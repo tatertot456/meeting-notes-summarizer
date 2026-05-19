@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP4330 — Unsupervised Classification</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #3d2400); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #d97706; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #fbbf24; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #d97706; color: white; border-color: #d97706; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #fbbf24; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #d97706; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #fbbf24; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #fbbf24; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #fbbf24; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">COMP4330 · Lecture 10</div>
+        <h1>Unsupervised Classification</h1>
+        <p class="subtitle">Dale Hamilton</p>
+    </header>
+    <nav>
+        <a href="#kmeans">K-Means</a>
+        <a href="#kmedoids">K-Medoids</a>
+        <a href="#genetic">Genetic Algorithms</a>
+        <a href="#fuzzy">Fuzzy & Rough Sets</a>
+        <a href="#applications">Real Applications</a>
+        <a href="#active">Active Learning</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="kmeans">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>K-Means Clustering</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>K-Means partitions a dataset of n objects into k clusters by minimizing the sum of squared distances to cluster centroids.</p>
+                <p><strong>Algorithm:</strong></p>
+                <ul>
+                    <li>Partition objects into k non-empty subsets arbitrarily</li>
+                    <li>Compute centroid (mean point) for each cluster</li>
+                    <li>Reassign each object to the cluster with the nearest centroid</li>
+                    <li>Repeat until no objects change clusters</li>
+                </ul>
+                <div class="grid">
+                    <div class="card"><h3>Strengths</h3><p>Efficient: O(tkn) where t=iterations, k=clusters, n=objects. Normally k,t &lt;&lt; n.</p></div>
+                    <div class="card"><h3>Weaknesses</h3><p>Only for continuous n-dimensional space. Must specify k in advance. Sensitive to outliers. Can't find non-convex clusters.</p></div>
+                </div>
+                <div class="highlight"><p>K-Means often terminates at a local optimum, not the global one. Multiple restarts with different initial centroids can help.</p></div>
+                <p style="margin-top:12px"><strong>Variations:</strong> K-modes for categorical data (uses frequency-based modes). K-prototype for mixed categorical + numerical data.</p>
+            </div>
+        </div>
+
+        <div class="section" id="kmedoids">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>K-Medoids (PAM)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Instead of using the mean, K-Medoids uses the <strong>most centrally located actual object</strong> as the cluster representative — making it more robust to outliers.</p>
+                <p><strong>PAM (Partitioning Around Medoids):</strong></p>
+                <ul>
+                    <li>Arbitrarily choose k objects as initial medoids</li>
+                    <li>Assign remaining objects to nearest medoid</li>
+                    <li>Randomly select a non-medoid object and compute cost of swapping</li>
+                    <li>If swap improves total cost, perform it</li>
+                    <li>Repeat until no improvement</li>
+                </ul>
+                <div class="grid">
+                    <div class="card"><h3>PAM</h3><p>Works effectively for small datasets. O(k(n-k)²) — doesn't scale to large datasets.</p></div>
+                    <div class="card"><h3>CLARA</h3><p>PAM on samples — scales better by working on subsets of data.</p></div>
+                    <div class="card"><h3>CLARANS</h3><p>Randomized re-sampling — further improves scalability.</p></div>
+                    <div class="card"><h3>vs. K-Means</h3><p>K-Medoids applies to wider range of data types and is more robust to outliers, but slower.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="genetic">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Genetic Algorithms</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Genetic Algorithms (GAs) are based on an analogy to biological evolution — survival of the fittest rules.</p>
+                <ul>
+                    <li>An initial population of randomly generated rules is created</li>
+                    <li>Rules are encoded as bit strings (one-hot encoding for multi-value attributes)</li>
+                    <li>Fitness = classification accuracy on training examples</li>
+                    <li>New generations formed via <strong>crossover</strong> and <strong>mutation</strong></li>
+                    <li>Continue until rules satisfy a prespecified accuracy threshold</li>
+                </ul>
+                <div class="highlight"><p>GAs are slow but easily parallelizable — each individual in the population can be evaluated independently on separate processors.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="fuzzy">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Fuzzy Sets & Rough Sets</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Fuzzy Logic</h3>
+                        <p>Uses truth values between 0.0 and 1.0 to represent degree of membership. Example: $49K income belongs to "medium" with value 0.15 and "high" with value 0.96. Values don't need to sum to 1.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Fuzzy Rules</h3>
+                        <p>Define fuzzy expressions using AND = min(A,B), OR = max(A,B), NOT = 1-A. Defuzzification applies the rule with the maximum expression value.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Rough Sets</h3>
+                        <p>Approximate class membership using lower approximation (certainly in C) and upper approximation (cannot be excluded from C).</p>
+                    </div>
+                    <div class="card">
+                        <h3>Feature Reduction</h3>
+                        <p>Finding minimal subsets of attributes (reducts) is NP-hard. Discernibility matrix reduces computation by storing differences between attribute values for each pair of tuples.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="applications">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Real-World Applications: Remote Sensing & Burn Severity</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Hamilton's research applied ML to mapping wildfire burn severity using drone and satellite imagery:</p>
+                <ul>
+                    <li><strong>Challenge:</strong> Mixed pixels at 30m Landsat resolution contain multiple land cover classes</li>
+                    <li><strong>Solution:</strong> Train SVM at 5cm drone resolution, use Fuzzy Control to generate 30m training data</li>
+                    <li><strong>Fuzzy Control Pipeline:</strong> Capture 5cm class density → Fuzzify inputs → Apply fuzzy rules → Defuzzify → Label 30m pixels</li>
+                    <li><strong>Result:</strong> SVM more accurate than kNN; 5cm resolution significantly better than 30m (Burn Extent p=0.018, Consumption p=0.006)</li>
+                </ul>
+                <div class="highlight"><p>Published: Hamilton et al. (2020) — "Mapping Burn Extent of Large Wildland Fires from Satellite Imagery Using Machine Learning Trained from Localized Hyperspatial Imagery." Remote Sensing, 12(24), 4097.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="active">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Active Learning & Additional Topics</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Active Learning</h3><p>Query a human oracle for labels on the most informative unlabeled tuples. Goal: high accuracy with as few labeled examples as possible. Strategy: uncertainty sampling — query least certain tuples.</p></div>
+                    <div class="card"><h3>Transfer Learning</h3><p>Extract knowledge from source tasks and apply to a target task. Instance-based: reweight source data. Negative transfer: when source knowledge hurts target performance.</p></div>
+                    <div class="card"><h3>Contrastive Learning</h3><p>SimCLR and FireCLR use data augmentation to learn representations without labels. Augmentations: random crop, Gaussian blur, flip, rotation, grayscale/color change.</p></div>
+                    <div class="card"><h3>Reinforcement Learning</h3><p>Q-Learning: Q(s,a) estimates expected reward. Update rule balances current reward with future expected rewards. Deep RL replaces Q-table with neural network weight matrices.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('toggle');
+            arrow.classList.toggle('open');
+        }
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP4330 — Feature Engineering & Data Wrangling</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1a0533, #2d1b4e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #7c3aed; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #c084fc; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #7c3aed; color: white; border-color: #7c3aed; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #c084fc; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e0a3c; border-left: 3px solid #7c3aed; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c084fc; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #c084fc; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #c084fc; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">COMP4330 · Lecture 03</div>
+        <h1>Feature Engineering & Data Wrangling</h1>
+        <p class="subtitle">Dale Hamilton — Adapted from Han, Kamber, and Pei</p>
+    </header>
+    <nav>
+        <a href="#cleaning">Data Cleaning</a>
+        <a href="#integration">Integration</a>
+        <a href="#reduction">Reduction</a>
+        <a href="#transformation">Transformation</a>
+        <a href="#discretization">Discretization</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="cleaning">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Cleaning</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Real-world data is dirty — incomplete, noisy, and inconsistent. Cleaning is the first step.</p>
+                <div class="grid">
+                    <div class="card"><h3>Missing Data</h3><p>Handle by ignoring the tuple, filling with mean/median, using the most probable value via Bayesian inference or decision tree, or global constant imputation.</p></div>
+                    <div class="card"><h3>Noisy Data</h3><p>Handle via binning (smooth by mean/median/boundary), regression, clustering to detect outliers, or combined human inspection.</p></div>
+                    <div class="card"><h3>Inconsistent Data</h3><p>Detect using metadata, uniqueness/null rules, and commercial auditing tools. Resolve via ETL transformations.</p></div>
+                    <div class="card"><h3>Binning</h3><p>Sort data and partition into equal-frequency or equal-width bins, then smooth by bin means, medians, or boundaries.</p></div>
+                </div>
+                <div class="highlight"><p>Data auditing uses correlation and clustering to detect violations of data rules and identify outliers automatically.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="integration">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Integration</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Combining data from multiple sources introduces challenges:</p>
+                <ul>
+                    <li><strong>Schema integration:</strong> A.cust-id ≡ B.cust-# — matching equivalent attributes across sources</li>
+                    <li><strong>Entity identification:</strong> "Bill Clinton" = "William Clinton" across databases</li>
+                    <li><strong>Data value conflicts:</strong> Same entity, different representations or scales (metric vs. imperial)</li>
+                    <li><strong>Redundancy detection:</strong> Use correlation analysis (χ²) and covariance analysis to find derivable/duplicate attributes</li>
+                </ul>
+                <div class="highlight"><p>Correlation does not imply causality — hospitals and car theft are correlated because both depend on population size.</p></div>
+                <p>Key measures for numeric correlation:</p>
+                <ul>
+                    <li><strong>Pearson's r > 0:</strong> Positive correlation</li>
+                    <li><strong>Pearson's r = 0:</strong> Independent</li>
+                    <li><strong>Pearson's r &lt; 0:</strong> Negative correlation</li>
+                    <li><strong>Covariance > 0:</strong> Both variables tend to be above their means together</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="reduction">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Reduction</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Obtain a smaller representation of data that produces the same analytical results.</p>
+                <div class="grid">
+                    <div class="card"><h3>PCA</h3><p>Principal Component Analysis — projects data onto orthogonal eigenvectors capturing maximum variance. Reduces dimensions while preserving information.</p></div>
+                    <div class="card"><h3>Wavelet Transform</h3><p>Decomposes signals into frequency subbands. Preserves relative distances at multiple resolutions. Used for image compression.</p></div>
+                    <div class="card"><h3>Attribute Subset Selection</h3><p>Remove redundant and irrelevant attributes. Methods: best single attribute, step-wise forward selection, backward elimination.</p></div>
+                    <div class="card"><h3>Numerosity Reduction</h3><p>Histograms, clustering, sampling, regression models, and data cube aggregation to reduce volume.</p></div>
+                </div>
+                <div class="highlight"><p>Curse of dimensionality: as dimensions increase, data becomes increasingly sparse and distance measures lose meaning.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="transformation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Transformation & Normalization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Transform data so all attributes fall within comparable ranges for fair analysis:</p>
+                <div class="grid">
+                    <div class="card"><h3>Min-Max Normalization</h3><p>Maps values to [new_min, new_max]. Ex: $73,600 in [$12K–$98K] → 0.716 in [0,1].</p></div>
+                    <div class="card"><h3>Z-Score Normalization</h3><p>Standardizes using mean (μ) and standard deviation (σ). Good when min/max are unknown.</p></div>
+                    <div class="card"><h3>Decimal Scaling</h3><p>Divides by powers of 10 until max absolute value &lt; 1.</p></div>
+                    <div class="card"><h3>Attribute Construction</h3><p>Create new features from existing ones. Ex: RGB → Hue/Saturation/Intensity, combining sparse features.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="discretization">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Discretization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Divide continuous attribute ranges into intervals with labels — reduces data size and prepares for classification.</p>
+                <div class="grid">
+                    <div class="card"><h3>Equal-Width Binning</h3><p>Divides range into N equal-sized intervals. Simple but sensitive to outliers and skewed data.</p></div>
+                    <div class="card"><h3>Equal-Frequency Binning</h3><p>Each bin contains approximately the same number of samples. Better for skewed data.</p></div>
+                    <div class="card"><h3>Decision Tree Discretization</h3><p>Supervised, top-down split using entropy to find the best split points.</p></div>
+                    <div class="card"><h3>Chi-Merge</h3><p>Unsupervised, bottom-up merge. Merges neighboring intervals with similar class distributions (low χ² values).</p></div>
+                </div>
+                <div class="highlight"><p>Concept hierarchy generation organizes values hierarchically: street → city → state → country. Supports drill-down and roll-up in data warehouses.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

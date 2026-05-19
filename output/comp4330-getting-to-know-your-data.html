@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP4330 — Getting to Know Your Data</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0891b2; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #22d3ee; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0891b2; color: white; border-color: #0891b2; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #22d3ee; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0c2233; border-left: 3px solid #0891b2; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #22d3ee; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #22d3ee; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #0891b2; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #22d3ee; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">COMP4330 · Lecture 02</div>
+        <h1>Getting to Know Your Data</h1>
+        <p class="subtitle">Dale Hamilton — Adapted from Han, Kamber, and Pei</p>
+    </header>
+    <nav>
+        <a href="#attributes">Attribute Types</a>
+        <a href="#stats">Statistical Descriptions</a>
+        <a href="#visualization">Visualization</a>
+        <a href="#similarity">Similarity & Dissimilarity</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="attributes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Objects & Attribute Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Data sets are made up of <strong>data objects</strong> (rows) described by <strong>attributes</strong> (columns). Attributes come in several types:</p>
+                <table>
+                    <tr><th>Type</th><th>Description</th><th>Example</th></tr>
+                    <tr><td>Nominal</td><td>Categories with no order</td><td>Hair color, zip code</td></tr>
+                    <tr><td>Binary</td><td>Two states only</td><td>Gender, COVID positive/negative</td></tr>
+                    <tr><td>Ordinal</td><td>Ordered but unknown magnitude between values</td><td>Grades, military rank</td></tr>
+                    <tr><td>Interval</td><td>Equal-sized units, no true zero</td><td>Temperature °C, calendar dates</td></tr>
+                    <tr><td>Ratio</td><td>Inherent zero point</td><td>Temperature K, length, monetary quantities</td></tr>
+                </table>
+                <div class="highlight" style="margin-top:16px"><p>Discrete attributes have finite values (zip codes, professions). Continuous attributes have real number values (temperature, height, weight).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="stats">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Basic Statistical Descriptions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Understanding your data starts with measuring <strong>central tendency</strong> and <strong>dispersion</strong>:</p>
+                <div class="grid">
+                    <div class="card"><h3>Mean</h3><p>Arithmetic average. Sensitive to outliers. Weighted and trimmed variations exist.</p></div>
+                    <div class="card"><h3>Median</h3><p>Middle value. More robust than mean for skewed data.</p></div>
+                    <div class="card"><h3>Mode</h3><p>Most frequent value. Data can be unimodal, bimodal, or trimodal.</p></div>
+                    <div class="card"><h3>Variance & Std Dev</h3><p>Measures spread of data. Standard deviation is the square root of variance.</p></div>
+                </div>
+                <p style="margin-top:16px">The <strong>five-number summary</strong> (Min, Q1, Median, Q3, Max) is displayed via a <strong>boxplot</strong>. Outliers are typically values beyond 1.5 × IQR from Q1 or Q3.</p>
+                <div class="highlight"><p>The normal distribution contains ~68% of data within ±1σ, ~95% within ±2σ, and ~99.7% within ±3σ of the mean.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="visualization">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Visualization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Visualization helps gain insight, find patterns, and tell the story of your data to decision makers.</p>
+                <div class="grid">
+                    <div class="card"><h3>Histogram</h3><p>Frequency distribution using bars. Area (not height) represents value when bins vary in width.</p></div>
+                    <div class="card"><h3>Quantile Plot</h3><p>Shows each value paired with its percentile rank. Good for seeing distribution shape.</p></div>
+                    <div class="card"><h3>Q-Q Plot</h3><p>Compares quantiles of two distributions. Reveals shifts between populations.</p></div>
+                    <div class="card"><h3>Scatter Plot</h3><p>Each pair of values plotted as coordinates. Reveals clusters, outliers, and correlations.</p></div>
+                    <div class="card"><h3>Parallel Coordinates</h3><p>N equidistant parallel axes for N attributes. Each data item is a polygonal line.</p></div>
+                    <div class="card"><h3>Chernoff Faces</h3><p>Encodes variables as facial features. Leverages human ability to read faces.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="similarity">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Measuring Similarity & Dissimilarity</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Similarity</strong> is higher when objects are more alike (range 0–1). <strong>Dissimilarity</strong> (distance) is lower when objects are more alike.</p>
+                <div class="grid">
+                    <div class="card"><h3>Minkowski Distance</h3><p>General distance formula. h=1: Manhattan. h=2: Euclidean. h=∞: Supremum (max difference).</p></div>
+                    <div class="card"><h3>Cosine Similarity</h3><p>Used for text/document vectors. cos(d1,d2) = (d1·d2) / (||d1|| × ||d2||). Approaches 1 = more similar.</p></div>
+                    <div class="card"><h3>Jaccard Coefficient</h3><p>Similarity for asymmetric binary variables. Used in set comparison.</p></div>
+                    <div class="card"><h3>Z-Score Standardization</h3><p>Normalizes data: (x - μ) / σ. Makes attributes comparable regardless of scale.</p></div>
+                </div>
+                <div class="highlight"><p>For mixed attribute types, use a weighted formula combining nominal, binary, numeric, and ordinal distance measures.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

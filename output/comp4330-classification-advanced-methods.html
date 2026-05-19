@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP4330 — Classification: Advanced Methods</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a1f1a, #0d3326); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #059669; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #34d399; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #059669; color: white; border-color: #059669; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #34d399; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2318; border-left: 3px solid #059669; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #34d399; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #34d399; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #34d399; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">COMP4330 · Lecture 09</div>
+        <h1>Classification: Advanced Methods</h1>
+        <p class="subtitle">Dale Hamilton — Adapted from Han, Kamber, and Pei</p>
+    </header>
+    <nav>
+        <a href="#bbn">Bayesian Networks</a>
+        <a href="#neural">Neural Networks</a>
+        <a href="#deep">Deep Learning</a>
+        <a href="#svm">SVM</a>
+        <a href="#lazy">Lazy Learners</a>
+        <a href="#semi">Semi-Supervised</a>
+        <a href="#transfer">Transfer Learning</a>
+        <a href="#gnn">Graph Neural Networks</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="bbn">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Bayesian Belief Networks</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Bayesian Belief Networks (BBNs) allow class conditional independencies between <em>subsets</em> of variables — more flexible than Naïve Bayes which assumes full independence.</p>
+                <ul>
+                    <li>Represented as a <strong>directed acyclic graph (DAG)</strong></li>
+                    <li>Nodes = random variables, Links = dependencies</li>
+                    <li>Each node has a <strong>Conditional Probability Table (CPT)</strong></li>
+                    <li>Captures causal relationships between variables</li>
+                </ul>
+                <div class="grid">
+                    <div class="card"><h3>Known Structure, All Observable</h3><p>Simply compute CPT entries from data.</p></div>
+                    <div class="card"><h3>Known Structure, Hidden Variables</h3><p>Use gradient descent (greedy hill-climbing) to converge to local optimum.</p></div>
+                    <div class="card"><h3>Unknown Structure, All Observable</h3><p>Search model space to reconstruct network topology.</p></div>
+                    <div class="card"><h3>Unknown Structure, Hidden Variables</h3><p>No good algorithms known for this scenario.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="neural">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Neural Networks & Backpropagation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Neural networks learn by adjusting weights to minimize error between predicted and actual outputs. Training uses <strong>backpropagation</strong> — propagating error backwards from output to input layers.</p>
+                <div class="grid">
+                    <div class="card"><h3>Strengths</h3><p>Tolerates noisy data, classifies untrained patterns, works well for continuous values, real-world success (handwriting, image recognition).</p></div>
+                    <div class="card"><h3>Weaknesses</h3><p>Long training time, many empirical parameters (topology, learning rate), poor interpretability of learned weights.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Backpropagation steps:</strong></p>
+                <ul>
+                    <li>Initialize weights to small random numbers</li>
+                    <li>Propagate inputs forward through activation functions</li>
+                    <li>Backpropagate error — update weights and biases</li>
+                    <li>Terminate when error is below threshold or max epochs reached</li>
+                </ul>
+                <div class="highlight"><p>More hidden layers = more complex decision boundaries. Neural networks perform nonlinear regression — with enough hidden units and training data, they can approximate any function.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="deep">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Deep Learning & CNNs</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Convolutional Neural Networks (CNNs) revolutionized image classification. AlexNet dropped ImageNet error from 26% to 15% in 2012.</p>
+                <div class="grid">
+                    <div class="card"><h3>Convolution</h3><p>Apply filters to detect features (edges, curves). Filter depth = number of filters. Stride = pixel step between filters.</p></div>
+                    <div class="card"><h3>ReLU</h3><p>Rectified Linear Unit: output = max(0, input). Removes negatives from feature maps. Works better than tanh/sigmoid.</p></div>
+                    <div class="card"><h3>Pooling</h3><p>Reduces spatial resolution of feature maps. Max pooling is most common. Reduces computation and overfitting.</p></div>
+                    <div class="card"><h3>Iterative Process</h3><p>1st layers find shapes/edges. Deeper layers find object parts. Final layers fed into fully connected ANN for classification.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Object detection variants:</strong></p>
+                <ul>
+                    <li><strong>R-CNN:</strong> Selective search + CNN per region + SVM classification</li>
+                    <li><strong>Fast/Faster R-CNN:</strong> ROI pooling for performance improvement</li>
+                    <li><strong>Mask R-CNN:</strong> Full pixel-level object segmentation using FCN</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="svm">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Support Vector Machines (SVM)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>SVMs find the <strong>Maximum Margin Hyperplane (MMH)</strong> — the decision boundary furthest from the nearest training tuples of both classes.</p>
+                <div class="grid">
+                    <div class="card"><h3>Support Vectors</h3><p>Training tuples that lie on the margin. These alone define the hyperplane — removing other tuples and retraining yields the same result.</p></div>
+                    <div class="card"><h3>Kernel Functions</h3><p>Map data to higher dimensions to find a linear separator. Common kernels: polynomial, Gaussian RBF, sigmoid. Avoids computing in high-dimensional space.</p></div>
+                    <div class="card"><h3>vs. Neural Networks</h3><p>SVM: deterministic, strong math foundation, batch learning. Neural Net: nondeterministic, incremental learning, complex functions via multilayer perceptron.</p></div>
+                    <div class="card"><h3>Multiclass SVM</h3><p>One-vs-All: m classifiers for m classes. All-vs-All: m(m-1)/2 classifiers. AVA tends to be superior.</p></div>
+                </div>
+                <div class="highlight"><p>SVM effectiveness on high-dimensional data comes from complexity being characterized by the number of support vectors, not the data dimensionality.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="lazy">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Lazy Learners (k-NN & Case-Based Reasoning)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Lazy learners</strong> store training data and wait until a test tuple arrives — less training time, more prediction time.</p>
+                <div class="grid">
+                    <div class="card"><h3>k-Nearest Neighbor</h3><p>Classify by majority vote among k nearest neighbors (Euclidean distance). Distance-weighted variant gives closer neighbors more influence.</p></div>
+                    <div class="card"><h3>Case-Based Reasoning</h3><p>Uses a database of symbolic problem solutions. Retrieves similar cases, possibly combines multiple, and adapts to new problems.</p></div>
+                </div>
+                <div class="highlight"><p>Curse of dimensionality: irrelevant attributes can dominate distance calculations in k-NN. Overcome via axis stretching or attribute elimination.</p></div>
+                <p style="margin-top:12px">Lazy methods use many local linear functions forming an implicit global approximation — richer hypothesis space than eager learners that commit to one global model.</p>
+            </div>
+        </div>
+
+        <div class="section" id="semi">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Semi-Supervised & Generative Methods</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Self-Training</h3><p>Build classifier from labeled data, label the most confident unlabeled predictions, repeat. Risk: may reinforce errors.</p></div>
+                    <div class="card"><h3>Co-Training</h3><p>Two classifiers on independent feature sets teach each other by exchanging most confident predictions.</p></div>
+                    <div class="card"><h3>GANs</h3><p>Generative network creates candidates; discriminative network evaluates against real data. Generator tries to fool discriminator. Used for art, music, deepfakes.</p></div>
+                    <div class="card"><h3>Autoencoders</h3><p>Compress input to latent representation then reconstruct. Used for compression, denoising, and feature extraction. Loss = MSE (continuous) or cross-entropy (binary).</p></div>
+                </div>
+                <div class="highlight"><p>Contrastive Learning (SimCLR, FireCLR): uses data augmentation (random crop, blur, flip, rotation, color change) to learn representations without labels.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="transfer">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Transfer Learning & Reinforcement Learning</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Transfer Learning</h3><p>Apply knowledge from source tasks to a new target task. Useful when target data is scarce or distribution changes (e.g., spam filtering, web classification).</p></div>
+                    <div class="card"><h3>TrAdaBoost</h3><p>Reduces weight of misclassified source tuples so they have less effect on subsequent classifiers. Focuses model on the target domain.</p></div>
+                    <div class="card"><h3>Reinforcement Learning</h3><p>Agent learns by reward/penalty. Q-Learning builds a Q(state, action) table estimating expected reward. Balance exploration vs exploitation.</p></div>
+                    <div class="card"><h3>Deep Reinforcement Learning</h3><p>Replaces Q-table with a neural network (weight matrices). Combines CNN feature extraction with RL reward-based learning.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="gnn">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Graph Neural Networks</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>GNNs operate on graph-structured data where relationships between entities matter. Applications: social networks, drug discovery, recommender systems.</p>
+                <div class="grid">
+                    <div class="card"><h3>Message Passing</h3><p>Nodes receive information from adjacent nodes — giving context from neighbors. Each phase of message passing = one layer. Implemented using adjacency matrix operations.</p></div>
+                    <div class="card"><h3>Embedding</h3><p>Maps nodes into a numerical space preserving topology. More similar nodes end up closer in embedding space. Forward/backward propagation improves embeddings.</p></div>
+                    <div class="card"><h3>Node Classification</h3><p>Predict properties of individual nodes (categorize users/items).</p></div>
+                    <div class="card"><h3>Link Prediction</h3><p>Find missing links between nodes — core of recommender systems. Uses proximity of embeddings.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP4330 — Classification: Basic Concepts</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a1628, #1a3a5c); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0369a1; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #38bdf8; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0369a1; color: white; border-color: #0369a1; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #38bdf8; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0c1e33; border-left: 3px solid #0369a1; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #38bdf8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #38bdf8; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #0369a1; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #38bdf8; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">COMP4330 · Lecture 08</div>
+        <h1>Classification: Basic Concepts</h1>
+        <p class="subtitle">Dale Hamilton — Adapted from Han, Kamber, and Pei</p>
+    </header>
+    <nav>
+        <a href="#basics">Basics</a>
+        <a href="#decision-tree">Decision Trees</a>
+        <a href="#info-gain">Information Gain</a>
+        <a href="#bayesian">Bayesian Classification</a>
+        <a href="#rules">Rule-Based</a>
+        <a href="#evaluation">Evaluation</a>
+        <a href="#ensemble">Ensemble Methods</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="basics">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Classification vs. Numeric Prediction</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Classification</h3><p>Predicts categorical class labels (discrete/nominal). Constructs a model from training data to classify new data.</p></div>
+                    <div class="card"><h3>Numeric Prediction (Regression)</h3><p>Models continuous-valued functions — predicts unknown or missing numeric values.</p></div>
+                </div>
+                <p style="margin-top:16px">Classification is a <strong>two-step process</strong>:</p>
+                <ul>
+                    <li><strong>Model Construction:</strong> Learn a classifier from labeled training tuples</li>
+                    <li><strong>Model Usage:</strong> Apply classifier to unlabeled data — only if accuracy is acceptable</li>
+                </ul>
+                <div class="highlight"><p>Test set must be independent of training set to avoid overfitting. Accuracy = % of test samples correctly classified.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="decision-tree">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Decision Tree Induction</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Decision trees use a <strong>greedy, top-down, divide-and-conquer</strong> approach:</p>
+                <ul>
+                    <li>All training examples start at the root</li>
+                    <li>Attributes are selected based on information gain or entropy</li>
+                    <li>Examples are partitioned recursively based on selected attributes</li>
+                </ul>
+                <p><strong>Stopping conditions:</strong></p>
+                <ul>
+                    <li>All samples belong to the same class</li>
+                    <li>No remaining attributes — use majority voting</li>
+                    <li>No samples left</li>
+                </ul>
+                <p><strong>Overfitting prevention:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Prepruning</h3><p>Halt tree construction early if goodness measure falls below a threshold. Difficult to choose the threshold.</p></div>
+                    <div class="card"><h3>Postpruning</h3><p>Grow the full tree, then remove branches using a validation set to find the best pruned version.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="info-gain">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Attribute Selection: Information Gain & Gini</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Information Gain (ID3/C4.5)</h3><p>Selects attribute with highest gain. Entropy measures variability. Biased toward multivalued attributes.</p></div>
+                    <div class="card"><h3>Gain Ratio (C4.5)</h3><p>Normalizes information gain by SplitInfo to overcome multivalued bias. Tends to prefer unbalanced splits.</p></div>
+                    <div class="card"><h3>Gini Index (CART)</h3><p>Measures impurity. Selects attribute with smallest gini split. Biased to multivalued attributes, difficulty with many classes.</p></div>
+                    <div class="card"><h3>General Comparison</h3><p>Most measures return good results. No single measure is significantly superior across all datasets.</p></div>
+                </div>
+                <div class="highlight"><p>For the buys_computer example: Gain(age)=0.246, Gain(income)=0.029, Gain(student)=0.151, Gain(credit_rating)=0.048 — age is selected first.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="bayesian">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Bayesian Classification</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Bayesian classifiers perform <strong>probabilistic prediction</strong> using Bayes' Theorem:</p>
+                <p style="text-align:center; font-style:italic; color:#888; margin: 16px 0;">posteriori = likelihood × prior / evidence</p>
+                <p>The <strong>Naïve Bayesian classifier</strong> assumes conditional independence between attributes — greatly reducing computation. Despite this simplification, it performs comparably to decision trees and neural networks in many cases.</p>
+                <div class="grid">
+                    <div class="card"><h3>Advantages</h3><p>Easy to implement, incremental learning, each example can adjust probabilities, good baseline performance.</p></div>
+                    <div class="card"><h3>Disadvantages</h3><p>Assumes attribute independence (often violated). Dependencies (e.g., patient symptoms) can't be modeled. Use Bayesian Belief Networks for dependencies.</p></div>
+                </div>
+                <div class="highlight"><p>Zero-probability problem: Use Laplacian correction (add 1 to each case) to avoid any conditional probability being zero, which would zero out the entire product.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="rules">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Rule-Based Classification</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Rules take the form: <strong>IF condition THEN class</strong>. Easier to understand than large trees.</p>
+                <ul>
+                    <li><strong>Coverage:</strong> Fraction of tuples the rule applies to</li>
+                    <li><strong>Accuracy:</strong> Fraction of covered tuples correctly classified</li>
+                </ul>
+                <p><strong>Conflict resolution strategies:</strong></p>
+                <ul>
+                    <li>Size ordering: toughest requirement (most attribute tests) wins</li>
+                    <li>Class-based ordering: by prevalence or misclassification cost</li>
+                    <li>Rule-based ordering (decision list): priority list by rule quality</li>
+                </ul>
+                <div class="highlight"><p>Sequential covering algorithms (FOIL, RIPPER) learn rules one at a time, removing covered tuples before learning the next rule.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="evaluation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Model Evaluation & Selection</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Metric</th><th>Formula</th><th>What It Measures</th></tr>
+                    <tr><td>Accuracy</td><td>(TP + TN) / All</td><td>Overall correct predictions</td></tr>
+                    <tr><td>Sensitivity</td><td>TP / P</td><td>True positive recognition rate</td></tr>
+                    <tr><td>Specificity</td><td>TN / N</td><td>True negative recognition rate</td></tr>
+                    <tr><td>Precision</td><td>TP / (TP + FP)</td><td>Exactness of positive predictions</td></tr>
+                    <tr><td>Recall</td><td>TP / (TP + FN)</td><td>Completeness of positive detection</td></tr>
+                    <tr><td>F1 Score</td><td>2PR / (P + R)</td><td>Harmonic mean of precision and recall</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Validation methods:</strong> Holdout (2/3 train, 1/3 test), k-fold cross-validation (k=10 most popular), Bootstrap (.632 method for small datasets).</p>
+                <div class="highlight"><p>ROC curves plot Sensitivity vs (1-Specificity). Area under ROC = 1.0 is perfect. Closer to 0.5 (diagonal) = worse. Used to compare classifiers M1 vs M2 statistically.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ensemble">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Ensemble Methods</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Bagging</h3><p>Bootstrap Aggregation — train k classifiers on k bootstrap samples, combine by majority vote. Robust to noise, proven accuracy improvement.</p></div>
+                    <div class="card"><h3>Boosting (AdaBoost)</h3><p>Iteratively trains classifiers, increasing weight of misclassified tuples. Generally higher accuracy than bagging but risks overfitting.</p></div>
+                    <div class="card"><h3>Random Forest</h3><p>Ensemble of decision trees using random attribute selection at each node. Comparable to AdaBoost, more robust to outliers, faster than bagging/boosting.</p></div>
+                    <div class="card"><h3>Class Imbalance</h3><p>Handle rare classes via oversampling, under-sampling, threshold-moving, or ensemble techniques.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

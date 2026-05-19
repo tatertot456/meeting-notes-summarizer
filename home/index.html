@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Notes — Home</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f0f;
+            color: #f0f0f0;
+            padding: 40px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+        .subtitle {
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 24px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .card:hover {
+            border-color: #555;
+            transform: translateY(-2px);
+        }
+        .card a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+        .date {
+            font-size: 0.8rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Meeting Notes</h1>
+    <p class="subtitle">6 notes summarized</p>
+    <div class="grid">
+        
+        <div class="card">
+            <a href="../output/comp4330-introduction-to-machine-learning.html">
+                <h2>COMP4330 Introduction to Machine Learning</h2>
+                <p class="date">2026-05-18 05:22 PM</p>
+            </a>
+        </div>
+        <div class="card">
+            <a href="../output/comp4330-getting-to-know-your-data.html">
+                <h2>COMP4330 Getting to Know Your Data</h2>
+                <p class="date">2026-05-18 05:23 PM</p>
+            </a>
+        </div>
+        <div class="card">
+            <a href="../output/comp4330-feature-engineering-and-data-wrangling.html">
+                <h2>COMP4330 Feature Engineering and Data Wrangling</h2>
+                <p class="date">2026-05-18 05:24 PM</p>
+            </a>
+        </div>
+        <div class="card">
+            <a href="../output/comp4330-classification-basic-concepts.html">
+                <h2>COMP4330 Classification Basic Concepts</h2>
+                <p class="date">2026-05-18 05:25 PM</p>
+            </a>
+        </div>
+        <div class="card">
+            <a href="../output/comp4330-classification-advanced-methods.html">
+                <h2>COMP4330 Classification Advanced Methods</h2>
+                <p class="date">2026-05-18 05:25 PM</p>
+            </a>
+        </div>
+        <div class="card">
+            <a href="../output/comp4330-unsupervised-classification.html">
+                <h2>COMP4330 Unsupervised Classification</h2>
+                <p class="date">2026-05-18 05:26 PM</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
