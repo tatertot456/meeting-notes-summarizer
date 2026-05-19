@@ -12,88 +12,160 @@
             color: #f0f0f0;
             padding: 40px;
         }
+        header { margin-bottom: 40px; }
         h1 {
             font-size: 2rem;
-            margin-bottom: 8px;
             color: #ffffff;
+            margin-bottom: 6px;
         }
         .subtitle {
-            color: #888;
-            margin-bottom: 40px;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        .search-bar {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #f0f0f0;
             font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-bar:focus { border-color: #555; }
+        .category-section { margin-bottom: 48px; }
+        .category-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid;
         }
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
         }
         .card {
             background: #1a1a1a;
             border: 1px solid #2a2a2a;
             border-radius: 12px;
-            padding: 24px;
-            transition: border-color 0.2s, transform 0.2s;
+            padding: 22px;
+            transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.25s;
         }
         .card:hover {
-            border-color: #555;
-            transform: translateY(-2px);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px var(--glow);
         }
-        .card a {
-            text-decoration: none;
-            color: inherit;
+        .card:hover::before { opacity: 1; }
+        .card.hidden { display: none; }
+        .card a { text-decoration: none; color: inherit; }
+        .badge {
+            display: inline-block;
+            font-size: 0.68rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            color: white;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         .card h2 {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             margin-bottom: 8px;
             color: #ffffff;
+            line-height: 1.4;
         }
-        .date {
-            font-size: 0.8rem;
-            color: #666;
-        }
+        .date { font-size: 0.75rem; color: #555; }
+        .category-section.hidden { display: none; }
     </style>
 </head>
 <body>
-    <h1>Meeting Notes</h1>
-    <p class="subtitle">6 notes summarized</p>
-    <div class="grid">
-        
-        <div class="card">
-            <a href="../output/comp4330-introduction-to-machine-learning.html">
-                <h2>COMP4330 Introduction to Machine Learning</h2>
-                <p class="date">2026-05-18 05:22 PM</p>
-            </a>
+    <header>
+        <h1>Meeting Notes</h1>
+        <p class="subtitle">6 notes summarized</p>
+        <input class="search-bar" type="text" placeholder="Search notes..." oninput="search(this.value)" />
+    </header>
+    
+        <div class="category-section">
+            <h2 class="category-title" style="color:#4f46e5; border-color:#4f46e522;">Machine Learning</h2>
+            <div class="grid">
+            <div class="card" style="--accent: #4f46e5; --glow: #1e1b4b;">
+                <a href="../output/comp4330-introduction-to-machine-learning.html">
+                    <span class="badge" style="background:#4338ca;">Machine Learning</span>
+                    <h2>COMP4330 Introduction to Machine Learning</h2>
+                    <p class="date">2026-05-18 05:22 PM</p>
+                </a>
+            </div>
+            <div class="card" style="--accent: #4f46e5; --glow: #1e1b4b;">
+                <a href="../output/comp4330-getting-to-know-your-data.html">
+                    <span class="badge" style="background:#4338ca;">Machine Learning</span>
+                    <h2>COMP4330 Getting to Know Your Data</h2>
+                    <p class="date">2026-05-18 05:23 PM</p>
+                </a>
+            </div>
+            <div class="card" style="--accent: #4f46e5; --glow: #1e1b4b;">
+                <a href="../output/comp4330-feature-engineering-and-data-wrangling.html">
+                    <span class="badge" style="background:#4338ca;">Machine Learning</span>
+                    <h2>COMP4330 Feature Engineering and Data Wrangling</h2>
+                    <p class="date">2026-05-18 05:24 PM</p>
+                </a>
+            </div>
+            <div class="card" style="--accent: #4f46e5; --glow: #1e1b4b;">
+                <a href="../output/comp4330-classification-basic-concepts.html">
+                    <span class="badge" style="background:#4338ca;">Machine Learning</span>
+                    <h2>COMP4330 Classification Basic Concepts</h2>
+                    <p class="date">2026-05-18 05:25 PM</p>
+                </a>
+            </div>
+            <div class="card" style="--accent: #4f46e5; --glow: #1e1b4b;">
+                <a href="../output/comp4330-classification-advanced-methods.html">
+                    <span class="badge" style="background:#4338ca;">Machine Learning</span>
+                    <h2>COMP4330 Classification Advanced Methods</h2>
+                    <p class="date">2026-05-18 05:25 PM</p>
+                </a>
+            </div>
+            <div class="card" style="--accent: #4f46e5; --glow: #1e1b4b;">
+                <a href="../output/comp4330-unsupervised-classification.html">
+                    <span class="badge" style="background:#4338ca;">Machine Learning</span>
+                    <h2>COMP4330 Unsupervised Classification</h2>
+                    <p class="date">2026-05-18 05:26 PM</p>
+                </a>
+            </div></div>
         </div>
-        <div class="card">
-            <a href="../output/comp4330-getting-to-know-your-data.html">
-                <h2>COMP4330 Getting to Know Your Data</h2>
-                <p class="date">2026-05-18 05:23 PM</p>
-            </a>
-        </div>
-        <div class="card">
-            <a href="../output/comp4330-feature-engineering-and-data-wrangling.html">
-                <h2>COMP4330 Feature Engineering and Data Wrangling</h2>
-                <p class="date">2026-05-18 05:24 PM</p>
-            </a>
-        </div>
-        <div class="card">
-            <a href="../output/comp4330-classification-basic-concepts.html">
-                <h2>COMP4330 Classification Basic Concepts</h2>
-                <p class="date">2026-05-18 05:25 PM</p>
-            </a>
-        </div>
-        <div class="card">
-            <a href="../output/comp4330-classification-advanced-methods.html">
-                <h2>COMP4330 Classification Advanced Methods</h2>
-                <p class="date">2026-05-18 05:25 PM</p>
-            </a>
-        </div>
-        <div class="card">
-            <a href="../output/comp4330-unsupervised-classification.html">
-                <h2>COMP4330 Unsupervised Classification</h2>
-                <p class="date">2026-05-18 05:26 PM</p>
-            </a>
-        </div>
-    </div>
+    <script>
+        function search(query) {
+            const q = query.toLowerCase();
+            document.querySelectorAll('.category-section').forEach(section => {
+                let anyVisible = false;
+                section.querySelectorAll('.card').forEach(card => {
+                    const title = card.querySelector('h2').textContent.toLowerCase();
+                    if (title.includes(q)) {
+                        card.classList.remove('hidden');
+                        anyVisible = true;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+                section.classList.toggle('hidden', !anyVisible);
+            });
+        }
+    </script>
 </body>
 </html>

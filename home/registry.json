@@ -2,31 +2,37 @@
   {
     "title": "COMP4330 Introduction to Machine Learning",
     "filename": "comp4330-introduction-to-machine-learning.html",
-    "date": "2026-05-18 05:22 PM"
+    "date": "2026-05-18 05:22 PM",
+    "category": "Machine Learning"
   },
   {
     "title": "COMP4330 Getting to Know Your Data",
     "filename": "comp4330-getting-to-know-your-data.html",
-    "date": "2026-05-18 05:23 PM"
+    "date": "2026-05-18 05:23 PM",
+    "category": "Machine Learning"
   },
   {
     "title": "COMP4330 Feature Engineering and Data Wrangling",
     "filename": "comp4330-feature-engineering-and-data-wrangling.html",
-    "date": "2026-05-18 05:24 PM"
+    "date": "2026-05-18 05:24 PM",
+    "category": "Machine Learning"
   },
   {
     "title": "COMP4330 Classification Basic Concepts",
     "filename": "comp4330-classification-basic-concepts.html",
-    "date": "2026-05-18 05:25 PM"
+    "date": "2026-05-18 05:25 PM",
+    "category": "Machine Learning"
   },
   {
     "title": "COMP4330 Classification Advanced Methods",
     "filename": "comp4330-classification-advanced-methods.html",
-    "date": "2026-05-18 05:25 PM"
+    "date": "2026-05-18 05:25 PM",
+    "category": "Machine Learning"
   },
   {
     "title": "COMP4330 Unsupervised Classification",
     "filename": "comp4330-unsupervised-classification.html",
-    "date": "2026-05-18 05:26 PM"
+    "date": "2026-05-18 05:26 PM",
+    "category": "Machine Learning"
   }
 ]
