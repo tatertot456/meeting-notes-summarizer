@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Architecture — Chapter 4: The Processor</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a1f2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #075985; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0369a1; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #075985; color: white; border-color: #075985; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0369a1; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #075985; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0369a1; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0369a1; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #0369a1; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #075985; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0369a1; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Architecture · Chapter 4</div>
+        <h1>The Processor</h1>
+        <p class="subtitle">Computer Organization and Design — ARM Edition</p>
+    </header>
+    <nav>
+        <a href="#intro">Introduction</a>
+        <a href="#logic">Logic Design</a>
+        <a href="#datapath">Datapath</a>
+        <a href="#control">Control</a>
+        <a href="#pipeline">Pipelining</a>
+        <a href="#hazards">Hazards</a>
+        <a href="#prediction">Branch Prediction</a>
+        <a href="#ilp">ILP</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Introduction & Instruction Execution</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>CPU performance depends on three factors — instruction count (determined by ISA and compiler), CPI, and cycle time (both determined by CPU hardware). This chapter examines how the hardware actually executes instructions.</p>
+                <p><strong>Every instruction follows the same basic execution steps:</strong></p>
+                <ul>
+                    <li><strong>Fetch:</strong> PC → instruction memory → fetch the instruction</li>
+                    <li><strong>Decode:</strong> Register numbers → register file → read registers</li>
+                    <li><strong>Execute:</strong> ALU computes arithmetic result, memory address, or branch target</li>
+                    <li><strong>Memory:</strong> Access data memory for loads and stores</li>
+                    <li><strong>Write Back:</strong> PC ← target address or PC + 4; write result to register</li>
+                </ul>
+                <div class="highlight"><p>We examine two implementations: a simplified single-cycle version (conceptually clear) and a pipelined version (realistic and fast). The simple subset covers LDUR, STUR, arithmetic/logical R-type instructions, and CBZ.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="logic">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Logic Design Basics</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>All CPU hardware is built from two types of logical elements:</p>
+                <div class="grid">
+                    <div class="card">
+                        <h3>Combinational Elements</h3>
+                        <p>Output is purely a function of current inputs — no memory. Examples: AND gates, ALUs, adders, multiplexers. Output changes whenever input changes.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Sequential (State) Elements</h3>
+                        <p>Store information — output depends on stored state AND current inputs. Examples: registers, memory. Updated only on the clock edge.</p>
+                    </div>
+                </div>
+                <p style="margin-top:16px"><strong>Registers</strong> are edge-triggered: they capture input D and present it as output Q only when the clock transitions from 0 to 1. Between clock edges, combinational logic transforms data from one set of state elements to the next.</p>
+                <div class="highlight"><p>The longest combinational delay between any two state elements determines the minimum clock period. The entire processor must run at the speed of its slowest path — this is the critical path.</p></div>
+                <p><strong>Multiplexers</strong> are essential when different instructions need different data sources routed to the same destination. You can't just wire two sources together — a mux selects which one to use based on a control signal.</p>
+            </div>
+        </div>
+
+        <div class="section" id="datapath">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Building the Datapath</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The datapath is the collection of elements that process data and addresses: registers, ALUs, multiplexers, and memories. We build it incrementally for each instruction type.</p>
+                <div class="grid">
+                    <div class="card">
+                        <h3>Instruction Fetch</h3>
+                        <p>PC → instruction memory → fetch 32-bit instruction. PC + 4 computed by adder for sequential execution. PC is a 32-bit register updated every cycle.</p>
+                    </div>
+                    <div class="card">
+                        <h3>R-Format Instructions</h3>
+                        <p>Read two register operands (Rn, Rm) from register file. ALU performs operation. Write result back to destination register (Rd).</p>
+                    </div>
+                    <div class="card">
+                        <h3>Load/Store Instructions</h3>
+                        <p>Read base register. Sign-extend 9-bit offset to 64 bits. ALU adds base + offset to get memory address. Load reads memory → register. Store writes register → memory.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Branch Instructions</h3>
+                        <p>Read register operands. ALU subtracts to compare (checks Zero output). Sign-extend displacement, shift left 2, add to PC+4 for target address.</p>
+                    </div>
+                </div>
+                <div class="highlight"><p>Each datapath element can only do one function at a time — this is why we need separate instruction and data memories. If we used one memory, a load instruction would need to fetch an instruction AND access data simultaneously, which is impossible with a single port.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="control">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>ALU Control & Main Control Unit</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The ALU can perform many operations — control logic must select the right one for each instruction. A two-level scheme keeps it manageable:</p>
+                <table>
+                    <tr><th>ALU Control</th><th>Function</th></tr>
+                    <tr><td>0000</td><td>AND</td></tr>
+                    <tr><td>0001</td><td>OR</td></tr>
+                    <tr><td>0010</td><td>Add</td></tr>
+                    <tr><td>0110</td><td>Subtract</td></tr>
+                    <tr><td>0111</td><td>Pass input B</td></tr>
+                    <tr><td>1100</td><td>NOR</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Two-level control:</strong> The main control unit generates a 2-bit ALUOp from the instruction opcode. A second level of logic uses ALUOp plus the instruction's function bits to generate the final 4-bit ALU control signal.</p>
+                <div class="highlight"><p>LDUR and STUR both produce ALUOp = 00 → always add (base + offset). CBZ produces ALUOp = 01 → pass input B (just need to check if register = 0). R-type produces ALUOp = 10 → use function bits to determine the specific operation.</p></div>
+                <p>The main control unit also generates: RegWrite, ALUSrc, MemRead, MemWrite, MemToReg, Branch — one signal per datapath multiplexer or enable line.</p>
+            </div>
+        </div>
+
+        <div class="section" id="pipeline">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pipelining</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The single-cycle datapath's critical path is the load instruction: IF → ID → EX → MEM → WB = 800ps. Every instruction must wait this long even if it doesn't need all stages.</p>
+                <p><strong>Pipelining</strong> overlaps execution of multiple instructions — like an assembly line. While one instruction is in MEM, the next is in EX, the next in ID, and so on.</p>
+                <p><strong>LEGv8 5-stage pipeline:</strong></p>
+                <ul>
+                    <li><strong>IF:</strong> Instruction fetch from memory</li>
+                    <li><strong>ID:</strong> Instruction decode and register read</li>
+                    <li><strong>EX:</strong> Execute operation or calculate address</li>
+                    <li><strong>MEM:</strong> Access memory operand</li>
+                    <li><strong>WB:</strong> Write result back to register</li>
+                </ul>
+                <table>
+                    <tr><th>Metric</th><th>Single-Cycle</th><th>Pipelined</th></tr>
+                    <tr><td>Clock period</td><td>800ps (slowest instruction)</td><td>200ps (slowest stage)</td></tr>
+                    <tr><td>Throughput</td><td>1 instruction / 800ps</td><td>~1 instruction / 200ps</td></tr>
+                    <tr><td>Latency per instruction</td><td>800ps</td><td>1000ps (5 × 200ps)</td></tr>
+                </table>
+                <div class="highlight"><p>Pipelining improves <em>throughput</em> (instructions completed per second), NOT latency (time per individual instruction). Each instruction actually takes longer in a pipeline — but many more complete per unit time. Ideal speedup = number of pipeline stages.</p></div>
+                <p>LEGv8's ISA was designed with pipelining in mind: fixed 32-bit instruction size (easy to fetch/decode in one cycle), few regular instruction formats (decode and register read in one step), load/store addressing (address in stage 3, memory in stage 4).</p>
+            </div>
+        </div>
+
+        <div class="section" id="hazards">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pipeline Hazards</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>hazard</strong> is any situation that prevents the next instruction from starting in the next cycle. Three types:</p>
+                <div class="grid">
+                    <div class="card">
+                        <h3>Structural Hazards</h3>
+                        <p>A required resource is busy. Example: single memory for both instructions and data. Solution: separate instruction and data memories (or caches).</p>
+                    </div>
+                    <div class="card">
+                        <h3>Data Hazards</h3>
+                        <p>An instruction needs data that a previous instruction hasn't finished computing yet. Example: ADD X19, X0, X1 followed immediately by SUB X2, X19, X3.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Control Hazards</h3>
+                        <p>The pipeline doesn't know which instruction to fetch next because a branch hasn't been resolved yet. The CPU is still in the ID stage of the branch when it needs to fetch the next instruction.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Forwarding (Bypassing)</h3>
+                        <p>Use the result as soon as it's computed — route it directly from the output of EX or MEM back to the input of EX — without waiting for it to be written to the register file.</p>
+                    </div>
+                </div>
+                <div class="highlight"><p>Load-use hazard: forwarding can't always help. If a LDUR result is needed by the immediately following instruction, the data isn't available until after MEM — but the next instruction needs it at the start of EX. You can't forward backward in time. A one-cycle stall (bubble) is unavoidable.</p></div>
+                <p><strong>Code scheduling to avoid stalls:</strong> Reorder independent instructions to put non-dependent work between a load and its use:</p>
+                <pre>
+// With stalls (13 cycles):        // Reordered (11 cycles):
+LDUR X1, [X0,#0]                  LDUR X1, [X0,#0]
+LDUR X2, [X0,#8]                  LDUR X2, [X0,#8]
+ADD  X3, X1, X2   ← stall         LDUR X4, [X0,#16]  ← moved up
+STUR X3, [X0,#24]                 ADD  X3, X1, X2    ← no stall
+LDUR X4, [X0,#16]                 STUR X3, [X0,#24]
+ADD  X5, X1, X4   ← stall         ADD  X5, X1, X4    ← no stall
+STUR X5, [X0,#32]                 STUR X5, [X0,#32]</pre>
+            </div>
+        </div>
+
+        <div class="section" id="prediction">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Branch Prediction</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Stalling on every branch until the outcome is known is too expensive in deeper pipelines. The solution: <strong>predict</strong> the branch outcome and continue fetching — only stall if the prediction is wrong.</p>
+                <div class="grid">
+                    <div class="card">
+                        <h3>Static Prediction</h3>
+                        <p>Fixed rules based on branch direction. Predict backward branches taken (loops usually repeat). Predict forward branches not taken (if-statements usually skip). No hardware overhead.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Dynamic Prediction</h3>
+                        <p>Hardware records recent history of each branch. 2-bit saturating counter: strongly taken, weakly taken, weakly not taken, strongly not taken. Adapts to actual program behavior.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Speculation</h3>
+                        <p>Predict and continue issuing instructions — but don't commit results until prediction confirmed. If wrong: flush the pipeline and re-fetch from correct path.</p>
+                    </div>
+                    <div class="card">
+                        <h3>LEGv8 Simple Approach</h3>
+                        <p>Predict branches not taken. Fetch instruction after branch with no delay. If branch is taken, flush the incorrectly fetched instruction (one-cycle penalty).</p>
+                    </div>
+                </div>
+                <div class="highlight"><p>In LEGv8, branch resolution hardware is moved to the ID stage (instead of EX) to minimize the branch penalty to one cycle. This requires a dedicated comparator and adder in the decode stage — extra hardware cost to reduce stall penalty.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ilp">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Instruction-Level Parallelism & Concluding Remarks</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>ILP (Instruction-Level Parallelism)</strong> goes beyond basic pipelining — issuing multiple instructions per cycle.</p>
+                <div class="grid">
+                    <div class="card">
+                        <h3>Multiple Issue</h3>
+                        <p>Issue 2–8 instructions per cycle. Requires multiple functional units (ALUs, FP units, load/store units) operating simultaneously.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Dynamic Scheduling</h3>
+                        <p>Hardware reorders instructions at runtime to avoid stalls. Needed because not all stalls are predictable (cache misses) and different ISA implementations have different latencies.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Loop Unrolling</h3>
+                        <p>Replicate the loop body multiple times to expose more independent instructions for the pipeline. Reduces loop overhead and enables better scheduling.</p>
+                    </div>
+                    <div class="card">
+                        <h3>SIMD + ILP</h3>
+                        <p>Combining unrolled loops with AVX SIMD (4 doubles per instruction) gives massive throughput — 4 C rows × 4 doubles = 16 elements per iteration of the matrix multiply inner loop.</p>
+                    </div>
+                </div>
+                <div class="highlight"><p>ILP limits: programs have real dependencies that limit parallelism. Pointer aliasing makes it hard to determine if two memory operations are independent. Memory bandwidth and limited instruction windows prevent keeping pipelines full. Speculation helps — but complexity increases power consumption, contributing to the power wall.</p></div>
+                <p><strong>Concluding principles:</strong></p>
+                <ul>
+                    <li>ISA design influences datapath and control — and vice versa</li>
+                    <li>Pipelining improves throughput via parallelism, not latency</li>
+                    <li>Hazards (structural, data, control) limit pipeline efficiency</li>
+                    <li>Compilers can schedule code to reduce stalls — but require knowledge of pipeline structure</li>
+                    <li>Poor ISA design (complex instructions, variable lengths, delayed branches) makes pipelining significantly harder</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

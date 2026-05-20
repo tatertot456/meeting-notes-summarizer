@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Architecture — Chapter 2: Instructions</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f0a00, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #c2410c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #c2410c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #c2410c; color: white; border-color: #c2410c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #c2410c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f0a00; border-left: 3px solid #c2410c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c2410c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #c2410c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c2410c; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #c2410c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #c2410c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Architecture · Chapter 2</div>
+        <h1>Instructions: Language of the Computer</h1>
+        <p class="subtitle">Computer Organization and Design — ARM Edition</p>
+    </header>
+    <nav>
+        <a href="#isa">Instruction Set</a>
+        <a href="#arithmetic">Arithmetic</a>
+        <a href="#registers">Registers</a>
+        <a href="#memory">Memory</a>
+        <a href="#numbers">Numbers & Encoding</a>
+        <a href="#formats">Instruction Formats</a>
+        <a href="#logical">Logical Ops</a>
+        <a href="#branches">Branches</a>
+        <a href="#procedures">Procedures</a>
+        <a href="#linking">Linking & Loading</a>
+        <a href="#x86">x86 vs ARM</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="isa">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Instruction Sets & ARMv8</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An <strong>instruction set</strong> is the complete repertoire of instructions a computer can execute. Different computers have different instruction sets, but with many aspects in common.</p>
+                <p>The <strong>ARMv8 ISA</strong> (using the LEGv8 subset throughout this book) is one of the most commercially successful ISAs ever made:</p>
+                <ul>
+                    <li>Commercialized by ARM Holdings — largest share of the embedded core market</li>
+                    <li>Used in consumer electronics, network/storage equipment, cameras, printers, smartphones</li>
+                    <li>Typical of many modern RISC ISAs</li>
+                </ul>
+                <div class="highlight"><p>Early computers had very simple instruction sets to simplify implementation. Many modern computers do too — simplicity enables higher performance at lower cost.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="arithmetic">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Arithmetic Operations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>All arithmetic instructions have exactly <strong>three operands</strong>: two sources and one destination.</p>
+                <pre>ADD a, b, c    // a = b + c
+SUB a, b, c    // a = b - c</pre>
+                <p><strong>Design Principle 1: Simplicity favors regularity.</strong> Every arithmetic instruction has the same form — this regularity makes hardware implementation simpler and faster.</p>
+                <p><strong>Example:</strong> Compiling <code>f = (g + h) - (i + j)</code></p>
+                <pre>ADD X9, X20, X21    // X9 = g + h
+ADD X10, X22, X23   // X10 = i + j
+SUB X19, X9, X10    // f = X9 - X10</pre>
+            </div>
+        </div>
+
+        <div class="section" id="registers">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Registers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Arithmetic instructions operate on <strong>registers</strong> — small, fast storage directly inside the CPU. LEGv8 has a <strong>32 × 64-bit register file</strong>.</p>
+                <p><strong>Design Principle 2: Smaller is faster.</strong> Registers are fast because there are only 32 of them — more registers would mean slower access.</p>
+                <table>
+                    <tr><th>Registers</th><th>Purpose</th></tr>
+                    <tr><td>X0 – X7</td><td>Procedure arguments and return values</td></tr>
+                    <tr><td>X9 – X17</td><td>Temporaries (not preserved across calls)</td></tr>
+                    <tr><td>X19 – X27</td><td>Saved registers (callee must preserve)</td></tr>
+                    <tr><td>X28 (SP)</td><td>Stack pointer</td></tr>
+                    <tr><td>X29 (FP)</td><td>Frame pointer</td></tr>
+                    <tr><td>X30 (LR)</td><td>Link register (return address)</td></tr>
+                    <tr><td>XZR</td><td>Constant value 0</td></tr>
+                </table>
+                <div class="highlight"><p>Register optimization is critical — compilers must use registers for frequently accessed variables and only "spill" to memory for rarely used ones. Every memory access costs extra instructions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="memory">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Memory Operands & Immediate Values</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Main memory stores composite data (arrays, structures, dynamic data). To use memory values in arithmetic, you must first <strong>load</strong> them into registers, then <strong>store</strong> results back.</p>
+                <pre>// A[12] = h + A[8];   h in X21, base of A in X22
+LDUR X9, [X22, #64]   // load A[8] (offset = 8*8 = 64)
+ADD  X9, X21, X9      // X9 = h + A[8]
+STUR X9, [X22, #96]   // store to A[12] (offset = 12*8 = 96)</pre>
+                <p>Memory is <strong>byte addressed</strong> — each address identifies one 8-bit byte. A 64-bit doubleword spans 8 bytes, so array index 8 is at byte offset 64.</p>
+                <p><strong>Immediate operands</strong> embed a constant directly in the instruction:</p>
+                <pre>ADDI X22, X22, #4    // X22 = X22 + 4</pre>
+                <div class="highlight"><p>Design Principle 3: Make the common case fast. Small constants are extremely common — immediate operands avoid a separate load instruction, saving both time and instructions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="numbers">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Number Representation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Unsigned Binary</h3>
+                        <p>Range: 0 to 2ⁿ–1. Using 32 bits: 0 to 4,294,967,295. All bits contribute positively.</p>
+                    </div>
+                    <div class="card">
+                        <h3>2's Complement Signed</h3>
+                        <p>Range: –2ⁿ⁻¹ to 2ⁿ⁻¹–1. Bit 31 is the sign bit. Using 32 bits: –2,147,483,648 to +2,147,483,647.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Signed Negation</h3>
+                        <p>To negate: flip all bits, then add 1. Example: +2 = 0000...0010 → –2 = 1111...1110.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Sign Extension</h3>
+                        <p>Replicate the sign bit leftward to extend to more bits. LDURSB sign-extends; LDURB zero-extends.</p>
+                    </div>
+                </div>
+                <div class="highlight"><p>Key insight on signed vs unsigned: the bit pattern 1111...1111 means –1 when interpreted as signed, but 4,294,967,295 when interpreted as unsigned. The hardware is the same — interpretation is everything.</p></div>
+                <p><strong>Hexadecimal</strong> is used as a compact representation: each hex digit represents exactly 4 bits. Example: <code>eca8 6420</code> = <code>1110 1100 1010 1000 0110 0100 0010 0000</code>.</p>
+            </div>
+        </div>
+
+        <div class="section" id="formats">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Instruction Formats</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>All LEGv8 instructions are encoded as <strong>32-bit words</strong>. Three main formats:</p>
+                <table>
+                    <tr><th>Format</th><th>Used For</th><th>Fields</th></tr>
+                    <tr><td>R-format</td><td>Register arithmetic (ADD, SUB, AND...)</td><td>opcode(11) | Rm(5) | shamt(6) | Rn(5) | Rd(5)</td></tr>
+                    <tr><td>D-format</td><td>Load/store (LDUR, STUR)</td><td>opcode(11) | address(9) | op2(2) | Rn(5) | Rt(5)</td></tr>
+                    <tr><td>I-format</td><td>Immediate arithmetic (ADDI)</td><td>opcode(10) | immediate(12) | Rn(5) | Rd(5)</td></tr>
+                </table>
+                <div class="highlight"><p>Design Principle 4: Good design demands good compromises. Different formats complicate decoding, but allow 32-bit instructions uniformly across all instruction types. Keeping formats as similar as possible minimizes the complexity cost.</p></div>
+                <p><strong>Stored Program concept:</strong> Instructions are just binary data stored in memory alongside other data. This enables programs that operate on programs — compilers, linkers, loaders — and binary compatibility across machines with the same ISA.</p>
+            </div>
+        </div>
+
+        <div class="section" id="logical">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Logical Operations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Operation</th><th>C</th><th>LEGv8</th><th>Use</th></tr>
+                    <tr><td>Shift left</td><td>&lt;&lt;</td><td>LSL</td><td>Multiply by 2ⁱ</td></tr>
+                    <tr><td>Shift right</td><td>&gt;&gt;</td><td>LSR</td><td>Divide by 2ⁱ (unsigned)</td></tr>
+                    <tr><td>Bitwise AND</td><td>&</td><td>AND, ANDI</td><td>Mask bits — clear selected bits to 0</td></tr>
+                    <tr><td>Bitwise OR</td><td>|</td><td>ORR, ORRI</td><td>Set selected bits to 1</td></tr>
+                    <tr><td>Bitwise XOR</td><td>^</td><td>EOR, EORI</td><td>Flip selected bits (XOR with all 1s = NOT)</td></tr>
+                </table>
+                <div class="highlight"><p>LSL by i bits = multiply by 2ⁱ. LSR by i bits = divide by 2ⁱ (unsigned only). Shift instructions are critical for array index calculations — multiplying an index by 8 (for 64-bit elements) becomes LSL #3.</p></div>
+                <p><strong>32-bit constants</strong> require two instructions since the immediate field is only 12 bits:</p>
+                <pre>MOVZ X9, 255, LSL 16   // load upper 16 bits, zero rest
+MOVK X9, 255, LSL 0    // keep upper bits, patch lower 16</pre>
+            </div>
+        </div>
+
+        <div class="section" id="branches">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Branches & Conditional Operations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Branches change the flow of execution based on conditions:</p>
+                <pre>CBZ  register, L1   // branch to L1 if register == 0
+CBNZ register, L1   // branch to L1 if register != 0
+B    L1             // unconditional branch to L1</pre>
+                <p>For richer comparisons, use an S-suffix instruction to set condition codes, then branch:</p>
+                <pre>SUBS XZR, X22, X23   // set flags from X22 - X23
+B.LT Less            // branch if less than (signed)
+B.GE Exit            // branch if greater or equal</pre>
+                <p><strong>Compiling a while loop:</strong></p>
+                <pre>// while (save[i] == k) i += 1;
+Loop: LSL  X10, X22, #3      // X10 = i * 8
+      ADD  X10, X10, X25     // address of save[i]
+      LDUR X9, [X10, #0]     // X9 = save[i]
+      SUB  X11, X9, X24      // X11 = save[i] - k
+      CBNZ X11, Exit         // if != 0, exit
+      ADDI X22, X22, #1      // i++
+      B    Loop
+Exit:</pre>
+                <div class="highlight"><p>Branch addresses are PC-relative — the branch instruction stores an offset from the current program counter, not an absolute address. This makes code position-independent and more compact.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="procedures">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Procedures & the Stack</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>6 steps for a procedure call:</strong></p>
+                <ul>
+                    <li>Place parameters in X0–X7</li>
+                    <li>Transfer control: <code>BL ProcedureLabel</code> (saves return address in X30/LR)</li>
+                    <li>Acquire storage for the procedure on the stack</li>
+                    <li>Perform the procedure's operations</li>
+                    <li>Place result in X0–X7 for the caller</li>
+                    <li>Return: <code>BR LR</code> (jumps to address in X30)</li>
+                </ul>
+                <div class="grid">
+                    <div class="card"><h3>Leaf Procedures</h3><p>Don't call other procedures. Must save any X19–X27 registers they use on the stack, then restore them before returning.</p></div>
+                    <div class="card"><h3>Non-Leaf Procedures</h3><p>Call other procedures. Must save LR (return address) AND all needed registers on the stack — otherwise the nested BL overwrites LR.</p></div>
+                    <div class="card"><h3>Temporaries (X9–X17)</h3><td>Not preserved across calls — callee can freely overwrite them. Caller saves if needed.</td></div>
+                    <div class="card"><h3>Saved Registers (X19–X27)</h3><p>Callee must save and restore these if used. Caller can rely on them being unchanged after a call.</p></div>
+                </div>
+                <div class="highlight"><p>Memory layout from low to high: Text (code) → Static data → Heap (grows up, malloc/new) → Stack (grows down, automatic variables). The stack pointer SP always points to the top of the stack.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="linking">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Translation, Linking & Loading</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Getting from C source to running program involves multiple steps:</p>
+                <div class="grid">
+                    <div class="card"><h3>Compiler</h3><p>Translates C to assembly language. Applies optimizations (O1, O2, O3 levels). Optimization level dramatically affects instruction count and CPI.</p></div>
+                    <div class="card"><h3>Assembler</h3><p>Translates assembly to machine code (object module). Produces: header, text segment, static data segment, relocation info, symbol table, debug info.</p></div>
+                    <div class="card"><h3>Linker</h3><p>Merges object modules. Resolves labels and external references. Patches location-dependent references. Produces executable image.</p></div>
+                    <div class="card"><h3>Loader</h3><p>Reads header, creates virtual address space, copies text and data into memory, initializes registers, jumps to startup routine which calls main().</p></div>
+                </div>
+                <div class="highlight"><p>Dynamic linking loads library procedures only when called — avoiding image bloat from static linking and automatically picking up new library versions. Java uses bytecode interpreted by the JVM, with JIT compilation of "hot" methods to native code for performance comparable to optimized C.</p></div>
+                <p><strong>Lessons from the C sort example:</strong></p>
+                <ul>
+                    <li>Instruction count and CPI are not good indicators in isolation — both matter</li>
+                    <li>Compiler optimizations are sensitive to the algorithm</li>
+                    <li>Java JIT compiled code is significantly faster than interpreted and can approach optimized C</li>
+                    <li><strong>Nothing can fix a dumb algorithm</strong> — quicksort beats bubblesort by 2500× regardless of language or optimization</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="x86">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>ARM vs. x86 & Fallacies</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The x86 ISA evolved from the Intel 8080 (1974) through decades of backward-compatible extensions — accumulating enormous complexity along the way.</p>
+                <table>
+                    <tr><th></th><th>ARM</th><th>x86</th></tr>
+                    <tr><td>Date</td><td>1985</td><td>1974 (8080)</td></tr>
+                    <tr><td>Instruction size</td><td>32 bits (fixed)</td><td>Variable length</td></tr>
+                    <tr><td>Registers</td><td>31 × 64-bit</td><td>16 × 64-bit</td></tr>
+                    <tr><td>Design philosophy</td><td>RISC — simple, regular</td><td>CISC — complex, backward compatible</td></tr>
+                    <tr><td>Implementation</td><td>Execute directly</td><td>Hardware translates to micro-ops</td></tr>
+                </table>
+                <div class="highlight"><p>x86 implements complex instructions by translating them to simpler internal micro-operations — essentially running a RISC core inside a CISC shell. Market share makes this economically viable despite the overhead.</p></div>
+                <p><strong>Fallacies:</strong></p>
+                <ul>
+                    <li><strong>Powerful instructions = higher performance:</strong> False. Complex instructions are hard to implement and may slow down all instructions including simple ones. Compilers are excellent at generating fast code from simple instructions.</li>
+                    <li><strong>Use assembly for high performance:</strong> False. Modern compilers understand modern processor pipelines better than most humans and generate better code.</li>
+                    <li><strong>Backward compatibility means the ISA doesn't change:</strong> False. ISAs only accrete — new instructions are always added, never removed.</li>
+                </ul>
+                <p><strong>Design principles recap:</strong> Simplicity favors regularity · Smaller is faster · Make the common case fast · Good design demands good compromises.</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Architecture — ARM Assembly on the Raspberry Pi</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2010, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #166534; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #166534; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #166534; color: white; border-color: #166534; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #166534; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2010; border-left: 3px solid #166534; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #166534; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #166534; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #166534; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #166534; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #166534; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Architecture · Lab</div>
+        <h1>ARM Assembly on the Raspberry Pi</h1>
+        <p class="subtitle">Assembly language programming basics — registers, memory, control flow, and functions</p>
+    </header>
+    <nav>
+        <a href="#setup">Setup</a>
+        <a href="#first">First Program</a>
+        <a href="#memory">Memory</a>
+        <a href="#branches">Branches</a>
+        <a href="#loops">Loops</a>
+        <a href="#arrays">Arrays</a>
+        <a href="#functions">Functions</a>
+        <a href="#debug">Debugger</a>
+        <a href="#structures">Structures</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="setup">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Setup & Toolchain</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The Raspberry Pi runs <strong>Raspbian</strong> — a Linux-based OS. You can access it directly, remotely via RDP (Remote Desktop Protocol), or over a network connection.</p>
+                <p><strong>Remote Desktop:</strong> Run RDP, enter <code>raspberrypi</code> as the computer. Username: <code>pi</code>, Password: <code>raspberry</code>.</p>
+                <p><strong>Essential Linux Shell commands:</strong></p>
+                <pre>ls          # List contents of current directory
+cd          # Change directory
+whoami      # Current user
+ps -ux      # Running processes
+help        # List available commands
+shutdown now  # Graceful shutdown (preferred over pulling the plug)</pre>
+                <div class="highlight"><p>Three tools you'll use: the <strong>assembler</strong> (turns assembly into object code), the <strong>linker</strong> (turns object files into an executable), and the <strong>debugger</strong> (lets you inspect registers during execution).</p></div>
+                <p><strong>Build process:</strong></p>
+                <pre>as -g -mfpu=vfpv2 -o first.o first.s   # Assemble → object file
+gcc -o first first.o                    # Link → executable
+./first                                 # Run (loader invoked automatically)</pre>
+                <p><strong>The Makefile</strong> automates this. Execution runs bottom-to-top in a makefile. Indentation must use tabs — not spaces — or make will fail.</p>
+            </div>
+        </div>
+
+        <div class="section" id="first">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>First Programs & Program Structure</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every assembly program needs a starting point declared with <code>.global main</code>. Lines in assembly are one of five types: directives, comments, instructions, parameters, or labels.</p>
+                <pre>/* -- first.s */
+.global main        @ 'main' is our entry point — must be global
+main:               @ Label marking the start of main
+    mov r0, #2      @ Put value 2 into register r0
+    bx lr           @ Branch and exchange: return from main</pre>
+                <p><strong>Adding two numbers:</strong></p>
+                <pre>.global main
+main:
+    mov r1, #3      @ r1 ← 3
+    mov r2, #4      @ r2 ← 4
+    add r0, r1, r2  @ r0 ← r1 + r2  (result = 7)
+    bx lr</pre>
+                <div class="highlight"><p><strong>Register reuse:</strong> Registers are a limited resource — reuse registers that are no longer needed. Using r0 as both an input and the result destination saves a register for other use elsewhere in the program.</p></div>
+                <p><strong>Three sections of an assembly program:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>.data</h3><p>Initialized data and constants. Values declared here do NOT change at runtime.</p></div>
+                    <div class="card"><h3>.bss</h3><p>Uninitialized variables that WILL change at runtime. Allocated but not filled.</p></div>
+                    <div class="card"><h3>.text</h3><p>The actual code. All instructions go here. Must be 4-byte aligned.</p></div>
+                    <div class="card"><h3>Alignment (.balign 4)</h3><p>Ensures the next address starts on a 4-byte boundary. Always align variables and code sections. Unused bytes are padding — never reference them.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="memory">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Memory: Load, Store & Variables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Declaring variables in the <code>.data</code> section and loading them into registers for arithmetic:</p>
+                <pre>/* Data section */
+.data
+.balign 4
+myvar1: .word 3      @ 4-byte integer with value 3
+.balign 4
+myvar2: .word 4      @ 4-byte integer with value 4
+
+/* Code section */
+.text
+.balign 4
+.global main
+main:
+    ldr r1, =myvar1  @ r1 ← address of myvar1 (shortcut)
+    ldr r1, [r1]     @ r1 ← *r1 (dereference — get the value)
+    ldr r2, =myvar2
+    ldr r2, [r2]
+    add r0, r1, r2   @ r0 = r1 + r2
+    bx lr</pre>
+                <div class="highlight"><p>You can't directly access data from a different section for security/efficiency reasons. <code>ldr r1, =myvar1</code> loads the <em>address</em>. <code>ldr r1, [r1]</code> dereferences it to get the <em>value</em>. The linker resolves the actual memory location.</p></div>
+                <p><strong>Storing values with MOV and STR:</strong></p>
+                <pre>ldr r1, =myvar1    @ r1 ← address of myvar1
+mov r3, #3         @ r3 ← 3
+str r3, [r1]       @ *r1 ← r3  (write 3 into myvar1)
+
+ldr r2, =myvar2
+mov r3, #4
+str r3, [r2]       @ *r2 ← r3  (write 4 into myvar2)</pre>
+                <p>Note: STR operand order is <strong>source first, destination second</strong> — the opposite of what you might expect from LDR.</p>
+            </div>
+        </div>
+
+        <div class="section" id="branches">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Branching & Conditional Logic</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Normally the PC (Program Counter — register R15) advances by 4 bytes after each instruction. Branches change this to jump to a label.</p>
+                <p><strong>Unconditional branch:</strong></p>
+                <pre>.global main
+main:
+    mov r0, #2      @ r0 ← 2
+    b end           @ jump to 'end' — skips next instruction
+    mov r0, #3      @ this is never executed
+end:
+    bx lr</pre>
+                <p><strong>Conditional branches</strong> use the <strong>CPSR</strong> (Current Program Status Register) — a special register with four condition flags:</p>
+                <table>
+                    <tr><th>Flag</th><th>Meaning</th></tr>
+                    <tr><td>N</td><td>Negative — result was negative</td></tr>
+                    <tr><td>Z</td><td>Zero — result was zero</td></tr>
+                    <tr><td>C</td><td>Carry — result produced a carry out</td></tr>
+                    <tr><td>V</td><td>Overflow — result overflowed signed range</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Common branch conditions:</strong> EQ (Z=1), NE (Z=0), GE, LT, GT, LE, MI (negative), PL (positive/zero), VS (overflow), VC (no overflow), HI, LS, CS/HS, CC/LO.</p>
+                <pre>/* IF r1 == r2 THEN r0=1 ELSE r0=2 */
+    mov r1, #2
+    mov r2, #2
+    cmp r1, r2        @ update CPSR with r1 - r2
+    beq case_equal    @ branch if Z=1 (they're equal)
+case_different:
+    mov r0, #2
+    b end
+case_equal:
+    mov r0, #1
+end:
+    bx lr</pre>
+                <div class="highlight"><p>IF/THEN/ELSE template: evaluate condition (updates CPSR) → conditional branch to else → then_part code → unconditional branch to end → else_part code → end label. Every high-level control structure maps to this pattern.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="loops">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Loops & Control Structures</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>While loop template:</strong></p>
+                <pre>while_condition:
+    /* evaluate E and update CPSR */
+    bXX end_of_loop   @ if E is false, leave loop
+    /* body of loop */
+    b while_condition  @ unconditional branch back
+end_of_loop:</pre>
+                <p><strong>For loop — sum of first 22 numbers:</strong></p>
+                <pre>.text
+.global main
+main:
+    mov r1, #0       @ r1 ← 0  (accumulator)
+    mov r2, #1       @ r2 ← 1  (counter)
+loop:
+    cmp r2, #22      @ compare r2 and 22
+    bgt end          @ if r2 > 22, exit loop
+    add r1, r1, r2   @ r1 ← r1 + r2
+    add r2, r2, #1   @ r2 ← r2 + 1
+    b loop
+end:
+    mov r0, r1       @ r0 ← r1  (return result = 253)
+    bx lr</pre>
+                <div class="highlight"><p>You only truly need IF and WHILE — every other control structure (for, do-while, switch) can be derived from these two. The for loop is just a while with an explicit initializer and increment.</p></div>
+                <p><strong>Shift operations</strong> for fast multiply/divide:</p>
+                <pre>mov r1, r2, lsl #1   @ r1 ← r2 * 2  (shift left 1)
+mov r1, r2, lsl #2   @ r1 ← r2 * 4  (shift left 2)
+mov r1, r3, asr #3   @ r1 ← r3 / 8  (arithmetic shift right)
+add r1, r2, r2, lsl #1  @ r1 ← r2 + r2*2 = r2*3
+add r1, r2, r2, lsl #2  @ r1 ← r2 + r2*4 = r2*5</pre>
+            </div>
+        </div>
+
+        <div class="section" id="arrays">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Arrays & Indexing Modes</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Arrays require knowing element size, element count, and total byte size. Assembly provides no built-in array type — you manage it manually.</p>
+                <pre>/* Array of 100 integers = 100 * 4 = 400 bytes */
+.data
+a: .skip 400        @ reserve 400 bytes
+
+.text
+.global main
+main:
+    ldr r1, =a      @ r1 ← &a  (address of array)
+    mov r2, #0      @ r2 ← 0  (index)
+loop:
+    cmp r2, #100
+    beq end
+    add r3, r1, r2, lsl #2  @ r3 ← r1 + (r2*4)  — element address
+    str r2, [r3]             @ *r3 ← r2  — store index value
+    add r2, r2, #1
+    b loop
+end:
+    bx lr</pre>
+                <div class="highlight"><p><code>.skip 400</code> reserves 400 bytes without initializing them. The expression <code>r2, lsl #2</code> multiplies the index by 4 (since each int is 4 bytes) inline — this is the ARM "flexible second operand" shift used in address calculation.</p></div>
+                <p><strong>Three non-updating index modes:</strong></p>
+                <pre>str r2, [r1, #12]       @ *(r1 + 12) ← r2  (immediate offset)
+str r2, [r1, +r3]       @ *(r1 + r3) ← r2  (register offset)
+str r2, [r1, +r2, lsl #2]  @ *(r1 + r2*4) ← r2  (shift offset)</pre>
+                <p><strong>Updating index mode</strong> (more efficient for sequential access):</p>
+                <pre>str r2, [r1], #4    @ *r1 ← r2, THEN r1 ← r1 + 4</pre>
+                <p>The updating mode combines the store and the pointer advance into one instruction — saving both a register and an ADD instruction compared to the non-updating approach.</p>
+            </div>
+        </div>
+
+        <div class="section" id="functions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Functions & the Stack</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Functions in assembly require careful management of the stack, PC, and Link Register (LR).</p>
+                <div class="grid">
+                    <div class="card"><h3>PC (R15)</h3><p>Program Counter — address of the currently executing instruction. Auto-increments by 4 each cycle unless modified.</p></div>
+                    <div class="card"><h3>LR (Link Register)</h3><p>Stores the return address when BL (Branch with Link) is called. Must be saved before any nested function calls.</p></div>
+                    <div class="card"><h3>R0–R3</h3><p>Parameter and return value registers. No assumptions about their values unless explicitly set as parameters.</p></div>
+                    <div class="card"><h3>R4+ (Saved Registers)</h3><p>If a function modifies these, it MUST save the original values on the stack and restore them before returning.</p></div>
+                </div>
+                <p><strong>Function rules:</strong></p>
+                <ul>
+                    <li>Use R0–R3 for parameters — make no assumptions about their values</li>
+                    <li>Make no assumptions about the CPSR on entry</li>
+                    <li>Save LR on entry, restore before exit</li>
+                    <li>Save and restore any R4+ registers you modify</li>
+                    <li>Exit via <code>bx lr</code> — or <code>pop {pc}</code> if you pushed LR</li>
+                </ul>
+                <div class="highlight"><p>Using C-helper functions (printf, scanf, puts) from assembly is possible but requires careful stack alignment. After a C call, push/pop the stack pointer to re-align it — C functions expect 8-byte alignment and will corrupt your stack if it's off.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="debug">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Using GDB (GNU Debugger)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>GDB</strong> (GNU Debugger) is part of the Free Software Foundation's open-source ecosystem — the same movement that produced Linux, Python, MySQL, Eclipse, and thousands of other tools. It lets you inspect and modify register values during execution.</p>
+                <p><strong>Launch:</strong> <code>gdb &lt;program&gt;</code> or load inside gdb with <code>file &lt;program&gt;</code></p>
+                <table>
+                    <tr><th>Command</th><th>What It Does</th></tr>
+                    <tr><td>start</td><td>Begin execution and pause at first instruction</td></tr>
+                    <tr><td>quit</td><td>Exit the debugger</td></tr>
+                    <tr><td>disassemble</td><td>Show machine code with addresses (note 4-byte separation)</td></tr>
+                    <tr><td>info registers</td><td>Show all register values in hex and decimal</td></tr>
+                    <tr><td>stepi</td><td>Execute one instruction and pause</td></tr>
+                    <tr><td>p $r0 = 2</td><td>Print or modify a register value</td></tr>
+                    <tr><td>continue</td><td>Run to end (or next breakpoint)</td></tr>
+                    <tr><td>break &lt;label&gt;</td><td>Set breakpoint at a label, function, or address</td></tr>
+                </table>
+                <div class="highlight"><p>Assembly is much harder to debug than high-level code. Use GDB heavily — especially <code>stepi</code> to trace through one instruction at a time and <code>info registers</code> after each step to verify values are what you expect. One trick: write the program in C first, run it through the assembler, and study the generated assembly to understand how the compiler handles constructs like loops and function calls.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="structures">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Structures & Advanced Topics</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Unlike arrays (uniform elements), structures have irregular shapes — multiple fields of different types. In C: <code>struct { char f0; int f1; }</code> = 5 bytes logically, but <strong>8 bytes with alignment padding</strong>.</p>
+                <pre>/* In assembly — 8 bytes not 5, due to 4-byte alignment */
+.data
+b: .skip 8    @ char field = 4 bytes padded, int field = 4 bytes</pre>
+                <div class="highlight"><p>Padding bytes are never referenced — they exist purely to keep fields on 4-byte boundaries. Referencing partial addresses creates extra work for the hardware and can cause alignment faults on some architectures.</p></div>
+                <p><strong>Indexing a structure array:</strong> Each structure instance is 8 bytes, so moving to the next element requires shifting the address right by 3 bits (8 = 2³). Managing structure arrays manually is one of the most complex tasks in assembly — high-level languages do all of this invisibly.</p>
+                <p><strong>Collatz Conjecture (advanced exercise):</strong> If n is even, divide by 2. If n is odd, multiply by 3 and add 1. Repeat — always reaches 1 for any starting n. Good exercise for combining conditional branches, shifts (divide by 2 = ASR #1), and loops.</p>
+                <p><strong>Final assignment — Bubble Sort:</strong> Input 8 single-digit numbers, sort ascending, print results. Tips: align all data elements, pre-allocate strings, allocate array space with <code>.skip</code>, use printf/scanf for I/O, pseudo-code in a high-level language first, focus on the core sort routine before worrying about I/O.</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

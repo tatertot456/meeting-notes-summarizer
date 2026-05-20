@@ -151,5 +151,50 @@
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
     "badge": "#6d28d9"
+  },
+  {
+    "title": "Computer Architecture Chapter 1 Abstractions and Technology",
+    "filename": "computer-architecture-chapter-1-abstractions-and-technology.html",
+    "category": "Computer Architecture",
+    "date": "2026-05-19 10:05 PM",
+    "accent": "#0d9488",
+    "glow": "#0a2a28",
+    "badge": "#0f766e"
+  },
+  {
+    "title": "Computer Architecture Chapter 2 Instructions Language of the Computer",
+    "filename": "computer-architecture-chapter-2-instructions-language-of-the-computer.html",
+    "category": "Computer Architecture",
+    "date": "2026-05-19 10:12 PM",
+    "accent": "#ea580c",
+    "glow": "#1f0a00",
+    "badge": "#c2410c"
+  },
+  {
+    "title": "Computer Architecture Chapter 3 Arithmetic for Computers",
+    "filename": "computer-architecture-chapter-3-arithmetic-for-computers.html",
+    "category": "Computer Architecture",
+    "date": "2026-05-19 10:27 PM",
+    "accent": "#6d28d9",
+    "glow": "#1a0f3d",
+    "badge": "#5b21b6"
+  },
+  {
+    "title": "Computer Architecture Chapter 4 The Processor",
+    "filename": "computer-architecture-chapter-4-the-processor.html",
+    "category": "Computer Architecture",
+    "date": "2026-05-19 10:33 PM",
+    "accent": "#0369a1",
+    "glow": "#0a1f2e",
+    "badge": "#075985"
+  },
+  {
+    "title": "Computer Architecture ARM Assembly Raspberry Pi",
+    "filename": "computer-architecture-arm-assembly-raspberry-pi.html",
+    "category": "Computer Architecture",
+    "date": "2026-05-19 10:42 PM",
+    "accent": "#15803d",
+    "glow": "#0a2010",
+    "badge": "#166534"
   }
 ]

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Architecture — Chapter 3: Arithmetic for Computers</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1a0f3d, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #5b21b6; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #5b21b6; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #5b21b6; color: white; border-color: #5b21b6; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #5b21b6; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1a0f3d; border-left: 3px solid #5b21b6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #5b21b6; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #5b21b6; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #5b21b6; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #5b21b6; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #5b21b6; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Architecture · Chapter 3</div>
+        <h1>Arithmetic for Computers</h1>
+        <p class="subtitle">Computer Organization and Design — ARM Edition</p>
+    </header>
+    <nav>
+        <a href="#addition">Addition & Subtraction</a>
+        <a href="#multiply">Multiplication</a>
+        <a href="#division">Division</a>
+        <a href="#float">Floating Point</a>
+        <a href="#ieee">IEEE 754</a>
+        <a href="#fparith">FP Arithmetic</a>
+        <a href="#simd">SIMD</a>
+        <a href="#pitfalls">Pitfalls</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="addition">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Integer Addition & Subtraction</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Integer addition works exactly like binary long addition, but hardware has finite width — results can <strong>overflow</strong> when they exceed the representable range.</p>
+                <p><strong>Overflow detection rules for addition:</strong></p>
+                <ul>
+                    <li>Adding a positive and a negative number: <strong>never overflows</strong></li>
+                    <li>Adding two positive numbers: overflow if result sign bit is 1</li>
+                    <li>Adding two negative numbers: overflow if result sign bit is 0</li>
+                </ul>
+                <p><strong>Subtraction</strong> is implemented as adding the negation: 7 – 6 = 7 + (–6)</p>
+                <pre>+7:  0000 0000 … 0000 0111
+–6:  1111 1111 … 1111 1010
++1:  0000 0000 … 0000 0001</pre>
+                <div class="highlight"><p>Multimedia/SIMD uses <strong>saturating arithmetic</strong> — on overflow, the result clamps to the largest representable value rather than wrapping around. This is correct for audio clipping and video saturation where a hard limit makes more sense than modular wraparound.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="multiply">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Multiplication</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Binary multiplication mirrors long multiplication: for each bit of the multiplier, either add a shifted copy of the multiplicand (if bit = 1) or add zero (if bit = 0). The product of two n-bit numbers is up to 2n bits wide.</p>
+                <div class="grid">
+                    <div class="card"><h3>Basic Hardware</h3><p>Shift the multiplicand left, check each multiplier bit, add to a running product. Takes one cycle per bit — slow but simple.</p></div>
+                    <div class="card"><h3>Optimized Multiplier</h3><p>Perform add and shift steps in parallel. One cycle per partial-product addition. Acceptable when multiplication frequency is low.</p></div>
+                    <div class="card"><h3>Faster Multiplier</h3><p>Uses multiple adders in a tree structure. Can be pipelined — several multiplications in flight simultaneously. High cost/performance ratio.</p></div>
+                    <div class="card"><h3>LEGv8 Instructions</h3><p>MUL: lower 64 bits of product. SMULH: upper 64 bits (signed). UMULH: upper 64 bits (unsigned). Two instructions needed for full 128-bit result.</p></div>
+                </div>
+                <div class="highlight"><p>Why two instructions for multiply? Two 64-bit numbers can produce a 128-bit result. MUL gives the lower half (sufficient for most code). SMULH/UMULH give the upper half when needed for overflow detection or arbitrary precision.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="division">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Division</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Division is the inverse of multiplication: given dividend and divisor, produce a quotient and remainder. Always check for division by zero first.</p>
+                <p><strong>Long division algorithm:</strong></p>
+                <ul>
+                    <li>If divisor ≤ current dividend bits: quotient bit = 1, subtract divisor</li>
+                    <li>Otherwise: quotient bit = 0, bring down next dividend bit</li>
+                    <li><strong>Restoring division:</strong> if remainder goes negative after subtraction, add the divisor back</li>
+                </ul>
+                <div class="grid">
+                    <div class="card"><h3>Signed Division</h3><p>Divide using absolute values, then adjust sign of quotient and remainder. Remainder has same sign as dividend.</p></div>
+                    <div class="card"><h3>Hardware</h3><p>Division hardware looks similar to multiplication hardware. Same datapath can serve both — major cost saving.</p></div>
+                    <div class="card"><h3>Faster Division</h3><p>Unlike multiplication, division can't easily be parallelized — each subtraction is conditional on the sign of the remainder. SRT division generates multiple quotient bits per step.</p></div>
+                    <div class="card"><h3>LEGv8 Instructions</h3><p>SDIV (signed), UDIV (unsigned). Both ignore overflow and division-by-zero — software must check.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="float">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Floating-Point Representation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Floating-point represents real numbers in scientific notation: ±1.fraction × 2^exponent</p>
+                <p>This allows representation of both very small numbers (like 10⁻³⁸) and very large numbers (like 10³⁸) — impossible with fixed-point integers of the same width.</p>
+                <div class="grid">
+                    <div class="card"><h3>Normalized Form</h3><p>Always ±1.fraction × 2^exp. The leading 1 before the binary point is implicit (hidden bit) — saves one bit of precision.</p></div>
+                    <div class="card"><h3>Denormal Numbers</h3><p>Exponent = 000...0 means hidden bit is 0. Allows gradual underflow — numbers smaller than normal with diminishing precision rather than an abrupt drop to zero.</p></div>
+                    <div class="card"><h3>Infinity</h3><p>Exponent = 111...1, Fraction = 0. Represents ±∞. Can propagate through calculations without triggering an immediate overflow check.</p></div>
+                    <div class="card"><h3>NaN (Not a Number)</h3><p>Exponent = 111...1, Fraction ≠ 0. Results from illegal operations like 0.0/0.0 or √(–1). Propagates through calculations.</p></div>
+                </div>
+                <div class="highlight"><p>Bits have no inherent meaning — the same bit pattern means completely different things depending on whether it's interpreted as integer, unsigned, or floating-point. The instruction determines the interpretation.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ieee">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>IEEE 754 Standard</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>IEEE 754 (1985) is the universal floating-point standard, developed to fix the chaos of incompatible representations across different systems. Almost universally adopted today.</p>
+                <p><strong>Format: S | Exponent | Fraction</strong></p>
+                <p>Value = (–1)^S × (1 + Fraction) × 2^(Exponent – Bias)</p>
+                <table>
+                    <tr><th>Format</th><th>Total bits</th><th>Exponent</th><th>Fraction</th><th>Bias</th><th>Range</th><th>Precision</th></tr>
+                    <tr><td>Single</td><td>32</td><td>8 bits</td><td>23 bits</td><td>127</td><td>±1.2×10⁻³⁸ to ±3.4×10³⁸</td><td>~6 decimal digits</td></tr>
+                    <tr><td>Double</td><td>64</td><td>11 bits</td><td>52 bits</td><td>1023</td><td>±2.2×10⁻³⁰⁸ to ±1.8×10³⁰⁸</td><td>~16 decimal digits</td></tr>
+                </table>
+                <div class="highlight"><p>Biased exponent: the stored exponent = actual exponent + Bias. This ensures the exponent field is always non-negative, making FP comparison possible using integer comparison hardware. Exponents 000...0 and 111...1 are reserved for denormals/zero and infinity/NaN.</p></div>
+                <p><strong>Example: –0.75 in single precision</strong></p>
+                <pre>–0.75 = (–1)¹ × 1.1₂ × 2⁻¹
+S = 1
+Exponent = –1 + 127 = 126 = 01111110₂
+Fraction = 10000...00₂
+Result: 1 01111110 10000000000000000000000</pre>
+            </div>
+        </div>
+
+        <div class="section" id="fparith">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Floating-Point Arithmetic</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>FP Addition — 4 steps:</strong></p>
+                <ul>
+                    <li><strong>1. Align:</strong> Shift the number with the smaller exponent right until exponents match</li>
+                    <li><strong>2. Add:</strong> Add the significands</li>
+                    <li><strong>3. Normalize:</strong> Shift result to restore 1.fraction form, adjust exponent, check overflow/underflow</li>
+                    <li><strong>4. Round:</strong> Round to fit available fraction bits, renormalize if needed</li>
+                </ul>
+                <p><strong>FP Multiplication — 5 steps:</strong></p>
+                <ul>
+                    <li><strong>1. Add exponents:</strong> New exponent = exp₁ + exp₂ – Bias (subtract bias since both are biased)</li>
+                    <li><strong>2. Multiply significands</strong></li>
+                    <li><strong>3. Normalize</strong></li>
+                    <li><strong>4. Round</strong></li>
+                    <li><strong>5. Determine sign:</strong> XOR of the two sign bits</li>
+                </ul>
+                <div class="highlight"><p>FP arithmetic hardware is much more complex than integer arithmetic and takes several cycles. Running it in one cycle would require such a long critical path that the entire processor clock would have to slow down — penalizing all instructions. FP units are pipelined to hide this latency.</p></div>
+                <p><strong>LEGv8 FP registers and instructions:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>FP Registers</h3><p>32 single-precision (S0–S31) and 32 double-precision (D0–D31). Sn stored in lower 32 bits of Dn. Separate from integer registers.</p></div>
+                    <div class="card"><h3>FP Load/Store</h3><p>LDURS/LDURD, STURS/STURD. Must use FP-specific load/store — integer LDUR won't work with FP registers.</p></div>
+                    <div class="card"><h3>Single Precision</h3><p>FADDS, FSUBS, FMULS, FDIVS. Example: FADDS S2, S4, S6</p></div>
+                    <div class="card"><h3>Double Precision</h3><p>FADDD, FSUBD, FMULD, FDIVD. FCMPS/FCMPD for comparison. B.cond for conditional branching on FP results.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="simd">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>SIMD & Subword Parallelism</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>SIMD (Single Instruction, Multiple Data)</strong> performs the same operation on multiple data elements simultaneously — exploiting data-level parallelism in graphics, audio, and scientific workloads.</p>
+                <p>A 128-bit register can hold:</p>
+                <ul>
+                    <li>Sixteen 8-bit integers</li>
+                    <li>Eight 16-bit integers</li>
+                    <li>Four 32-bit floats</li>
+                    <li>Two 64-bit doubles</li>
+                </ul>
+                <p><strong>ARMv8 SIMD:</strong> 32 × 128-bit V registers (V0–V31)</p>
+                <pre>ADD  V1.16B, V2.16B, V3.16B  // 16 simultaneous 8-bit adds
+FADD V1.4S,  V2.4S,  V3.4S   // 4 simultaneous 32-bit FP adds</pre>
+                <div class="highlight"><p>Matrix multiply performance comparison: Unoptimized scalar code processes one element at a time. AVX-optimized SIMD code (using 256-bit YMM registers) processes 4 doubles simultaneously — achieving roughly 4× throughput on the inner loop. The key instruction is vmulpd (parallel multiply) instead of vmulsd (scalar multiply).</p></div>
+                <p>ARMv8 includes 245 SIMD instructions covering: square root, fused multiply-add, saturating arithmetic, and strided vector loads/stores.</p>
+            </div>
+        </div>
+
+        <div class="section" id="pitfalls">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pitfalls & Concluding Remarks</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Right Shift ≠ Division for Signed</h3><p>Arithmetic right shift replicates the sign bit. –5 >> 2 = –2 (rounds toward –∞), not –1. Use with care on signed integers.</p></div>
+                    <div class="card"><h3>FP Associativity Fails</h3><p>(x+y)+z ≠ x+(y+z) in floating-point due to rounding. Parallel programs that reorder operations can produce different results — validate carefully.</p></div>
+                    <div class="card"><h3>Finite Precision</h3><p>FP numbers have bounded range and precision. Operations can overflow (too large), underflow (too small), or lose precision through rounding.</p></div>
+                    <div class="card"><h3>The Pentium FDIV Bug</h3><p>A lookup table error in Pentium's FP divider produced wrong results for certain inputs. Cost Intel $475M in recalls. Accuracy matters even for "everyday" use.</p></div>
+                </div>
+                <div class="highlight"><p>Core takeaway: bits have no inherent meaning. The same 32-bit pattern is a different number depending on whether you apply integer, unsigned, or floating-point instructions. Programs must track types carefully — hardware just manipulates bits.</p></div>
+                <p><strong>ISA arithmetic summary:</strong> Signed and unsigned integers (exact within range), floating-point (approximate reals with bounded range and precision). Both can overflow — programs must account for finite representation in all numeric computations.</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

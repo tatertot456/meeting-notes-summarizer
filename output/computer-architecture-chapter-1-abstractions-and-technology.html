@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Architecture — Chapter 1: Abstractions and Technology</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a28, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0f766e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0d9488; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0f766e; color: white; border-color: #0f766e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0d9488; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a28; border-left: 3px solid #0f766e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0d9488; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0d9488; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #0f766e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0d9488; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Architecture · Chapter 1</div>
+        <h1>Abstractions and Technology</h1>
+        <p class="subtitle">Computer Organization and Design — ARM Edition</p>
+    </header>
+    <nav>
+        <a href="#intro">Introduction</a>
+        <a href="#classes">Classes of Computers</a>
+        <a href="#performance">Understanding Performance</a>
+        <a href="#eight">Eight Great Ideas</a>
+        <a href="#below">Below Your Program</a>
+        <a href="#cpu">CPU & Clocking</a>
+        <a href="#power">Power Wall</a>
+        <a href="#amdahl">Amdahl's Law</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Introduction & Course Overview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Computer Architecture takes you on a tour of the lesser-known aspects of computer hardware — the whys and hows of hardware design and implementation.</p>
+                <p><strong>Three primary goals of this course:</strong></p>
+                <ul>
+                    <li>How computers work at the hardware level</li>
+                    <li>How to code in ARM assembly language</li>
+                    <li>Various components used to make programs — compilers, call stack, etc.</li>
+                </ul>
+                <div class="highlight"><p>Key word: <strong>Optimization</strong>. Everything you learn about low-level hardware applies directly to writing better high-level code.</p></div>
+                <p><strong>What you will learn:</strong></p>
+                <ul>
+                    <li>How programs are translated into machine language and how hardware executes them</li>
+                    <li>The hardware/software interface</li>
+                    <li>What determines program performance and how to improve it</li>
+                    <li>How hardware designers improve performance</li>
+                    <li>What parallel processing is</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="classes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Classes of Computers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Personal Computers</h3><p>General purpose, variety of software. Subject to cost/performance tradeoff.</p></div>
+                    <div class="card"><h3>Server Computers</h3><p>Network based. High capacity, performance, and reliability. Range from small servers to building-sized installations.</p></div>
+                    <div class="card"><h3>Supercomputers</h3><p>High-end scientific and engineering calculations. Highest capability but represent a small fraction of the overall market.</p></div>
+                    <div class="card"><h3>Embedded Computers</h3><p>Hidden as components of systems. Stringent power/performance/cost constraints.</p></div>
+                    <div class="card"><h3>Personal Mobile Devices</h3><p>Battery operated, connects to the Internet. Smartphones, tablets, electronic glasses. Hundreds to thousands of dollars.</p></div>
+                    <div class="card"><h3>Cloud Computing</h3><p>Warehouse Scale Computers (WSC). Software as a Service (SaaS). Portions run on PMD, portions in the Cloud (Amazon, Google).</p></div>
+                </div>
+                <div class="highlight" style="margin-top:16px"><p>We are now in the PostPC Era — Personal Mobile Devices and Cloud Computing have replaced the traditional PC as the dominant computing platform.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="performance">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Understanding Performance</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Performance is determined by a layered stack of factors:</p>
+                <ul>
+                    <li><strong>Algorithm:</strong> Determines number of operations executed</li>
+                    <li><strong>Programming language, compiler, architecture:</strong> Determine number of machine instructions per operation</li>
+                    <li><strong>Processor and memory system:</strong> Determine how fast instructions execute</li>
+                    <li><strong>I/O system (including OS):</strong> Determines how fast I/O operations execute</li>
+                </ul>
+                <p><strong>Defining Performance:</strong> Performance = 1 / Execution Time. "X is n times faster than Y" means Execution_Time_Y / Execution_Time_X = n.</p>
+                <div class="grid">
+                    <div class="card"><h3>Response Time</h3><p>How long it takes to do a task. Also called latency. What a single user cares about most.</p></div>
+                    <div class="card"><h3>Throughput</h3><p>Total work done per unit time — tasks/transactions per hour. What a data center cares about most.</p></div>
+                    <div class="card"><h3>Elapsed Time</h3><p>Total response time including processing, I/O, OS overhead, and idle time. Determines system performance.</p></div>
+                    <div class="card"><h3>CPU Time</h3><p>Time spent processing a given job only — discounts I/O time and other jobs. Split into user CPU time and system CPU time.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="eight">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Eight Great Ideas in Computer Architecture</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>1. Design for Moore's Law</h3><p>ICs double in capacity roughly every 2 years. Design for where technology will be when the product ships, not where it is today.</p></div>
+                    <div class="card"><h3>2. Use Abstraction</h3><p>Hide lower-level detail to simplify design. Each layer presents a clean interface to the layer above.</p></div>
+                    <div class="card"><h3>3. Make the Common Case Fast</h3><p>Optimizing the frequent case yields more benefit than optimizing the rare case. Amdahl's Law formalizes this.</p></div>
+                    <div class="card"><h3>4. Performance via Parallelism</h3><p>Do multiple operations simultaneously to increase throughput.</p></div>
+                    <div class="card"><h3>5. Performance via Pipelining</h3><p>Overlap execution of multiple instructions — like an assembly line.</p></div>
+                    <div class="card"><h3>6. Performance via Prediction</h3><p>Guess the likely outcome and start working — correct if wrong. Faster on average than waiting.</p></div>
+                    <div class="card"><h3>7. Hierarchy of Memories</h3><p>Fastest/smallest/most expensive memory at top, slowest/largest/cheapest at bottom. Cache exploits this.</p></div>
+                    <div class="card"><h3>8. Dependability via Redundancy</h3><p>Include redundant components so a system can continue working despite failures.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="below">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Below Your Program</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Programs exist at multiple levels of abstraction:</p>
+                <div class="grid">
+                    <div class="card"><h3>Application Software</h3><p>Written in high-level language. Closest to the problem domain. Provides productivity and portability.</p></div>
+                    <div class="card"><h3>System Software</h3><p>Compiler translates HLL to machine code. OS handles I/O, memory management, task scheduling, and resource sharing.</p></div>
+                    <div class="card"><h3>Assembly Language</h3><p>Textual representation of machine instructions. Human-readable form of the hardware's native language.</p></div>
+                    <div class="card"><h3>Hardware</h3><p>Binary digits (bits). Encoded instructions and data. Processor, memory, I/O controllers.</p></div>
+                </div>
+                <div class="highlight"><p>Instruction Set Architecture (ISA) is the hardware/software interface — the contract between hardware and software that allows them to evolve independently.</p></div>
+                <p><strong>Memory types:</strong></p>
+                <ul>
+                    <li><strong>Volatile main memory (DRAM):</strong> Loses data when power is off</li>
+                    <li><strong>Non-volatile secondary memory:</strong> Magnetic disk, flash memory, optical disk — persists without power</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="cpu">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>CPU Clocking, CPI & Performance Equations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Digital hardware is governed by a constant-rate clock:</p>
+                <ul>
+                    <li><strong>Clock period:</strong> Duration of one clock cycle (e.g., 250ps = 0.25ns)</li>
+                    <li><strong>Clock frequency:</strong> Cycles per second (e.g., 4.0GHz = 4×10⁹ Hz)</li>
+                </ul>
+                <p><strong>CPU Time = Clock Cycles × Clock Cycle Time = Clock Cycles / Clock Rate</strong></p>
+                <p>Performance is improved by reducing clock cycles OR increasing clock rate — but hardware designers must trade these off against each other.</p>
+                <p><strong>CPI (Cycles Per Instruction):</strong></p>
+                <p style="text-align:center; font-family:'Courier New'; color:#0d9488; margin:16px 0;">CPU Time = Instruction Count × CPI × Clock Cycle Time</p>
+                <div class="grid">
+                    <div class="card"><h3>Instruction Count</h3><p>Determined by the program, ISA, and compiler. Not affected by hardware.</p></div>
+                    <div class="card"><h3>CPI</h3><p>Determined by CPU hardware. Different instruction classes have different CPI — weighted average depends on instruction mix.</p></div>
+                </div>
+                <div class="highlight"><p>CPI Example: Sequence 1 (IC=5) takes 10 cycles → avg CPI 2.0. Sequence 2 (IC=6) takes 9 cycles → avg CPI 1.5. Sequence 2 is faster despite more instructions!</p></div>
+                <table>
+                    <tr><th>Factor</th><th>Affects</th></tr>
+                    <tr><td>Algorithm</td><td>Instruction Count, possibly CPI</td></tr>
+                    <tr><td>Programming Language</td><td>Instruction Count, CPI</td></tr>
+                    <tr><td>Compiler</td><td>Instruction Count, CPI</td></tr>
+                    <tr><td>ISA</td><td>Instruction Count, CPI, Clock Cycle Time</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="power">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Power Wall & Multiprocessors</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>In CMOS IC technology: <strong>Power = Capacitive load × Voltage² × Frequency</strong></p>
+                <p>As clock rates increased, power consumption became unmanageable:</p>
+                <ul>
+                    <li>Voltage can't be reduced further without losing reliability</li>
+                    <li>Heat can't be removed fast enough</li>
+                    <li>Single-core performance hit a wall around 2004</li>
+                </ul>
+                <div class="highlight"><p>The solution: multicore processors. Instead of one faster core, put multiple cores on one chip. But this requires explicitly parallel programming — the hardware can no longer hide the parallelism from the programmer.</p></div>
+                <p><strong>Challenges of parallel programming:</strong></p>
+                <ul>
+                    <li>Load balancing — keeping all cores busy</li>
+                    <li>Optimizing communication between cores</li>
+                    <li>Synchronization — avoiding race conditions</li>
+                </ul>
+                <p><strong>Power at idle:</strong> Servers rarely run at 100% load. Google data centers mostly operate at 10–50% load. A processor drawing 47% of full power at 10% load is very inefficient — designing power-proportional processors is an active research area.</p>
+            </div>
+        </div>
+
+        <div class="section" id="amdahl">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Amdahl's Law & Pitfalls</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Amdahl's Law:</strong> The performance improvement from enhancing one part of a system is limited by the fraction of time that part is used.</p>
+                <p style="text-align:center; font-family:'Courier New'; color:#0d9488; margin:16px 0;">T_improved = T_affected / improvement_factor + T_unaffected</p>
+                <div class="highlight"><p>Example: If multiply accounts for 80s of 100s execution time, making multiply infinitely fast still only gives a 5× speedup — not infinite. The unaffected 20s is the bottleneck. Corollary: make the COMMON case fast.</p></div>
+                <p><strong>MIPS is a flawed metric:</strong> Millions of Instructions Per Second doesn't account for differences in ISAs or instruction complexity. A program with fewer but more complex instructions can be faster than one with more simple instructions, yet show lower MIPS.</p>
+                <p><strong>Concluding principles:</strong></p>
+                <ul>
+                    <li>Execution time is the only reliable performance metric</li>
+                    <li>Cost/performance improves due to underlying technology development</li>
+                    <li>Hierarchical abstraction exists in both hardware and software</li>
+                    <li>Power is a fundamental limiting factor — use parallelism to improve performance</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
