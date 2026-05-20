@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Module 2: Introduction to T-SQL Querying</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a1a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #9d174d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #be185d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #9d174d; color: white; border-color: #9d174d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #be185d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e1b4b; border-left: 3px solid #9d174d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #be185d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #be185d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #be185d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #9d174d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #be185d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Module 2</div>
+        <h1>Introduction to T-SQL Querying</h1>
+        <p class="subtitle">T-SQL basics, set theory, predicate logic, and logical query processing order</p>
+    </header>
+    <nav>
+        <a href="#tsql">About T-SQL</a>
+        <a href="#categories">Statement Categories</a>
+        <a href="#elements">Language Elements</a>
+        <a href="#sets">Set Theory</a>
+        <a href="#predicates">Predicate Logic</a>
+        <a href="#logical">Logical Order</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="tsql">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>About T-SQL</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Structured Query Language (SQL) was developed by IBM in the 1970s and adopted by ANSI and ISO standards bodies. <strong>Transact-SQL (T-SQL)</strong> is Microsoft SQL Server's dialect — the querying language of SQL Server.</p>
+                <div class="highlight"><p>SQL is <strong>declarative</strong> — you describe WHAT you want, not the individual steps to get it. You tell the engine "give me customers in Spain" and it figures out HOW to retrieve them. This is fundamentally different from procedural languages where you write step-by-step instructions.</p></div>
+                <p>Other dialects: PL/SQL (Oracle), SQL Procedural Language (IBM). The ANSI standard provides a common foundation, but each vendor adds proprietary extensions.</p>
+            </div>
+        </div>
+
+        <div class="section" id="categories">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Categories of T-SQL Statements</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>DML — Data Manipulation Language</h3><p>Used to query and manipulate data. SELECT, INSERT, UPDATE, DELETE. SELECT is the primary focus of this course.</p></div>
+                    <div class="card"><h3>DDL — Data Definition Language</h3><p>Used to define and modify database objects and their structure. CREATE, ALTER, DROP.</p></div>
+                    <div class="card"><h3>DCL — Data Control Language</h3><p>Used to manage security permissions on database objects. GRANT, REVOKE, DENY.</p></div>
+                    <div class="card"><h3>TCL — Transaction Control Language</h3><p>Used to manage transactions. BEGIN TRANSACTION, COMMIT, ROLLBACK, SAVE TRANSACTION.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="elements">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>T-SQL Language Elements</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Predicates and Operators:</strong></p>
+                <table>
+                    <tr><th>Category</th><th>Elements</th></tr>
+                    <tr><td>Predicates</td><td>ALL, ANY, BETWEEN, IN, LIKE, OR, SOME</td></tr>
+                    <tr><td>Comparison Operators</td><td>=, >, &lt;, >=, &lt;=, &lt;>, !=, !>, !&lt;</td></tr>
+                    <tr><td>Logical Operators</td><td>AND, OR, NOT</td></tr>
+                    <tr><td>Arithmetic Operators</td><td>*, /, %, +, -</td></tr>
+                    <tr><td>Concatenation</td><td>+ (string concatenation)</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Built-in Functions:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>String Functions</h3><p>SUBSTRING, LEFT, RIGHT, LEN, REPLACE, REPLICATE, UPPER, LOWER, LTRIM, RTRIM, STUFF, SOUNDEX</p></div>
+                    <div class="card"><h3>Date & Time Functions</h3><p>GETDATE, SYSDATETIME, GETUTCDATE, DATEADD, DATEDIFF, YEAR, MONTH, DAY, DATENAME, DATEPART, ISDATE</p></div>
+                    <div class="card"><h3>Aggregate Functions</h3><p>SUM, MIN, MAX, AVG, COUNT, COUNT_BIG, STDEV, STDEVP, VAR</p></div>
+                    <div class="card"><h3>Control of Flow</h3><p>IF…ELSE, WHILE, BREAK, CONTINUE, BEGIN…END, WAITFOR. Used in programmatic objects like stored procedures.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Variables:</strong> Local variables store values temporarily. Names begin with @. @@ is reserved for system functions. Must be declared and used within the same batch.</p>
+                <pre>-- Declare and initialize in one statement (SQL Server 2016+)
+DECLARE @search varchar(30) = 'Match%';
+SELECT custid, companyname FROM Sales.Customers
+WHERE companyname LIKE @search;</pre>
+                <p><strong>Expressions:</strong> combinations of identifiers, values, and operators that evaluate to a single result. Used in SELECT, WHERE, and other clauses.</p>
+                <pre>SELECT YEAR(orderdate) + 1 AS next_year,
+       qty * unitprice AS line_total
+FROM Sales.OrderDetails;</pre>
+                <p><strong>Comments:</strong></p>
+                <pre>/* Block comment: spans
+   multiple lines */
+-- Inline comment: rest of this line only</pre>
+                <div class="highlight"><p><strong>Batch Separators:</strong> Batches are sets of commands sent to SQL Server as a unit. The GO keyword separates batches in SQL Server tools. GO is NOT a T-SQL command — it's a tool directive. Variable scope and name resolution are bounded by batches. GO [count] executes the preceding batch that many times.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="sets">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Set Theory & SQL Server</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The relational database model is mathematically grounded in set theory. Understanding sets explains why SQL behaves the way it does.</p>
+                <table>
+                    <tr><th>Set Theory Characteristic</th><th>SQL Server Application</th></tr>
+                    <tr><td>Acts on all elements at once</td><td>Queries operate on whole tables — set-based processing</td></tr>
+                    <tr><td>Tell the engine what to retrieve</td><td>Declarative SQL — describe results, not steps</td></tr>
+                    <tr><td>Avoid processing items individually</td><td>Avoid cursors and loops — use set-based queries</td></tr>
+                    <tr><td>Elements must be unique</td><td>Define unique keys in tables (PRIMARY KEY, UNIQUE)</td></tr>
+                    <tr><td>No defined order in a set</td><td>Use ORDER BY when sorted results are required</td></tr>
+                </table>
+                <div class="highlight"><p>A SQL result set is NOT truly relational by default — rows are NOT guaranteed to be unique and have NO guaranteed order. DISTINCT enforces uniqueness in results. ORDER BY enforces ordering. Without these, SQL Server may return results in any order it finds efficient.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="predicates">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Predicate Logic</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Predicate logic is the second mathematical foundation of the relational model. A <strong>predicate</strong> is a property or expression that evaluates to TRUE or FALSE (also called a Boolean expression).</p>
+                <p>Predicates are used throughout SQL:</p>
+                <div class="grid">
+                    <div class="card"><h3>Filtering Data</h3><p>WHERE clause predicates determine which rows survive. Only rows where the predicate evaluates to TRUE are returned.</p></div>
+                    <div class="card"><h3>CASE Expressions</h3><p>Each WHEN clause contains a predicate. First predicate that evaluates to TRUE determines the returned value.</p></div>
+                    <div class="card"><h3>Joining Tables</h3><p>The ON clause predicate determines which rows from two tables are matched and combined.</p></div>
+                    <div class="card"><h3>Subqueries & Integrity</h3><p>EXISTS predicate tests whether a subquery returns rows. CHECK constraints use predicates to validate data.</p></div>
+                </div>
+                <div class="highlight"><p>Three-valued logic: SQL predicates can evaluate to TRUE, FALSE, or UNKNOWN (when NULL is involved). WHERE and HAVING clauses filter out both FALSE and UNKNOWN — only TRUE rows pass. This is why NULL comparisons behave unexpectedly: NULL = NULL evaluates to UNKNOWN, not TRUE. Always use IS NULL or IS NOT NULL to test for NULL values.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="logical">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Logical Order of Operations in SELECT</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The order you <em>write</em> a SELECT query is NOT the order SQL Server <em>evaluates</em> it. Understanding logical processing order explains many "why doesn't this work?" moments.</p>
+                <table>
+                    <tr><th>Step</th><th>Clause</th><th>What It Does</th></tr>
+                    <tr><td>1</td><td>FROM</td><td>Identifies source tables, applies joins, produces virtual table</td></tr>
+                    <tr><td>2</td><td>WHERE</td><td>Filters rows from the FROM virtual table using predicates</td></tr>
+                    <tr><td>3</td><td>GROUP BY</td><td>Groups remaining rows by specified columns</td></tr>
+                    <tr><td>4</td><td>HAVING</td><td>Filters groups using predicates (aggregate conditions)</td></tr>
+                    <tr><td>5</td><td>SELECT</td><td>Defines which columns to return, applies aliases</td></tr>
+                    <tr><td>6</td><td>ORDER BY</td><td>Sorts the final result set</td></tr>
+                </table>
+                <pre>-- Full example showing all clauses in logical order
+USE TSQL;
+SELECT EmployeeId, YEAR(OrderDate) AS OrderYear
+FROM Sales.Orders
+WHERE CustomerId = 71
+GROUP BY EmployeeId, YEAR(OrderDate)
+HAVING COUNT(*) > 1
+ORDER BY EmployeeId, OrderYear;</pre>
+                <div class="highlight"><p>Critical consequence: SELECT aliases (like OrderYear above) are NOT visible to WHERE or HAVING — those clauses execute BEFORE SELECT. Only ORDER BY can see SELECT aliases because it executes last. To filter on a computed value, either repeat the expression in WHERE/HAVING, or wrap the query in a CTE or subquery.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

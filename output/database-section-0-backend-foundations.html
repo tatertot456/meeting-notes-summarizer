@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Section 0: Backend Foundations</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #059669; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #b45309; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #059669; color: white; border-color: #059669; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #b45309; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2318; border-left: 3px solid #059669; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #b45309; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #b45309; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        .takeaway { background: #111; border: 1px solid #92400e; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+        .takeaway h3 { font-size: 1rem; color: #b45309; margin-bottom: 8px; }
+        .takeaway p { font-size: 0.9rem; margin: 0; color: #aaa; }
+        .back { display: inline-block; margin-bottom: 32px; color: #b45309; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Section 0</div>
+        <h1>Backend Foundations</h1>
+        <p class="subtitle">Mental models, roles, responsibilities, and architectural thinking</p>
+    </header>
+    <nav>
+        <a href="#why">Why Backend?</a>
+        <a href="#roles">Enterprise Roles</a>
+        <a href="#clients">Clients</a>
+        <a href="#api">The API</a>
+        <a href="#database">The Database</a>
+        <a href="#communication">Communication</a>
+        <a href="#errors">Errors</a>
+        <a href="#environments">Environments</a>
+        <a href="#takeaways">Takeaways</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="why">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why Backend Development?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Backend development operates mostly behind the scenes — no immediate visual feedback, no obvious output on screen. And yet it is the backbone of every serious software system.</p>
+                <p>Backend systems are designed to:</p>
+                <ul>
+                    <li>Respond reliably to requests</li>
+                    <li>Enforce business rules consistently</li>
+                    <li>Protect data integrity</li>
+                    <li>Evolve over time as requirements change</li>
+                    <li>Protect against unauthorized access and attacks</li>
+                    <li>Interface seamlessly into consumer software</li>
+                </ul>
+                <div class="highlight"><p>The goal is not to memorize frameworks or follow recipes. Frameworks change constantly. What doesn't change is structure — understanding responsibility is what makes a backend developer professional.</p></div>
+                <p>The core questions to always ask:</p>
+                <ul>
+                    <li>What belongs in the API vs the front-end?</li>
+                    <li>What belongs in services?</li>
+                    <li>What belongs in the database?</li>
+                    <li>How do those pieces communicate safely and predictably?</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="roles">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Roles of Enterprise Software</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Enterprise software doesn't exist to solve a single problem. It exists to serve multiple roles at once — presentation, logic, data, and integration — all simultaneously, all reliably.</p>
+                <p>Think of it like building a car. Building a perfect engine is meaningless if you don't know how it interfaces with the drivetrain, frame, electrical system, and suspension. <strong>Parts don't become a car simply by existing.</strong> Integration requires a plan defining responsibilities, interfaces, and constraints before assembly begins.</p>
+                <div class="grid">
+                    <div class="card"><h3>Presentation</h3><p>Interacting with users or external clients. The user interface layer — where data enters the system.</p></div>
+                    <div class="card"><h3>Application Logic</h3><p>Coordinating workflows and enforcing rules. The backend — where correctness matters most.</p></div>
+                    <div class="card"><h3>Data Management</h3><p>Storing, retrieving, and protecting information. The database — where truth is preserved.</p></div>
+                    <div class="card"><h3>Integration</h3><p>Communicating with other systems and services. Explicit, resilient connections between components.</p></div>
+                </div>
+                <div class="highlight"><p>The most common mistake: treating all responsibilities as merely "components of a larger project." Without architectural discipline, roles blur, boundaries erode, assumptions leak, and the system becomes impossible to test, secure, or change.</p></div>
+                <p>Throughout this course, we will repeatedly ask: <em>What role is this code serving? Does this responsibility belong here? What happens when this part changes?</em></p>
+            </div>
+        </div>
+
+        <div class="section" id="clients">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Clients</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Clients are the entry point into the system. They initiate requests and present results. They can be web browsers, mobile apps, desktop applications, or other backend services acting as consumers.</p>
+                <p><strong>From an architectural perspective: clients exist to interact, not to decide.</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Initiate Requests</h3><p>Clients always start interactions. Nothing happens in a modern system until a client makes a request. Like a bank customer — they must act within the rules set by the organization.</p></div>
+                    <div class="card"><h3>Collect User Input</h3><p>Clients gather text, clicks, selections, files, and gestures. User input is unreliable by definition — malformed, incomplete, or intentionally manipulated. Always treat it as unverified.</p></div>
+                    <div class="card"><h3>Display Results</h3><p>Formatting, layout, responsiveness, and usability belong here. These concerns change frequently and must evolve independently of backend logic.</p></div>
+                    <div class="card"><h3>Never Trusted</h3><p>Clients are never trusted to enforce business rules or protect data. Anything a client sends can be altered or bypassed. The backend must always re-validate — no exceptions.</p></div>
+                </div>
+                <div class="highlight"><p>Clients live in environments we do not control. They can't be vetted, identified, or held responsible for security breaches. From an architectural standpoint, clients are consumers — not authorities.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="api">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Backend API</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The backend API is the authority of the system. While clients initiate requests, the backend decides what actually happens. Every serious backend system answers one fundamental question:</p>
+                <p style="text-align:center; font-style:italic; color:#b45309; margin: 16px 0;">"Given this request, is this allowed — and if so, what should the result be?"</p>
+                <div class="grid">
+                    <div class="card"><h3>Validates Requests</h3><p>Every incoming request is validated regardless of source — checking required fields, data types, ranges, and references. Even if a client already validated, the backend must repeat it. Validation here is about correctness, not UX.</p></div>
+                    <div class="card"><h3>Enforces Business Rules</h3><p>Who can perform an action, when it's permitted, quantity limits, state change rules, entity relationships. These rules belong in the backend so they are enforced uniformly — not scattered across clients where they diverge.</p></div>
+                    <div class="card"><h3>Controls Data Access</h3><p>The backend is the only component that directly controls access to persistent data. Clients never talk to databases — they request actions. The backend decides what can be read, changed, and under what conditions.</p></div>
+                    <div class="card"><h3>Shapes Responses</h3><p>Selects which data is returned, omits sensitive fields, transforms internal models into external representations, ensures consistent formats. Clients receive only what they need — no more, no less.</p></div>
+                </div>
+                <div class="highlight"><p>APIs are not just technical interfaces — they are boundaries of responsibility. APIs hide internal structure, expose contracts, and prevent misuse. What APIs expose is a contract: inputs accepted, outputs returned, errors possible, guarantees provided. Clients depend on the contract only — everything behind it is free to change.</p></div>
+                <p><strong>What clients should never know:</strong> table names, storage layouts, internal business logic, or permission models. When internal details leak into clients, even correct changes become breaking changes.</p>
+            </div>
+        </div>
+
+        <div class="section" id="database">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Database</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>While the backend API enforces behavior, <strong>the database enforces truth.</strong> It ensures stored information remains consistent, valid, and durable — even when other parts of the system fail. Databases are conservative by design: correctness over convenience.</p>
+                <div class="grid">
+                    <div class="card"><h3>Stores Data</h3><p>Persistent (survives restarts), reliable (not silently lost), and performant enough for system needs. Everything else ultimately depends on this being fulfilled correctly.</p></div>
+                    <div class="card"><h3>Enforces Integrity</h3><p>Primary key constraints, foreign key relationships, uniqueness rules, required fields. The database provides the final guarantee that invalid data cannot be stored — intentional redundancy with backend validation.</p></div>
+                    <div class="card"><h3>Protects Relationships</h3><p>Entities are connected: users → orders → items → categories. The database protects these relationships so they can't be broken by buggy code or partial failures.</p></div>
+                    <div class="card"><h3>Does Not Trust Clients</h3><p>Clients never talk directly to the database. Even the backend is constrained in how it interacts with data. Permissions, procedures, and constraints limit what can be changed. Layered distrust is professionalism.</p></div>
+                </div>
+                <div class="highlight"><p>Two layers inside the database: the <strong>Persistence Layer</strong> (tables, indexes, stored procedures, views — concerned with correctness and performance) and the <strong>Database Layer</strong> (the DBMS as a whole — transaction management, concurrency control, backup/recovery, security, physical storage). Most developers interact with the second layer indirectly, but its behavior shapes everything built on top.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="communication">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Communication Basics</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Modern backend systems communicate using simple, well-established conventions. Understanding these lets you reason about almost any API regardless of language or framework.</p>
+                <div class="grid">
+                    <div class="card"><h3>HTTP + JSON</h3><p>HTTP defines how requests are sent, responses returned, and success/failure communicated. JSON defines how data is structured and moves between systems. HTTP is stateless and predictable. JSON is human-readable and language-agnostic.</p></div>
+                    <div class="card"><h3>Request → Response</h3><p>A client sends a request (what action, what data). The backend returns a response (did it succeed, what data, or why it failed). No shared memory, no hidden state, no timing assumptions. Each request must be self-contained.</p></div>
+                    <div class="card"><h3>Status Codes Matter</h3><p>200-level = success. 400-level = client errors. 500-level = server failures. Status codes are part of the contract — they allow clients to respond appropriately. A backend that always returns 200 OK even on failure is hiding critical information.</p></div>
+                    <div class="card"><h3>Errors Are Expected</h3><p>Invalid data, missing resources, failed permissions, network hiccups — these are normal. Well-designed systems expect errors: clear status codes, meaningful messages, safe failure. An error means the system is enforcing rules — not that it's broken.</p></div>
+                </div>
+                <div class="highlight"><p>A silent API is dangerous. When errors are hidden: data can corrupt, transactions partially complete, users think actions succeeded when they didn't, and developers are left guessing. Silence creates false confidence — and false confidence causes far more damage than visible failure.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="errors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Errors as Information</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Errors are messages. They tell the client why an action could not be performed. In backend systems, an error does not automatically mean something went wrong — often it means something went <em>right</em>.</p>
+                <div class="grid">
+                    <div class="card"><h3>Invalid Input</h3><p>Data is malformed, out of range, or violates rules. The backend correctly rejected it.</p></div>
+                    <div class="card"><h3>Missing Data</h3><p>Required information was not provided. The backend correctly required it.</p></div>
+                    <div class="card"><h3>Forbidden Actions</h3><p>The user is not authorized to perform the operation. The backend correctly blocked it.</p></div>
+                    <div class="card"><h3>Resource Not Found</h3><p>The requested entity doesn't exist. The backend correctly communicated this rather than returning empty or corrupt data.</p></div>
+                </div>
+                <div class="highlight"><p>A backend that never returns errors is not robust — it is suspicious. Clear, consistent errors make systems safer: clients respond appropriately, users receive accurate feedback, logs reflect what happened, and developers can debug efficiently. Errors are not interruptions — they are part of normal system operation.</p></div>
+                <p>A professional backend system is not one that avoids errors. It is one that <strong>expects, communicates, and handles them deliberately.</strong></p>
+            </div>
+        </div>
+
+        <div class="section" id="environments">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Environments</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Enterprise software is not built, tested, and run in a single place. Systems move through multiple environments, each with a different purpose.</p>
+                <div class="grid">
+                    <div class="card"><h3>Local Development</h3><p>Where code is written and initially tested. Prioritizes fast feedback, easy debugging, and developer convenience. Uses simplified configs, mock services, reduced security constraints. Local behavior is not authoritative.</p></div>
+                    <div class="card"><h3>Testing / Staging</h3><p>Simulates real usage as closely as possible. Used to validate features, test integrations, verify deployments, and catch issues before users see them. More restrictive than local, closer to production.</p></div>
+                    <div class="card"><h3>Production</h3><p>The live environment. Real users, real data, real consequences. Prioritizes stability, security, and correctness over convenience. Debugging access is limited. Logging is critical. Mistakes are expensive.</p></div>
+                    <div class="card"><h3>Same Code ≠ Same Behavior</h3><p>Behavior changes across environments due to config values, connection strings, feature flags, auth settings, external services, and infrastructure. This is a design feature — not a flaw. Environments control risk without changing code.</p></div>
+                </div>
+                <div class="highlight"><p>"It works on my machine" is not success — it's a clue. Configuration management, environment variables, and deployment practices exist precisely because the same code must behave differently in different contexts, and that difference must be intentional and controlled.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="takeaways">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Takeaways</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>These aren't buzzwords — they are working rules you will apply all semester.</p>
+                <div class="takeaway">
+                    <h3>Backend = coordination + protection</h3>
+                    <p>The backend exists to control flow, enforce rules, and protect data — not just to "return JSON."</p>
+                </div>
+                <div class="takeaway">
+                    <h3>APIs define boundaries</h3>
+                    <p>If something crosses a boundary, it must be intentional, validated, and shaped.</p>
+                </div>
+                <div class="takeaway">
+                    <h3>Clients never touch databases</h3>
+                    <p>If that line gets crossed, the architecture is already broken.</p>
+                </div>
+                <div class="takeaway">
+                    <h3>Errors are information</h3>
+                    <p>A good error tells you what went wrong and where to look next.</p>
+                </div>
+                <div class="takeaway">
+                    <h3>Environments matter</h3>
+                    <p>If something "works on my machine," that's not success — it's a clue.</p>
+                </div>
+                <div class="highlight"><p>Backend development is the ability to reason across multiple parts of a system and understand how decisions in one place affect behavior elsewhere. When you ask "Where should this logic live? Who should be responsible? What happens when this changes?" — you are thinking like a professional backend developer.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

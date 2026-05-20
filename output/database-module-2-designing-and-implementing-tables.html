@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Module 2: Designing and Implementing Tables</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b91c1c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #b91c1c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b91c1c; color: white; border-color: #b91c1c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #b91c1c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a0a; border-left: 3px solid #b91c1c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #b91c1c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #b91c1c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #b91c1c; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b91c1c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #b91c1c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Module 2</div>
+        <h1>Designing and Implementing Tables</h1>
+        <p class="subtitle">Normalization, data types, schemas, and table management in SQL Server</p>
+    </header>
+    <nav>
+        <a href="#tables">Tables</a>
+        <a href="#normalization">Normalization</a>
+        <a href="#keys">Keys</a>
+        <a href="#concurrency">Concurrency</a>
+        <a href="#datatypes">Data Types</a>
+        <a href="#schemas">Schemas</a>
+        <a href="#creating">Creating Tables</a>
+        <a href="#temp">Temp Tables</a>
+        <a href="#computed">Computed Columns</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="tables">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is a Table?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Relational databases store data in <strong>tables (relations)</strong>. A table is defined by a collection of named columns and contains zero or more rows. Tables typically represent a type of object or entity — employees, purchase orders, customers, sales orders.</p>
+                <ul>
+                    <li>Each row usually represents a single instance of the entity (one employee, one order)</li>
+                    <li>Rows have no guaranteed order — use ORDER BY when order matters</li>
+                    <li>Tables are a security boundary — permissions can be set at the table level</li>
+                    <li>Consistent naming conventions for tables are important for maintainability</li>
+                </ul>
+                <div class="highlight"><p>Tables in the relational model are based on set theory — they act on all elements at once. Members must be unique (enforced by primary keys). No defined order exists in the underlying set — ORDER BY is required for presentation.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="normalization">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Normalization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Normalization is a process invented by Edgar F. Codd that ensures database structures are appropriate and avoid poor design characteristics. Degrees of normalization are called <strong>normal forms</strong>.</p>
+                <div class="grid">
+                    <div class="card">
+                        <h3>First Normal Form (1NF)</h3>
+                        <p>Eliminate repeating groups in individual tables. Create a separate table for each set of related data. Identify each set with a primary key. Each cell must contain a single atomic value.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Second Normal Form (2NF)</h3>
+                        <p>Must be in 1NF. Non-key columns must depend on the ENTIRE primary key — not just part of it. Columns that depend on only part of a composite key belong in a separate table linked by a foreign key.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Third Normal Form (3NF)</h3>
+                        <p>Must be in 2NF. Eliminate fields that do not depend on the key — only on the key, the whole key, and nothing but the key. Remove transitive dependencies.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Denormalization</h3>
+                        <p>Database designs should initially be normalized. Denormalization might be applied later to improve performance or simplify data warehouse analysis — but only deliberately.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="keys">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Primary Keys & Foreign Keys</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Primary keys</strong> uniquely identify each row within a table:</p>
+                <ul>
+                    <li>Must be unique — no two rows share the same primary key value</li>
+                    <li>Cannot be NULL (unknown values can't uniquely identify a row)</li>
+                    <li>Can involve multiple columns (composite key)</li>
+                    <li>Should not change — updating a primary key cascades complexity</li>
+                    <li><strong>Natural key:</strong> formed from data related to the entity (e.g. Social Security Number)</li>
+                    <li><strong>Surrogate key:</strong> system-generated codes or numbers (e.g. IDENTITY column)</li>
+                </ul>
+                <div class="highlight"><p>Surrogate keys are generally preferred: they never change, are always unique, have no business meaning that could become outdated, and simplify joins. Use IDENTITY or SEQUENCE to generate them automatically.</p></div>
+                <p><strong>Foreign keys</strong> create references between tables:</p>
+                <ul>
+                    <li>A foreign key in one table holds the primary key from another table</li>
+                    <li>Self-references are permitted (e.g. employee manager is also an employee)</li>
+                    <li>Rows that don't exist in the referenced table cannot be inserted</li>
+                    <li>Referenced rows cannot be deleted without cascading options</li>
+                    <li>Multiple foreign keys can exist in one table</li>
+                </ul>
+                <p><strong>Surrogate key implementation:</strong></p>
+                <pre>-- IDENTITY: auto-incrementing column
+CREATE TABLE Employees (
+    EmpID INT IDENTITY(1,1) PRIMARY KEY,
+    LastName VARCHAR(50) NOT NULL
+);
+
+-- @@IDENTITY: last value across ALL sessions (avoid)
+-- SCOPE_IDENTITY(): last value in CURRENT session (preferred)
+
+-- SEQUENCE: shared across multiple tables
+CREATE SEQUENCE dbo.OrderSeq
+    START WITH 1 INCREMENT BY 1
+    MINVALUE 1 MAXVALUE 999999;</pre>
+            </div>
+        </div>
+
+        <div class="section" id="concurrency">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Designing for Concurrency</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>SQL Server uses <strong>locking</strong> to manage concurrent access. Locks can be applied at the row, page, or table level.</p>
+                <div class="grid">
+                    <div class="card"><h3>Row Locking</h3><p>Increases concurrency — multiple users can access different rows simultaneously. Higher overhead from maintaining many individual locks.</p></div>
+                    <div class="card"><h3>Table Locking</h3><p>Lower overhead but blocks all users when one user is writing. Acceptable for batch operations on data warehouses.</p></div>
+                    <div class="card"><h3>OLTP Databases</h3><p>Should be normalized. Transactions should be small and fast. Smaller tables (fewer columns) are less likely to cause locking conflicts.</p></div>
+                    <div class="card"><h3>Data Warehouses</h3><p>Should be denormalized. No frequent modifications so locking is less of a concern. Optimized for read-heavy analytical queries.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="datatypes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Data types determine what can be stored in a column, variable, expression, or parameter. Choosing appropriate data types assists with query optimization and provides self-documentation.</p>
+                <table>
+                    <tr><th>Type</th><th>Size</th><th>Range / Notes</th></tr>
+                    <tr><td>tinyint</td><td>8 bits</td><td>0 to 255</td></tr>
+                    <tr><td>smallint</td><td>16 bits</td><td>-32,768 to 32,767</td></tr>
+                    <tr><td>int</td><td>32 bits</td><td>-2,147,483,648 to 2,147,483,647</td></tr>
+                    <tr><td>bigint</td><td>64 bits</td><td>-2^63 to 2^63-1</td></tr>
+                    <tr><td>decimal/numeric</td><td>Variable</td><td>Fixed precision and scale — use for money</td></tr>
+                    <tr><td>money/smallmoney</td><td>64/32 bits</td><td>Fixed 4 decimal places — avoid, use decimal instead</td></tr>
+                    <tr><td>float/real</td><td>Variable</td><td>Approximate — avoid in business applications</td></tr>
+                    <tr><td>bit</td><td>1 bit</td><td>Values: 1, 0, or NULL</td></tr>
+                    <tr><td>uniqueidentifier</td><td>128 bits</td><td>GUID — use NEWID() to generate. Don't store as string.</td></tr>
+                    <tr><td>varchar(n)</td><td>Variable</td><td>Non-Unicode character data up to n chars</td></tr>
+                    <tr><td>nvarchar(n)</td><td>Variable</td><td>Unicode character data — use N prefix in literals</td></tr>
+                </table>
+                <div class="highlight"><p>For <strong>NULL vs NOT NULL</strong>: NULL indicates the absence of a value — not zero, not empty string. Declare NOT NULL when a value is always required. NULL-able columns should be declared nullable only when "unknown" is a valid state for the data.</p></div>
+                <p><strong>Unicode data</strong> uses double-byte storage (nchar, nvarchar). Always prefix Unicode string literals with N: <code>WHERE country = N'Spain'</code>. Use LEN() for character count, DATALENGTH() for byte count.</p>
+                <p><strong>Alias data types</strong> are created with CREATE TYPE and behave like system types — useful for standardizing column types across a database.</p>
+            </div>
+        </div>
+
+        <div class="section" id="schemas">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Schemas</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Schemas are <strong>containers for database objects</strong> — tables, stored procedures, functions, types, views. They also serve as security boundaries.</p>
+                <ul>
+                    <li>Permissions can be granted at the schema level, applying to all objects within it</li>
+                    <li>Simplifies security configuration — grant once, covers everything in the schema</li>
+                    <li>Objects are referenced as <code>SchemaName.ObjectName</code>: <code>Production.Product</code></li>
+                    <li>Always specify schema name to avoid ambiguity and improve performance</li>
+                </ul>
+                <p><strong>Name resolution without schema prefix:</strong></p>
+                <ul>
+                    <li>SQL Server first searches the user's default schema</li>
+                    <li>If not found, searches the dbo schema</li>
+                    <li>Users with no default schema assigned use dbo as default</li>
+                </ul>
+                <pre>-- Create a schema
+CREATE SCHEMA Production AUTHORIZATION dbo;
+
+-- Reference objects with schema prefix (always do this)
+SELECT ProductID FROM Production.Product;
+
+-- Drop a schema (must be empty first)
+DROP SCHEMA Production;</pre>
+                <div class="highlight"><p>Always reference objects with both schema and object name. Omitting the schema forces SQL Server to search multiple schemas, which adds overhead and can cause unexpected behavior when two schemas contain objects with the same name.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="creating">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Creating, Altering & Dropping Tables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>-- CREATE TABLE
+CREATE TABLE Production.Products (
+    ProductID   INT IDENTITY(1,1) NOT NULL,
+    ProductName NVARCHAR(100)     NOT NULL,
+    Price       DECIMAL(10,2)     NOT NULL,
+    CategoryID  INT               NULL,
+    CONSTRAINT PK_Products PRIMARY KEY (ProductID),
+    CONSTRAINT FK_Products_Categories
+        FOREIGN KEY (CategoryID)
+        REFERENCES Production.Categories(CategoryID)
+);
+
+-- ALTER TABLE: add a column
+ALTER TABLE Production.Products
+ADD Description NVARCHAR(500) NULL;
+
+-- ALTER TABLE: drop a column
+ALTER TABLE Production.Products
+DROP COLUMN Description;
+
+-- DROP TABLE (can't drop if referenced by foreign key)
+DROP TABLE Production.Products;</pre>
+                <div class="highlight"><p>ALTER TABLE retains existing data and permissions. DROP TABLE permanently removes the table AND all its data, constraints, indexes, and triggers — but NOT stored procedures or views that reference it (those become invalid). Reference tables with foreign keys pointing to them cannot be dropped until the foreign key is removed first.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="temp">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Temporary Tables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Temporary tables exist only for the duration of a session or scope, stored in the tempdb system database.</p>
+                <div class="grid">
+                    <div class="card">
+                        <h3>Local Temporary Tables (#)</h3>
+                        <p>Visible only to the creator in the same session and scope. Automatically dropped when out of scope or when the session ends. Prefix with single #.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Global Temporary Tables (##)</h3>
+                        <p>Visible to ALL users across all sessions. Deleted when all users referencing the table disconnect. Prefix with double ##.</p>
+                    </div>
+                </div>
+                <pre>-- Local temp table
+CREATE TABLE #TempOrders (
+    OrderID INT,
+    TotalAmt DECIMAL(10,2)
+);
+
+-- Often created with SELECT INTO
+SELECT OrderID, TotalAmt
+INTO #TempOrders
+FROM Sales.Orders
+WHERE OrderDate > '2024-01-01';
+
+-- Global temp table (visible to all)
+CREATE TABLE ##SharedData (
+    ID INT,
+    Value VARCHAR(100)
+);
+
+-- Always drop temp tables explicitly in code
+DROP TABLE IF EXISTS #TempOrders;</pre>
+                <div class="highlight"><p>Don't rely on automatic cleanup of temporary tables — drop them explicitly in code when done. This prevents tempdb bloat in long-running sessions and makes the code's intent clear.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="computed">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Computed Columns</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Computed columns are derived from other columns or functions. They provide easier access to data without actually denormalizing the table structure.</p>
+                <pre>-- Computed column: calculated on the fly
+CREATE TABLE Sales.OrderDetails (
+    OrderID     INT NOT NULL,
+    Quantity    INT NOT NULL,
+    UnitPrice   DECIMAL(10,2) NOT NULL,
+    LineTotal   AS (Quantity * UnitPrice)  -- computed
+);
+
+-- PERSISTED: value stored physically, improves SELECT performance
+CREATE TABLE Production.Products (
+    ProductID   INT NOT NULL,
+    Price       DECIMAL(10,2) NOT NULL,
+    TaxRate     DECIMAL(5,2) NOT NULL,
+    PriceWithTax AS (Price * (1 + TaxRate)) PERSISTED
+);</pre>
+                <div class="highlight"><p>Non-persisted computed columns are recalculated every time they're accessed. PERSISTED computed columns store the value physically — improving SELECT performance at the cost of slightly more storage and compute during INSERT/UPDATE. Use PERSISTED when the computed column is frequently queried.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

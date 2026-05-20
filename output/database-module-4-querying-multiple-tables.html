@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Module 4: Querying Multiple Tables</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #92400e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #92400e; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #92400e; color: white; border-color: #92400e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #92400e; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #92400e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #92400e; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #92400e; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #92400e; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #92400e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #92400e; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Module 4</div>
+        <h1>Querying Multiple Tables</h1>
+        <p class="subtitle">Joins, Cartesian products, inner joins, outer joins, cross joins, and self joins</p>
+    </header>
+    <nav>
+        <a href="#joins">Join Overview</a>
+        <a href="#cartesian">Cartesian Product</a>
+        <a href="#inner">Inner Joins</a>
+        <a href="#outer">Outer Joins</a>
+        <a href="#cross">Cross Joins</a>
+        <a href="#self">Self Joins</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="joins">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Understanding Joins</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The FROM clause determines the source tables for a SELECT statement. Its result is a <strong>virtual table</strong> consumed by subsequent clauses (WHERE, GROUP BY, SELECT, ORDER BY). Joins combine rows from multiple tables into that virtual table.</p>
+                <table>
+                    <tr><th>Join Type</th><th>Description</th></tr>
+                    <tr><td>CROSS</td><td>Combines all rows from both tables — creates a Cartesian product. No ON clause.</td></tr>
+                    <tr><td>INNER</td><td>Starts with Cartesian product, applies filter to match rows based on predicate. Only matching rows returned.</td></tr>
+                    <tr><td>OUTER (LEFT/RIGHT/FULL)</td><td>All rows from designated preserved table returned. Matching rows from other table retrieved. NULLs inserted where no match exists.</td></tr>
+                </table>
+                <div class="highlight"><p>Always use ANSI SQL-92 syntax with the JOIN keyword and ON clause. The old SQL-89 syntax joins tables with commas in the FROM clause and filters in WHERE — this makes Cartesian products easy to accidentally create if you forget the WHERE condition. SQL-89 is NOT recommended.</p></div>
+                <pre>-- ANSI SQL-92 (preferred)
+SELECT o.orderid, o.orderdate, od.productid
+FROM Sales.Orders AS o
+JOIN Sales.OrderDetails AS od
+ON o.orderid = od.orderid;
+
+-- ANSI SQL-89 (avoid — accidental Cartesian product risk)
+SELECT o.orderid, od.productid
+FROM Sales.Orders AS o, Sales.OrderDetails AS od
+WHERE o.orderid = od.orderid;</pre>
+            </div>
+        </div>
+
+        <div class="section" id="cartesian">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Cartesian Product</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A Cartesian product combines every row from one table with every row from another table — producing all possible combinations. It is the mathematical foundation from which all join types start.</p>
+                <p>Example: 3 names × 3 products = 9 rows in the Cartesian product:</p>
+                <pre>-- 3 employees × 3 products = 9 result rows
+Names: Davis, Funk, King
+Products: Alice Mutton, Crab Meat, Ipoh Coffee
+
+Result:
+Davis  | Alice Mutton
+Davis  | Crab Meat
+Davis  | Ipoh Coffee
+Funk   | Alice Mutton
+Funk   | Crab Meat
+...and so on</pre>
+                <div class="highlight"><p>Inner join = Cartesian product + filter (ON predicate). Outer join = Cartesian product + filter + add back non-matching rows with NULLs. Cross join = raw Cartesian product with no filter. Understanding this relationship explains why "forgetting the ON clause" accidentally turns an inner join into a Cartesian product.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="inner">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Inner Joins</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>INNER JOIN returns only rows where a match is found in BOTH input tables. Non-matching rows from either table are excluded. When the join predicate uses =, it is also called an <strong>equi-join</strong>.</p>
+                <pre>-- Basic inner join: orders with their details
+SELECT o.orderid, o.orderdate,
+    od.productid, od.unitprice, od.qty
+FROM Sales.Orders AS o
+JOIN Sales.OrderDetails AS od
+ON o.orderid = od.orderid;
+
+-- Join on single attribute: products with their categories
+SELECT C.categoryname, P.productname, P.unitprice
+FROM Production.Categories AS C
+JOIN Production.Products AS P
+ON C.categoryid = P.categoryid;
+
+-- Composite join: match on multiple columns
+-- Cities and countries where both customers AND employees live
+SELECT DISTINCT e.city, e.country
+FROM Sales.Customers AS c
+JOIN HR.Employees AS e
+ON c.city = e.city
+AND c.country = e.country;
+
+-- Three-table join
+SELECT o.orderid, c.companyname, p.productname
+FROM Sales.Orders AS o
+JOIN Sales.Customers AS c ON o.custid = c.custid
+JOIN Sales.OrderDetails AS od ON o.orderid = od.orderid
+JOIN Production.Products AS p ON od.productid = p.productid;</pre>
+                <div class="highlight"><p>Table order in an INNER JOIN does not matter — the result is the same regardless of which table is listed first. Use table aliases to qualify column names when joining — especially when both tables have columns with the same name. Filter for join purposes goes in ON; filter for results goes in WHERE — this logical separation improves readability even when the query optimizer may treat them identically.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="outer">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Outer Joins</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>OUTER JOINs return all rows from the "preserved" table plus matching rows from the other table. Where no match exists, NULLs fill the missing columns.</p>
+                <div class="grid">
+                    <div class="card"><h3>LEFT OUTER JOIN</h3><p>All rows from the LEFT table are preserved. Matching rows from right table retrieved. Non-matching right rows → NULL placeholders.</p></div>
+                    <div class="card"><h3>RIGHT OUTER JOIN</h3><p>All rows from the RIGHT table are preserved. Matching rows from left table retrieved. Non-matching left rows → NULL placeholders.</p></div>
+                    <div class="card"><h3>FULL OUTER JOIN</h3><p>All rows from BOTH tables preserved. NULLs fill in where either side has no match. Rarely needed but useful for finding discrepancies.</p></div>
+                    <div class="card"><h3>Anti-Join Pattern</h3><p>LEFT OUTER JOIN + WHERE right.col IS NULL returns only rows from the left table with NO match in the right table. Classic pattern for "find customers with no orders."</p></div>
+                </div>
+                <pre>-- All customers WITH order info (NULL if no orders)
+SELECT c.custid, c.contactname, o.orderid, o.orderdate
+FROM Sales.Customers AS c
+LEFT OUTER JOIN Sales.Orders AS o
+ON c.custid = o.custid;
+
+-- Customers who have placed NO orders (anti-join)
+SELECT c.custid, c.contactname
+FROM Sales.Customers AS c
+LEFT OUTER JOIN Sales.Orders AS o
+ON c.custid = o.custid
+WHERE o.orderid IS NULL;  -- filter to non-matching rows only
+
+-- RIGHT OUTER JOIN: same result, different table order
+SELECT c.custid, c.contactname, o.orderid
+FROM Sales.Orders AS o
+RIGHT OUTER JOIN Sales.Customers AS c
+ON o.custid = c.custid;</pre>
+                <div class="highlight"><p>Best practice: always use LEFT OUTER JOIN and place the preserved table on the left. Mixing LEFT and RIGHT joins in complex queries becomes confusing. Rewrite RIGHT joins as LEFT joins by swapping table order — the result is identical and the query is easier to read.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="cross">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Cross Joins</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>CROSS JOIN produces the Cartesian product of two tables — every row from the first table combined with every row from the second. No ON clause is used or needed.</p>
+                <pre>-- ANSI SQL-92 CROSS JOIN syntax
+SELECT e1.firstname, e2.lastname
+FROM HR.Employees AS e1
+CROSS JOIN HR.Employees AS e2;
+
+-- ANSI SQL-89 equivalent (same result)
+SELECT e1.firstname, e2.lastname
+FROM HR.Employees AS e1, HR.Employees AS e2;</pre>
+                <div class="highlight"><p>Cross joins are usually NOT desired in production queries — a 1,000-row table crossed with a 1,000-row table produces 1,000,000 rows. Legitimate uses: generating test data (all combinations of inputs), creating a numbers/dates table (sequence generator), or building reporting grids where every combination is needed.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="self">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Self Joins</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A self join joins a table to itself — creating two logical instances of the same physical table. At least one alias is required to distinguish the two instances. Used to compare rows within the same table.</p>
+                <pre>-- Inner self join: employees and their managers
+-- CEO has no manager → CEO's row is excluded (inner join)
+SELECT e.empid, e.lastname, e.title,
+    e.mgrid, m.lastname AS manager_lastname
+FROM HR.Employees AS e
+JOIN HR.Employees AS m
+ON e.mgrid = m.empid;
+
+-- Left outer self join: include CEO (no manager = NULL)
+SELECT e.empid, e.lastname, e.title,
+    m.lastname AS manager_lastname
+FROM HR.Employees AS e
+LEFT OUTER JOIN HR.Employees AS m
+ON e.mgrid = m.empid;
+-- CEO row: manager_lastname = NULL</pre>
+                <div class="highlight"><p>Self joins are essential for hierarchical data (employees/managers, categories/subcategories, bill of materials). The key technique is giving the same table two different aliases — one representing the "child" role and one representing the "parent" role — then joining on the relationship column (mgrid = empid).</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

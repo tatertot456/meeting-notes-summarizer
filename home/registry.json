@@ -196,5 +196,131 @@
     "accent": "#15803d",
     "glow": "#0a2010",
     "badge": "#166534"
+  },
+  {
+    "title": "Database Section 0 Backend Foundations",
+    "filename": "database-section-0-backend-foundations.html",
+    "category": "Database",
+    "date": "2026-05-20 02:34 PM",
+    "accent": "#b45309",
+    "glow": "#1f1200",
+    "badge": "#92400e"
+  },
+  {
+    "title": "Database Chapter 7 Introduction to SQL",
+    "filename": "database-chapter-7-introduction-to-sql.html",
+    "category": "Database",
+    "date": "2026-05-20 02:39 PM",
+    "accent": "#be185d",
+    "glow": "#2a0a1a",
+    "badge": "#9d174d"
+  },
+  {
+    "title": "Database Module 2 Designing and Implementing Tables",
+    "filename": "database-module-2-designing-and-implementing-tables.html",
+    "category": "Database",
+    "date": "2026-05-20 02:52 PM",
+    "accent": "#dc2626",
+    "glow": "#2a0a0a",
+    "badge": "#b91c1c"
+  },
+  {
+    "title": "Database Module 13 Window Functions",
+    "filename": "database-module-13-window-functions.html",
+    "category": "Database",
+    "date": "2026-05-20 02:56 PM",
+    "accent": "#16a34a",
+    "glow": "#0a2a0a",
+    "badge": "#15803d"
+  },
+  {
+    "title": "Database Module 8 Designing and Implementing Views",
+    "filename": "database-module-8-designing-and-implementing-views.html",
+    "category": "Database",
+    "date": "2026-05-20 03:00 PM",
+    "accent": "#d97706",
+    "glow": "#1f1200",
+    "badge": "#b45309"
+  },
+  {
+    "title": "Database Module 9 Stored Procedures",
+    "filename": "database-module-9-stored-procedures.html",
+    "category": "Database",
+    "date": "2026-05-20 03:05 PM",
+    "accent": "#2563eb",
+    "glow": "#0a0a2e",
+    "badge": "#1d4ed8"
+  },
+  {
+    "title": "Database Chapter 6 Normalization and Table Design",
+    "filename": "database-chapter-6-normalization-and-table-design.html",
+    "category": "Database",
+    "date": "2026-05-20 03:09 PM",
+    "accent": "#7c3aed",
+    "glow": "#1e0a3c",
+    "badge": "#6d28d9"
+  },
+  {
+    "title": "Database Chapters 9 and 10 Database Design and Transactions",
+    "filename": "database-chapters-9-and-10-database-design-and-transactions.html",
+    "category": "Database",
+    "date": "2026-05-20 03:12 PM",
+    "accent": "#0d9488",
+    "glow": "#0a2a28",
+    "badge": "#0f766e"
+  },
+  {
+    "title": "Database More Windowing Functions",
+    "filename": "database-more-windowing-functions.html",
+    "category": "Database",
+    "date": "2026-05-20 03:15 PM",
+    "accent": "#ea580c",
+    "glow": "#1f0a00",
+    "badge": "#c2410c"
+  },
+  {
+    "title": "Database Module 10 Subqueries",
+    "filename": "database-module-10-subqueries.html",
+    "category": "Database",
+    "date": "2026-05-20 03:20 PM",
+    "accent": "#6d28d9",
+    "glow": "#1a0f3d",
+    "badge": "#5b21b6"
+  },
+  {
+    "title": "Database Module 11 Table Expressions",
+    "filename": "database-module-11-table-expressions.html",
+    "category": "Database",
+    "date": "2026-05-20 03:23 PM",
+    "accent": "#0369a1",
+    "glow": "#0a1f2e",
+    "badge": "#075985"
+  },
+  {
+    "title": "Database Module 3 Writing SELECT Queries",
+    "filename": "database-module-3-writing-select-queries.html",
+    "category": "Database",
+    "date": "2026-05-20 03:25 PM",
+    "accent": "#15803d",
+    "glow": "#0a2010",
+    "badge": "#166534"
+  },
+  {
+    "title": "Database Module 4 Querying Multiple Tables",
+    "filename": "database-module-4-querying-multiple-tables.html",
+    "category": "Database",
+    "date": "2026-05-20 03:28 PM",
+    "accent": "#b45309",
+    "glow": "#1f1200",
+    "badge": "#92400e"
+  },
+  {
+    "title": "Database Module 2 Introduction to T-SQL Querying",
+    "filename": "database-module-2-introduction-to-t-sql-querying.html",
+    "category": "Database",
+    "date": "2026-05-20 03:32 PM",
+    "accent": "#be185d",
+    "glow": "#2a0a1a",
+    "badge": "#9d174d"
   }
 ]

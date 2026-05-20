@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Chapter 7: Introduction to SQL</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a1a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #9d174d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #be185d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #9d174d; color: white; border-color: #9d174d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #be185d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a1a; border-left: 3px solid #9d174d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #be185d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #be185d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #be185d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #9d174d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #be185d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Chapter 7</div>
+        <h1>Introduction to SQL</h1>
+        <p class="subtitle">T-SQL, SELECT queries, joins, aggregates, subqueries, and set operators</p>
+    </header>
+    <nav>
+        <a href="#tsql">T-SQL Basics</a>
+        <a href="#select">SELECT Statement</a>
+        <a href="#from">FROM & Joins</a>
+        <a href="#where">WHERE Clause</a>
+        <a href="#order">ORDER BY</a>
+        <a href="#aggregates">Aggregates</a>
+        <a href="#subqueries">Subqueries</a>
+        <a href="#setops">Set Operators</a>
+        <a href="#crafting">Crafting Queries</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="tsql">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>T-SQL Basics & Language Elements</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>SQL was developed by IBM in the 1970s and adopted by ANSI/ISO standards bodies. <strong>Transact-SQL (T-SQL)</strong> is Microsoft SQL Server's dialect. SQL is <strong>declarative</strong> — you describe what you want, not the individual steps to get it.</p>
+                <div class="grid">
+                    <div class="card"><h3>DML — Data Manipulation Language</h3><p>Used to query and manipulate data. SELECT, INSERT, UPDATE, DELETE. This is the focus of this course.</p></div>
+                    <div class="card"><h3>DDL — Data Definition Language</h3><p>Used to define database objects. CREATE, ALTER, DROP. Covered in Chapter 8.</p></div>
+                    <div class="card"><h3>DCL — Data Control Language</h3><p>Used to manage security permissions. GRANT, REVOKE, DENY. Covered in Chapter 16.</p></div>
+                    <div class="card"><h3>TCL — Transaction Control Language</h3><p>COMMIT, ROLLBACK, SAVE TRANSACTION. Used to manage data changes atomically.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Key language elements:</strong></p>
+                <ul>
+                    <li><strong>Predicates:</strong> ALL, ANY, BETWEEN, IN, LIKE, OR, SOME</li>
+                    <li><strong>Comparison operators:</strong> =, >, &lt;, >=, &lt;=, &lt;>, !=</li>
+                    <li><strong>Logical operators:</strong> AND, OR, NOT</li>
+                    <li><strong>Variables:</strong> Local variables start with @, system functions use @@. Declared with DECLARE @name datatype = value</li>
+                    <li><strong>Comments:</strong> Block comments /* ... */ or inline comments -- </li>
+                    <li><strong>Batch separator:</strong> GO keyword separates batches sent to SQL Server</li>
+                </ul>
+                <div class="highlight"><p>SQL is set-based — it acts on all matching elements at once. Avoid cursors and loops that process rows individually. Tell the engine what you want to retrieve, not how to retrieve it.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="select">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The SELECT Statement</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The SELECT statement is the main data retrieval command in SQL. Each clause performs a specific function:</p>
+                <table>
+                    <tr><th>Clause</th><th>Role</th><th>Logical Order</th></tr>
+                    <tr><td>FROM</td><td>Defines table(s) to query</td><td>1st evaluated</td></tr>
+                    <tr><td>WHERE</td><td>Filters rows using a predicate</td><td>2nd</td></tr>
+                    <tr><td>GROUP BY</td><td>Arranges rows into groups</td><td>3rd</td></tr>
+                    <tr><td>HAVING</td><td>Filters groups by a predicate</td><td>4th</td></tr>
+                    <tr><td>SELECT</td><td>Defines which columns to return</td><td>5th</td></tr>
+                    <tr><td>ORDER BY</td><td>Sorts the final result</td><td>6th (last)</td></tr>
+                </table>
+                <div class="highlight"><p>The order you WRITE a query is not the order SQL Server EVALUATES it. FROM is always evaluated first — this is why WHERE can't reference SELECT aliases (SELECT hasn't run yet when WHERE is evaluated).</p></div>
+                <p><strong>Key SELECT options:</strong></p>
+                <pre>SELECT *                          -- all columns (wildcard)
+SELECT col1, col2                 -- specific columns
+SELECT col1 AS alias              -- column alias
+SELECT col1 * col2 AS computed    -- computed column
+SELECT DISTINCT col1              -- unique values only
+SELECT TOP (10) col1 FROM t       -- first 10 rows
+SELECT TOP (10) PERCENT col1      -- top 10% of rows</pre>
+                <p><strong>OFFSET-FETCH</strong> for paging through results:</p>
+                <pre>SELECT orderid, orderdate
+FROM Sales.Orders
+ORDER BY orderdate
+OFFSET 10 ROWS
+FETCH NEXT 10 ROWS ONLY;   -- rows 11-20</pre>
+            </div>
+        </div>
+
+        <div class="section" id="from">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>FROM Clause & Joins</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The FROM clause determines source tables and produces a virtual table consumed by subsequent clauses. Joins combine rows from multiple tables based on related columns.</p>
+                <div class="highlight"><p>A <strong>Cartesian product</strong> combines every row from one table with every row from another — usually NOT desired. Inner and outer joins start with the Cartesian product then filter it. Always specify join conditions to avoid accidental Cartesian products.</p></div>
+                <div class="grid">
+                    <div class="card"><h3>INNER JOIN</h3><p>Returns only rows where the join condition matches in both tables. Most common join type.</p></div>
+                    <div class="card"><h3>LEFT OUTER JOIN</h3><p>Returns all rows from the left table plus matching rows from the right. Non-matching right rows get NULL.</p></div>
+                    <div class="card"><h3>RIGHT OUTER JOIN</h3><p>Returns all rows from the right table plus matching rows from the left. Non-matching left rows get NULL.</p></div>
+                    <div class="card"><h3>CROSS JOIN</h3><p>Returns all possible combinations — the full Cartesian product. No ON clause. Useful for test data generation.</p></div>
+                    <div class="card"><h3>SELF JOIN</h3><p>Joins a table to itself using two aliases. Used to compare rows in the same table — e.g. employees and their managers.</p></div>
+                    <div class="card"><h3>FULL OUTER JOIN</h3><p>Returns all rows from both tables. Non-matching rows from either side get NULL placeholders.</p></div>
+                </div>
+                <pre>-- INNER JOIN
+SELECT o.orderid, o.orderdate, od.productid
+FROM Sales.Orders AS o
+JOIN Sales.OrderDetails AS od ON o.orderid = od.orderid;
+
+-- LEFT OUTER JOIN: all customers, orders if they exist
+SELECT c.custid, c.contactname, o.orderid
+FROM Sales.Customers AS c
+LEFT OUTER JOIN Sales.Orders AS o ON c.custid = o.custid;
+
+-- Customers with NO orders
+SELECT c.custid, c.contactname
+FROM Sales.Customers AS c
+LEFT OUTER JOIN Sales.Orders AS o ON c.custid = o.custid
+WHERE o.orderid IS NULL;
+
+-- SELF JOIN: employees and their managers
+SELECT e.empid, e.lastname, m.lastname AS manager
+FROM HR.Employees AS e
+JOIN HR.Employees AS m ON e.mgrid = m.empid;</pre>
+            </div>
+        </div>
+
+        <div class="section" id="where">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>WHERE Clause & Filtering</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The WHERE clause filters rows based on predicates — logical conditions that evaluate to TRUE, FALSE, or UNKNOWN. Only rows where the predicate is TRUE are returned.</p>
+                <pre>-- Comparison operators
+WHERE country = N'Spain'
+WHERE orderdate > '20070101'
+WHERE orderdate >= '20070101' AND orderdate < '20080101'
+
+-- Special operators
+WHERE custid BETWEEN 1 AND 50       -- inclusive range
+WHERE country IN ('Spain', 'France', 'Germany')
+WHERE lastname LIKE 'S%'            -- starts with S
+WHERE region IS NULL                -- test for NULL
+WHERE region IS NOT NULL</pre>
+                <div class="highlight"><p><strong>Three-valued logic:</strong> SQL uses NULL to mark missing values. Comparisons involving NULL return UNKNOWN, not TRUE or FALSE. Always use IS NULL or IS NOT NULL — never = NULL or &lt;> NULL, which will always return UNKNOWN.</p></div>
+                <p><strong>Logical operators:</strong> AND, OR, NOT combine multiple conditions. AND requires both sides to be TRUE. OR requires at least one side to be TRUE. Parentheses control evaluation order.</p>
+                <p><strong>LIKE wildcards:</strong> % matches any sequence of characters. _ matches exactly one character. Example: <code>LIKE 'S%th'</code> matches "Smith", "South".</p>
+            </div>
+        </div>
+
+        <div class="section" id="order">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>ORDER BY Clause</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>ORDER BY sorts the final query result. Without ORDER BY, SQL Server makes no guarantee about row order. It is the last clause logically processed.</p>
+                <pre>-- Sort by column name
+SELECT orderid, orderdate FROM Sales.Orders
+ORDER BY orderdate;
+
+-- Sort descending
+SELECT orderid, orderdate FROM Sales.Orders
+ORDER BY orderdate DESC;
+
+-- Sort by alias
+SELECT orderid, YEAR(orderdate) AS orderyear
+FROM Sales.Orders
+ORDER BY orderyear;
+
+-- Cascading sort: last name, then first name
+SELECT lastname, firstname FROM HR.Employees
+ORDER BY lastname ASC, firstname ASC;</pre>
+                <div class="highlight"><p>ORDER BY can reference column names, aliases, or ordinal position (not recommended). It can reference columns not in the SELECT list (unless DISTINCT is used). NULLs are sorted together — either first or last depending on sort direction.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="aggregates">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Aggregate Functions & GROUP BY</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Aggregate functions collapse a collection of rows into a single scalar value. They ignore NULLs except for COUNT(*).</p>
+                <table>
+                    <tr><th>Function</th><th>Returns</th></tr>
+                    <tr><td>COUNT(*)</td><td>Total number of rows (including NULLs)</td></tr>
+                    <tr><td>COUNT(col)</td><td>Number of non-NULL values in column</td></tr>
+                    <tr><td>MIN(col)</td><td>Minimum value</td></tr>
+                    <tr><td>MAX(col)</td><td>Maximum value</td></tr>
+                    <tr><td>SUM(col)</td><td>Sum of all non-NULL values</td></tr>
+                    <tr><td>AVG(col)</td><td>Arithmetic mean (ignores NULLs!)</td></tr>
+                </table>
+                <pre>-- Basic aggregates
+SELECT AVG(unitprice) AS avg_price,
+       MIN(qty) AS min_qty,
+       MAX(discount) AS max_discount
+FROM Sales.OrderDetails;
+
+-- GROUP BY: aggregate per group
+SELECT custid, COUNT(*) AS order_count
+FROM Sales.Orders
+GROUP BY custid;
+
+-- HAVING: filter groups (like WHERE but for groups)
+SELECT custid, COUNT(*) AS order_count
+FROM Sales.Orders
+GROUP BY custid
+HAVING COUNT(*) > 10;
+
+-- DISTINCT with aggregates: count unique values
+SELECT empid, COUNT(DISTINCT custid) AS unique_custs
+FROM Sales.Orders
+GROUP BY empid;</pre>
+                <div class="highlight"><p>After GROUP BY, all subsequent phases (HAVING, SELECT, ORDER BY) operate on groups, not individual rows. Every column in SELECT must either appear in GROUP BY or be inside an aggregate function. Use COALESCE(col, 0) to replace NULLs before aggregating to avoid skewed averages.</p></div>
+                <p><strong>WHERE vs HAVING:</strong> WHERE filters rows BEFORE grouping. HAVING filters groups AFTER grouping. You can't use aggregate functions in WHERE — use HAVING instead.</p>
+            </div>
+        </div>
+
+        <div class="section" id="subqueries">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Subqueries</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A subquery is a SELECT statement nested inside another query. The inner query executes first — its output becomes input for the outer query.</p>
+                <div class="grid">
+                    <div class="card"><h3>Scalar Subquery</h3><p>Returns exactly one column and one row. Used in WHERE or SELECT clause to supply a single value.</p></div>
+                    <div class="card"><h3>IN Subquery</h3><p>Returns one column with multiple rows. Used with IN operator to compare a value against a derived list.</p></div>
+                    <div class="card"><h3>FROM Subquery</h3><p>Returns a virtual table used as the source in FROM clause. Also called a derived table.</p></div>
+                    <div class="card"><h3>Correlated Subquery</h3><p>References a column from the outer query. Executes once per row of the outer query — can be slower but very powerful.</p></div>
+                </div>
+                <pre>-- Scalar subquery in WHERE
+SELECT orderid, custid
+FROM Sales.Orders
+WHERE custid = (SELECT custid FROM Sales.Customers
+                WHERE contactname = 'Maria Anders');
+
+-- IN subquery
+SELECT productid, productname
+FROM Production.Products
+WHERE categoryid IN (SELECT categoryid
+                     FROM Production.Categories
+                     WHERE categoryname = 'Beverages');
+
+-- Correlated subquery with EXISTS
+SELECT custid, contactname
+FROM Sales.Customers AS c
+WHERE EXISTS (SELECT 1 FROM Sales.Orders AS o
+              WHERE o.custid = c.custid);</pre>
+                <div class="highlight"><p>Correlated subqueries reference the outer query — they re-execute for every row of the outer query. EXISTS returns TRUE if any row matches — it stops as soon as it finds one, making it efficient for existence checks. Use IN for known lists, EXISTS for existence tests.</p></div>
+                <p><strong>ALL and ANY operators:</strong> ALL requires all values in the subquery list to satisfy the condition. ANY requires at least one value to satisfy it.</p>
+            </div>
+        </div>
+
+        <div class="section" id="setops">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Set Operators</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Set operators combine the results of two queries. Both queries must return the same number of columns with compatible data types.</p>
+                <div class="grid">
+                    <div class="card"><h3>UNION</h3><p>Combines rows from two queries, removing duplicates. Like a mathematical union of two sets.</p></div>
+                    <div class="card"><h3>UNION ALL</h3><p>Combines rows including duplicates. Faster than UNION since no duplicate elimination step is needed.</p></div>
+                    <div class="card"><h3>INTERSECT</h3><p>Returns only rows that appear in BOTH result sets. Useful for finding common members.</p></div>
+                    <div class="card"><h3>EXCEPT</h3><p>Returns rows from the first query that do NOT appear in the second. Useful for finding differences.</p></div>
+                </div>
+                <pre>-- UNION: all customers and all employees in one list
+SELECT custid AS id, contactname AS name FROM Sales.Customers
+UNION
+SELECT empid, lastname FROM HR.Employees;
+
+-- INTERSECT: cities where both customers and employees live
+SELECT city FROM Sales.Customers
+INTERSECT
+SELECT city FROM HR.Employees;
+
+-- EXCEPT: customers who never ordered
+SELECT custid FROM Sales.Customers
+EXCEPT
+SELECT custid FROM Sales.Orders;</pre>
+            </div>
+        </div>
+
+        <div class="section" id="crafting">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Crafting SELECT Queries</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Writing effective SQL queries requires both knowledge of the language and understanding of the data. Build queries one clause at a time in logical evaluation order:</p>
+                <ul>
+                    <li><strong>1. FROM</strong> — identify which tables you need</li>
+                    <li><strong>2. WHERE</strong> — filter rows to only what you need</li>
+                    <li><strong>3. GROUP BY</strong> — group if aggregation is needed</li>
+                    <li><strong>4. HAVING</strong> — filter groups if needed</li>
+                    <li><strong>5. SELECT</strong> — specify which columns to return</li>
+                    <li><strong>6. ORDER BY</strong> — sort the final result</li>
+                </ul>
+                <div class="highlight"><p>Know your data. Real-world databases are messy and remain in service for decades. Understand the data model before writing queries. Know the problem — understand what question you're answering. A query that returns results isn't necessarily correct if you misunderstood the question.</p></div>
+                <p><strong>SQL Functions available in T-SQL:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>String Functions</h3><p>SUBSTRING, LEFT, RIGHT, LEN, REPLACE, UPPER, LOWER, LTRIM, RTRIM, STUFF, SOUNDEX</p></div>
+                    <div class="card"><h3>Date/Time Functions</h3><p>GETDATE, SYSDATETIME, DATEADD, DATEDIFF, YEAR, MONTH, DAY, DATENAME, DATEPART, ISDATE</p></div>
+                    <div class="card"><h3>Aggregate Functions</h3><p>SUM, MIN, MAX, AVG, COUNT, COUNT_BIG, STDEV, VAR</p></div>
+                    <div class="card"><h3>Conversion Functions</h3><p>CAST, CONVERT — convert a value from one data type to another. COALESCE — return first non-NULL value.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

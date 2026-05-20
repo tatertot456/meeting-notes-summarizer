@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Module 10: Using Subqueries</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1a0f3d, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #5b21b6; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #6d28d9; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #5b21b6; color: white; border-color: #5b21b6; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #6d28d9; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1a0f3d; border-left: 3px solid #5b21b6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #6d28d9; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #6d28d9; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #6d28d9; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #5b21b6; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #6d28d9; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Module 10</div>
+        <h1>Using Subqueries</h1>
+        <p class="subtitle">Self-contained, correlated, scalar, multi-valued, and EXISTS subqueries</p>
+    </header>
+    <nav>
+        <a href="#overview">Overview</a>
+        <a href="#scalar">Scalar Subqueries</a>
+        <a href="#multivalued">Multi-Valued Subqueries</a>
+        <a href="#correlated">Correlated Subqueries</a>
+        <a href="#exists">EXISTS Predicate</a>
+        <a href="#comparison">Comparison</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="overview">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is a Subquery?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A subquery is a query nested inside another query. The results of the inner query are passed to the outer query — the inner query acts like an expression from the outer query's perspective.</p>
+                <div class="grid">
+                    <div class="card"><h3>Self-Contained Subquery</h3><p>Has no dependency on the outer query. Can be executed independently on its own. Easier to write, test, and debug.</p></div>
+                    <div class="card"><h3>Correlated Subquery</h3><p>Refers to elements (columns) from tables used in the outer query. Cannot be executed independently. Executes once per row of the outer query.</p></div>
+                    <div class="card"><h3>Scalar Subquery</h3><p>Returns exactly one value (one row, one column). Can be used anywhere a single-valued expression is expected: SELECT list, WHERE clause, HAVING clause.</p></div>
+                    <div class="card"><h3>Multi-Valued Subquery</h3><p>Returns multiple values as a single column set. Used with the IN predicate. Can often be rewritten as a JOIN — test both for performance.</p></div>
+                </div>
+                <div class="highlight"><p>Subqueries allow complex queries to be expressed in a single statement. Without them, you'd need temp tables, multiple queries, or complex self-joins. The inner query always executes first — its result becomes input for the outer query.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="scalar">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Scalar Subqueries</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A scalar subquery returns a single value (one row, one column). If the inner query returns an empty set, the result is converted to NULL — not an error.</p>
+                <pre>-- Find all order details for the most recent order
+SELECT orderid, productid, unitprice, qty
+FROM Sales.OrderDetails
+WHERE orderid = (
+    SELECT MAX(orderid) AS lastorder
+    FROM Sales.Orders
+);
+
+-- Scalar subquery in SELECT clause: show difference from average
+SELECT orderid, custid, freight,
+    freight - (SELECT AVG(freight) FROM Sales.Orders) AS diff_from_avg
+FROM Sales.Orders;
+
+-- Scalar subquery in HAVING clause
+SELECT custid, COUNT(*) AS order_count
+FROM Sales.Orders
+GROUP BY custid
+HAVING COUNT(*) > (
+    SELECT AVG(cnt)
+    FROM (SELECT custid, COUNT(*) AS cnt
+          FROM Sales.Orders
+          GROUP BY custid) AS counts
+);</pre>
+                <div class="highlight"><p>The outer query's construction determines whether the inner query must return a single value. If you use = in the WHERE clause, the subquery MUST return exactly one value — if it returns multiple rows, SQL Server throws an error. Use MAX(), MIN(), or other aggregates to guarantee a scalar result.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="multivalued">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Multi-Valued Subqueries</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A multi-valued subquery returns multiple values as a single column. Used with the IN predicate — if any value in the subquery result matches the IN expression, the predicate returns TRUE.</p>
+                <pre>-- Customers in Mexico using subquery
+SELECT custid, orderid
+FROM Sales.Orders
+WHERE custid IN (
+    SELECT custid
+    FROM Sales.Customers
+    WHERE country = N'Mexico'
+);
+
+-- Equivalent JOIN (often similar or better performance)
+SELECT o.custid, o.orderid
+FROM Sales.Orders AS o
+JOIN Sales.Customers AS c ON o.custid = c.custid
+WHERE c.country = N'Mexico';
+
+-- NOT IN: orders for customers NOT in Mexico
+SELECT custid, orderid
+FROM Sales.Orders
+WHERE custid NOT IN (
+    SELECT custid
+    FROM Sales.Customers
+    WHERE country = N'Mexico'
+);</pre>
+                <div class="highlight"><p>WARNING with NOT IN and NULLs: if the subquery result set contains any NULL values, NOT IN returns no rows at all — because NULL compared to anything yields UNKNOWN, not FALSE or TRUE. Use NOT EXISTS instead of NOT IN when the subquery column might contain NULLs.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="correlated">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Correlated Subqueries</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Correlated subqueries refer to columns from the outer query. They <strong>cannot be executed independently</strong> — they depend on a value from each outer row. The inner query executes once per row of the outer query.</p>
+                <pre>-- Find each employee's most recent order
+-- Inner query references O1.empid from the outer query
+SELECT orderid, empid, orderdate
+FROM Sales.Orders AS O1
+WHERE orderdate = (
+    SELECT MAX(orderdate)
+    FROM Sales.Orders AS O2
+    WHERE O2.empid = O1.empid   -- correlation: O1 is outer
+)
+ORDER BY empid, orderdate;
+
+-- Find each customer's most recent order date
+SELECT custid, orderid, orderdate
+FROM Sales.Orders AS outerorders
+WHERE orderdate = (
+    SELECT MAX(orderdate)
+    FROM Sales.Orders AS innerorders
+    WHERE innerorders.custid = outerorders.custid  -- correlation
+)
+ORDER BY custid;</pre>
+                <div class="highlight"><p>Correlated subqueries are harder to test than self-contained ones — you can't just highlight the inner query and run it independently. To test, replace the outer reference with a literal value (e.g., substitute O1.empid with a specific empid) to verify the inner query logic works.</p></div>
+                <p><strong>Performance note:</strong> because correlated subqueries execute once per outer row, they can be slow on large tables. Consider rewriting as a JOIN or using window functions (like ROW_NUMBER() OVER PARTITION BY) for better performance on large datasets.</p>
+            </div>
+        </div>
+
+        <div class="section" id="exists">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The EXISTS Predicate</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>EXISTS tests whether a subquery returns any rows at all. It returns TRUE or FALSE — never UNKNOWN. No rows are passed back to the outer query; EXISTS stops as soon as it finds the first matching row.</p>
+                <pre>-- Customers who HAVE placed orders
+SELECT custid, companyname
+FROM Sales.Customers AS c
+WHERE EXISTS (
+    SELECT *               -- * is conventional — column list doesn't matter
+    FROM Sales.Orders AS o
+    WHERE c.custid = o.custid  -- correlated to outer query
+);
+
+-- Customers who have NOT placed any orders
+SELECT custid, companyname
+FROM Sales.Customers AS c
+WHERE NOT EXISTS (
+    SELECT *
+    FROM Sales.Orders AS o
+    WHERE c.custid = o.custid
+);</pre>
+                <div class="highlight"><p>EXISTS is almost always better than IN for existence tests — especially when the subquery might return NULLs. EXISTS stops at the first match (short-circuit evaluation) making it efficient. NOT EXISTS handles NULLs correctly unlike NOT IN. The SELECT list inside EXISTS doesn't matter — use SELECT * or SELECT 1 by convention.</p></div>
+                <table>
+                    <tr><th>Approach</th><th>Use When</th><th>NULL Safe?</th></tr>
+                    <tr><td>IN (subquery)</td><td>Matching against a list of values</td><td>Yes for IN, No for NOT IN</td></tr>
+                    <tr><td>EXISTS (subquery)</td><td>Testing whether related rows exist</td><td>Yes for both EXISTS and NOT EXISTS</td></tr>
+                    <tr><td>JOIN</td><td>Need columns from both tables in results</td><td>Depends on join type</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="comparison">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Self-Contained vs. Correlated: Side by Side</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>-- SELF-CONTAINED: inner query has no reference to outer query
+-- Can be run independently
+SELECT orderid, productid, unitprice, qty
+FROM Sales.OrderDetails
+WHERE orderid = (
+    SELECT MAX(orderid)        -- no reference to outer tables
+    FROM Sales.Orders
+);
+
+-- CORRELATED: inner query references outer query's table (O1)
+-- Cannot be run independently — depends on each outer row
+SELECT orderid, empid, orderdate
+FROM Sales.Orders AS O1
+WHERE orderdate = (
+    SELECT MAX(orderdate)
+    FROM Sales.Orders AS O2
+    WHERE O2.empid = O1.empid  -- O1 comes from outer query
+);</pre>
+                <div class="grid">
+                    <div class="card"><h3>Self-Contained Advantages</h3><p>Can be tested independently. Easier to debug. SQL Server often optimizes them more aggressively. Execute once — result reused for all outer rows.</p></div>
+                    <div class="card"><h3>Correlated Advantages</h3><p>Can express per-row logic that self-contained queries cannot. Essential for "most recent per group" type queries. Can be combined with EXISTS for powerful existence tests.</p></div>
+                </div>
+                <div class="highlight"><p>When writing a correlated subquery, always use table aliases to clearly distinguish between inner and outer query references. The pattern of matching O2.empid = O1.empid (inner = outer) is the signature of a correlated subquery — the inner query is "correlated" to each row of the outer query.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — More Windowing Functions</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f0a00, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #c2410c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #c2410c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #c2410c; color: white; border-color: #c2410c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #c2410c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f0a00; border-left: 3px solid #c2410c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c2410c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #c2410c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c2410c; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #c2410c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #c2410c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Guest Lecture</div>
+        <h1>More Windowing Functions</h1>
+        <p class="subtitle">Kevin McCarty — Aggregate, offset/analytic, and distribution window functions</p>
+    </header>
+    <nav>
+        <a href="#review">OVER Review</a>
+        <a href="#partition">Partitioning</a>
+        <a href="#framing">ROWS & RANGE</a>
+        <a href="#offset">Offset Functions</a>
+        <a href="#distribution">Distribution Functions</a>
+        <a href="#syntax">Full Syntax</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="review">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Are Windowing Functions?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Introduced in SQL Server 2005 (SQL 2003 Standard), windowing functions perform operations on subsets of data without collapsing rows like GROUP BY does. Before windowing functions, these operations required liberal use of temp tables, CTEs, subqueries, and produced significant performance hits.</p>
+                <div class="grid">
+                    <div class="card"><h3>Ranking Functions (covered)</h3><p>ROW_NUMBER, RANK, DENSE_RANK, NTILE — assign position numbers to rows within a window.</p></div>
+                    <div class="card"><h3>Aggregate Functions</h3><p>SUM, AVG, COUNT applied over a window with ROWS/RANGE framing — running totals, moving averages.</p></div>
+                    <div class="card"><h3>Offset / Analytic Functions</h3><p>LAG, LEAD, FIRST_VALUE, LAST_VALUE — access values from other rows without self-joins.</p></div>
+                    <div class="card"><h3>Distribution Functions</h3><p>PERCENT_RANK, CUME_DIST, PERCENTILE_DISC, PERCENTILE_CONT — statistical positioning.</p></div>
+                </div>
+                <div class="highlight"><p>The core component of every windowing function is the OVER clause — it defines the "window" (the specific set of rows) the function operates on. Without OVER, there's no window function.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="partition">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The OVER Clause & Partitioning</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>OVER defines the window. PARTITION BY within OVER limits the window to rows sharing the same value in a partitioning column — similar to GROUP BY, but without collapsing rows.</p>
+                <pre>-- Basic OVER: window is ALL rows, ordered by sales
+SELECT BusinessEntityID AS SalesID,
+    FirstName + ' ' + LastName AS FullName,
+    SalesLastYear,
+    ROW_NUMBER() OVER(ORDER BY SalesLastYear ASC) AS RowNumber
+FROM Sales.vSalesPerson;
+
+-- PARTITION BY: separate window per TerritoryGroup
+-- Row numbers restart at 1 for each territory
+SELECT BusinessEntityID AS SalesID,
+    FirstName + ' ' + LastName AS FullName,
+    SalesLastYear,
+    TerritoryGroup,
+    ROW_NUMBER() OVER(
+        PARTITION BY TerritoryGroup
+        ORDER BY SalesLastYear ASC) AS RowNumber
+FROM Sales.vSalesPerson;</pre>
+                <div class="highlight"><p>Partitioning is useful for isolating sets with specific characteristics without running a separate query per group. Each partition gets its own independent window — rank 1 in the North partition and rank 1 in the South partition are completely independent.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="framing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>ROWS & RANGE Framing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>ROWS and RANGE further refine which rows within a partition are included in the calculation — based on proximity to the current row. Requires ORDER BY in the OVER clause.</p>
+                <table>
+                    <tr><th>Boundary</th><th>Meaning</th><th>Works With</th></tr>
+                    <tr><td>CURRENT ROW</td><td>The current row being processed</td><td>ROWS and RANGE</td></tr>
+                    <tr><td>UNBOUNDED PRECEDING</td><td>Start of the partition (first row)</td><td>ROWS and RANGE</td></tr>
+                    <tr><td>UNBOUNDED FOLLOWING</td><td>End of the partition (last row)</td><td>ROWS and RANGE</td></tr>
+                    <tr><td>n PRECEDING</td><td>n rows before the current row</td><td>ROWS only</td></tr>
+                    <tr><td>n FOLLOWING</td><td>n rows after the current row</td><td>ROWS only</td></tr>
+                </table>
+                <pre>-- Running total: start of partition to current row
+SUM(SalesLastYear) OVER(
+    PARTITION BY TerritoryGroup
+    ORDER BY SalesLastYear
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+
+-- Moving average of last 3 rows including current
+AVG(SalesLastYear) OVER(
+    ORDER BY SalesLastYear
+    ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+
+-- Total of entire partition (no frame needed)
+SUM(SalesLastYear) OVER(PARTITION BY TerritoryGroup)</pre>
+                <div class="highlight"><p><strong>ROWS vs RANGE:</strong> ROWS treats each physical row individually — precise and predictable. RANGE treats rows with the same ORDER BY value as a group. For running totals, always prefer ROWS — it's more deterministic and generally faster. RANGE is useful when logical grouping of tied values matters.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="offset">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Offset / Analytic Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Offset functions access values from other rows relative to the current row — eliminating the need for self-joins. All four require ORDER BY in the OVER clause to be meaningful.</p>
+                <div class="grid">
+                    <div class="card"><h3>LAG(col, n, default)</h3><p>Returns value from n rows BEFORE the current row. If no row exists at the offset, returns the default value (or NULL if not specified).</p></div>
+                    <div class="card"><h3>LEAD(col, n, default)</h3><p>Returns value from n rows AFTER the current row. If no row exists at the offset, returns the default value (or NULL if not specified).</p></div>
+                    <div class="card"><h3>FIRST_VALUE(col)</h3><p>Returns the value of the specified column for the FIRST row in the current window frame. Useful for comparing each row to the group's starting value.</p></div>
+                    <div class="card"><h3>LAST_VALUE(col)</h3><p>Returns the value of the specified column for the LAST row in the current window frame. Requires careful framing — default frame stops at current row, so UNBOUNDED FOLLOWING is usually needed.</p></div>
+                </div>
+                <pre>-- Compare each salesperson's sales to the previous year
+SELECT BusinessEntityID AS SalesID,
+    FirstName + ' ' + LastName AS FullName,
+    SalesLastYear,
+    LAG(SalesLastYear, 1, 0)  OVER(ORDER BY SalesLastYear) AS PrevSales,
+    LEAD(SalesLastYear, 1, 0) OVER(ORDER BY SalesLastYear) AS NextSales,
+    FIRST_VALUE(SalesLastYear) OVER(ORDER BY SalesLastYear) AS LowestSale,
+    LAST_VALUE(SalesLastYear)  OVER(
+        ORDER BY SalesLastYear
+        ROWS BETWEEN UNBOUNDED PRECEDING
+             AND UNBOUNDED FOLLOWING) AS HighestSale
+FROM Sales.vSalesPerson;</pre>
+                <div class="highlight"><p>LAST_VALUE gotcha: the default frame is ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW — so LAST_VALUE with the default frame just returns the current row's value. Always specify ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING when you want the true last value in the partition.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="distribution">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Distribution Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Distribution functions perform statistical analysis — showing where a row stands relative to the entire distribution. All require ORDER BY in the OVER clause.</p>
+                <div class="grid">
+                    <div class="card"><h3>PERCENT_RANK()</h3><p>Percentile rank as a value between 0 and 1. Formula: (rank - 1) / (total rows - 1). First row = 0.0, last row = 1.0. Useful to see where a row "scores" relative to the group.</p></div>
+                    <div class="card"><h3>CUME_DIST()</h3><p>Cumulative distribution — what fraction of rows have values ≤ the current row. Between 0 and 1, last row always = 1.0. Shows how far along the distribution the current value falls.</p></div>
+                    <div class="card"><h3>PERCENTILE_DISC(n)</h3><p>Inverse distribution using a DISCRETE model — returns the first actual value in the dataset whose cumulative distribution is ≥ n. Returns a real data value.</p></div>
+                    <div class="card"><h3>PERCENTILE_CONT(n)</h3><p>Inverse distribution using a CONTINUOUS model — interpolates between values. Can return a value that doesn't exist in the actual data. More statistically precise.</p></div>
+                </div>
+                <pre>-- Where does each salesperson rank as a percentage?
+SELECT BusinessEntityID AS SalesID,
+    FirstName + ' ' + LastName AS FullName,
+    SalesLastYear,
+    PERCENT_RANK() OVER(ORDER BY SalesLastYear) AS PctRank,
+    CUME_DIST()    OVER(ORDER BY SalesLastYear) AS CumeDist
+FROM Sales.vSalesPerson;
+
+-- What is the median (50th percentile) sales value?
+-- PERCENTILE_DISC: returns an actual value from the data
+-- PERCENTILE_CONT: may return an interpolated value
+SELECT DISTINCT
+    PERCENTILE_DISC(0.5) WITHIN GROUP (ORDER BY SalesLastYear)
+        OVER() AS MedianDisc,
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY SalesLastYear)
+        OVER() AS MedianCont
+FROM Sales.vSalesPerson;</pre>
+                <div class="highlight"><p>Key distinction: PERCENTILE_DISC returns a value that actually exists in your data (discrete). PERCENTILE_CONT may return an interpolated value between two actual data points (continuous). Use DISC when you need a real data point; use CONT for statistically precise percentile estimation.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="syntax">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Complete Syntax Reference</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>-- Full windowing function syntax
+&lt;Window Function&gt; OVER (
+    [ PARTITION BY &lt;partition_column&gt; ]   -- optional
+    [ ORDER BY &lt;order_column&gt; [ASC|DESC] ] -- required for most
+    [ ROWS|RANGE BETWEEN &lt;start&gt; AND &lt;end&gt; ] -- optional
+)
+
+-- Start/end options:
+-- UNBOUNDED PRECEDING  → start of partition
+-- n PRECEDING          → n rows before current (ROWS only)
+-- CURRENT ROW          → current row
+-- n FOLLOWING          → n rows after current (ROWS only)
+-- UNBOUNDED FOLLOWING  → end of partition
+
+-- Complete example combining multiple window functions
+SELECT
+    BusinessEntityID AS SalesID,
+    FirstName + ' ' + LastName AS FullName,
+    TerritoryGroup,
+    SalesLastYear,
+    -- Ranking
+    ROW_NUMBER()  OVER(PARTITION BY TerritoryGroup ORDER BY SalesLastYear DESC) AS RowNum,
+    RANK()        OVER(PARTITION BY TerritoryGroup ORDER BY SalesLastYear DESC) AS Rnk,
+    -- Aggregates
+    SUM(SalesLastYear) OVER(PARTITION BY TerritoryGroup
+                            ORDER BY SalesLastYear
+                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS RunningTotal,
+    AVG(SalesLastYear) OVER(PARTITION BY TerritoryGroup) AS AvgInTerritory,
+    -- Offset
+    LAG(SalesLastYear, 1, 0) OVER(PARTITION BY TerritoryGroup ORDER BY SalesLastYear) AS PrevSales,
+    -- Distribution
+    PERCENT_RANK() OVER(ORDER BY SalesLastYear) AS PctRank
+FROM Sales.vSalesPerson
+ORDER BY TerritoryGroup, SalesLastYear DESC;</pre>
+                <div class="highlight"><p>Multiple window functions can appear in a single SELECT — each with its own independent OVER clause, partition, and ordering. The query processes all of them in a single pass over the data, making window functions far more efficient than equivalent self-join or subquery approaches.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

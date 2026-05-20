@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Module 13: Window Functions</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #15803d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #16a34a; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #15803d; color: white; border-color: #15803d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #16a34a; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a0a; border-left: 3px solid #15803d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #16a34a; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #16a34a; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #16a34a; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #15803d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #16a34a; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Module 13</div>
+        <h1>Window Ranking, Offset & Aggregate Functions</h1>
+        <p class="subtitle">OVER, PARTITION BY, framing, ranking, offset, and aggregate window functions</p>
+    </header>
+    <nav>
+        <a href="#windowing">SQL Windowing</a>
+        <a href="#over">OVER Clause</a>
+        <a href="#partition">Partitioning</a>
+        <a href="#framing">Framing</a>
+        <a href="#ranking">Ranking Functions</a>
+        <a href="#aggregate">Aggregate Functions</a>
+        <a href="#offset">Offset Functions</a>
+        <a href="#distribution">Distribution Functions</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="windowing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>SQL Windowing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Window functions extend T-SQL's set-based approach by allowing you to specify an order as part of a calculation — without affecting the order of input or final output. They allow <strong>partitioning</strong> and <strong>framing</strong> of rows to support powerful analytical calculations.</p>
+                <p>Window functions can simplify queries that need:</p>
+                <ul>
+                    <li>Running totals</li>
+                    <li>Moving averages</li>
+                    <li>Gaps in sequences</li>
+                    <li>Rank within a group</li>
+                    <li>Comparisons between adjacent rows</li>
+                </ul>
+                <div class="highlight"><p>Key insight: window functions don't collapse rows like GROUP BY does. Every source row is preserved in the output — the window function adds a calculated column alongside existing data. This is the fundamental difference between window functions and grouped aggregates.</p></div>
+                <pre>-- Running total of quantity by category and year
+SELECT Category, Qty, Orderyear,
+    SUM(Qty) OVER (
+        PARTITION BY category
+        ORDER BY orderyear
+        ROWS BETWEEN UNBOUNDED PRECEDING
+             AND CURRENT ROW) AS RunningQty
+FROM Sales.CategoryQtyYear;</pre>
+            </div>
+        </div>
+
+        <div class="section" id="over">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The OVER Clause</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>OVER defines a <strong>window</strong> — the set of rows the window function operates on. It has three optional components:</p>
+                <pre>OVER (
+    [ PARTITION BY &lt;partition_column&gt; ]
+    [ ORDER BY &lt;order_column&gt; ]
+    [ ROWS BETWEEN &lt;start&gt; AND &lt;end&gt; ]
+)</pre>
+                <ul>
+                    <li><strong>OVER() with nothing:</strong> creates a single window of ALL rows — unrestricted</li>
+                    <li><strong>OVER(PARTITION BY col):</strong> restricts the window to rows sharing the same value in col</li>
+                    <li><strong>OVER(ORDER BY col):</strong> provides ordering context within the window</li>
+                    <li><strong>Multiple OVER clauses:</strong> a single query can contain multiple OVER clauses, each with different partitioning and ordering</li>
+                </ul>
+                <div class="highlight"><p>OVER does NOT sort the final output. To sort the result set you still need a separate ORDER BY clause at the end of the query. OVER's ORDER BY only provides context for the window function calculation.</p></div>
+                <pre>-- Two different windows in one query
+SELECT productid, unitprice,
+    RANK() OVER(ORDER BY unitprice DESC) AS pricerank,
+    RANK() OVER(PARTITION BY categoryid
+                ORDER BY unitprice DESC) AS categoryrank
+FROM Production.Products;</pre>
+            </div>
+        </div>
+
+        <div class="section" id="partition">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Partitioning Windows</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Partitioning limits a window to rows with the same value in the partitioning column — similar to GROUP BY but without collapsing rows.</p>
+                <pre>-- Total quantity per customer, alongside each row's detail
+SELECT custid, ordermonth, qty,
+    SUM(qty) OVER(PARTITION BY custid) AS totalbycust
+FROM Sales.CustOrders;
+
+-- Result: every row preserved, total shown for each customer's group
+-- custid  ordermonth   qty  totalbycust
+-- 1       2007-08      38   174
+-- 1       2007-10      41   174    ← same total for custid=1
+-- 2       2006-09      6    63
+-- 2       2007-08      18   63     ← same total for custid=2</pre>
+                <div class="highlight"><p>Without PARTITION BY, OVER() operates on ALL rows as a single window. With PARTITION BY, it operates independently within each partition — like running the aggregate separately for each group, but keeping all rows visible.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="framing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Ordering & Framing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Window framing defines start and end boundaries within a partition. It requires ORDER BY in the OVER clause to be meaningful — without ordering, "first row" and "last row" have no meaning.</p>
+                <table>
+                    <tr><th>Boundary</th><th>Meaning</th></tr>
+                    <tr><td>UNBOUNDED PRECEDING</td><td>Start of the partition (first row)</td></tr>
+                    <tr><td>CURRENT ROW</td><td>The current row being processed</td></tr>
+                    <tr><td>UNBOUNDED FOLLOWING</td><td>End of the partition (last row)</td></tr>
+                    <tr><td>N PRECEDING</td><td>N rows before the current row</td></tr>
+                    <tr><td>N FOLLOWING</td><td>N rows after the current row</td></tr>
+                </table>
+                <pre>-- Running total (cumulative sum): start to current row
+SUM(qty) OVER(
+    PARTITION BY custid
+    ORDER BY ordermonth
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+
+-- Moving average of last 3 rows including current
+AVG(qty) OVER(
+    ORDER BY orderdate
+    ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+
+-- Total of entire partition (no frame — same as no ORDER BY)
+SUM(qty) OVER(PARTITION BY custid)</pre>
+                <div class="highlight"><p>ROWS vs RANGE: ROWS treats each physical row individually. RANGE treats rows with the same ORDER BY value as a group. Use ROWS for running totals — it's more predictable and generally faster.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ranking">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Window Ranking Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Ranking functions assign a rank to each row within a window. They <strong>require an ORDER BY in the OVER clause</strong>. Partitioning is optional.</p>
+                <table>
+                    <tr><th>Function</th><th>Ties?</th><th>Gaps?</th><th>Description</th></tr>
+                    <tr><td>RANK()</td><td>Yes</td><td>Yes</td><td>Ranks rows — ties get same rank, next rank skips. 1,1,3,4...</td></tr>
+                    <tr><td>DENSE_RANK()</td><td>Yes</td><td>No</td><td>Ranks rows — ties get same rank, no gaps. 1,1,2,3...</td></tr>
+                    <tr><td>ROW_NUMBER()</td><td>No</td><td>No</td><td>Unique sequential number regardless of ties. 1,2,3,4...</td></tr>
+                    <tr><td>NTILE(n)</td><td>N/A</td><td>N/A</td><td>Distributes rows into n equal groups, returns group number.</td></tr>
+                </table>
+                <pre>-- Rank products by price, highest first
+SELECT productid, productname, unitprice,
+    RANK()       OVER(ORDER BY unitprice DESC) AS rnk,
+    DENSE_RANK() OVER(ORDER BY unitprice DESC) AS dense_rnk,
+    ROW_NUMBER() OVER(ORDER BY unitprice DESC) AS rownum
+FROM Production.Products
+ORDER BY unitprice DESC;
+
+-- Rank within category partition
+SELECT productid, categoryid, unitprice,
+    RANK() OVER(PARTITION BY categoryid
+                ORDER BY unitprice DESC) AS rank_in_cat
+FROM Production.Products;</pre>
+                <div class="highlight"><p>Use ROW_NUMBER() when you need guaranteed unique numbers (e.g. paging). Use RANK() or DENSE_RANK() when ties matter and you want equal ranks for equal values. Use NTILE(4) to divide data into quartiles for percentile analysis.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="aggregate">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Window Aggregate Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Window aggregate functions (SUM, MIN, MAX, AVG, COUNT) work like grouped aggregates but operate over a window defined by OVER — preserving all source rows in the output.</p>
+                <pre>-- Running total by customer and month
+SELECT custid, ordermonth, qty,
+    SUM(qty) OVER(
+        PARTITION BY custid
+        ORDER BY ordermonth
+        ROWS BETWEEN UNBOUNDED PRECEDING
+             AND CURRENT ROW) AS running_total,
+    AVG(qty) OVER(
+        PARTITION BY custid) AS avg_per_cust,
+    MAX(qty) OVER(
+        PARTITION BY custid) AS max_per_cust
+FROM Sales.CustOrders
+ORDER BY custid, ordermonth;</pre>
+                <div class="highlight"><p>The same aggregate function can appear multiple times in a SELECT with different OVER clauses — one for a running total, one for a partition total, one for the overall total — all in the same query without self-joins or subqueries.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="offset">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Window Offset Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Offset functions allow comparisons between rows in a set without needing a self-join. They operate relative to the current row's position in the window.</p>
+                <table>
+                    <tr><th>Function</th><th>Description</th></tr>
+                    <tr><td>LAG(col, n, default)</td><td>Returns value from n rows BEFORE current row. Returns default (or NULL) if no row exists.</td></tr>
+                    <tr><td>LEAD(col, n, default)</td><td>Returns value from n rows AFTER current row. Returns default (or NULL) if no row exists.</td></tr>
+                    <tr><td>FIRST_VALUE(col)</td><td>Returns first value in the current window frame. Requires ORDER BY to be meaningful.</td></tr>
+                    <tr><td>LAST_VALUE(col)</td><td>Returns last value in the current window frame. Requires ORDER BY and framing to be meaningful.</td></tr>
+                </table>
+                <pre>-- Compare current year sales to next year's sales per employee
+SELECT employee, orderyear,
+    totalsales AS currsales,
+    LEAD(totalsales, 1, 0) OVER (
+        PARTITION BY employee
+        ORDER BY orderyear) AS nextsales,
+    totalsales - LAG(totalsales, 1, 0) OVER (
+        PARTITION BY employee
+        ORDER BY orderyear) AS change_from_prev
+FROM Sales.OrdersByEmployeeYear
+ORDER BY employee, orderyear;
+
+-- Result:
+-- employee  orderyear  currsales  nextsales  change_from_prev
+-- 1         2006       38789.00   97533.58   38789.00
+-- 1         2007       97533.58   65821.13   58744.58
+-- 1         2008       65821.13   0.00       -31712.45</pre>
+                <div class="highlight"><p>LAG and LEAD eliminate the need for self-joins when comparing consecutive rows. The third parameter is the default value returned when no row exists at the offset position (e.g., the last row has no LEAD, the first row has no LAG). Without a default, NULL is returned.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="distribution">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Window Distribution Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Distribution functions perform statistical analysis on data. They require a window ORDER BY clause.</p>
+                <div class="grid">
+                    <div class="card">
+                        <h3>PERCENT_RANK()</h3>
+                        <p>Returns the relative rank of a row as a percentage between 0 and 1. Formula: (rank - 1) / (total rows - 1). First row = 0.0, last row = 1.0.</p>
+                    </div>
+                    <div class="card">
+                        <h3>CUME_DIST()</h3>
+                        <p>Returns the cumulative distribution — the fraction of rows with values less than or equal to the current row. Always between 0 and 1, last row = 1.0.</p>
+                    </div>
+                    <div class="card">
+                        <h3>PERCENTILE_CONT(n)</h3>
+                        <p>Calculates a percentile by interpolating between values. Returns a continuous value that may not exist in the data.</p>
+                    </div>
+                    <div class="card">
+                        <h3>PERCENTILE_DISC(n)</h3>
+                        <p>Calculates a percentile by returning the first value in the ordered set whose cumulative distribution is >= n. Returns an actual value from the data.</p>
+                    </div>
+                </div>
+                <pre>-- Rank distribution: what percentile is each product's price?
+SELECT productid, unitprice,
+    PERCENT_RANK() OVER(ORDER BY unitprice) AS pct_rank,
+    CUME_DIST()    OVER(ORDER BY unitprice) AS cume_dist
+FROM Production.Products
+ORDER BY unitprice;</pre>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

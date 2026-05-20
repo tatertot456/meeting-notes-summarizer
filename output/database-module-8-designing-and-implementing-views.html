@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Module 8: Designing and Implementing Views</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b45309; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #d97706; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b45309; color: white; border-color: #b45309; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #d97706; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2318; border-left: 3px solid #b45309; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #d97706; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #d97706; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #d97706; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b45309; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #d97706; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Module 8</div>
+        <h1>Designing and Implementing Views</h1>
+        <p class="subtitle">Standard views, indexed views, partitioned views, and performance considerations</p>
+    </header>
+    <nav>
+        <a href="#what">What Is a View?</a>
+        <a href="#types">Types of Views</a>
+        <a href="#system">System Views</a>
+        <a href="#creating">Creating Views</a>
+        <a href="#managing">Managing Views</a>
+        <a href="#updateable">Updateable Views</a>
+        <a href="#performance">Performance</a>
+        <a href="#indexed">Indexed Views</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="what">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is a View?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A view is a <strong>stored query expression</strong>. It behaves like a table — it has a name, can be referenced by other queries, and returns rows and columns — but the data itself is stored in the underlying base tables, not in the view.</p>
+                <p>Views are used to:</p>
+                <ul>
+                    <li>Simplify complex relationships between tables into a clean, queryable surface</li>
+                    <li>Prevent unauthorized access to data — users see only the columns and rows they need</li>
+                    <li>Create a stable interface between underlying data structures and external applications</li>
+                    <li>Simplify reporting by presenting data in the correct format</li>
+                    <li>Filter records by restricting columns or rows returned</li>
+                </ul>
+                <div class="highlight"><p>Views are the primary mechanism for hiding complexity and enforcing security boundaries at the database layer. If underlying table structures change, views can be updated to maintain the same interface for consumers — without requiring changes to application code.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="types">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Types of Views</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Standard Views</h3><p>User-defined views that store only the query definition. Data is always retrieved live from base tables when the view is queried. No physical storage of data.</p></div>
+                    <div class="card"><h3>Indexed Views</h3><p>Materialized views — the result set is computed and stored physically on disk. Faster for repeated complex queries but requires maintenance overhead on INSERT/UPDATE/DELETE.</p></div>
+                    <div class="card"><h3>Partitioned Views</h3><p>A view onto a horizontally partitioned table — a large table split across multiple tables with identical structure. Can be local or distributed across servers.</p></div>
+                    <div class="card"><h3>System Catalog Views</h3><p>Views onto internal SQL Server metadata. sys.views, sys.tables, sys.columns, etc. Organized by category: object views, schema views, linked server views.</p></div>
+                    <div class="card"><h3>Dynamic Management Views (DMVs)</h3><p>Return internal SQL Server state information. Used to monitor health, diagnose problems, and tune performance. DMFs (Dynamic Management Functions) take parameters.</p></div>
+                    <div class="card"><h3>Information Schema Views</h3><p>ISO-standard views for querying metadata. INFORMATION_SCHEMA.TABLES, INFORMATION_SCHEMA.COLUMNS, etc. More portable across database platforms than sys.* views.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="system">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>System Views & DMVs</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>SQL Server provides several categories of system views for querying metadata and monitoring the server:</p>
+                <pre>-- List all views in a database
+SELECT name, object_id, schema_id
+FROM sys.views;
+
+-- Get the definition of a view
+SELECT OBJECT_DEFINITION(OBJECT_ID('Sales.vOrderDetails'));
+
+-- List objects that depend on a view
+SELECT referencing_entity_name
+FROM sys.sql_expression_dependencies
+WHERE referenced_entity_name = 'vOrderDetails';
+
+-- DMV: check active connections
+SELECT session_id, login_name, status
+FROM sys.dm_exec_sessions;
+
+-- Information schema (ISO standard)
+SELECT TABLE_NAME, TABLE_TYPE
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = 'Sales';</pre>
+                <div class="highlight"><p>Compatibility views (backward compatible with SQL Server 2000 system tables) should NOT be used for new development. Use sys.* catalog views or INFORMATION_SCHEMA views instead. DMVs and DMFs together are called DMOs (Dynamic Management Objects) — they are invaluable for performance monitoring and troubleshooting.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="creating">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Creating Views</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Views are created with CREATE VIEW. Several optional attributes control behavior:</p>
+                <pre>-- Basic view
+CREATE VIEW Sales.vCustomerOrders AS
+SELECT c.custid, c.contactname, o.orderid, o.orderdate
+FROM Sales.Customers AS c
+JOIN Sales.Orders AS o ON c.custid = o.custid;
+
+-- WITH ENCRYPTION: obfuscates the view definition
+CREATE VIEW Sales.vSensitiveData
+WITH ENCRYPTION AS
+SELECT custid, creditlimit
+FROM Sales.Customers;
+
+-- WITH SCHEMABINDING: prevents changes to underlying tables
+-- that would break the view (required for indexed views)
+CREATE VIEW Sales.vOrderTotals
+WITH SCHEMABINDING AS
+SELECT o.custid, SUM(od.qty * od.unitprice) AS total
+FROM Sales.Orders AS o
+JOIN Sales.OrderDetails AS od ON o.orderid = od.orderid
+GROUP BY o.custid;
+
+-- WITH CHECK OPTION: prevents inserting rows that don't
+-- match the view's WHERE clause
+CREATE VIEW Sales.vActiveCustomers
+WITH CHECK OPTION AS
+SELECT custid, contactname, isactive
+FROM Sales.Customers
+WHERE isactive = 1;</pre>
+                <table>
+                    <tr><th>Option</th><th>Effect</th></tr>
+                    <tr><td>WITH ENCRYPTION</td><td>Obfuscates view definition in system tables — limited protection</td></tr>
+                    <tr><td>WITH SCHEMABINDING</td><td>Binds view to base table schema — prevents breaking changes. Required for indexed views.</td></tr>
+                    <tr><td>WITH VIEW_METADATA</td><td>Returns view metadata instead of base table metadata to client tools</td></tr>
+                    <tr><td>WITH CHECK OPTION</td><td>Ensures INSERTs and UPDATEs through the view conform to its WHERE clause</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="managing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Managing Views: Alter, Drop & Ownership</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>-- Alter an existing view (preserves permissions)
+ALTER VIEW Sales.vCustomerOrders
+WITH ENCRYPTION AS
+SELECT c.custid, c.contactname, o.orderid, o.orderdate, o.freight
+FROM Sales.Customers AS c
+JOIN Sales.Orders AS o ON c.custid = o.custid;
+
+-- Drop a view (also drops permissions)
+DROP VIEW Sales.vCustomerOrders;
+
+-- Drop multiple views at once
+DROP VIEW Sales.vView1, Sales.vView2, Sales.vView3;</pre>
+                <div class="highlight"><p>ALTER VIEW preserves existing permissions on the view. DROP VIEW removes the view AND all associated permissions — use ALTER VIEW when you want to change the definition without affecting security settings.</p></div>
+                <p><strong>Ownership chains matter for security:</strong></p>
+                <ul>
+                    <li>If view and underlying tables have the <strong>same owner</strong>: a user granted access to the view can query it even without direct table permissions — ownership chain is intact</li>
+                    <li>If view and tables have <strong>different owners</strong>: the ownership chain is broken — users need explicit permissions on the underlying tables too</li>
+                </ul>
+                <p>This is why views are a powerful security tool: grant users access to the view only, and the underlying tables remain protected.</p>
+            </div>
+        </div>
+
+        <div class="section" id="updateable">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Updateable Views</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Data can be modified (INSERT, UPDATE, DELETE) through a view — but only under strict conditions:</p>
+                <ul>
+                    <li>The view must include columns from <strong>only one base table</strong></li>
+                    <li>Columns must <strong>directly reference</strong> base table columns — no expressions or computations</li>
+                    <li><strong>No aggregations</strong> — GROUP BY, HAVING, DISTINCT, or aggregate functions disqualify a view</li>
+                    <li>The modifications must comply with all base table constraints (NULL/NOT NULL, PKs, FKs)</li>
+                </ul>
+                <pre>-- Updateable view: columns from one table, no computations
+CREATE VIEW HR.vEmployeeContact AS
+SELECT empid, lastname, firstname, phone
+FROM HR.Employees;
+-- Users can INSERT/UPDATE/DELETE through this view
+
+-- WITH CHECK OPTION enforces view filter on modifications
+CREATE VIEW HR.vActiveEmployees
+WITH CHECK OPTION AS
+SELECT empid, lastname, firstname, isactive
+FROM HR.Employees
+WHERE isactive = 1;
+-- Attempting to INSERT isactive=0 will fail</pre>
+                <div class="highlight"><p>WITH CHECK OPTION is critical for security — without it, a user could INSERT a row through the view that doesn't match the view's WHERE clause. After the insert, the row would be invisible through the view but would exist in the base table. WITH CHECK OPTION prevents this data leakage.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="performance">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Performance Considerations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Views themselves don't inherently hurt or help performance — how you design and use them determines their impact.</p>
+                <div class="grid">
+                    <div class="card"><h3>Dynamic Resolution</h3><p>SQL Server merges the view definition into the outer query and creates a single optimized query plan. It only retrieves data actually needed — if you query 2 of 10 columns, SQL Server fetches only those 2.</p></div>
+                    <div class="card"><h3>Avoid SELECT *</h3><p>Never use SELECT * in view definitions. When base tables change, SELECT * doesn't automatically update — and it retrieves columns that may not be needed.</p></div>
+                    <div class="card"><h3>Nested Views</h3><p>A view calling another view calling another view creates ownership chain problems, poorly performing queries, and debugging nightmares. Avoid deep nesting.</p></div>
+                    <div class="card"><h3>Partitioned Views</h3><p>Views onto horizontally partitioned tables. All member tables have identical structure. Benefits: faster querying and indexing by limiting the data range accessed.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="indexed">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Indexed Views</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An indexed view is <strong>materialized</strong> — the result set is computed once and stored physically on disk, like a table. This dramatically speeds up reads for complex aggregations at the cost of storage and write overhead.</p>
+                <p><strong>Requirements for indexed views:</strong></p>
+                <ul>
+                    <li>Must use WITH SCHEMABINDING</li>
+                    <li>Cannot use SELECT *, subqueries, outer joins, or non-deterministic functions</li>
+                    <li>Must have a unique clustered index created first</li>
+                    <li>All referenced tables must use two-part naming (schema.table)</li>
+                </ul>
+                <pre>-- Step 1: Create view with SCHEMABINDING
+CREATE VIEW Sales.vOrderTotals
+WITH SCHEMABINDING AS
+SELECT o.custid,
+       COUNT_BIG(*) AS order_count,
+       SUM(od.qty * od.unitprice) AS total
+FROM Sales.Orders AS o
+JOIN Sales.OrderDetails AS od ON o.orderid = od.orderid
+GROUP BY o.custid;
+
+-- Step 2: Create unique clustered index to materialize it
+CREATE UNIQUE CLUSTERED INDEX IX_vOrderTotals
+ON Sales.vOrderTotals(custid);</pre>
+                <div class="highlight"><p>Indexed views are used two ways: directly (query the view by name and SQL Server uses the stored data) or indirectly (query the base tables and SQL Server's optimizer automatically uses the indexed view when beneficial). The optimizer can use indexed views even when you don't reference them explicitly.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

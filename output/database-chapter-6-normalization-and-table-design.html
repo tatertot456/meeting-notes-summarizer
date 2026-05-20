@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Chapter 6: Normalization and Table Design</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1e0a3c, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #6d28d9; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #7c3aed; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #6d28d9; color: white; border-color: #6d28d9; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #7c3aed; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e1b4b; border-left: 3px solid #6d28d9; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #7c3aed; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #7c3aed; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #7c3aed; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #6d28d9; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #7c3aed; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Chapter 6</div>
+        <h1>Normalization and Table Design</h1>
+        <p class="subtitle">Normal forms, constraints, indexes, data integrity, and denormalization</p>
+    </header>
+    <nav>
+        <a href="#tables">Tables & Keys</a>
+        <a href="#integrity">Data Integrity</a>
+        <a href="#constraints">Constraints</a>
+        <a href="#normalization">Normalization</a>
+        <a href="#normal-forms">Normal Forms</a>
+        <a href="#denorm">Denormalization</a>
+        <a href="#indexes">Indexes</a>
+        <a href="#checklist">Design Checklist</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="tables">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Tables, Keys & Schemas</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Relational databases store data in <strong>tables (relations)</strong> — collections of named columns containing zero or more rows. Each row represents a single instance of an entity. Rows have no guaranteed order.</p>
+                <div class="grid">
+                    <div class="card"><h3>Primary Key</h3><p>Uniquely identifies each row. Must be unique, cannot be NULL, should not change. Can be composite (multiple columns). Natural keys use real data; surrogate keys are system-generated numbers.</p></div>
+                    <div class="card"><h3>Foreign Key</h3><p>Holds the primary key from another table — creates relationships. Self-references permitted. Referenced rows cannot be deleted without cascading options. Multiple FKs allowed per table.</p></div>
+                    <div class="card"><h3>Surrogate Keys</h3><p>IDENTITY auto-increments. SCOPE_IDENTITY() returns last value in current session. @@IDENTITY returns last value across all sessions. SEQUENCE creates a shared counter across multiple tables.</p></div>
+                    <div class="card"><h3>Schemas</h3><p>Containers for database objects (tables, views, procedures, functions). Security boundaries — permissions granted at schema level apply to all objects within. Always reference as Schema.Object.</p></div>
+                </div>
+                <div class="highlight"><p>GUID (uniqueidentifier) is highly selective but costly on updates/deletes. Never store GUIDs as strings — use the uniqueidentifier type. Generate new values with NEWID(). IDENTITY cannot be used with uniqueidentifier.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="integrity">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Integrity</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Data integrity is enforced across multiple application layers — UI tier, middle tier, and data tier. All three layers may enforce rules, requiring synchronization.</p>
+                <div class="grid">
+                    <div class="card"><h3>Domain Integrity</h3><p>Defines the allowed values in columns. Enforced by data types, nullability, CHECK constraints, and DEFAULT constraints.</p></div>
+                    <div class="card"><h3>Entity Integrity</h3><p>Primary key uniquely identifies each row. Enforced by PRIMARY KEY constraint — values must be unique and NOT NULL.</p></div>
+                    <div class="card"><h3>Referential Integrity</h3><p>Defines relationships between tables. Enforced by FOREIGN KEY constraints. Cascading options control what happens on UPDATE or DELETE.</p></div>
+                    <div class="card"><h3>Triggers</h3><p>Code executed automatically when data is modified. Used for complex business rules that can't be expressed as simple constraints.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Cascading referential integrity options:</strong></p>
+                <table>
+                    <tr><th>Option</th><th>Behavior on Parent Delete/Update</th></tr>
+                    <tr><td>NO ACTION (default)</td><td>Return error and rollback — child must be removed first</td></tr>
+                    <tr><td>CASCADE</td><td>Automatically delete/update matching child rows</td></tr>
+                    <tr><td>SET NULL</td><td>Set child FK columns to NULL</td></tr>
+                    <tr><td>SET DEFAULT</td><td>Set child FK columns to their default values</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="constraints">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Constraints</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>-- PRIMARY KEY
+CREATE TABLE Orders (
+    OrderID   INT IDENTITY(1,1) NOT NULL,
+    CustomerID INT NOT NULL,
+    OrderDate  DATE NOT NULL,
+    CONSTRAINT PK_Orders PRIMARY KEY (OrderID)
+);
+
+-- FOREIGN KEY with CASCADE
+ALTER TABLE Orders
+ADD CONSTRAINT FK_Orders_Customers
+    FOREIGN KEY (CustomerID)
+    REFERENCES Customers(CustomerID)
+    ON DELETE CASCADE;
+
+-- UNIQUE constraint (allows one NULL)
+ALTER TABLE Employees
+ADD CONSTRAINT UQ_Email UNIQUE (Email);
+
+-- DEFAULT constraint
+ALTER TABLE Orders
+ADD CONSTRAINT DF_OrderDate DEFAULT GETDATE() FOR OrderDate;
+
+-- CHECK constraint (only rejects FALSE — NULL passes!)
+ALTER TABLE Products
+ADD CONSTRAINT CK_Price CHECK (Price > 0);
+
+-- Composite CHECK (table-level, references multiple columns)
+ALTER TABLE Scheduling
+ADD CONSTRAINT CK_Dates CHECK (EndDate >= StartDate);</pre>
+                <div class="highlight"><p>CHECK constraints only reject FALSE. NULL evaluates to UNKNOWN — not FALSE — so NULL passes a CHECK constraint. Always consider nullability alongside CHECK constraints. Give constraints meaningful names — they must be named to be suspended, altered, or dropped later.</p></div>
+                <p>Constraints can be suspended to improve bulk load performance or to add constraints to tables with existing valid data. UNIQUE constraints allow one NULL value (unlike PRIMARY KEY which allows none).</p>
+            </div>
+        </div>
+
+        <div class="section" id="normalization">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Normalization — Why & How</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Normalization evaluates and corrects table structures to <strong>minimize data redundancy</strong> and prevent data anomalies. Invented by Edgar F. Codd.</p>
+                <p>A well-normalized table:</p>
+                <ul>
+                    <li>Represents a single subject</li>
+                    <li>Has only one value per row/column intersection (atomic values)</li>
+                    <li>Has no data stored unnecessarily in more than one table</li>
+                    <li>Has all non-key attributes dependent on the primary key</li>
+                    <li>Has no insertion, update, or deletion anomalies</li>
+                </ul>
+                <div class="highlight"><p>Normalized data is smaller in size, faster to insert/update, and more flexible to modify. The normalization process works one relation at a time, identifying dependencies and progressively decomposing tables until 3NF is achieved. Higher forms (BCNF, 4NF) are rarely needed in business environments.</p></div>
+                <p><strong>Key dependency concepts:</strong></p>
+                <ul>
+                    <li><strong>Functional dependence:</strong> A determines B if each value of A determines exactly one value of B</li>
+                    <li><strong>Partial dependency:</strong> A non-key attribute depends on only PART of a composite primary key — violates 2NF</li>
+                    <li><strong>Transitive dependency:</strong> A non-key attribute depends on another non-key attribute — violates 3NF</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="normal-forms">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Normal Forms: 1NF through 4NF</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Normal Form</th><th>Requirement</th><th>Fixes</th></tr>
+                    <tr><td>1NF</td><td>Primary key defined, no repeating groups, atomic values only</td><td>Repeating groups, multi-valued cells</td></tr>
+                    <tr><td>2NF</td><td>In 1NF + no partial dependencies</td><td>Attributes that depend on only part of a composite key</td></tr>
+                    <tr><td>3NF</td><td>In 2NF + no transitive dependencies</td><td>Non-key attributes that depend on other non-key attributes</td></tr>
+                    <tr><td>BCNF</td><td>Every determinant is a candidate key</td><td>Special case when table has multiple overlapping candidate keys</td></tr>
+                    <tr><td>4NF</td><td>In 3NF + no independent multivalued dependencies</td><td>Rows with multiple independent multi-valued facts about an entity</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>How to convert:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>1NF → 2NF</h3><p>Only needed when PK is composite. Create new tables for attributes that depend on only PART of the PK. Link with foreign key. If PK is single-column, table is already in 2NF.</p></div>
+                    <div class="card"><h3>2NF → 3NF</h3><p>Find non-key attributes that determine other non-key attributes. Move them to a new table. The determining attribute becomes the PK of the new table, linked back by foreign key.</p></div>
+                    <div class="card"><h3>BCNF</h3><p>A special case of 3NF — violated only when the table has more than one candidate key and a non-candidate-key attribute determines part of a candidate key.</p></div>
+                    <div class="card"><h3>4NF</h3><p>No row may contain two or more independent multivalued facts. Split into separate tables — one for each independent multivalued relationship.</p></div>
+                </div>
+                <div class="highlight"><p>If a 1NF table has a SINGLE-column primary key, it's automatically in 2NF (there can be no partial dependencies on a single-column key). Focus 2NF analysis on tables with composite keys.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="denorm">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Denormalization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Denormalization intentionally introduces redundancy to improve read performance. It produces a lower normal form — a deliberate trade-off between data redundancy and query speed.</p>
+                <p><strong>Why normalize first, then denormalize?</strong> Normalization creates the correct logical design. Denormalization is then applied surgically where performance measurement proves it's needed — not as a default approach.</p>
+                <div class="grid">
+                    <div class="card"><h3>Redundant Data</h3><p>Store ZIP and CITY together even though ZIP determines CITY. Avoids an extra join. Application validates city based on zip via dropdown.</p></div>
+                    <div class="card"><h3>Derived Data</h3><p>Store student classification (Freshman/Sophomore etc.) even though it's derivable from credit hours. Avoids recalculating. Application keeps it updated.</p></div>
+                    <div class="card"><h3>Pre-aggregated Data</h3><p>Store GPA in the STUDENT table even though it's calculable from ENROLL/COURSE. Computed once on grade entry, not on every report query.</p></div>
+                    <div class="card"><h3>Temporary Tables</h3><p>Use a temp denormalized table to hold report data when a tabular report requires column pivots impossible in plain SQL. Table deleted after report generation.</p></div>
+                </div>
+                <div class="highlight"><p>Data warehouse tables should be denormalized — no frequent modifications, so redundancy costs less. OLTP tables should be normalized — frequent inserts/updates/deletes, where redundancy causes anomalies and locking problems.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="indexes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Indexes</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Without an index, SQL Server performs a <strong>table scan</strong> — reading every page. A table with no indexes is called a <strong>heap</strong>. Indexes use a B-tree structure to dramatically reduce rows read for queries.</p>
+                <div class="grid">
+                    <div class="card"><h3>Heap</h3><p>No defined order. Inserts go to first available space. SELECTs must scan the entire table. Good for: bulk loads with no concurrent queries.</p></div>
+                    <div class="card"><h3>Clustered Index</h3><p>Logically orders the rows by the clustering key. Only ONE per table. Pages are linked in logical sequence. Best for range queries on the clustering key.</p></div>
+                    <div class="card"><h3>Nonclustered Index</h3><p>Separate structure pointing to data rows. Up to 999 per table. Consumes extra space. Speeds up SELECTs for covered columns but slows INSERT/UPDATE/DELETE.</p></div>
+                    <div class="card"><h3>Composite Index</h3><p>Index on multiple columns. Index on (A,B) is NOT the same as (B,A). More selective than single-column indexes. Each component can be ASC or DESC.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Index data type considerations:</strong></p>
+                <table>
+                    <tr><th>Data Type</th><th>Benefits</th><th>Negatives</th></tr>
+                    <tr><td>Numeric</td><td>Small size, more values per page, fast</td><td>Small types = high density</td></tr>
+                    <tr><td>Character</td><td>Searched frequently, better than heap</td><td>Slower than numeric, prone to fragmentation</td></tr>
+                    <tr><td>Date</td><td>Small size, fast</td><td>Small types = high density</td></tr>
+                    <tr><td>GUID</td><td>Highly selective, fast reads</td><td>Poor performance on updates/deletes</td></tr>
+                    <tr><td>BIT</td><td>Extremely small</td><td>Very dense — low selectivity</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Selectivity</strong> (few rows returned / total rows) = good index. <strong>Density</strong> (many duplicates) = poor index. <strong>Fragmentation</strong> occurs when page splits happen on INSERT — detect with sys.dm_db_index_physical_stats. SQL Server automatically creates and updates statistics on indexes — leave auto-creation and auto-update enabled.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="checklist">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data-Modeling Checklist</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Use this checklist to verify an ERD meets minimum design requirements:</p>
+                <div class="grid">
+                    <div class="card"><h3>Business Rules</h3><p>Document and verify all rules with end users. Each rule should be written precisely, dated, and signed off by an approving authority. Rules identify entities, attributes, relationships, and constraints.</p></div>
+                    <div class="card"><h3>Naming Conventions</h3><p>Entity names: nouns, short, meaningful, unique in model. Attribute names: unique within entity, use entity abbreviation as prefix, use _ID/_NUM/_CODE suffix for PKs, no reserved words, no spaces or special characters.</p></div>
+                    <div class="card"><h3>Entities</h3><p>Each entity represents a single subject. All entities should be in 3NF or higher (justify anything below). PK clearly defined and supports the selected data granularity.</p></div>
+                    <div class="card"><h3>Attributes</h3><p>Simple and single-valued (atomic). Document defaults, constraints, synonyms. Derived attributes clearly identified. No redundancy unless required for performance or history. All non-key attributes fully dependent on PK.</p></div>
+                    <div class="card"><h3>Relationships</h3><p>Clearly identify participants. Define participation, connectivity, and document cardinality. Relationship names should be active or passive verbs.</p></div>
+                    <div class="card"><h3>ER Model</h3><p>Validate against inserts, updates, and deletions. Minimize redundancy (single-place updates). Conform to the minimal data rule: all that is needed is there, and all that is there is needed.</p></div>
+                </div>
+                <div class="highlight"><p>Design principles to remember: Use best practices. Stay consistent. Plan for change. Normalization is a tool — understand when to apply it and when denormalization is justified by real measurement, not assumption.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Chapters 9 & 10: Database Design and Transactions</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a28, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0f766e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0d9488; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0f766e; color: white; border-color: #0f766e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0d9488; }
+        .chapter-divider { background: #0a2a28; border: 1px solid #0f766e; border-radius: 12px; padding: 14px 20px; margin: 32px 0 20px; }
+        .chapter-divider h3 { color: #0d9488; font-size: 1rem; letter-spacing: 1px; text-transform: uppercase; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a28; border-left: 3px solid #0f766e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0d9488; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0d9488; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #0d9488; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #0f766e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0d9488; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Chapters 9 & 10</div>
+        <h1>Database Design & Transaction Management</h1>
+        <p class="subtitle">SDLC, DBLC, conceptual/logical/physical design, ACID, concurrency, and recovery</p>
+    </header>
+    <nav>
+        <a href="#sdlc">SDLC</a>
+        <a href="#dblc">DBLC</a>
+        <a href="#conceptual">Conceptual Design</a>
+        <a href="#logical">Logical Design</a>
+        <a href="#strategies">Design Strategies</a>
+        <a href="#transactions">Transactions</a>
+        <a href="#acid">ACID Properties</a>
+        <a href="#concurrency">Concurrency</a>
+        <a href="#locking">Locking</a>
+        <a href="#isolation">Isolation Levels</a>
+        <a href="#recovery">Recovery</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="chapter-divider">
+            <h3>Chapter 9 — Database Design</h3>
+        </div>
+
+        <div class="section" id="sdlc">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Systems Development Life Cycle (SDLC)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The SDLC traces the history of an information system and provides the framework within which database design and application development are mapped and evaluated. It is <strong>iterative rather than sequential</strong>.</p>
+                <div class="grid">
+                    <div class="card"><h3>Planning</h3><p>General overview of the company and its objectives. Identifies the need for and extent of the information system.</p></div>
+                    <div class="card"><h3>Analysis</h3><p>Problems defined during planning are examined in detail. Requirements gathering and analysis of current systems.</p></div>
+                    <div class="card"><h3>Detailed Systems Design</h3><p>Designer completes the design of the system's processes, interfaces, and data structures.</p></div>
+                    <div class="card"><h3>Implementation</h3><p>Hardware, DBMS software, and application programs are installed. Database design is physically implemented.</p></div>
+                    <div class="card"><h3>Testing</h3><p>Ensures software performs as expected and meets stated requirements. Includes integration, performance, and user acceptance testing.</p></div>
+                    <div class="card"><h3>Maintenance</h3><p>Corrective (fix bugs), adaptive (respond to environment changes), and perfective (improve performance) maintenance.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="dblc">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Database Life Cycle (DBLC)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The DBLC contains six phases describing the history of the database within an information system:</p>
+                <table>
+                    <tr><th>Phase</th><th>Description</th></tr>
+                    <tr><td>1. Initial Study</td><td>Define problems, constraints, objectives, scope, and boundaries</td></tr>
+                    <tr><td>2. Database Design</td><td>Ensure the final product meets user and system requirements</td></tr>
+                    <tr><td>3. Implementation & Loading</td><td>DBMS installed, database created, data loaded or converted</td></tr>
+                    <tr><td>4. Testing & Evaluation</td><td>Database tested, fine-tuned, and evaluated. Backup strategy established.</td></tr>
+                    <tr><td>5. Operation</td><td>Problems identified and solutions implemented in production</td></tr>
+                    <tr><td>6. Maintenance & Evolution</td><td>Preventative, corrective, adaptive improvements</td></tr>
+                </table>
+                <div class="highlight"><p>Three backup types in Phase 4: <strong>Full backup</strong> (all objects), <strong>Differential backup</strong> (only changes since last full), <strong>Transaction log backup</strong> (only uncommitted log operations). Database failures can be caused by software bugs, hardware failures, programming exceptions, deadlocks, or external disasters (fire, flood, lightning).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="conceptual">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Conceptual Design</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Goal: design a database <strong>independent of database software and physical details</strong>. The conceptual data model describes main entities, attributes, relationships, and constraints in a software/hardware-independent way.</p>
+                <p><strong>Minimum data rule:</strong> All that is needed is there, and all that is there is needed.</p>
+                <p><strong>Steps to develop the conceptual model using ER diagrams:</strong></p>
+                <ol style="padding-left:20px; color:#ccc; line-height:1.8;">
+                    <li>Identify, analyze, and refine the business rules</li>
+                    <li>Identify the main entities from Step 1</li>
+                    <li>Define relationships among entities</li>
+                    <li>Define attributes, primary keys, and foreign keys for each entity</li>
+                    <li>Normalize the entities</li>
+                    <li>Complete the initial ER diagram</li>
+                    <li>Validate the ER model against end users' requirements</li>
+                    <li>Modify the ER model based on validation results</li>
+                </ol>
+                <div class="highlight"><p>Data model verification checks the model against proposed system processes. Key concepts: <strong>Module</strong> (IS component handling a specific business function), <strong>Cohesivity</strong> (strength of relationships among module's entities), <strong>Module coupling</strong> (degree of independence between modules — low coupling is better).</p></div>
+                <p><strong>Distributed database design:</strong> Portions of the database may reside in different physical locations. A <em>database fragment</em> is a subset stored at a given location. Ensures integrity, security, and performance across distributed environments.</p>
+            </div>
+        </div>
+
+        <div class="section" id="logical">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Logical & Physical Design</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Logical Design</strong> goal: design an enterprise-wide database based on a specific data model but <em>independent of physical-level details</em>. Maps all conceptual model objects to the constructs used by the selected database model.</p>
+                <p>Logical design steps:</p>
+                <ol style="padding-left:20px; color:#ccc; line-height:1.8;">
+                    <li>Map the conceptual model to logical model components (strong entities, supertype/subtype, weak entities, binary/higher-degree relationships)</li>
+                    <li>Validate using normalization</li>
+                    <li>Validate integrity constraints</li>
+                    <li>Validate against user requirements</li>
+                </ol>
+                <div class="highlight"><p><strong>Physical Design</strong> deals with actual data storage organization and access characteristics — defining storage organization, integrity and security measures, and performance optimizations. This is where indexes, partitioning, and physical file layout decisions are made.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="strategies">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Design Strategies</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Top-Down Design</h3><p>Starts by identifying data sets (entities) then defines data elements (attributes) for each. Works from the big picture down to details. Suitable for smaller, well-understood problem domains.</p></div>
+                    <div class="card"><h3>Bottom-Up Design</h3><p>First identifies data elements (attributes) then groups them into data sets (entities). Works from details up to the big picture. Useful when starting from existing data or documents.</p></div>
+                    <div class="card"><h3>Centralized Design</h3><p>All design decisions made by a small central group. Suitable for top-down approaches with smaller, single-unit problem domains. Consistent and controlled.</p></div>
+                    <div class="card"><h3>Decentralized Design</h3><p>Conceptual design models subsets of requirements independently, then aggregated into a complete design. Typical for complex systems with many objects and procedures across multiple departments.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chapter-divider">
+            <h3>Chapter 10 — Transaction Management and Concurrency Control</h3>
+        </div>
+
+        <div class="section" id="transactions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is a Transaction?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A transaction is a <strong>logical unit of work that must be entirely completed or aborted</strong> — no partial completion permitted. The database must begin and end in a consistent state.</p>
+                <p>Transactions end when one of four events occurs: COMMIT reached, ROLLBACK reached, end of program, or abnormal termination.</p>
+                <pre>-- Without transactions: Order can exist without Payment
+BEGIN TRY
+    INSERT INTO Sales.Orders ...       -- succeeds
+    INSERT INTO Sales.OrderDetails ... -- fails
+END TRY
+BEGIN CATCH
+    -- Order row still exists! Data integrity violated.
+    SELECT ERROR_NUMBER();
+END CATCH;
+
+-- With transactions: all-or-nothing
+BEGIN TRY
+    BEGIN TRANSACTION;
+        INSERT INTO Sales.Orders ...
+        INSERT INTO Sales.OrderDetails ...
+    COMMIT TRANSACTION;
+END TRY
+BEGIN CATCH
+    ROLLBACK TRANSACTION;  -- undo everything
+    SELECT ERROR_NUMBER();
+END CATCH;</pre>
+                <div class="highlight"><p>Individual DML statements (INSERT, UPDATE, DELETE) are automatically treated as stand-alone transactions. Explicit transactions group multiple statements into a single logical unit. Transactions are local to a connection — they cannot span connections. Keep transactions as short as possible to minimize locking.</p></div>
+                <p><strong>XACT_ABORT:</strong> SET XACT_ABORT ON causes SQL Server to automatically roll back the entire transaction when any runtime error occurs — simplifying error handling by eliminating the need for explicit ROLLBACK in each CATCH block.</p>
+            </div>
+        </div>
+
+        <div class="section" id="acid">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>ACID Properties</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Atomicity</h3><p>All operations of a transaction must complete — or the entire transaction is aborted. No partial completion. The "all or nothing" property.</p></div>
+                    <div class="card"><h3>Consistency</h3><p>The database must be in a consistent state before and after a transaction. All integrity constraints must be satisfied. A transaction cannot leave the database in a broken state.</p></div>
+                    <div class="card"><h3>Isolation</h3><p>Data used by a transaction cannot be used by a second transaction until the first completes. Concurrent transactions appear to execute serially from each other's perspective.</p></div>
+                    <div class="card"><h3>Durability</h3><p>Once a transaction is committed, changes are permanent and cannot be undone or lost — even if the system fails immediately after commit. Enforced by the transaction log.</p></div>
+                </div>
+                <div class="highlight"><p>Serializability: the result of concurrently executing transactions must be equivalent to some serial (one-at-a-time) execution order. This is the gold standard for concurrency correctness.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="concurrency">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Concurrency Control Problems</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Concurrent transactions on shared data create three main problems:</p>
+                <div class="grid">
+                    <div class="card"><h3>Lost Update</h3><p>Two transactions read the same value, both compute a new value based on it, and both write back — the first write is overwritten by the second, losing the first transaction's change.</p></div>
+                    <div class="card"><h3>Uncommitted Data (Dirty Read)</h3><p>Transaction T2 reads data modified by T1 before T1 commits. If T1 rolls back, T2 has worked with data that never officially existed.</p></div>
+                    <div class="card"><h3>Inconsistent Retrieval</h3><p>A transaction reads the same data twice and gets different results because another transaction modified it between the two reads. Also called a non-repeatable read.</p></div>
+                    <div class="card"><h3>Phantom Read</h3><p>A transaction runs the same query twice and gets additional rows the second time — because another transaction inserted matching rows between the two query executions.</p></div>
+                </div>
+                <p style="margin-top:16px">The <strong>scheduler</strong> establishes execution order for concurrent transactions, interleaving operations to ensure serializability. It creates a serializable schedule where the interleaved result equals some serial execution.</p>
+            </div>
+        </div>
+
+        <div class="section" id="locking">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Locking & Deadlocks</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Shared Lock (S)</h3><p>Multiple transactions can hold simultaneously. Allows concurrent reads. Blocks exclusive locks — prevents writes while reading.</p></div>
+                    <div class="card"><h3>Exclusive Lock (X)</h3><p>Only one transaction can hold. Blocks all other locks. Required for writes. No other transaction can read or write the locked resource.</p></div>
+                    <div class="card"><h3>Lock Granularity</h3><p>Row locking: highest concurrency, highest overhead. Page locking: middle ground. Table locking: lowest concurrency, lowest overhead. SQL Server automatically escalates locks when too many row locks exist.</p></div>
+                    <div class="card"><h3>Two-Phase Locking</h3><p>Growing phase: acquire all needed locks, release none. Shrinking phase: release locks, acquire none. Guarantees serializability — but NOT deadlock prevention.</p></div>
+                </div>
+                <div class="highlight"><p><strong>Deadlock (deadly embrace):</strong> T1 holds lock A and waits for lock B. T2 holds lock B and waits for lock A. Neither can proceed. SQL Server's Lock Manager detects deadlocks every 5 seconds, selects a victim, and terminates it. Use SQL Server Profiler's deadlock graphs to analyze and prevent deadlocks.</p></div>
+                <p><strong>Time stamping</strong> assigns a global unique timestamp to each transaction — older transactions take priority. <strong>Wait/Die:</strong> older waits, younger dies. <strong>Wound/Wait:</strong> older preempts younger, younger waits for older. <strong>Optimistic concurrency:</strong> assumes conflicts are rare — no locks, validate before commit, roll back if conflict detected.</p>
+            </div>
+        </div>
+
+        <div class="section" id="isolation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>ANSI Transaction Isolation Levels</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Isolation Level</th><th>Dirty Read</th><th>Non-repeatable Read</th><th>Phantom Read</th><th>Notes</th></tr>
+                    <tr><td>Read Uncommitted</td><td>Possible</td><td>Possible</td><td>Possible</td><td>Highest performance, lowest safety</td></tr>
+                    <tr><td>Read Committed</td><td>Prevented</td><td>Possible</td><td>Possible</td><td>Default for most databases including SQL Server</td></tr>
+                    <tr><td>Repeatable Read</td><td>Prevented</td><td>Prevented</td><td>Possible</td><td>Uses shared locks until transaction ends</td></tr>
+                    <tr><td>Serializable</td><td>Prevented</td><td>Prevented</td><td>Prevented</td><td>Most restrictive. Deadlocks still possible.</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Row versioning</strong> (READ_COMMITTED_SNAPSHOT) reduces blocking by keeping versions of rows in tempdb — readers don't block writers and writers don't block readers. Benefit: fewer locks and less blocking. Cost: increased tempdb load. Writers still block other writers.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="recovery">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Database Recovery</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Database recovery restores the database from a given state to a previously consistent state. Based on the atomic transaction property — if a transaction cannot complete, it must be rolled back entirely.</p>
+                <div class="grid">
+                    <div class="card"><h3>Write-Ahead Log Protocol</h3><p>Transaction logs are always written BEFORE the data pages are updated. Ensures recovery can reconstruct any committed transaction even if data pages weren't flushed to disk.</p></div>
+                    <div class="card"><h3>Checkpoints</h3><p>SQL Server periodically writes all modified in-memory buffers to disk. Checkpoints reduce recovery time — transactions committed before the last checkpoint don't need to be redone.</p></div>
+                    <div class="card"><h3>Deferred Write (Deferred Update)</h3><p>Transaction operations don't immediately update the physical database — only the log is updated. Changes applied only after successful commit.</p></div>
+                    <div class="card"><h3>Write-Through (Immediate Update)</h3><p>Database is immediately updated during transaction execution. Log records the "before" image for rollback if needed.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Recovery process:</strong></p>
+                <ul>
+                    <li>Find last checkpoint in transaction log</li>
+                    <li>If committed BEFORE checkpoint: nothing to do — already on disk</li>
+                    <li>If committed AFTER checkpoint: REDO the transaction from log</li>
+                    <li>If ROLLBACK after checkpoint: UNDO operations using "before" values in log</li>
+                </ul>
+                <div class="highlight"><p>The transaction log is the foundation of all recovery. Redundant transaction logs ensure that a physical disk failure won't prevent recovery. Always maintain multiple backup types (full, differential, transaction log) and test recovery procedures regularly.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

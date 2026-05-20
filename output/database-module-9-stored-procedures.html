@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Module 9: Stored Procedures</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a0a2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #1d4ed8; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #2563eb; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #2563eb; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e0a3c; border-left: 3px solid #1d4ed8; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #2563eb; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #2563eb; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #2563eb; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #1d4ed8; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #2563eb; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Module 9</div>
+        <h1>Designing and Implementing Stored Procedures</h1>
+        <p class="subtitle">Creating, parameterizing, error handling, transactions, and execution context</p>
+    </header>
+    <nav>
+        <a href="#what">What Is a SP?</a>
+        <a href="#benefits">Benefits</a>
+        <a href="#creating">Creating SPs</a>
+        <a href="#errors">Error Handling</a>
+        <a href="#transactions">Transactions</a>
+        <a href="#parameters">Parameters</a>
+        <a href="#sniffing">Parameter Sniffing</a>
+        <a href="#context">Execution Context</a>
+        <a href="#guidelines">Guidelines</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="what">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is a Stored Procedure?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>When applications interact with SQL Server, they have two ways to execute T-SQL code:</p>
+                <ul>
+                    <li><strong>Direct execution:</strong> every statement issued individually by the application</li>
+                    <li><strong>Stored procedures:</strong> groups of statements stored on the server and called by name</li>
+                </ul>
+                <p>Stored procedures are similar to procedures or methods in other programming languages:</p>
+                <ul>
+                    <li>Can accept <strong>input parameters</strong></li>
+                    <li>Can produce <strong>output parameters</strong></li>
+                    <li>Can <strong>return sets of rows</strong></li>
+                    <li>Executed using the <strong>EXECUTE</strong> statement</li>
+                    <li>Can be written in T-SQL or managed code (.NET)</li>
+                </ul>
+                <div class="highlight"><p>Two categories of system stored procedures: <strong>System SPs</strong> (T-SQL code in master database, used for administration) and <strong>Extended SPs</strong> (references to external DLLs that extend SQL Server functionality). Always use two- or three-part naming when executing stored procedures to avoid unnecessary object resolution searches.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="benefits">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Benefits of Stored Procedures</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Enhanced Security</h3><p>Users can be granted permission to EXECUTE a stored procedure without having direct permissions on the underlying tables. The SP acts as a security boundary — users can only do what the procedure allows.</p></div>
+                    <div class="card"><h3>Modular Programming</h3><p>Create once, call many times from many applications. Logic is centralized — change it in one place and all callers benefit immediately.</p></div>
+                    <div class="card"><h3>Performance</h3><p>A single EXECUTE statement sent over the network can run hundreds of lines of T-SQL. Execution plans are cached and reused — avoiding recompilation on each call.</p></div>
+                    <div class="card"><h3>Delayed Binding</h3><p>A stored procedure can reference objects that don't exist yet. This allows flexible object creation order and avoids circular dependency issues during deployment.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="creating">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Creating, Altering & Dropping Stored Procedures</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>-- Create a stored procedure
+CREATE PROCEDURE Reports.GetCustomerOrders
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT c.custid, c.contactname, o.orderid, o.orderdate
+    FROM Sales.Customers AS c
+    JOIN Sales.Orders AS o ON c.custid = o.custid;
+END;
+
+-- Execute it
+EXECUTE Reports.GetCustomerOrders;
+-- or shorthand:
+EXEC Reports.GetCustomerOrders;
+
+-- Alter (preserves existing permissions)
+ALTER PROCEDURE Reports.GetCustomerOrders
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT c.custid, c.contactname, o.orderid, o.orderdate, o.freight
+    FROM Sales.Customers AS c
+    JOIN Sales.Orders AS o ON c.custid = o.custid;
+END;
+
+-- SQL Server 2016 SP1+: CREATE OR ALTER
+CREATE OR ALTER PROCEDURE Reports.GetCustomerOrders
+AS BEGIN ... END;
+
+-- Drop a stored procedure
+DROP PROCEDURE Reports.GetCustomerOrders;
+
+-- View all stored procedures in database
+SELECT name, object_id, create_date, modify_date
+FROM sys.procedures;</pre>
+                <div class="highlight"><p>CREATE PROCEDURE must be the only statement in its batch. Statements NOT permitted inside stored procedures include: CREATE/ALTER FUNCTION, CREATE/ALTER PROCEDURE, CREATE/ALTER VIEW, CREATE/ALTER TRIGGER, USE databasename, SET SHOWPLAN, SET PARSEONLY, CREATE SCHEMA, CREATE RULE.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="errors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Error Handling</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Always include error handling in stored procedures using the TRY…CATCH construct:</p>
+                <pre>CREATE PROCEDURE Sales.InsertOrder
+    @custid INT,
+    @orderdate DATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO Sales.Orders (custid, orderdate)
+        VALUES (@custid, @orderdate);
+    END TRY
+    BEGIN CATCH
+        -- Capture error details
+        SELECT
+            ERROR_NUMBER()    AS ErrorNumber,
+            ERROR_SEVERITY()  AS ErrorSeverity,
+            ERROR_STATE()     AS ErrorState,
+            ERROR_PROCEDURE() AS ErrorProcedure,
+            ERROR_LINE()      AS ErrorLine,
+            ERROR_MESSAGE()   AS ErrorMessage;
+
+        -- Re-throw the error to the caller
+        THROW;
+    END CATCH
+END;</pre>
+                <table>
+                    <tr><th>Error Function</th><th>Returns</th></tr>
+                    <tr><td>ERROR_NUMBER()</td><td>The error number</td></tr>
+                    <tr><td>ERROR_SEVERITY()</td><td>The severity level</td></tr>
+                    <tr><td>ERROR_STATE()</td><td>The error state number</td></tr>
+                    <tr><td>ERROR_PROCEDURE()</td><td>Name of the SP where error occurred</td></tr>
+                    <tr><td>ERROR_LINE()</td><td>Line number where error occurred</td></tr>
+                    <tr><td>ERROR_MESSAGE()</td><td>The full error message text</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="transactions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Transaction Handling</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Use explicit transactions inside stored procedures to ensure all-or-nothing execution. Always pair with TRY…CATCH so failures trigger a ROLLBACK:</p>
+                <pre>CREATE PROCEDURE Sales.TransferOrder
+    @fromCustID INT,
+    @toCustID INT,
+    @orderID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;   -- auto-rollback on error
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        UPDATE Sales.Orders
+        SET custid = @toCustID
+        WHERE orderid = @orderID AND custid = @fromCustID;
+
+        -- More related operations...
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        THROW;  -- re-raise to caller
+    END CATCH
+END;</pre>
+                <div class="highlight"><p><strong>@@TRANCOUNT</strong> tracks the nesting level of BEGIN TRANSACTION calls. Each BEGIN increments it; each COMMIT decrements it. ROLLBACK sets it to 0. Always check @@TRANCOUNT before rolling back — rolling back when there's no active transaction throws an error. SET XACT_ABORT ON automatically rolls back the transaction if any statement raises an error.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="parameters">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Parameters: Input & Output</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Parameterized stored procedures have three component types: input parameters, output parameters, and return values.</p>
+                <pre>-- Input parameters with defaults
+CREATE PROCEDURE Reports.GetOrdersByDate
+    @startdate DATE = '2000-01-01',   -- default value
+    @enddate   DATE = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validate parameters early
+    IF @enddate IS NULL SET @enddate = GETDATE();
+
+    SELECT orderid, custid, orderdate
+    FROM Sales.Orders
+    WHERE orderdate BETWEEN @startdate AND @enddate;
+END;
+
+-- Call with named parameters (order doesn't matter)
+EXEC Reports.GetOrdersByDate
+    @startdate = '2024-01-01',
+    @enddate   = '2024-12-31';
+
+-- Output parameters
+CREATE PROCEDURE Reports.GetOrderCount
+    @custid     INT,
+    @ordercount INT OUTPUT     -- OUTPUT keyword required
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT @ordercount = COUNT(*)
+    FROM Sales.Orders
+    WHERE custid = @custid;
+END;
+
+-- Execute with OUTPUT parameter
+DECLARE @cnt INT;
+EXEC Reports.GetOrderCount
+    @custid     = 1,
+    @ordercount = @cnt OUTPUT;  -- OUTPUT required here too
+SELECT @cnt AS OrderCount;</pre>
+                <div class="highlight"><p>OUTPUT must be specified in both the procedure definition AND when calling the procedure. Parameters can be passed by position (in order) or by name (using @paramname = value) — named parameters are preferred for clarity and allow you to skip optional parameters.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="sniffing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Parameter Sniffing & Performance</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>SQL Server generates and caches an execution plan the first time a stored procedure runs — using the parameter values from that first call. Subsequent calls reuse the cached plan even if different parameters would benefit from a different plan. This is called <strong>parameter sniffing</strong>.</p>
+                <p>Usually beneficial — but problematic when the optimal plan varies significantly between parameter values (e.g., a query for a common value vs. a rare value).</p>
+                <div class="grid">
+                    <div class="card"><h3>WITH RECOMPILE</h3><p>Forces a new execution plan every time the procedure runs. Use when parameter values vary widely and different plans are needed per call.</p></div>
+                    <div class="card"><h3>sp_recompile</h3><p>Marks a procedure so its plan is discarded next time it runs. Useful for forcing a one-time recompile after statistics change.</p></div>
+                    <div class="card"><h3>EXEC WITH RECOMPILE</h3><p>Recompiles only for the current execution without permanently changing the procedure.</p></div>
+                    <div class="card"><h3>OPTION (OPTIMIZE FOR)</h3><p>Hints the optimizer to use a specific parameter value when generating the plan — useful when you know a "typical" value produces the best general plan.</p></div>
+                </div>
+                <pre>-- Recompile every execution
+CREATE PROCEDURE Reports.GetOrders @custid INT
+WITH RECOMPILE
+AS BEGIN ... END;
+
+-- Optimize for a specific value
+SELECT * FROM Sales.Orders
+WHERE custid = @custid
+OPTION (OPTIMIZE FOR (@custid = 1));</pre>
+            </div>
+        </div>
+
+        <div class="section" id="context">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Controlling Execution Context</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>SQL Server uses two security tokens: a <strong>login token</strong> (server-level) and a <strong>user token</strong> (database-level). The EXECUTE AS clause allows a stored procedure to impersonate a different security context.</p>
+                <pre>-- Impersonate a database user
+CREATE PROCEDURE Reports.SecureReport
+WITH EXECUTE AS 'ReportUser'
+AS
+BEGIN
+    -- Executes as if ReportUser is running this code
+    SELECT orderid, custid FROM Sales.Orders;
+END;
+
+-- Impersonate a login (server-level)
+EXECUTE AS LOGIN = 'sa';
+-- ... do work ...
+REVERT;  -- return to original context
+
+-- View current security context
+SELECT * FROM sys.login_token;  -- login-level tokens
+SELECT * FROM sys.user_token;   -- user-level tokens</pre>
+                <div class="highlight"><p>EXECUTE AS is powerful — it allows granting users access to functionality without granting direct access to underlying objects. A user can EXECUTE the procedure (which runs as a privileged account) without having any permissions on the tables. Always REVERT after impersonation when done manually.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="guidelines">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Guidelines & Best Practices</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <ul>
+                    <li><strong>Always use SET NOCOUNT ON</strong> — suppresses "rows affected" messages that add network traffic and can confuse some clients</li>
+                    <li><strong>Qualify all object names</strong> with schema prefix inside procedures (Sales.Orders not just Orders)</li>
+                    <li><strong>Never use sp_ prefix</strong> for user-defined procedures — SQL Server searches master database first for sp_ prefixed names, causing unnecessary overhead</li>
+                    <li><strong>One procedure per task</strong> — keep stored procedures focused on a single responsibility</li>
+                    <li><strong>Validate parameters early</strong> in the procedure body before doing any work</li>
+                    <li><strong>Use consistent SET options</strong> — SET NOCOUNT ON, SET XACT_ABORT ON where appropriate</li>
+                    <li><strong>Check @@NESTLEVEL</strong> if nesting procedures — maximum nesting is 32 levels</li>
+                    <li><strong>Use return codes</strong> to communicate execution outcomes to callers (0 = success by convention)</li>
+                    <li><strong>Check dependencies</strong> using sys.sql_expression_dependencies before dropping objects</li>
+                </ul>
+                <div class="highlight"><p>WITH ENCRYPTION obfuscates the stored procedure definition stored in SQL Server system tables — providing limited protection for proprietary logic. It is generally not recommended as a security measure since it can be defeated and makes debugging and maintenance harder.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

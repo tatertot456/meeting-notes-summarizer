@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Module 3: Writing SELECT Queries</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2010, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #166534; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #15803d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #166534; color: white; border-color: #166534; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #15803d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2318; border-left: 3px solid #166534; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #15803d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #15803d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #15803d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #166534; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #15803d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Module 3</div>
+        <h1>Writing SELECT Queries</h1>
+        <p class="subtitle">Simple SELECT statements, DISTINCT, aliases, and CASE expressions</p>
+    </header>
+    <nav>
+        <a href="#select">SELECT Basics</a>
+        <a href="#calculations">Calculations</a>
+        <a href="#distinct">DISTINCT</a>
+        <a href="#aliases">Aliases</a>
+        <a href="#case">CASE Expressions</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="select">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Simple SELECT Statements</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The SELECT statement retrieves data from one or more tables or views. Every SELECT query has these core clauses evaluated in logical processing order:</p>
+                <table>
+                    <tr><th>Clause</th><th>Expression</th><th>Logical Order</th></tr>
+                    <tr><td>FROM</td><td>&lt;table or view&gt;</td><td>1st</td></tr>
+                    <tr><td>WHERE</td><td>&lt;search condition&gt;</td><td>2nd</td></tr>
+                    <tr><td>GROUP BY</td><td>&lt;group by list&gt;</td><td>3rd</td></tr>
+                    <tr><td>HAVING</td><td>&lt;search condition&gt;</td><td>4th</td></tr>
+                    <tr><td>SELECT</td><td>&lt;select list&gt;</td><td>5th</td></tr>
+                    <tr><td>ORDER BY</td><td>&lt;order by list&gt;</td><td>6th</td></tr>
+                </table>
+                <pre>-- Specify both schema and object name (best practice)
+SELECT companyname, country
+FROM Sales.Customers;
+
+-- Wildcard: returns all columns
+-- NOT recommended in production code
+SELECT *
+FROM Sales.Customers;
+
+-- Always specify only the columns you need
+SELECT custid, companyname, country
+FROM Sales.Customers;</pre>
+                <div class="highlight"><p>Always specify schema and object name together: Sales.Customers, not just Customers. This avoids ambiguity, improves performance (no schema resolution search), and makes intent clear. End all T-SQL statements with a semicolon.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="calculations">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Using Calculations in SELECT</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Scalar expressions in the SELECT clause return one value per row — calculated on the fly without storing the result.</p>
+                <table>
+                    <tr><th>Operator</th><th>Description</th></tr>
+                    <tr><td>+</td><td>Add numbers or concatenate strings</td></tr>
+                    <tr><td>-</td><td>Subtract</td></tr>
+                    <tr><td>*</td><td>Multiply</td></tr>
+                    <tr><td>/</td><td>Divide</td></tr>
+                    <tr><td>%</td><td>Modulo (remainder)</td></tr>
+                </table>
+                <pre>-- Calculate line total per order detail row
+SELECT unitprice, qty, (qty * unitprice) AS line_total
+FROM Sales.OrderDetails;
+
+-- String concatenation with +
+SELECT firstname + ' ' + lastname AS fullname
+FROM HR.Employees;
+
+-- Date arithmetic
+SELECT orderid, orderdate,
+    DATEADD(day, 30, orderdate) AS due_date
+FROM Sales.Orders;</pre>
+                <div class="highlight"><p>Calculated columns return one value per row (scalar). They don't permanently store values — recalculated each query. Give calculated columns an alias using AS so results have meaningful column names instead of no name at all.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="distinct">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Eliminating Duplicates with DISTINCT</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>SQL query results are not truly relational — rows are NOT guaranteed to be unique and have NO guaranteed order. Even unique source rows can produce duplicate values for selected columns.</p>
+                <pre>-- Without DISTINCT: same country appears multiple times
+SELECT country
+FROM Sales.Customers;
+-- Argentina, Argentina, Belgium, Austria, Austria...
+
+-- With DISTINCT: each unique value appears once
+SELECT DISTINCT country
+FROM Sales.Customers;
+-- Argentina, Austria, Belgium...
+
+-- DISTINCT across multiple columns: unique combinations
+SELECT DISTINCT companyname, country
+FROM Sales.Customers;</pre>
+                <div class="highlight"><p>DISTINCT removes duplicates based on the combination of ALL selected columns — not from the source table. A row is only eliminated if every selected column matches an already-seen row. Performance note: some queries improve performance by filtering duplicates early in the logical processing pipeline — before the full SELECT clause executes.</p></div>
+                <p>DISTINCT is applied AFTER WHERE, HAVING, and GROUP BY — so it only operates on the rows that survive those filters, not on all source rows.</p>
+            </div>
+        </div>
+
+        <div class="section" id="aliases">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Column and Table Aliases</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Aliases give alternative names to columns or tables. They improve readability and are essential for calculated columns.</p>
+                <pre>-- Column aliases: three equivalent syntaxes
+SELECT orderid, qty AS quantity         -- preferred: explicit AS
+FROM Sales.OrderDetails;
+
+SELECT orderid, quantity = qty          -- = syntax (less common)
+FROM Sales.OrderDetails;
+
+SELECT orderid, unitprice quantity      -- accidental alias! (space only)
+FROM Sales.OrderDetails;               -- easy to misread — avoid
+
+-- Table aliases in FROM clause
+SELECT SO.custid, SO.orderdate
+FROM SalesOrders AS SO;                -- with AS (preferred)
+
+SELECT SO.custid, SO.orderdate
+FROM SalesOrders SO;                   -- without AS (also valid)</pre>
+                <div class="highlight"><p>Critical impact of logical processing order: FROM, WHERE, and HAVING are processed BEFORE SELECT. This means aliases created in the SELECT clause are NOT visible to WHERE or HAVING — only to ORDER BY. If you need to filter on a calculated value, repeat the expression in WHERE or use a CTE/derived table.</p></div>
+                <div class="grid">
+                    <div class="card"><h3>Column Alias Purpose</h3><p>Give meaningful names to calculated columns. Rename columns for display. Required when a SELECT expression has no natural column name.</p></div>
+                    <div class="card"><h3>Table Alias Purpose</h3><p>Shorten long table names. Required when self-joining (two references to same table need different aliases). Required with some table expressions.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="case">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>CASE Expressions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>CASE expressions return a single scalar value based on conditions. They are NOT control-of-flow — they are expressions that evaluate to a value, usable anywhere a value expression is valid: SELECT list, WHERE, HAVING, ORDER BY.</p>
+                <p><strong>Simple CASE</strong> — compares one value to a list of possible values, returns first match:</p>
+                <pre>-- Simple CASE: compare one value to known options
+SELECT orderid, custid,
+    CASE shipcountry
+        WHEN 'USA'    THEN 'Domestic'
+        WHEN 'Canada' THEN 'North America'
+        WHEN 'Mexico' THEN 'North America'
+        ELSE 'International'
+    END AS shipping_region
+FROM Sales.Orders;</pre>
+                <p><strong>Searched CASE</strong> — evaluates a set of predicates, returns first TRUE:</p>
+                <pre>-- Searched CASE: evaluate different conditions per branch
+SELECT orderid, freight,
+    CASE
+        WHEN freight < 10   THEN 'Low'
+        WHEN freight < 100  THEN 'Medium'
+        WHEN freight >= 100 THEN 'High'
+        ELSE 'Unknown'
+    END AS freight_category
+FROM Sales.Orders;
+
+-- CASE in ORDER BY: custom sort order
+SELECT productname, categoryid
+FROM Production.Products
+ORDER BY
+    CASE categoryid
+        WHEN 1 THEN 'Beverages'
+        WHEN 2 THEN 'Condiments'
+        ELSE 'Other'
+    END;</pre>
+                <div class="highlight"><p>CASE evaluation rules: returns the value from the FIRST matching condition — subsequent conditions are not evaluated. If no condition matches and there is no ELSE, the result is NULL. In the SELECT clause, CASE behaves as a calculated column and requires an alias for a meaningful column name.</p></div>
+                <div class="grid">
+                    <div class="card"><h3>Simple CASE</h3><p>One input value compared to a list. Equivalent to a series of = comparisons. Cleaner when checking one column against known values.</p></div>
+                    <div class="card"><h3>Searched CASE</h3><p>Each WHEN evaluates a full predicate (can involve any expression). More flexible — different columns or complex conditions per branch.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

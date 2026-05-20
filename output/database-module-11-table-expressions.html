@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database — Module 11: Using Table Expressions</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a1f2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #075985; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #075985; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #075985; color: white; border-color: #075985; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #075985; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #075985; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #075985; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #075985; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #075985; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #075985; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #075985; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Database · Module 11</div>
+        <h1>Using Table Expressions</h1>
+        <p class="subtitle">Views, inline TVFs, derived tables, and CTEs</p>
+    </header>
+    <nav>
+        <a href="#overview">Overview</a>
+        <a href="#views">Views</a>
+        <a href="#tvf">Inline TVFs</a>
+        <a href="#derived">Derived Tables</a>
+        <a href="#cte">CTEs</a>
+        <a href="#comparison">Comparison</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="overview">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Are Table Expressions?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Table expressions are named query expressions that return a virtual relational table. They allow more modular, readable, and maintainable SQL by encapsulating complex logic behind a clean name.</p>
+                <div class="grid">
+                    <div class="card"><h3>Views</h3><p>Named table expressions stored permanently in the database. Reusable across sessions and applications. Can provide security by exposing only specific columns/rows.</p></div>
+                    <div class="card"><h3>Inline TVFs</h3><p>Like parameterized views — stored in database, accept input parameters, return a table. The only table expression type that supports parameters.</p></div>
+                    <div class="card"><h3>Derived Tables</h3><p>Defined inline within a FROM clause. Exist only for the duration of the query. Not stored in database. Scope is limited to the single outer query.</p></div>
+                    <div class="card"><h3>CTEs (Common Table Expressions)</h3><p>Named table expressions defined in a WITH clause above the main query. Support multiple definitions, multiple references, and recursion. More readable than nested derived tables.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="views">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Views</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Views are named table expressions with definitions stored permanently in the database. They behave like tables in SELECT statements but retrieve data live from underlying base tables each time they are queried.</p>
+                <pre>-- Create a simple view
+CREATE VIEW HR.EmpPhoneList
+AS
+SELECT empid, lastname, firstname, phone
+FROM HR.Employees;
+
+-- Query the view like a table
+SELECT empid, lastname, firstname, phone
+FROM HR.EmpPhoneList
+ORDER BY lastname;  -- ORDER BY goes in the outer query, not the view</pre>
+                <div class="highlight"><p>ORDER BY is NOT permitted in a view definition without TOP, OFFSET/FETCH, or FOR XML. A view is a set — sets have no order. Add ORDER BY in the outer query that references the view. Views provide encapsulation, simplification, and security (users can be granted access to the view without direct table permissions).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="tvf">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Inline Table-Valued Functions (TVFs)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Inline TVFs are stored in the database like views, but they accept input parameters — making them "parameterized views." They return a virtual table to the calling query.</p>
+                <pre>-- Create an inline TVF
+CREATE FUNCTION Sales.fn_LineTotal (@orderid INT)
+RETURNS TABLE
+AS
+RETURN
+    SELECT orderid,
+        CAST((qty * unitprice * (1 - discount)) AS DECIMAL(8,2)) AS line_total
+    FROM Sales.OrderDetails
+    WHERE orderid = @orderid;
+
+-- Call the TVF: use two-part name, pass parameter
+SELECT orderid, line_total
+FROM Sales.fn_LineTotal(10252) AS LT;
+
+-- TVF in a join: get line totals for all orders by a specific customer
+SELECT o.orderid, o.custid, LT.line_total
+FROM Sales.Orders AS o
+CROSS APPLY Sales.fn_LineTotal(o.orderid) AS LT
+WHERE o.custid = 1;</pre>
+                <div class="highlight"><p>SQL Server supports two types of TVFs: <strong>Inline TVFs</strong> (single SELECT statement, treated like a parameterized view — better performance) and <strong>Multi-statement TVFs</strong> (create and populate a table variable, then return it — more flexible but generally slower). Prefer inline TVFs when possible.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="derived">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Derived Tables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Derived tables are named query expressions created within the FROM clause of an outer SELECT. They are not stored in the database — they exist only for the duration of the query and are unpacked into the underlying query when processed.</p>
+                <pre>-- Basic derived table: count distinct customers per year
+SELECT orderyear, COUNT(DISTINCT custid) AS cust_count
+FROM (
+    SELECT YEAR(orderdate) AS orderyear, custid
+    FROM Sales.Orders
+) AS derived_year          -- alias is REQUIRED
+GROUP BY orderyear;
+
+-- External column aliases (defined in alias list)
+SELECT orderyear, COUNT(DISTINCT custid) AS cust_count
+FROM (
+    SELECT YEAR(orderdate), custid
+    FROM Sales.Orders
+) AS derived_year(orderyear, custid)  -- column names defined here
+GROUP BY orderyear;
+
+-- Derived table with variable argument
+DECLARE @emp_id INT = 9;
+SELECT orderyear, COUNT(DISTINCT custid) AS cust_count
+FROM (
+    SELECT YEAR(orderdate) AS orderyear, custid
+    FROM Sales.Orders
+    WHERE empid = @emp_id   -- pass variable into derived table
+) AS derived_year
+GROUP BY orderyear;</pre>
+                <div class="highlight"><p>Derived table rules: MUST have an alias, MUST have named columns (all of them), column names must be unique, ORDER BY is not permitted without TOP/OFFSET-FETCH, and cannot be referenced more than once in the same query. Each additional reference must be separately defined — which is why CTEs are often preferred.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="cte">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Common Table Expressions (CTEs)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>CTEs are named table expressions defined in a WITH clause before the main query. They are similar to derived tables in scope and naming requirements, but more powerful — supporting multiple definitions, multiple references, and recursion.</p>
+                <pre>-- Basic CTE
+WITH CTE_year AS (
+    SELECT YEAR(orderdate) AS orderyear, custid
+    FROM Sales.Orders
+)
+SELECT orderyear, COUNT(DISTINCT custid) AS cust_count
+FROM CTE_year
+GROUP BY orderyear;
+
+-- Multiple CTEs in one query
+WITH CTE_orders AS (
+    SELECT custid, COUNT(*) AS order_count
+    FROM Sales.Orders
+    GROUP BY custid
+),
+CTE_customers AS (
+    SELECT custid, companyname, country
+    FROM Sales.Customers
+    WHERE country = N'USA'
+)
+SELECT c.custid, c.companyname, o.order_count
+FROM CTE_customers AS c
+JOIN CTE_orders AS o ON c.custid = o.custid
+WHERE o.order_count > 5;
+
+-- CTE referenced multiple times (not possible with derived table)
+WITH CTE_avg AS (
+    SELECT AVG(freight) AS avg_freight
+    FROM Sales.Orders
+)
+SELECT orderid, freight,
+    freight - (SELECT avg_freight FROM CTE_avg) AS diff
+FROM Sales.Orders
+WHERE freight > (SELECT avg_freight FROM CTE_avg);</pre>
+                <div class="highlight"><p>CTEs are the preferred alternative to nested derived tables. They are more readable, support multiple references to the same expression, and support recursive queries (for hierarchical data like org charts or bill-of-materials). Unlike views and TVFs, CTEs are not stored in the database — they exist only for the statement they precede.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="comparison">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Choosing the Right Table Expression</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Feature</th><th>View</th><th>Inline TVF</th><th>Derived Table</th><th>CTE</th></tr>
+                    <tr><td>Stored in database</td><td>✓</td><td>✓</td><td>✗</td><td>✗</td></tr>
+                    <tr><td>Accepts parameters</td><td>✗</td><td>✓</td><td>Via variables</td><td>Via variables</td></tr>
+                    <tr><td>Multiple references</td><td>✓</td><td>✓</td><td>✗</td><td>✓</td></tr>
+                    <tr><td>Recursion support</td><td>✗</td><td>✗</td><td>✗</td><td>✓</td></tr>
+                    <tr><td>Security layer</td><td>✓</td><td>✓</td><td>✗</td><td>✗</td></tr>
+                    <tr><td>Scope</td><td>Database-wide</td><td>Database-wide</td><td>Single query</td><td>Single statement</td></tr>
+                </table>
+                <div class="highlight"><p>Decision guide: need it permanently and reused across queries → View. Need parameters → Inline TVF. Need it once in a complex query → CTE (preferred over derived table for readability). Avoid nested derived tables — use multiple CTEs instead. CTEs dramatically improve query readability by naming each logical step of a complex computation.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
