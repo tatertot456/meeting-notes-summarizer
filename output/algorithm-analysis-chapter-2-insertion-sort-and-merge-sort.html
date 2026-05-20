@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Analysis — Chapter 2: Insertion Sort & Merge Sort</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1e0a3c, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #6d28d9; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #4ade80; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #6d28d9; color: white; border-color: #6d28d9; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #4ade80; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a0a; border-left: 3px solid #6d28d9; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #4ade80; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #4ade80; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #6d28d9; overflow-x: auto; margin: 12px 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #4ade80; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Algorithm Analysis · Chapter 2</div>
+        <h1>Insertion Sort & Merge Sort</h1>
+        <p class="subtitle">Loop invariants, algorithm correctness, and divide & conquer</p>
+    </header>
+    <nav>
+        <a href="#insertion">Insertion Sort</a>
+        <a href="#invariants">Loop Invariants</a>
+        <a href="#analysis">Analysis</a>
+        <a href="#mergesort">Merge Sort</a>
+        <a href="#recursion">Solving Recursion</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="insertion">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Insertion Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Insertion Sort works the way you sort a hand of playing cards — pick up one card at a time and insert it into its correct position among already-sorted cards.</p>
+                <pre>
+INSERTION-SORT(A)
+for j = 2 to A.length
+    key = A[j]
+    i = j - 1
+    while i > 0 and A[i] > key
+        A[i+1] = A[i]
+        i = i - 1
+    A[i+1] = key</pre>
+                <div class="grid">
+                    <div class="card"><h3>Best Case</h3><p>Array already sorted — inner while loop never executes. Runtime: Θ(n).</p></div>
+                    <div class="card"><h3>Worst Case</h3><p>Array reverse sorted — every element must shift. Runtime: Θ(n²).</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="invariants">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Loop Invariants & Correctness</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>loop invariant</strong> is a property that is true before and after each iteration of a loop. It is the formal tool for proving an algorithm correct.</p>
+                <p>Three conditions must hold:</p>
+                <ul>
+                    <li><strong>Initialization:</strong> The invariant is true before the first iteration</li>
+                    <li><strong>Maintenance:</strong> If true before an iteration, it remains true after</li>
+                    <li><strong>Termination:</strong> When the loop ends, the invariant gives us a useful property that proves correctness</li>
+                </ul>
+                <div class="highlight"><p>For Insertion Sort: the invariant is that A[1..j-1] always contains the original elements of A[1..j-1] in sorted order. At termination (j = n+1), the entire array is sorted.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="analysis">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Analyzing Insertion Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>We count the number of primitive operations each line executes as a function of n (input size):</p>
+                <ul>
+                    <li>The outer for loop runs n-1 times</li>
+                    <li>The inner while loop runs between 0 and j-1 times depending on input</li>
+                    <li>Summing over all iterations gives a quadratic function in the worst case</li>
+                </ul>
+                <div class="highlight"><p>Order of Growth: we care about the leading term only. Θ(n²) means the running time grows proportionally to n² as n gets large — constants and lower-order terms are ignored.</p></div>
+                <p>Why best/worst case matters: guaranteed performance bounds tell you the limits of what an algorithm can do on any input, not just typical ones.</p>
+            </div>
+        </div>
+
+        <div class="section" id="mergesort">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Merge Sort & Divide and Conquer</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Merge Sort uses the <strong>divide and conquer</strong> paradigm:</p>
+                <ul>
+                    <li><strong>Divide:</strong> Split the array into two halves</li>
+                    <li><strong>Conquer:</strong> Recursively sort each half</li>
+                    <li><strong>Combine:</strong> Merge the two sorted halves into one sorted array</li>
+                </ul>
+                <pre>
+MERGE-SORT(A, p, r)
+if p &lt; r
+    q = floor((p + r) / 2)
+    MERGE-SORT(A, p, q)
+    MERGE-SORT(A, q+1, r)
+    MERGE(A, p, q, r)</pre>
+                <div class="highlight"><p>Merge Sort runtime: T(n) = 2T(n/2) + Θ(n) → Θ(n log n). Dramatically better than Insertion Sort's Θ(n²) for large inputs.</p></div>
+                <p>The key insight: merging two sorted arrays of size n/2 takes Θ(n) time, and we do this at log n levels of recursion.</p>
+            </div>
+        </div>
+
+        <div class="section" id="recursion">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Solving Recursion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Recursive algorithms produce recurrence relations — equations that describe T(n) in terms of T on smaller inputs. Three methods to solve them:</p>
+                <div class="grid">
+                    <div class="card"><h3>Substitution Method</h3><p>Guess the form of the solution, then use mathematical induction to prove it correct.</p></div>
+                    <div class="card"><h3>Recursion Tree Method</h3><p>Draw the recursion as a tree, sum costs at each level to find total cost.</p></div>
+                    <div class="card"><h3>Master Theorem</h3><p>A formula-based approach for recurrences of the form T(n) = aT(n/b) + f(n). Covered in Chapter 4.</p></div>
+                    <div class="card"><h3>Why It Matters</h3><p>Solving recurrences tells you the actual runtime of divide-and-conquer algorithms without tracing every recursive call.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

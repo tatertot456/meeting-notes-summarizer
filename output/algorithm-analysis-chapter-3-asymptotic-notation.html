@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Analysis — Chapter 3: Asymptotic Notation</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1a0f3d, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #5b21b6; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #6d28d9; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #5b21b6; color: white; border-color: #5b21b6; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #6d28d9; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1a0f3d; border-left: 3px solid #5b21b6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #6d28d9; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #6d28d9; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #5b21b6; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #6d28d9; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Algorithm Analysis · Chapter 3</div>
+        <h1>Asymptotic Notation</h1>
+        <p class="subtitle">Θ, O, Ω, o, and ω — the language of algorithm efficiency</p>
+    </header>
+    <nav>
+        <a href="#theta">Θ Notation</a>
+        <a href="#big-o">O Notation</a>
+        <a href="#omega">Ω Notation</a>
+        <a href="#little">Little-o & ω</a>
+        <a href="#comparisons">Comparisons</a>
+        <a href="#functions">Function Growth</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="theta">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Θ (Theta) Notation — Tight Bound</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Θ(g(n)) describes a <strong>tight bound</strong> — the function grows exactly as fast as g(n), up to constant factors.</p>
+                <p><strong>Formal definition:</strong> f(n) = Θ(g(n)) if there exist positive constants c₁, c₂, and n₀ such that:</p>
+                <p style="text-align:center; font-family: 'Courier New'; color: #6d28d9; margin: 16px 0;">0 ≤ c₁·g(n) ≤ f(n) ≤ c₂·g(n) for all n ≥ n₀</p>
+                <div class="highlight"><p>Θ means "sandwiched between" — g(n) is both an upper and lower bound on f(n). When we say T(n) = Θ(n²), the running time grows neither faster nor slower than n² asymptotically.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="big-o">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>O (Big-O) Notation — Upper Bound</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>O(g(n)) describes an <strong>upper bound</strong> — the function grows no faster than g(n).</p>
+                <p><strong>Formal definition:</strong> f(n) = O(g(n)) if there exist positive constants c and n₀ such that:</p>
+                <p style="text-align:center; font-family: 'Courier New'; color: #6d28d9; margin: 16px 0;">0 ≤ f(n) ≤ c·g(n) for all n ≥ n₀</p>
+                <div class="highlight"><p>Important note: O is not the same as Θ. Saying an algorithm is O(n²) means it runs in at most n² time — it might be faster. Θ(n²) means it is exactly that tight.</p></div>
+                <p>O notation is most commonly used in practice because we care most about worst-case upper bounds.</p>
+            </div>
+        </div>
+
+        <div class="section" id="omega">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Ω (Omega) Notation — Lower Bound</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Ω(g(n)) describes a <strong>lower bound</strong> — the function grows at least as fast as g(n).</p>
+                <p><strong>Formal definition:</strong> f(n) = Ω(g(n)) if there exist positive constants c and n₀ such that:</p>
+                <p style="text-align:center; font-family: 'Courier New'; color: #6d28d9; margin: 16px 0;">0 ≤ c·g(n) ≤ f(n) for all n ≥ n₀</p>
+                <div class="highlight"><p>Theorem 3.1: f(n) = Θ(g(n)) if and only if f(n) = O(g(n)) AND f(n) = Ω(g(n)). Theta is the intersection of O and Ω.</p></div>
+                <p>Ω is useful for proving lower bounds — e.g., any comparison-based sort requires Ω(n log n) comparisons.</p>
+            </div>
+        </div>
+
+        <div class="section" id="little">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Little-o and Little-ω Notation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card">
+                        <h3>o (little-o) — Strict Upper Bound</h3>
+                        <p>f(n) = o(g(n)) means f grows strictly slower than g. The ratio f(n)/g(n) → 0 as n → ∞. Example: n = o(n²).</p>
+                    </div>
+                    <div class="card">
+                        <h3>ω (little-omega) — Strict Lower Bound</h3>
+                        <p>f(n) = ω(g(n)) means f grows strictly faster than g. Example: n^2.0001 = ω(n²). But n² ≠ ω(n²).</p>
+                    </div>
+                </div>
+                <div class="highlight"><p>Analogy with real numbers: O is like ≤, Ω is like ≥, Θ is like =, o is like &lt;, ω is like &gt;. Little notations are strict — no equality allowed.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="comparisons">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Comparing Notations on Insertion Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Case</th><th>Running Time</th><th>Notation</th></tr>
+                    <tr><td>Best Case</td><td>cn (already sorted)</td><td>Θ(n)</td></tr>
+                    <tr><td>Worst Case</td><td>cn² + c'n</td><td>Θ(n²)</td></tr>
+                    <tr><td>Upper Bound</td><td>Always at most cn²</td><td>O(n²)</td></tr>
+                    <tr><td>Lower Bound</td><td>Always at least cn</td><td>Ω(n)</td></tr>
+                </table>
+                <div class="highlight" style="margin-top:16px"><p>Asymptotic notation appears in equations: T(n) = 2T(n/2) + Θ(n) means the combine step costs some function that is Θ(n) — the exact constant doesn't matter for the analysis.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="functions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Function Growth & Special Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Function</th><th>Growth Rate</th><th>Notes</th></tr>
+                    <tr><td>Θ(1)</td><td>Constant</td><td>Does not grow with input</td></tr>
+                    <tr><td>Θ(log n)</td><td>Logarithmic</td><td>Very slow growth</td></tr>
+                    <tr><td>Θ(n)</td><td>Linear</td><td>Proportional to input</td></tr>
+                    <tr><td>Θ(n log n)</td><td>Linearithmic</td><td>Optimal for comparison sort</td></tr>
+                    <tr><td>Θ(n²)</td><td>Quadratic</td><td>Typical naive algorithms</td></tr>
+                    <tr><td>Θ(2ⁿ)</td><td>Exponential</td><td>Impractical for large n</td></tr>
+                </table>
+                <p style="margin-top:16px">Special functions to know: <strong>iterated log</strong> lg* n grows incredibly slowly (lg* 2^65536 = 5). <strong>Factorials</strong> grow faster than exponentials. <strong>Stirling's approximation</strong>: n! ≈ √(2πn)(n/e)ⁿ.</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Analysis — Chapter 14: Dynamic Programming</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b91c1c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #38bdf8; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b91c1c; color: white; border-color: #b91c1c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #38bdf8; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #b91c1c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #38bdf8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #38bdf8; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #b91c1c; overflow-x: auto; margin: 12px 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #38bdf8; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Algorithm Analysis · Chapter 14</div>
+        <h1>Dynamic Programming</h1>
+        <p class="subtitle">Memoization, bottom-up DP, rod cutting, LCS, matrix chain, and OBST</p>
+    </header>
+    <nav>
+        <a href="#what">What Is DP?</a>
+        <a href="#approaches">Top-Down vs Bottom-Up</a>
+        <a href="#rod">Rod Cutting</a>
+        <a href="#matrix">Matrix Chain</a>
+        <a href="#lcs">LCS</a>
+        <a href="#obst">Optimal BST</a>
+        <a href="#when">When to Use DP</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="what">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is Dynamic Programming?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Dynamic programming (DP) solves problems by breaking them into overlapping subproblems and storing results so each subproblem is solved only once.</p>
+                <div class="highlight"><p>The problem with plain divide-and-conquer on overlapping subproblems: the same sub-computation gets redone exponentially many times. DP fixes this by caching results — trading redundant computation for memory.</p></div>
+                <p>DP applies when a problem has two key properties:</p>
+                <ul>
+                    <li><strong>Optimal substructure:</strong> An optimal solution contains optimal solutions to subproblems</li>
+                    <li><strong>Overlapping subproblems:</strong> The same subproblems recur many times (unlike divide-and-conquer where subproblems are independent)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="approaches">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Top-Down vs Bottom-Up</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Top-Down (Memoization)</h3>
+                        <p>Write the natural recursive solution. Add a cache (memo table). Before computing, check if result is already cached. Return cached result or compute and cache.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Bottom-Up (Tabulation)</h3>
+                        <p>Solve smallest subproblems first. Fill a table in order of increasing subproblem size. Each entry uses only already-computed entries. No recursion — just loops.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Bottom-Up, No Memory</h3>
+                        <p>For some problems (e.g., Fibonacci), only the last few computed values are needed. Discard old entries to reduce space from O(n) to O(1).</p>
+                    </div>
+                    <div class="card">
+                        <h3>Which Is Best?</h3>
+                        <p>Bottom-up is usually faster in practice (no recursion overhead, better cache behavior). Top-down is easier to write and only computes needed subproblems.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="rod">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Rod Cutting Problem</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Given a rod of length n and a price table p[i] for rods of length i, find the maximum revenue by cutting the rod into pieces.</p>
+                <p><strong>Optimal substructure:</strong> The best way to cut a rod of length n uses the best cut of the remaining length after the first piece.</p>
+                <pre>
+// Bottom-Up Rod Cutting
+BOTTOM-UP-CUT-ROD(p, n)
+let r[0..n] be a new array
+r[0] = 0
+for j = 1 to n
+    q = -∞
+    for i = 1 to j
+        q = max(q, p[i] + r[j-i])
+    r[j] = q
+return r[n]</pre>
+                <div class="highlight"><p>Runtime: Θ(n²) — two nested loops each running O(n) times. The naive recursive solution runs in Θ(2ⁿ) — exponential. DP provides a dramatic improvement.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="matrix">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Matrix-Chain Multiplication</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Matrix multiplication is associative: (A×B)×C = A×(B×C). But the parenthesization dramatically affects the number of scalar multiplications needed.</p>
+                <p>Given matrices A₁, A₂, ..., Aₙ, find the optimal parenthesization to minimize total multiplications.</p>
+                <p><strong>4-step DP development:</strong></p>
+                <ul>
+                    <li><strong>Step 1:</strong> Characterize optimal substructure — an optimal solution splits at some index k</li>
+                    <li><strong>Step 2:</strong> Define recursively: m[i,j] = min cost to multiply Aᵢ through Aⱼ</li>
+                    <li><strong>Step 3:</strong> Compute m[i,j] bottom-up, filling by increasing chain length</li>
+                    <li><strong>Step 4:</strong> Reconstruct the optimal solution from the s[i,j] table</li>
+                </ul>
+                <div class="highlight"><p>Runtime: Θ(n³) — three nested loops. Brute force trying all parenthesizations is Ω(2ⁿ). The DP table has Θ(n²) entries, each computed in O(n) time.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="lcs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Longest Common Subsequence (LCS)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Given sequences X and Y, find the longest subsequence common to both. Used in DNA comparison, diff tools, version control.</p>
+                <p><strong>Recursive structure:</strong> if xₘ = yₙ, the LCS ends with that character and LCS(X,Y) = LCS(Xₘ₋₁, Yₙ₋₁) + 1. Otherwise, LCS(X,Y) = max(LCS(Xₘ₋₁, Y), LCS(X, Yₙ₋₁)).</p>
+                <div class="grid">
+                    <div class="card"><h3>Table Construction</h3><p>Fill an m×n table c[i,j] = length of LCS of X[1..i] and Y[1..j]. Fill row by row left to right.</p></div>
+                    <div class="card"><h3>Reconstruction</h3><p>Trace back through the table using the b[i,j] pointer table to reconstruct the actual LCS, not just its length.</p></div>
+                </div>
+                <div class="highlight"><p>Runtime: Θ(mn) — fills a table of m×n entries, each in O(1). Space: Θ(mn) for the tables. Can reduce space to O(min(m,n)) if only the length is needed.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="obst">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Optimal Binary Search Trees</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Given keys k₁ &lt; k₂ &lt; ... &lt; kₙ with search probabilities p₁...pₙ and "dummy key" probabilities q₀...qₙ for unsuccessful searches, find the BST minimizing expected search cost.</p>
+                <div class="highlight"><p>Unlike standard BST construction, optimal BST doesn't always put the most frequent key at the root. The optimal structure balances frequency against depth across the entire tree.</p></div>
+                <p>The expected cost considers every key's depth: E[cost] = Σ (depth(kᵢ)+1)·pᵢ + Σ (depth(dᵢ)+1)·qᵢ</p>
+                <p><strong>Runtime:</strong> Θ(n³) for the straightforward DP formulation. Can be improved to Θ(n²) using Knuth's optimization.</p>
+            </div>
+        </div>
+
+        <div class="section" id="when">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>When Should We Use Dynamic Programming?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Use dynamic programming when:</p>
+                <ul>
+                    <li>The problem asks for an <strong>optimal value</strong> (min/max) or counting</li>
+                    <li>The problem has <strong>optimal substructure</strong> — solutions to subproblems combine into the overall solution</li>
+                    <li>Subproblems <strong>overlap</strong> — the same sub-computation appears repeatedly in the recursion tree</li>
+                    <li>The number of distinct subproblems is <strong>polynomial</strong> in the input size</li>
+                </ul>
+                <div class="highlight"><p>Don't use DP if subproblems are independent (use divide-and-conquer instead). Don't use DP if the problem lacks optimal substructure — a greedy solution may work, or the problem may require a different approach entirely.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

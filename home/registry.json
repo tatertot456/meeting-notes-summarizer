@@ -3,36 +3,153 @@
     "title": "COMP4330 Introduction to Machine Learning",
     "filename": "comp4330-introduction-to-machine-learning.html",
     "date": "2026-05-18 05:22 PM",
-    "category": "Machine Learning"
+    "category": "Machine Learning",
+    "accent": "#dc2626",
+    "glow": "#2a0a0a",
+    "badge": "#b91c1c"
   },
   {
     "title": "COMP4330 Getting to Know Your Data",
     "filename": "comp4330-getting-to-know-your-data.html",
     "date": "2026-05-18 05:23 PM",
-    "category": "Machine Learning"
+    "category": "Machine Learning",
+    "accent": "#16a34a",
+    "glow": "#0a2a0a",
+    "badge": "#15803d"
   },
   {
     "title": "COMP4330 Feature Engineering and Data Wrangling",
     "filename": "comp4330-feature-engineering-and-data-wrangling.html",
     "date": "2026-05-18 05:24 PM",
-    "category": "Machine Learning"
+    "category": "Machine Learning",
+    "accent": "#d97706",
+    "glow": "#1f1200",
+    "badge": "#b45309"
   },
   {
     "title": "COMP4330 Classification Basic Concepts",
     "filename": "comp4330-classification-basic-concepts.html",
     "date": "2026-05-18 05:25 PM",
-    "category": "Machine Learning"
+    "category": "Machine Learning",
+    "accent": "#2563eb",
+    "glow": "#0a0a2e",
+    "badge": "#1d4ed8"
   },
   {
     "title": "COMP4330 Classification Advanced Methods",
     "filename": "comp4330-classification-advanced-methods.html",
     "date": "2026-05-18 05:25 PM",
-    "category": "Machine Learning"
+    "category": "Machine Learning",
+    "accent": "#7c3aed",
+    "glow": "#1e0a3c",
+    "badge": "#6d28d9"
   },
   {
     "title": "COMP4330 Unsupervised Classification",
     "filename": "comp4330-unsupervised-classification.html",
     "date": "2026-05-18 05:26 PM",
-    "category": "Machine Learning"
+    "category": "Machine Learning",
+    "accent": "#0d9488",
+    "glow": "#0a2a28",
+    "badge": "#0f766e"
+  },
+  {
+    "title": "Algorithm Analysis Chapter 1 Introduction",
+    "filename": "algorithm-analysis-chapter-1-introduction.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 06:41 PM",
+    "accent": "#ea580c",
+    "glow": "#1f0a00",
+    "badge": "#c2410c"
+  },
+  {
+    "title": "Algorithm Analysis Chapter 3 Asymptotic Notation",
+    "filename": "algorithm-analysis-chapter-3-asymptotic-notation.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 06:45 PM",
+    "accent": "#6d28d9",
+    "glow": "#1a0f3d",
+    "badge": "#5b21b6"
+  },
+  {
+    "title": "Algorithm Analysis Chapter 5 Probabilistic Analysis",
+    "filename": "algorithm-analysis-chapter-5-probabilistic-analysis.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 06:48 PM",
+    "accent": "#0369a1",
+    "glow": "#0a1f2e",
+    "badge": "#075985"
+  },
+  {
+    "title": "Algorithm Analysis Chapter 6 Heapsort",
+    "filename": "algorithm-analysis-chapter-6-heapsort.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 06:48 PM",
+    "accent": "#15803d",
+    "glow": "#0a2010",
+    "badge": "#166534"
+  },
+  {
+    "title": "Algorithm Analysis Chapter 7 Quicksort",
+    "filename": "algorithm-analysis-chapter-7-quicksort.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 06:49 PM",
+    "accent": "#b45309",
+    "glow": "#1f1200",
+    "badge": "#92400e"
+  },
+  {
+    "title": "Algorithm Analysis Chapter 8 Linear Time Sorting",
+    "filename": "algorithm-analysis-chapter-8-linear-time-sorting.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 06:51 PM",
+    "accent": "#be185d",
+    "glow": "#2a0a1a",
+    "badge": "#9d174d"
+  },
+  {
+    "title": "Algorithm Analysis Chapter 14 Dynamic Programming",
+    "filename": "algorithm-analysis-chapter-14-dynamic-programming.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 06:54 PM",
+    "accent": "#dc2626",
+    "glow": "#2a0a0a",
+    "badge": "#b91c1c"
+  },
+  {
+    "title": "Algorithm Analysis Chapter 15 Greedy Algorithms",
+    "filename": "algorithm-analysis-chapter-15-greedy-algorithms.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 06:55 PM",
+    "accent": "#16a34a",
+    "glow": "#0a2a0a",
+    "badge": "#15803d"
+  },
+  {
+    "title": "Algorithm Analysis Hashtables",
+    "filename": "algorithm-analysis-hashtables.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 06:56 PM",
+    "accent": "#d97706",
+    "glow": "#1f1200",
+    "badge": "#b45309"
+  },
+  {
+    "title": "Algorithm Analysis Chapter 4 Recurrences and Master Theorem",
+    "filename": "algorithm-analysis-chapter-4-recurrences-and-master-theorem.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 07:03 PM",
+    "accent": "#2563eb",
+    "glow": "#0a0a2e",
+    "badge": "#1d4ed8"
+  },
+  {
+    "title": "Algorithm Analysis Chapter 2 Insertion Sort and Merge Sort",
+    "filename": "algorithm-analysis-chapter-2-insertion-sort-and-merge-sort.html",
+    "category": "Algorithm Analysis",
+    "date": "2026-05-19 07:13 PM",
+    "accent": "#7c3aed",
+    "glow": "#1e0a3c",
+    "badge": "#6d28d9"
   }
 ]

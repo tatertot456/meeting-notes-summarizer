@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Analysis — Chapter 5: Probabilistic Analysis</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a1f2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #075985; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0369a1; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #075985; color: white; border-color: #075985; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0369a1; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #075985; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0369a1; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0369a1; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0369a1; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Algorithm Analysis · Chapter 5</div>
+        <h1>Probabilistic Analysis & Randomized Algorithms</h1>
+        <p class="subtitle">Indicator random variables, the hiring problem, and birthday paradox</p>
+    </header>
+    <nav>
+        <a href="#hiring">Hiring Problem</a>
+        <a href="#indicator">Indicator Variables</a>
+        <a href="#randomized">Randomized Algorithms</a>
+        <a href="#birthday">Birthday Paradox</a>
+        <a href="#streaks">Streaks</a>
+        <a href="#online">Online Hiring</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="hiring">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Hiring Problem</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>You interview candidates one at a time. After each interview, you must immediately hire or reject. You always hire someone better than your current employee.</p>
+                <div class="grid">
+                    <div class="card"><h3>Worst Case</h3><p>Candidates arrive in increasing order — you hire everyone. Cost = n·(hire cost). This happens with probability 1/n! of all orderings.</p></div>
+                    <div class="card"><h3>Average Case</h3><p>Over all random orderings, the expected number of hires is O(log n). Much better than worst case!</p></div>
+                </div>
+                <div class="highlight"><p>This problem motivates probabilistic analysis: worst case is too pessimistic. By analyzing expected behavior over random inputs, we get a much more realistic picture.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="indicator">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Indicator Random Variables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An <strong>indicator random variable</strong> I{A} for event A is defined as:</p>
+                <ul>
+                    <li>I{A} = 1 if event A occurs</li>
+                    <li>I{A} = 0 if event A does not occur</li>
+                </ul>
+                <p><strong>Key property (Lemma 5.1):</strong> E[I{A}] = Pr{A}</p>
+                <p>The expected value of the indicator equals the probability of the event. This lets us convert counting problems into probability problems.</p>
+                <div class="highlight"><p>For the hiring problem: let Xᵢ = I{candidate i is hired}. Candidate i is hired iff they are the best of the first i candidates — probability 1/i. Total hires E[X] = Σ 1/i = H(n) = Θ(ln n) = O(log n).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="randomized">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Randomized Algorithms</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>randomized algorithm</strong> makes random choices during execution. Instead of relying on the input being random, we randomize the algorithm itself.</p>
+                <div class="grid">
+                    <div class="card"><h3>Probabilistic Analysis</h3><p>Assumes input is drawn randomly. Performance depends on input distribution — requires knowledge of that distribution.</p></div>
+                    <div class="card"><h3>Randomized Algorithm</h3><p>Algorithm makes random choices. Performance is guaranteed regardless of input — adversary cannot choose a bad input because the algorithm's behavior is random.</p></div>
+                </div>
+                <div class="highlight"><p>For the hiring problem: randomly permute candidates before interviewing. Now any ordering is equally likely regardless of how they arrived — expected cost is O(log n) guaranteed.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="birthday">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Birthday Paradox</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>How many people must be in a room before there's a 50% chance two share a birthday?</p>
+                <p>Surprisingly: only <strong>23 people</strong>. With 57 people, the probability exceeds 99%.</p>
+                <div class="highlight"><p>Using indicator variables: let Xᵢⱼ = I{person i and j share a birthday}. E[Xᵢⱼ] = 1/365. Total pairs = C(k,2) = k(k-1)/2. Expected matches = k(k-1)/730. Setting this to 1 gives k ≈ 28.</p></div>
+                <p>This result is counterintuitive because we're not asking "does anyone share MY birthday" — we're asking "does any pair share a birthday." The number of pairs grows quadratically with k.</p>
+            </div>
+        </div>
+
+        <div class="section" id="streaks">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Balls and Bins, and Streaks</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Balls and Bins</h3><p>Throw n balls into n bins uniformly at random. Expected balls per bin = 1. Expected empty bins = n/e. Maximum load = Θ(log n / log log n) with high probability.</p></div>
+                    <div class="card"><h3>Streaks</h3><p>Flip a fair coin n times. What is the longest streak of heads? Expected longest streak = Θ(log n). With high probability, the longest streak is between (1/2)log n and 2 log n.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="online">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Online Hiring Problem</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>What if you can only hire one person total? The strategy:</p>
+                <ul>
+                    <li>Interview the first k candidates but reject them all (use as a baseline)</li>
+                    <li>Hire the next candidate who is better than all k baseline candidates</li>
+                    <li>Optimal k = n/e ≈ 0.368n</li>
+                </ul>
+                <div class="highlight"><p>With k = n/e, the probability of hiring the best overall candidate is at least 1/e ≈ 0.368. This is the best possible strategy for the online setting — a beautiful result from optimal stopping theory.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

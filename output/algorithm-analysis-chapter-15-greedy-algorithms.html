@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Analysis — Chapter 15: Greedy Algorithms</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #15803d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #4ade80; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #15803d; color: white; border-color: #15803d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #4ade80; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a0a; border-left: 3px solid #15803d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #4ade80; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #4ade80; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #15803d; overflow-x: auto; margin: 12px 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #4ade80; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Algorithm Analysis · Chapter 15</div>
+        <h1>Greedy Algorithms</h1>
+        <p class="subtitle">Activity selection, knapsack problem, and Huffman codes</p>
+    </header>
+    <nav>
+        <a href="#what">What Is Greedy?</a>
+        <a href="#activity">Activity Selection</a>
+        <a href="#elements">Greedy Elements</a>
+        <a href="#knapsack">Knapsack Problem</a>
+        <a href="#huffman">Huffman Codes</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="what">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is a Greedy Algorithm?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A greedy algorithm makes the locally optimal choice at each step, hoping it leads to a globally optimal solution. It never reconsiders past choices.</p>
+                <div class="grid">
+                    <div class="card"><h3>Greedy vs DP</h3><p>DP considers all choices and picks the best. Greedy makes one choice that seems best right now. Greedy is simpler and faster — but only correct for certain problem structures.</p></div>
+                    <div class="card"><h3>When Greedy Works</h3><p>Must have greedy choice property (a globally optimal solution can be arrived at by making locally optimal choices) and optimal substructure.</p></div>
+                </div>
+                <div class="highlight"><p>Greedy algorithms don't always work — the fractional knapsack problem has a greedy solution but the 0-1 knapsack does not. Knowing which structure applies is the key skill.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="activity">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Activity Selection Problem</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Given n activities with start times sᵢ and finish times fᵢ, select the maximum number of non-overlapping activities.</p>
+                <p><strong>Greedy choice:</strong> Always pick the activity that finishes earliest — it leaves the most time for remaining activities.</p>
+                <pre>
+GREEDY-ACTIVITY-SELECTOR(s, f)
+n = s.length
+A = {a₁}              // a₁ has earliest finish time
+k = 1
+for m = 2 to n
+    if s[m] ≥ f[k]    // activity m starts after k finishes
+        A = A ∪ {aₘ}
+        k = m
+return A</pre>
+                <div class="highlight"><p>Runtime: Θ(n) after sorting by finish time (sorting is Θ(n log n)). The greedy choice is provably optimal: the activity that finishes first is always part of some optimal solution.</p></div>
+                <p>The recursive version is conceptually clean but the iterative version is O(n) in time and O(1) in extra space — no recursion stack needed.</p>
+            </div>
+        </div>
+
+        <div class="section" id="elements">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Elements of the Greedy Strategy</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>To prove a greedy algorithm correct, establish two properties:</p>
+                <ul>
+                    <li><strong>Greedy choice property:</strong> There always exists an optimal solution that includes the greedy choice. Prove by exchange argument — take any optimal solution, swap in the greedy choice, show it's still optimal.</li>
+                    <li><strong>Optimal substructure:</strong> After making the greedy choice, the remaining problem has optimal substructure — its optimal solution extends to the overall optimal solution.</li>
+                </ul>
+                <div class="highlight"><p>Exchange argument pattern: suppose the greedy choice (e.g., earliest finishing activity) is NOT in an optimal solution. Show you can swap it in without making things worse. Therefore, the greedy choice can always be included — making greedy correct.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="knapsack">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Knapsack Problem</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Fractional Knapsack</h3>
+                        <p>Can take fractions of items. Greedy works: sort by profit/weight ratio, take greedily from highest ratio down. O(n log n) time.</p>
+                    </div>
+                    <div class="card">
+                        <h3>0-1 Knapsack</h3>
+                        <p>Must take whole items or leave them. Greedy FAILS here — counterexamples exist. Requires dynamic programming. O(nW) time.</p>
+                    </div>
+                </div>
+                <div class="highlight"><p>Why greedy fails for 0-1: taking the highest ratio item might leave a gap in the knapsack that smaller items can't fill efficiently. DP considers all combinations. The distinction between fractional and 0-1 is a classic example of why you must verify greedy choice property.</p></div>
+                <p><strong>DP for 0-1 Knapsack:</strong> K[i,w] = max value using items 1..i with capacity w. Either exclude item i (K[i-1,w]) or include it if it fits (pᵢ + K[i-1, w-wᵢ]).</p>
+            </div>
+        </div>
+
+        <div class="section" id="huffman">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Huffman Codes</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Huffman coding compresses data by assigning shorter binary codes to more frequent characters. It produces an optimal prefix-free code.</p>
+                <p><strong>Algorithm:</strong></p>
+                <ul>
+                    <li>Build a min-priority queue of characters by frequency</li>
+                    <li>Repeatedly extract two minimum-frequency nodes</li>
+                    <li>Merge them into a new node with combined frequency</li>
+                    <li>Insert the merged node back into the queue</li>
+                    <li>Repeat until one node remains — that's the root of the Huffman tree</li>
+                </ul>
+                <div class="highlight"><p>Greedy choice: always merge the two least frequent characters. Proof: if two characters have the lowest frequencies, there exists an optimal code where they are siblings at the deepest level — and greedy achieves exactly that.</p></div>
+                <p><strong>Runtime:</strong> O(n log n) — n-1 merge operations, each O(log n) with a min-heap. Achieves optimal compression for given character frequencies — no other prefix-free code does better.</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -6,6 +6,21 @@ OUTPUT_FOLDER = Path(__file__).parent.parent / "output"
 HOME_FOLDER = Path(__file__).parent.parent / "home"
 REGISTRY_FILE = HOME_FOLDER / "registry.json"
 
+PAGE_COLORS = [
+    {"accent": "#dc2626", "glow": "#2a0a0a", "badge": "#b91c1c"},  # red
+    {"accent": "#16a34a", "glow": "#0a2a0a", "badge": "#15803d"},  # green
+    {"accent": "#d97706", "glow": "#1f1200", "badge": "#b45309"},  # amber
+    {"accent": "#2563eb", "glow": "#0a0a2e", "badge": "#1d4ed8"},  # blue
+    {"accent": "#7c3aed", "glow": "#1e0a3c", "badge": "#6d28d9"},  # purple
+    {"accent": "#0d9488", "glow": "#0a2a28", "badge": "#0f766e"},  # teal
+    {"accent": "#ea580c", "glow": "#1f0a00", "badge": "#c2410c"},  # orange
+    {"accent": "#6d28d9", "glow": "#1a0f3d", "badge": "#5b21b6"},  # violet
+    {"accent": "#0369a1", "glow": "#0a1f2e", "badge": "#075985"},  # sky
+    {"accent": "#15803d", "glow": "#0a2010", "badge": "#166534"},  # emerald
+    {"accent": "#b45309", "glow": "#1f1200", "badge": "#92400e"},  # yellow
+    {"accent": "#be185d", "glow": "#2a0a1a", "badge": "#9d174d"},  # pink
+]
+
 
 def save_page(title: str, html_content: str, category: str = "General"):
     OUTPUT_FOLDER.mkdir(exist_ok=True)
@@ -33,11 +48,16 @@ def register_page(title: str, filename: str, category: str):
 
     existing = [p for p in registry if p["filename"] == filename]
     if not existing:
+        color_index = len(registry) % len(PAGE_COLORS)
+        color = PAGE_COLORS[color_index]
         registry.append({
             "title": title,
             "filename": filename,
             "category": category,
-            "date": datetime.now().strftime("%Y-%m-%d %I:%M %p")
+            "date": datetime.now().strftime("%Y-%m-%d %I:%M %p"),
+            "accent": color["accent"],
+            "glow": color["glow"],
+            "badge": color["badge"],
         })
         REGISTRY_FILE.write_text(json.dumps(registry, indent=2), encoding="utf-8")
         print(f"Registered: {title} under '{category}'")
@@ -99,10 +119,13 @@ def rebuild_home():
 
         cards = ""
         for page in pages:
+            p_accent = page.get("accent", accent)
+            p_glow = page.get("glow", glow)
+            p_badge = page.get("badge", badge)
             cards += f"""
-            <div class="card" style="--accent: {accent}; --glow: {glow};">
+            <div class="card" style="--accent: {p_accent}; --glow: {p_glow};">
                 <a href="../output/{page['filename']}">
-                    <span class="badge" style="background:{badge};">{cat}</span>
+                    <span class="badge" style="background:{p_badge};">{cat}</span>
                     <h2>{page['title']}</h2>
                     <p class="date">{page['date']}</p>
                 </a>

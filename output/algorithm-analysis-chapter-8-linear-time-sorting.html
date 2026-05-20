@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Analysis — Chapter 8: Linear Time Sorting</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a1a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #be185d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #9d174d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #be185d; color: white; border-color: #be185d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #9d174d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a1a; border-left: 3px solid #be185d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #9d174d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #9d174d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #be185d; overflow-x: auto; margin: 12px 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #9d174d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Algorithm Analysis · Chapter 8</div>
+        <h1>Sorting in Linear Time</h1>
+        <p class="subtitle">Decision trees, lower bounds, counting sort, radix sort, and bucket sort</p>
+    </header>
+    <nav>
+        <a href="#lower">Lower Bounds</a>
+        <a href="#counting">Counting Sort</a>
+        <a href="#radix">Radix Sort</a>
+        <a href="#bucket">Bucket Sort</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="lower">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Decision Trees & Lower Bounds for Sorting</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Any comparison-based sort can be modeled as a <strong>decision tree</strong> — a binary tree where each internal node represents a comparison and each leaf represents an output permutation.</p>
+                <ul>
+                    <li>A correct sort must reach every possible permutation — n! leaves</li>
+                    <li>A binary tree with n! leaves has height ≥ ⌈log₂(n!)⌉</li>
+                    <li>By Stirling's approximation: log₂(n!) = Θ(n log n)</li>
+                </ul>
+                <div class="highlight"><p>Theorem: Any comparison-based sorting algorithm requires Ω(n log n) comparisons in the worst case. This means merge sort and heapsort are asymptotically optimal comparison sorts.</p></div>
+                <p>To beat Ω(n log n), we must use information beyond comparisons — knowledge of the values themselves. That's exactly what counting sort, radix sort, and bucket sort do.</p>
+            </div>
+        </div>
+
+        <div class="section" id="counting">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Counting Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Counting sort assumes all input values are integers in the range [0, k]. It counts occurrences rather than comparing elements.</p>
+                <pre>
+COUNTING-SORT(A, B, k)
+// Step 1: Count occurrences
+let C[0..k] be a new array initialized to 0
+for j = 1 to n
+    C[A[j]] = C[A[j]] + 1
+
+// Step 2: Accumulate counts
+for i = 1 to k
+    C[i] = C[i] + C[i-1]
+
+// Step 3: Place elements
+for j = n downto 1
+    B[C[A[j]]] = A[j]
+    C[A[j]] = C[A[j]] - 1</pre>
+                <div class="highlight"><p>Runtime: Θ(n + k). When k = O(n), this is Θ(n) — linear time! The iteration in step 3 goes backwards (j = n downto 1) to preserve stability: equal elements appear in their original order.</p></div>
+                <p><strong>Stability</strong> is crucial because counting sort is used as a subroutine in radix sort — the sort must preserve the relative order of equal elements from previous passes.</p>
+            </div>
+        </div>
+
+        <div class="section" id="radix">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Radix Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Radix sort sorts multi-digit numbers digit by digit, from <strong>least significant to most significant</strong> digit, using a stable sort at each pass.</p>
+                <div class="highlight"><p>Why least significant digit first? If you sort by most significant digit, you'd need to recursively sort each bucket — expensive. Sorting from least to most significant with a stable sort accumulates the correct order across passes.</p></div>
+                <div class="grid">
+                    <div class="card"><h3>Runtime</h3><p>Θ(d·(n+k)) where d = number of digits, k = range per digit. With d constant and k = O(n), this is Θ(n).</p></div>
+                    <div class="card"><h3>Stability Requirement</h3><p>The per-digit sort MUST be stable. Counting sort is the natural choice — that's why we studied stability there first.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="bucket">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Bucket Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Bucket sort assumes input is uniformly distributed over [0, 1). It divides the range into n equal-width buckets and distributes elements into them.</p>
+                <pre>
+BUCKET-SORT(A)
+let B[0..n-1] be an array of empty lists
+for i = 1 to n
+    insert A[i] into list B[⌊n·A[i]⌋]
+for i = 0 to n-1
+    sort list B[i] with insertion sort
+concatenate lists B[0], B[1], ..., B[n-1]</pre>
+                <div class="highlight"><p>Expected runtime: Θ(n). With uniform distribution, each bucket gets O(1) elements on average — insertion sort on each bucket takes O(1) expected time. Total: n buckets × O(1) = O(n).</p></div>
+                <p>Unlike counting and radix sort, bucket sort's runtime depends on the input distribution. If inputs cluster in one bucket, that bucket takes longer to sort — worst case degrades to O(n²).</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

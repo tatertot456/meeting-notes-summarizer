@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Analysis — Chapter 7: Quicksort</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #92400e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #fb923c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #92400e; color: white; border-color: #92400e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #fb923c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #92400e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #fb923c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #fb923c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #b45309; overflow-x: auto; margin: 12px 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #fb923c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Algorithm Analysis · Chapter 7</div>
+        <h1>Quicksort</h1>
+        <p class="subtitle">Partitioning, correctness, efficiency, and randomization</p>
+    </header>
+    <nav>
+        <a href="#description">Description</a>
+        <a href="#algorithm">Algorithm</a>
+        <a href="#correctness">Correctness</a>
+        <a href="#efficiency">Efficiency</a>
+        <a href="#randomized">Randomized Quicksort</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="description">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Quicksort Description</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Quicksort is a divide-and-conquer sorting algorithm. It is one of the most widely used sorting algorithms in practice due to its excellent average-case performance and cache efficiency.</p>
+                <ul>
+                    <li><strong>Divide:</strong> Partition the array around a pivot element</li>
+                    <li><strong>Conquer:</strong> Recursively sort the two subarrays on either side of the pivot</li>
+                    <li><strong>Combine:</strong> Nothing — the array is sorted in place</li>
+                </ul>
+                <div class="highlight"><p>After partitioning, the pivot is in its final sorted position. All elements to its left are ≤ pivot, all elements to its right are ≥ pivot — forever.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="algorithm">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Quicksort Algorithm</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>
+QUICKSORT(A, p, r)
+if p &lt; r
+    q = PARTITION(A, p, r)
+    QUICKSORT(A, p, q-1)
+    QUICKSORT(A, q+1, r)
+
+PARTITION(A, p, r)
+x = A[r]          // pivot
+i = p - 1
+for j = p to r-1
+    if A[j] ≤ x
+        i = i + 1
+        swap A[i] with A[j]
+swap A[i+1] with A[r]
+return i + 1</pre>
+                <p>PARTITION maintains four regions:</p>
+                <ul>
+                    <li>A[p..i]: elements ≤ pivot</li>
+                    <li>A[i+1..j-1]: elements &gt; pivot</li>
+                    <li>A[j..r-1]: not yet examined</li>
+                    <li>A[r]: the pivot</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="correctness">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Quicksort Correctness</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>PARTITION's correctness is proved via a loop invariant on the four regions. At the start of each iteration:</p>
+                <ul>
+                    <li>All elements in A[p..i] are ≤ x (the pivot)</li>
+                    <li>All elements in A[i+1..j-1] are &gt; x</li>
+                    <li>A[r] = x (pivot is untouched)</li>
+                </ul>
+                <div class="highlight"><p>After PARTITION places the pivot in its final position q, QUICKSORT recursively sorts A[p..q-1] and A[q+1..r]. By induction, these subarrays become sorted — and since the pivot is already in place, the whole array is sorted.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="efficiency">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Quicksort Efficiency</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Worst Case — O(n²)</h3><p>Pivot is always the smallest or largest element (already-sorted input). Produces maximally unbalanced partitions: T(n) = T(n-1) + Θ(n) → Θ(n²).</p></div>
+                    <div class="card"><h3>Best Case — O(n log n)</h3><p>Pivot always splits array exactly in half. T(n) = 2T(n/2) + Θ(n) → Θ(n log n). Same recurrence as merge sort.</p></div>
+                    <div class="card"><h3>Average Case — O(n log n)</h3><p>Over all permutations of input, expected runtime is Θ(n log n). The constant is very small — faster in practice than merge sort.</p></div>
+                    <div class="card"><h3>In-Place</h3><p>Sorts using only O(log n) stack space for recursion. No auxiliary array needed — unlike merge sort.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="randomized">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Randomized Quicksort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Instead of always using A[r] as pivot, randomly select a pivot before partitioning:</p>
+                <pre>
+RANDOMIZED-PARTITION(A, p, r)
+i = RANDOM(p, r)
+swap A[i] with A[r]
+return PARTITION(A, p, r)</pre>
+                <div class="highlight"><p>With randomized pivot selection, no particular input causes worst-case behavior. An adversary cannot construct a bad input because they don't know which element will be chosen as pivot. Expected runtime is Θ(n log n) regardless of input.</p></div>
+                <p>This is the version used in practice. The expected number of comparisons is exactly 2n·ln(n) ≈ 1.386·n log₂(n).</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
