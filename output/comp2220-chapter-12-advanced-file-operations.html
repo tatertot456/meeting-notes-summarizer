@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 12: Advanced File Operations</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a1a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #9d174d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #9d174d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #9d174d; color: white; border-color: #9d174d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #9d174d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a1a; border-left: 3px solid #9d174d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #9d174d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #9d174d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #9d174d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #9d174d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #9d174d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 12</div>
+        <h1>Advanced File Operations</h1>
+        <p class="subtitle">File modes, formatting, error testing, character I/O, binary files, random access, and struct records</p>
+    </header>
+    <nav>
+        <a href="#fileops">File Operations</a>
+        <a href="#modes">Open Modes & Flags</a>
+        <a href="#formatting">Output Formatting</a>
+        <a href="#errors">Error Testing</a>
+        <a href="#readwrite">Read & Write Functions</a>
+        <a href="#binary">Binary Files</a>
+        <a href="#structs">Struct Records</a>
+        <a href="#random">Random Access</a>
+        <a href="#both">Input & Output Together</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="fileops">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>File Operations Overview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Files allow data to persist between program runs. Requires <code>#include &lt;fstream&gt;</code>.</p>
+                <div class="grid">
+                    <div class="card"><h3>ifstream</h3><p>Input only. File cannot be written. open fails if file doesn't exist.</p></div>
+                    <div class="card"><h3>ofstream</h3><p>Output only. File cannot be read. Created if it doesn't exist. Existing content is ERASED.</p></div>
+                    <div class="card"><h3>fstream</h3><p>Both input and output. Must specify mode flags on open. Most flexible option.</p></div>
+                    <div class="card"><h3>Multiple Files</h3><p>A program can have multiple files open simultaneously. Define a separate file stream object for each file.</p></div>
+                </div>
+                <pre>#include &lt;fstream&gt;
+
+// ifstream — input only
+ifstream gradeList("grades.txt");
+
+// ofstream — output only
+ofstream reportFile("report.txt");
+
+// fstream — specify mode explicitly
+fstream dFile;
+dFile.open("class.txt", ios::in | ios::out);
+
+// Copy 10 numbers between files
+fstream infile("input.txt", ios::in);
+fstream outfile("output.txt", ios::out);
+int num;
+for (int i = 1; i &lt;= 10; i++)
+{
+    infile &gt;&gt; num;
+    outfile &lt;&lt; num;
+}
+infile.close();
+outfile.close();</pre>
+                <div class="highlight"><p>Always close files when done — buffered output may not be written to disk until the file is properly closed. Always test for open failure before reading or writing. File stream objects evaluate to false if the open failed.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="modes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Open Modes & Access Flags</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Flag</th><th>Meaning</th></tr>
+                    <tr><td>ios::in</td><td>Open for input (reading)</td></tr>
+                    <tr><td>ios::out</td><td>Open for output (writing)</td></tr>
+                    <tr><td>ios::binary</td><td>Open in binary mode</td></tr>
+                    <tr><td>ios::app</td><td>Append — write to end of existing file</td></tr>
+                    <tr><td>ios::trunc</td><td>Truncate — erase existing file contents (default for ios::out)</td></tr>
+                    <tr><td>ios::ate</td><td>At end — open and seek to end of file</td></tr>
+                </table>
+                <pre>// Combine flags with | operator
+fstream file("data.txt", ios::in | ios::out);
+fstream binFile("data.dat", ios::in | ios::binary);
+
+// Test for open failure
+ifstream gradeList("grades.txt");
+if (!gradeList)
+    cout &lt;&lt; "Error: could not open file\n";
+
+if (gradeList.fail())
+    cout &lt;&lt; "Open failed\n";</pre>
+            </div>
+        </div>
+
+        <div class="section" id="formatting">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>File Output Formatting</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>File stream objects support the same formatting manipulators as cout. Requires <code>#include &lt;iomanip&gt;</code>.</p>
+                <pre>#include &lt;iomanip&gt;
+
+ofstream outFile("report.txt");
+
+outFile &lt;&lt; fixed &lt;&lt; setprecision(2);
+outFile &lt;&lt; setw(10) &lt;&lt; "Name"
+        &lt;&lt; setw(8)  &lt;&lt; "Score" &lt;&lt; endl;
+outFile &lt;&lt; setw(10) &lt;&lt; "Alice"
+        &lt;&lt; setw(8)  &lt;&lt; 95.5 &lt;&lt; endl;</pre>
+                <div class="highlight"><p>Everything you can do with cout formatting (setw, fixed, setprecision, showpoint, left, right) works identically with file output stream objects. Always pass file stream objects to functions by reference — never by value.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="errors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Detailed Error Testing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Stream state bits provide detailed information about what went wrong with a file operation.</p>
+                <table>
+                    <tr><th>Member Function</th><th>Returns true when...</th></tr>
+                    <tr><td>eof()</td><td>End of file has been reached</td></tr>
+                    <tr><td>fail()</td><td>Operation failed (bad data, open failure)</td></tr>
+                    <tr><td>bad()</td><td>A serious unrecoverable error occurred</td></tr>
+                    <tr><td>good()</td><td>No error bits are set — stream is OK</td></tr>
+                    <tr><td>clear()</td><td>Clears all error state bits (not a test — resets state)</td></tr>
+                </table>
+                <pre>ifstream dataFile("numbers.txt");
+
+int num;
+while (dataFile &gt;&gt; num)
+{
+    cout &lt;&lt; num &lt;&lt; endl;
+}
+
+if (dataFile.eof())
+    cout &lt;&lt; "Reached end of file normally\n";
+else if (dataFile.fail())
+    cout &lt;&lt; "Read failed — bad data?\n";
+
+// Clear error state before seeking (required after eof)
+dataFile.clear();
+dataFile.seekg(0L, ios::beg);  // go back to beginning</pre>
+            </div>
+        </div>
+
+        <div class="section" id="readwrite">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Member Functions for Reading & Writing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>These functions handle whitespace and single characters — things that &gt;&gt; and &lt;&lt; can't handle cleanly.</p>
+                <pre>// getline: read a full line including spaces
+string name, address;
+getline(myFile, name);              // reads until '\n'
+getline(myFile, address, '\t');     // reads until tab character
+// default delimiter is '\n' if third argument omitted
+
+// get: read a single character (including whitespace)
+char letterGrade;
+gradeFile.get(letterGrade);         // reads next char, even spaces
+
+// put: write a single character to a file
+reportFile.put(letterGrade);
+
+// Example: copy file character by character
+char ch;
+while (inFile.get(ch))
+    outFile.put(ch);</pre>
+                <div class="highlight"><p>The &gt;&gt; operator skips whitespace before reading — you can't use it to read spaces, tabs, or newlines as data. Use get() for single character I/O that preserves whitespace. Use getline() for entire lines. These functions are essential for processing text files where formatting and whitespace matter.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="binary">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Binary Files</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Binary files store raw, unformatted data — no ASCII text conversion. Use the ios::binary flag and the read/write member functions instead of &lt;&lt; and &gt;&gt;.</p>
+                <pre>// Open in binary mode
+fstream binFile("nums.dat", ios::in | ios::binary);
+fstream outBin("output.dat", ios::out | ios::binary);
+
+// Read/write a char
+char ch;
+binFile.read(&amp;ch, sizeof(ch));   // read sizeof(ch) bytes into ch
+outBin.write(&amp;ch, sizeof(ch));   // write sizeof(ch) bytes from ch
+
+// Read/write non-char types: must cast address to char*
+int num;
+binFile.read(reinterpret_cast&lt;char *&gt;(&amp;num), sizeof(num));
+outBin.write(reinterpret_cast&lt;char *&gt;(&amp;num), sizeof(num));
+
+double value;
+binFile.read(reinterpret_cast&lt;char *&gt;(&amp;value), sizeof(value));</pre>
+                <div class="highlight"><p>reinterpret_cast&lt;char *&gt;(&amp;num) tells the compiler "treat the address of num as if it were the address of a char array." The read/write functions work with raw bytes, so they need a char* address. sizeof(num) tells them exactly how many bytes to read or write. This is the standard pattern for all non-char binary I/O.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="structs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Creating Records with Structures</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Structs can be written to and read from binary files as complete records — all members at once in a single read/write call.</p>
+                <pre>struct TestScore
+{
+    int studentId;
+    double score;
+    char grade;
+};
+
+TestScore oneTest;
+oneTest.studentId = 1001;
+oneTest.score = 95.5;
+oneTest.grade = 'A';
+
+// Open binary file
+fstream gradeFile("grades.dat", ios::out | ios::binary);
+
+// Write entire struct as one record
+gradeFile.write(reinterpret_cast&lt;char *&gt;(&amp;oneTest),
+                sizeof(oneTest));
+
+// Read it back
+fstream readFile("grades.dat", ios::in | ios::binary);
+TestScore readTest;
+readFile.read(reinterpret_cast&lt;char *&gt;(&amp;readTest),
+              sizeof(readTest));
+cout &lt;&lt; readTest.studentId &lt;&lt; " " &lt;&lt; readTest.score;</pre>
+                <div class="highlight"><p>Each struct written to a binary file becomes a fixed-size record — sizeof(TestScore) bytes. Since all records are the same size, you can calculate the position of any record and jump directly to it — the foundation of random access file processing.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="random">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Random Access Files</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Sequential access</strong> reads from start to end in order. <strong>Random access</strong> jumps directly to any position — like accessing array elements by index.</p>
+                <table>
+                    <tr><th>Function</th><th>Purpose</th></tr>
+                    <tr><td>seekg(offset, mode)</td><td>Set READ position (seek get) for input files</td></tr>
+                    <tr><td>seekp(offset, mode)</td><td>Set WRITE position (seek put) for output files</td></tr>
+                    <tr><td>tellg()</td><td>Return current byte position in input file</td></tr>
+                    <tr><td>tellp()</td><td>Return current byte position in output file</td></tr>
+                </table>
+                <table style="margin-top:12px">
+                    <tr><th>Mode Flag</th><th>Starting Point</th></tr>
+                    <tr><td>ios::beg</td><td>Beginning of file</td></tr>
+                    <tr><td>ios::cur</td><td>Current position</td></tr>
+                    <tr><td>ios::end</td><td>End of file</td></tr>
+                </table>
+                <pre>// Jump to 26th byte from beginning
+inData.seekg(25L, ios::beg);
+
+// Move 10 bytes before current position
+outData.seekp(-10L, ios::cur);
+
+// Go to beginning of file
+gradeFile.seekg(0L, ios::beg);
+
+// Jump to the Nth struct record (random access by record number)
+int recordNum = 4;   // want record #5 (0-based)
+gradeFile.seekg(recordNum * sizeof(TestScore), ios::beg);
+gradeFile.read(reinterpret_cast&lt;char *&gt;(&amp;oneTest), sizeof(oneTest));
+
+// Get current position
+long whereAmI = inData.tellg();
+
+// IMPORTANT: clear eof flag before seeking
+if (gradeFile.eof())
+{
+    gradeFile.clear();    // must clear before seeking
+    gradeFile.seekg(0L, ios::beg);
+}</pre>
+                <div class="highlight"><p>Random access only works reliably with fixed-size records — that's why binary struct files are perfect for it. If record sizes vary (like text lines), you can't calculate positions directly. Always clear the eof flag with clear() before calling seekg or seekp — seeking after eof without clearing will fail silently.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="both">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Opening a File for Both Input and Output</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A file can be open for both reading and writing simultaneously — useful for updating records in place without creating a separate output file.</p>
+                <pre>// Open for both input and output
+fstream gradeList("grades.dat", ios::in | ios::out);
+
+// Open for both in binary mode
+fstream binData("records.dat", ios::in | ios::out | ios::binary);
+
+// Typical update pattern:
+// 1. Seek to the record position
+// 2. Read the record
+// 3. Modify the data in memory
+// 4. Seek back to the same position
+// 5. Write the updated record
+
+int recordNum = 2;
+TestScore record;
+
+// Read record #3
+binData.seekg(recordNum * sizeof(TestScore), ios::beg);
+binData.read(reinterpret_cast&lt;char *&gt;(&record), sizeof(record));
+
+// Modify
+record.grade = 'B';
+
+// Write back to same position
+binData.seekp(recordNum * sizeof(TestScore), ios::beg);
+binData.write(reinterpret_cast&lt;char *&gt;(&record), sizeof(record));</pre>
+                <div class="highlight"><p>Opening with ios::in | ios::out does NOT erase the file — it opens the existing file for modification. This is the key difference from ios::out alone (which erases the file). Use fstream (not ifstream or ofstream) when you need both input and output on the same file.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 6: Functions</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a28, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0f766e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0f766e; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0f766e; color: white; border-color: #0f766e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0f766e; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a28; border-left: 3px solid #0f766e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0f766e; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0f766e; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #0f766e; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #0f766e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0f766e; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 6</div>
+        <h1>Functions</h1>
+        <p class="subtitle">Modular programming, parameters, return values, scope, references, and overloading</p>
+    </header>
+    <nav>
+        <a href="#modular">Modular Programming</a>
+        <a href="#defining">Defining Functions</a>
+        <a href="#prototypes">Prototypes</a>
+        <a href="#parameters">Parameters</a>
+        <a href="#returning">Return Values</a>
+        <a href="#scope">Scope & Lifetime</a>
+        <a href="#advanced">Advanced Features</a>
+        <a href="#reference">Reference Parameters</a>
+        <a href="#overloading">Overloading</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="modular">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Modular Programming</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Modular programming</strong> breaks a program into smaller, manageable functions. A <strong>function</strong> is a named collection of statements that performs a specific task.</p>
+                <div class="grid">
+                    <div class="card"><h3>Improves Maintainability</h3><p>Fix or change a function in one place — every caller benefits automatically. No need to hunt through thousands of lines of code.</p></div>
+                    <div class="card"><h3>Simplifies Development</h3><p>Break complex problems into smaller pieces. Write, test, and debug each piece independently before combining them.</p></div>
+                    <div class="card"><h3>Enables Reuse</h3><p>Write a function once, call it many times from many places — even across different programs.</p></div>
+                    <div class="card"><h3>Stubs & Drivers</h3><p>Stub: dummy function that stands in during development. Driver: test function that calls another function with various inputs to verify it works correctly.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="defining">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Defining and Calling Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A function definition has four parts: return type, name, parameter list, and body.</p>
+                <pre>// void function: returns nothing
+void printHeading()
+{
+    cout &lt;&lt; "Monthly Sales\n";
+}
+
+// int function: returns an integer
+int sum(int num1, int num2)
+{
+    return num1 + num2;
+}
+
+// Calling functions
+printHeading();           // call with no arguments
+int total = sum(5, 3);    // call with arguments, capture return value</pre>
+                <div class="highlight"><p>When a function is called, execution jumps to the function body. After the function ends (via return or reaching the last }), execution resumes in the calling function at the exact point of the call. main() can call any number of functions, and functions can call other functions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="prototypes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Function Prototypes</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The compiler must know a function's name, return type, and parameter types before it can be called. A <strong>prototype</strong> provides this information without the full body.</p>
+                <pre>// Prototype: like the header with a semicolon instead of body
+void printHeading();
+int sum(int, int);           // parameter names optional in prototype
+bool isValid(int, double);
+
+int main()
+{
+    printHeading();          // compiler knows about it from prototype
+    int total = sum(5, 3);
+}
+
+// Full definitions can appear anywhere after the prototypes
+void printHeading()
+{
+    cout &lt;&lt; "Monthly Sales\n";
+}
+
+int sum(int num1, int num2)
+{
+    return num1 + num2;
+}</pre>
+                <div class="highlight"><p>Place prototypes near the top of the file, before main(). Without a prototype or prior definition, calling a function causes a compiler error. With prototypes, you can organize function definitions in any order — most programmers put main() first and definitions after.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="parameters">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Parameters & Pass by Value</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Arguments</strong> are values passed at the call site. <strong>Parameters</strong> are the variables inside the function that receive those values. By default, C++ passes by value — a COPY is made.</p>
+                <pre>// Function with parameters
+void displayValue(int num)       // num is the parameter
+{
+    cout &lt;&lt; "Value: " &lt;&lt; num &lt;&lt; endl;
+    num = 99;    // only changes the LOCAL copy — caller unaffected
+}
+
+// Multiple parameters
+void showData(int x, double y, char z)
+{
+    cout &lt;&lt; x &lt;&lt; " " &lt;&lt; y &lt;&lt; " " &lt;&lt; z;
+}
+
+// Calling with arguments
+int val = 5;
+displayValue(val);    // passes a COPY of val — val still 5 after call
+showData(10, 3.14, 'A');</pre>
+                <div class="highlight"><p>Pass by value means the function gets its own copy of the data. Changes to the parameter inside the function have NO effect on the original argument. Arguments are promoted/demoted as needed to match parameter types. The number and order of arguments must exactly match the parameter list.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="returning">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Return Values</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// return a computed value
+int sum(int num1, int num2)
+{
+    return num1 + num2;   // can return an expression directly
+}
+
+// return a bool
+bool isEven(int num)
+{
+    return (num % 2 == 0);   // returns true or false
+}
+
+// Use return values in calling code
+int total = sum(5, 3);               // assign to variable
+cout &lt;&lt; sum(10, 20);                 // use in cout
+if (isEven(val))                     // use in condition
+    cout &lt;&lt; "Even\n";
+
+// Early return: exit function before reaching the end
+void checkAge(int age)
+{
+    if (age &lt; 0)
+    {
+        cout &lt;&lt; "Invalid age\n";
+        return;    // exits function immediately
+    }
+    cout &lt;&lt; "Age is " &lt;&lt; age;
+}</pre>
+                <div class="highlight"><p>The return type in the prototype and definition must match. A void function doesn't need a return statement — it ends at the closing brace. A return statement in a void function simply exits early. Statements after a return never execute.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="scope">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Scope, Lifetime & Global Variables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Local Variables</h3><p>Defined inside a function. Only accessible within that function. Created when function starts, destroyed when it ends. NOT automatically initialized — must be set by the programmer.</p></div>
+                    <div class="card"><h3>Global Variables</h3><p>Defined outside all functions. Accessible by any function defined after them. Auto-initialized to 0/NULL. Avoid — make debugging very difficult. Use global CONSTANTS instead.</p></div>
+                    <div class="card"><h3>Static Local Variables</h3><p>Declared with static keyword. Retain their value between function calls. Initialized only once (first call). Default value is 0.</p></div>
+                    <div class="card"><h3>Global Constants</h3><p>The one legitimate use of global scope. const double PI = 3.14159; defined globally makes it available to all functions without passing it as a parameter.</p></div>
+                </div>
+                <pre>const double TAX_RATE = 0.0675;  // global constant — OK
+
+void countCalls()
+{
+    static int count = 0;    // retains value between calls
+    count++;
+    cout &lt;&lt; "Called " &lt;&lt; count &lt;&lt; " times\n";
+}
+
+// Two functions can have variables with the same name
+void funcA() { int x = 10; }   // this x
+void funcB() { int x = 20; }   // different x — completely separate</pre>
+            </div>
+        </div>
+
+        <div class="section" id="advanced">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Default Arguments & exit()</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Default arguments</strong> are automatically used when an argument is omitted from the call. Must be declared in the prototype, must appear at the END of the parameter list.</p>
+                <pre>// Default arguments in prototype
+int getSum(int, int = 0, int = 0);   // last two have defaults
+
+// Valid calls
+sum = getSum(num1);           // uses 0 for 2nd and 3rd
+sum = getSum(num1, num2);     // uses 0 for 3rd only
+sum = getSum(num1, num2, num3); // no defaults used
+
+// INVALID — can't skip middle arguments
+sum = getSum(num1, , num3);   // ERROR
+
+// INVALID — defaultless parameters must come first
+int getSum(int = 0, int, int);  // ERROR</pre>
+                <pre>// exit() — terminate program from any function
+#include &lt;cstdlib&gt;
+
+if (criticalError)
+{
+    cout &lt;&lt; "Fatal error — terminating\n";
+    exit(EXIT_FAILURE);   // or exit(0) for success
+}</pre>
+            </div>
+        </div>
+
+        <div class="section" id="reference">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Reference Parameters (Pass by Reference)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A reference parameter is an alias for the original variable — changes inside the function affect the original. Declared with <code>&amp;</code>. Allows a function to "return" multiple values.</p>
+                <pre>// & in prototype and header
+void getDimensions(int&amp; length, int&amp; width);
+
+void getDimensions(int&amp; length, int&amp; width)
+{
+    cout &lt;&lt; "Enter length: ";
+    cin &gt;&gt; length;    // modifies the ORIGINAL variable
+    cout &lt;&lt; "Enter width: ";
+    cin &gt;&gt; width;     // modifies the ORIGINAL variable
+}
+
+int main()
+{
+    int l, w;
+    getDimensions(l, w);   // l and w are changed by the function
+    cout &lt;&lt; l &lt;&lt; " x " &lt;&lt; w;
+}</pre>
+                <div class="highlight"><p>Rules for reference parameters: must use & in BOTH prototype and header. The argument passed must be a variable — not a literal or expression (5 or num1+num2 cannot be passed by reference). Only use reference parameters when the function needs to modify the original — use pass by value otherwise.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="overloading">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Function Overloading</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Overloaded functions share the same name but have different parameter lists. The compiler selects the correct version based on the argument types and count at the call site.</p>
+                <pre>// Four overloaded versions of getDimensions
+void getDimensions(int);             // 1 int
+void getDimensions(int, int);        // 2 ints
+void getDimensions(int, double);     // int + double
+void getDimensions(double, double);  // 2 doubles
+
+// Compiler picks the right one automatically
+int length, width;
+double base, height;
+
+getDimensions(length);           // calls version 1
+getDimensions(length, width);    // calls version 2
+getDimensions(length, height);   // calls version 3
+getDimensions(height, base);     // calls version 4</pre>
+                <div class="highlight"><p>Overloading lets you use one intuitive name for related operations on different data types — like how the + operator works on both ints and doubles. The compiler distinguishes versions by their signature (parameter count and types) — NOT by return type alone.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

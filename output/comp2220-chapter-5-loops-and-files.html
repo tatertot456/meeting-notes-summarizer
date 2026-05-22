@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 5: Loops and Files</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1e0a3c, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #6d28d9; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #6d28d9; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #6d28d9; color: white; border-color: #6d28d9; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #6d28d9; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e0a3c; border-left: 3px solid #6d28d9; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #6d28d9; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #6d28d9; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #6d28d9; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #6d28d9; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #6d28d9; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 5</div>
+        <h1>Loops and Files</h1>
+        <p class="subtitle">Increment/decrement, while, do-while, for loops, nested loops, and file I/O</p>
+    </header>
+    <nav>
+        <a href="#incdec">Increment & Decrement</a>
+        <a href="#while">while Loop</a>
+        <a href="#dowhile">do-while Loop</a>
+        <a href="#for">for Loop</a>
+        <a href="#techniques">Loop Techniques</a>
+        <a href="#nested">Nested Loops</a>
+        <a href="#choosing">Choosing a Loop</a>
+        <a href="#files">File I/O</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="incdec">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Increment & Decrement Operators</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><code>++</code> adds 1 to a variable. <code>--</code> subtracts 1. Both can be used in prefix (before) or postfix (after) position — and the difference matters in expressions.</p>
+                <table>
+                    <tr><th>Mode</th><th>Syntax</th><th>Behavior</th></tr>
+                    <tr><td>Prefix</td><td>++val / --val</td><td>Increment/decrement FIRST, then return new value</td></tr>
+                    <tr><td>Postfix</td><td>val++ / val--</td><td>Return current value FIRST, then increment/decrement</td></tr>
+                </table>
+                <pre>int num, val = 12;
+
+cout &lt;&lt; val++;   // displays 12, THEN val becomes 13
+cout &lt;&lt; ++val;   // val becomes 14, THEN displays 14
+num = --val;     // val becomes 13, stores 13 in num
+num = val--;     // stores 13 in num, THEN val becomes 12</pre>
+                <div class="highlight"><p>Prefix vs postfix only matters when the operator is used INSIDE a larger expression. As a standalone statement (val++;), both are identical. Cannot apply ++ or -- to an expression — only to a variable with a memory location. (num1 + num2)++ is illegal.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="while">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The while Loop</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The while loop is a <strong>pretest loop</strong> — the condition is evaluated BEFORE each iteration. If the condition is false from the start, the body never executes.</p>
+                <pre>// General format
+while (expression)
+    statement;   // or block in { }
+
+// Example: count from 1 to 5
+int number = 1;
+while (number &lt;= 5)
+{
+    cout &lt;&lt; number &lt;&lt; endl;
+    number++;     // must update or infinite loop!
+}
+
+// Input validation pattern
+cout &lt;&lt; "Enter a number less than 10: ";
+cin &gt;&gt; number;
+while (number &gt;= 10)
+{
+    cout &lt;&lt; "Invalid! Enter a number less than 10: ";
+    cin &gt;&gt; number;
+}</pre>
+                <div class="highlight"><p>Infinite loops happen when the expression never becomes false — always make sure the loop body contains code that eventually makes the condition false. The while loop is ideal for input validation (repeat until valid) and reading data terminated by a sentinel value.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="dowhile">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The do-while Loop</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The do-while loop is a <strong>posttest loop</strong> — the body executes FIRST, then the condition is checked. The body always executes at least once.</p>
+                <pre>// General format — note semicolon after while()
+do
+{
+    statement;
+} while (expression);
+
+// Example: always runs at least once
+int x = 1;
+do
+{
+    cout &lt;&lt; x &lt;&lt; endl;
+} while (x &lt; 0);   // false, but still ran once!
+
+// Classic use: menu-driven programs
+do
+{
+    displayMenu();
+    cin &gt;&gt; choice;
+    processChoice(choice);
+} while (choice != 4);  // repeat until user chooses quit</pre>
+                <div class="highlight"><p>The semicolon after while(expression) is required — don't forget it. The do-while is the natural choice for menus because you always need to show the menu at least once before you can test the user's choice.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="for">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The for Loop</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The for loop is a <strong>pretest loop</strong> designed for counter-controlled iteration. It bundles initialization, test, and update into one clean line.</p>
+                <pre>// General format
+for (initialization; test; update)
+    statement;   // or block in { }
+
+// Example: count from 1 to 5
+for (int count = 1; count &lt;= 5; count++)
+    cout &lt;&lt; "Hello" &lt;&lt; endl;
+
+// Execution order:
+// 1. initialization (once only)
+// 2. test — if false, exit loop
+// 3. body executes
+// 4. update
+// 5. repeat from step 2</pre>
+                <p><strong>Modifications:</strong></p>
+                <pre>// Multiple initializations and updates (comma-separated)
+for (int x=1, y=1; x &lt;= 5; x++, y++)
+    cout &lt;&lt; x + y &lt;&lt; endl;
+
+// Omit initialization if already done
+int sum = 0, num = 1;
+for (; num &lt;= 10; num++)
+    sum += num;
+
+// Variable declared inside for — scope is the loop only
+for (int i = 0; i &lt; 10; i++)
+    cout &lt;&lt; i;</pre>
+                <div class="highlight"><p>No semicolon after the update expression or after the closing parenthesis. Variables declared in the initialization expression only exist inside the loop — they go out of scope when the loop ends. Use the for loop when you know exactly how many iterations are needed.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="techniques">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Loop Techniques: Counters, Totals & Sentinels</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card">
+                        <h3>Counter</h3>
+                        <p>A variable incremented or decremented each iteration — used to control how many times the loop runs. Must be initialized before the loop.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Running Total (Accumulator)</h3>
+                        <p>A variable that accumulates a sum across iterations. Initialize to 0 before the loop, then add each value inside the loop.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Sentinel</h3>
+                        <p>A special value that signals the end of input — chosen so it can't be confused with valid data (e.g., -999 for test scores). Loop continues until sentinel is entered.</p>
+                    </div>
+                    <div class="card">
+                        <h3>break & continue</h3>
+                        <p>break exits the loop immediately. continue skips to the end of the current iteration (test/update for while/for). Use sparingly — both make logic harder to follow.</p>
+                    </div>
+                </div>
+                <pre>// Running total example
+int sum = 0, num = 1;
+while (num &lt;= 10)
+{
+    sum += num;   // accumulate
+    num++;
+}
+cout &lt;&lt; "Sum = " &lt;&lt; sum;
+
+// Sentinel example
+int score, total = 0;
+cout &lt;&lt; "Enter score (-999 to stop): ";
+cin &gt;&gt; score;
+while (score != -999)
+{
+    total += score;
+    cout &lt;&lt; "Enter score (-999 to stop): ";
+    cin &gt;&gt; score;
+}</pre>
+            </div>
+        </div>
+
+        <div class="section" id="nested">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Nested Loops</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A nested loop is a loop inside the body of another loop. The inner loop completes ALL its iterations for each single iteration of the outer loop.</p>
+                <pre>// Multiplication table
+for (int row = 1; row &lt;= 3; row++)        // outer: 3 iterations
+{
+    for (int col = 1; col &lt;= 3; col++)    // inner: 3 iterations each
+    {
+        cout &lt;&lt; row * col &lt;&lt; "\t";
+    }
+    cout &lt;&lt; endl;
+}
+// Output:
+// 1  2  3
+// 2  4  6
+// 3  6  9</pre>
+                <div class="highlight"><p>Total iterations = outer iterations × inner iterations. A 3×3 nested loop runs the inner body 9 times total. When break is used inside a nested loop, it only exits the INNER loop — the outer loop continues normally.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="choosing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Choosing the Right Loop</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Loop</th><th>Type</th><th>Best Used When</th></tr>
+                    <tr><td>while</td><td>Pretest</td><td>Number of iterations unknown; validating input; reading sentinel-terminated data</td></tr>
+                    <tr><td>do-while</td><td>Posttest</td><td>Must execute at least once; menu-driven programs; repeat-until patterns</td></tr>
+                    <tr><td>for</td><td>Pretest</td><td>Exact number of iterations known; counter-controlled loops; clean init/test/update</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="files">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>File I/O</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Files allow data to persist between program runs. Requires <code>#include &lt;fstream&gt;</code>. Three steps: open → use → close.</p>
+                <pre>#include &lt;fstream&gt;
+
+// Define file stream objects
+ifstream infile;    // for reading
+ofstream outfile;   // for writing
+
+// Open files
+infile.open("data.txt");
+outfile.open("report.txt");  // created if it doesn't exist
+                              // existing file is ERASED first!
+
+// Test for open failure
+if (!infile)
+{
+    cout &lt;&lt; "Error: could not open file!\n";
+    return 1;
+}
+
+// Write to file (same as cout)
+outfile &lt;&lt; "Inventory Report\n";
+outfile &lt;&lt; partNum &lt;&lt; " " &lt;&lt; qty &lt;&lt; endl;
+
+// Read from file (same as cin)
+infile &gt;&gt; partNum;
+infile &gt;&gt; qtyInStock &gt;&gt; qtyOnOrder;
+
+// Loop through entire file
+int number;
+while (infile &gt;&gt; number)   // returns false at end of file
+{
+    cout &lt;&lt; number &lt;&lt; endl;
+}
+
+// Close files when done
+infile.close();
+outfile.close();
+
+// Let user specify filename (C++11)
+string filename;
+cout &lt;&lt; "Enter filename: ";
+cin &gt;&gt; filename;
+infile.open(filename);             // C++11
+infile.open(filename.c_str());     // pre-C++11 (c_str converts to null-terminated)</pre>
+                <div class="highlight"><p>Always close files explicitly — don't rely on the OS to close them. Buffered output data may not be written to disk until the file is properly closed. Opening an output file that already exists silently erases its contents — make sure you're opening the right file. Always test for open failure before reading or writing.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

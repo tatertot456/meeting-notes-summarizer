@@ -4,7 +4,7 @@ import pyperclip
 from reader import read_file
 
 WATCHED_FOLDER = Path(__file__).parent.parent / "input"
-SUPPORTED = {".txt", ".md", ".pdf", ".docx", ".pptx"}
+SUPPORTED = {".txt", ".md", ".pdf", ".docx", ".doc", ".pptx", ".ppt"}
 
 
 def watch():

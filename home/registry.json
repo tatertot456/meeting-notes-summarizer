@@ -322,5 +322,158 @@
     "accent": "#be185d",
     "glow": "#2a0a1a",
     "badge": "#9d174d"
+  },
+  {
+    "title": "COMP2220 Chapter 1 Introduction to Computers and Programming",
+    "filename": "comp2220-chapter-1-introduction-to-computers-and-programming.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 08:07 PM",
+    "accent": "#dc2626",
+    "glow": "#2a0a0a",
+    "badge": "#b91c1c"
+  },
+  {
+    "title": "COMP2220 Chapter 2 Introduction to C++",
+    "filename": "comp2220-chapter-2-introduction-to-c++.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 08:13 PM",
+    "accent": "#16a34a",
+    "glow": "#0a2a0a",
+    "badge": "#15803d"
+  },
+  {
+    "title": "COMP2220 Chapter 3 Expressions and Interactivity",
+    "filename": "comp2220-chapter-3-expressions-and-interactivity.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 08:48 PM",
+    "accent": "#d97706",
+    "glow": "#1f1200",
+    "badge": "#b45309"
+  },
+  {
+    "title": "COMP2220 Chapter 4 Making Decisions",
+    "filename": "comp2220-chapter-4-making-decisions.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 09:59 PM",
+    "accent": "#2563eb",
+    "glow": "#0a0a2e",
+    "badge": "#1d4ed8"
+  },
+  {
+    "title": "COMP2220 Chapter 5 Loops and Files",
+    "filename": "comp2220-chapter-5-loops-and-files.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 10:03 PM",
+    "accent": "#7c3aed",
+    "glow": "#1e0a3c",
+    "badge": "#6d28d9"
+  },
+  {
+    "title": "COMP2220 Chapter 6 Functions",
+    "filename": "comp2220-chapter-6-functions.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 10:08 PM",
+    "accent": "#0d9488",
+    "glow": "#0a2a28",
+    "badge": "#0f766e"
+  },
+  {
+    "title": "COMP2220 Chapter 7 Arrays and Vectors",
+    "filename": "comp2220-chapter-7-arrays-and-vectors.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 10:12 PM",
+    "accent": "#ea580c",
+    "glow": "#1f0a00",
+    "badge": "#c2410c"
+  },
+  {
+    "title": "COMP2220 Chapter 8 Searching and Sorting Arrays",
+    "filename": "comp2220-chapter-8-searching-and-sorting-arrays.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 10:15 PM",
+    "accent": "#6d28d9",
+    "glow": "#1a0f3d",
+    "badge": "#5b21b6"
+  },
+  {
+    "title": "COMP2220 Chapter 9 Pointers",
+    "filename": "comp2220-chapter-9-pointers.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 10:19 PM",
+    "accent": "#0369a1",
+    "glow": "#0a1f2e",
+    "badge": "#075985"
+  },
+  {
+    "title": "COMP2220 Chapter 10 Characters",
+    "filename": "comp2220-chapter-10-characters.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 10:22 PM",
+    "accent": "#15803d",
+    "glow": "#0a2010",
+    "badge": "#166534"
+  },
+  {
+    "title": "COMP2220 Chapter 11 Structs and Enumerated Types",
+    "filename": "comp2220-chapter-11-structs-and-enumerated-types.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 10:26 PM",
+    "accent": "#b45309",
+    "glow": "#1f1200",
+    "badge": "#92400e"
+  },
+  {
+    "title": "COMP2220 Chapter 12 Advanced File Operations",
+    "filename": "comp2220-chapter-12-advanced-file-operations.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 10:29 PM",
+    "accent": "#be185d",
+    "glow": "#2a0a1a",
+    "badge": "#9d174d"
+  },
+  {
+    "title": "COMP2220 Chapter 13 Introduction to Classes",
+    "filename": "comp2220-chapter-13-introduction-to-classes.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 10:32 PM",
+    "accent": "#dc2626",
+    "glow": "#2a0a0a",
+    "badge": "#b91c1c"
+  },
+  {
+    "title": "COMP2220 Chapter 14 More About Classes",
+    "filename": "comp2220-chapter-14-more-about-classes.html",
+    "category": "Computer Programming",
+    "date": "2026-05-21 10:47 PM",
+    "accent": "#16a34a",
+    "glow": "#0a2a0a",
+    "badge": "#15803d"
+  },
+  {
+    "title": "COMP2220 Chapter 15 Inheritance Polymorphism and Virtual Functions",
+    "filename": "comp2220-chapter-15-inheritance-polymorphism-and-virtual-functions.html",
+    "category": "Computer Programming",
+    "date": "2026-05-22 09:35 AM",
+    "accent": "#d97706",
+    "glow": "#1f1200",
+    "badge": "#b45309"
+  },
+  {
+    "title": "COMP2220 Chapter 16 Exceptions Templates and STL",
+    "filename": "comp2220-chapter-16-exceptions-templates-and-stl.html",
+    "category": "Computer Programming",
+    "date": "2026-05-22 09:39 AM",
+    "accent": "#2563eb",
+    "glow": "#0a0a2e",
+    "badge": "#1d4ed8"
+  },
+  {
+    "title": "COMP2220 Chapter 16b Introduction to Threads",
+    "filename": "comp2220-chapter-16b-introduction-to-threads.html",
+    "category": "Computer Programming",
+    "date": "2026-05-22 09:48 AM",
+    "accent": "#7c3aed",
+    "glow": "#1e0a3c",
+    "badge": "#6d28d9"
   }
 ]

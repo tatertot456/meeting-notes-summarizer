@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 8: Searching and Sorting Arrays</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1a0f3d, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #5b21b6; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #5b21b6; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #5b21b6; color: white; border-color: #5b21b6; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #5b21b6; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1a0f3d; border-left: 3px solid #5b21b6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #5b21b6; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #5b21b6; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #5b21b6; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #5b21b6; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #5b21b6; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 8</div>
+        <h1>Searching and Sorting Arrays</h1>
+        <p class="subtitle">Linear search, binary search, bubble sort, selection sort, and asymptotic analysis</p>
+    </header>
+    <nav>
+        <a href="#linear">Linear Search</a>
+        <a href="#binary">Binary Search</a>
+        <a href="#bubble">Bubble Sort</a>
+        <a href="#selection">Selection Sort</a>
+        <a href="#comparison">Algorithm Comparison</a>
+        <a href="#complexity">Asymptotic Analysis</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="linear">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Linear Search</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Also called <strong>sequential search</strong>. Starting at index 0, examines each element one by one until the target value is found or the array ends. Works on any array — sorted or unsorted.</p>
+                <pre>int linearSearch(int arr[], int size, int value)
+{
+    int index = 0;
+    int position = -1;    // -1 means "not found"
+    bool found = false;
+
+    while (index &lt; size &amp;&amp; !found)
+    {
+        if (arr[index] == value)
+        {
+            found = true;
+            position = index;
+        }
+        index++;
+    }
+    return position;   // returns index if found, -1 if not
+}</pre>
+                <div class="highlight"><p>Returning -1 for "not found" is a common convention — -1 is never a valid array index, so it unambiguously signals failure. The caller checks: if (result == -1) ... else use result as the index.</p></div>
+                <div class="grid">
+                    <div class="card"><h3>Benefits</h3><p>Simple to understand and implement. Array can be in any order — no sorting required.</p></div>
+                    <div class="card"><h3>Disadvantages</h3><p>Inefficient for large arrays. On average examines N/2 elements when found, N elements when not found. O(n) complexity.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="binary">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Binary Search</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Requires a <strong>sorted array</strong>. Repeatedly halves the search space by comparing the target to the middle element. Dramatically faster than linear search on large arrays.</p>
+                <p><strong>Algorithm:</strong></p>
+                <ol style="padding-left:20px; color:#ccc; line-height:1.8; margin-bottom:12px;">
+                    <li>Set first = 0, last = size - 1</li>
+                    <li>Calculate middle = (first + last) / 2</li>
+                    <li>If array[middle] == value → found!</li>
+                    <li>If array[middle] > value → search lower half (last = middle - 1)</li>
+                    <li>If array[middle] &lt; value → search upper half (first = middle + 1)</li>
+                    <li>Repeat until found or first > last (not in array)</li>
+                </ol>
+                <pre>int binarySearch(int array[], int size, int value)
+{
+    int first = 0,
+        last = size - 1,
+        middle,
+        position = -1;
+    bool found = false;
+
+    while (!found &amp;&amp; first &lt;= last)
+    {
+        middle = (first + last) / 2;
+
+        if (array[middle] == value)
+        {
+            found = true;
+            position = middle;
+        }
+        else if (array[middle] &gt; value)
+            last = middle - 1;    // search lower half
+        else
+            first = middle + 1;   // search upper half
+    }
+    return position;
+}</pre>
+                <div class="grid">
+                    <div class="card"><h3>Benefits</h3><p>Extremely efficient. For an array of N elements, performs at most log₂N comparisons. A 1 million element array needs at most 20 comparisons. O(log n) complexity.</p></div>
+                    <div class="card"><h3>Disadvantages</h3><p>Array must be sorted first. If the array changes frequently, keeping it sorted adds overhead. More complex to implement than linear search.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="bubble">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Bubble Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Repeatedly compares adjacent pairs and swaps them if out of order. Larger values "bubble up" to the end of the array with each pass. Stops when a full pass completes with no swaps.</p>
+                <p><strong>Example trace on {17, 23, 5, 11}:</strong></p>
+                <ul>
+                    <li><strong>Pass 1:</strong> 17,23 ok → swap 23,5 → {17,5,23,11} → swap 23,11 → {17,5,11,23}</li>
+                    <li><strong>Pass 2:</strong> swap 17,5 → {5,17,11,23} → swap 17,11 → {5,11,17,23} → 17,23 ok</li>
+                    <li><strong>Pass 3:</strong> 5,11 ok → 11,17 ok → 17,23 ok → no swaps → done!</li>
+                </ul>
+                <pre>void bubbleSort(int array[], int size)
+{
+    bool swap;
+    int temp;
+
+    do
+    {
+        swap = false;
+        for (int count = 0; count &lt; (size - 1); count++)
+        {
+            if (array[count] &gt; array[count + 1])
+            {
+                temp = array[count];
+                array[count] = array[count + 1];
+                array[count + 1] = temp;
+                swap = true;
+            }
+        }
+    } while (swap);
+}</pre>
+                <div class="grid">
+                    <div class="card"><h3>Benefits</h3><p>Easy to understand and implement. Good for nearly-sorted arrays where few swaps are needed.</p></div>
+                    <div class="card"><h3>Disadvantages</h3><p>Very inefficient for large arrays. O(n²) complexity — doubling the data quadruples the work. One of the slowest sorting algorithms.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="selection">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Selection Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Finds the smallest element and swaps it into position 0. Then finds the next smallest and swaps it into position 1. Continues until the entire array is sorted. Fewer swaps than bubble sort.</p>
+                <p><strong>Example trace on {11, 2, 29, 3, 17}:</strong></p>
+                <ul>
+                    <li>Find smallest (2) → swap with position 0 → {2, 11, 29, 3, 17}</li>
+                    <li>Find next smallest (3) → swap with position 1 → {2, 3, 29, 11, 17}</li>
+                    <li>Find next smallest (11) → swap with position 2 → {2, 3, 11, 29, 17}</li>
+                    <li>Find next smallest (17) → swap with position 3 → {2, 3, 11, 17, 29}</li>
+                </ul>
+                <pre>void selectionSort(int array[], int size)
+{
+    int minIndex, minValue;
+
+    for (int start = 0; start &lt; (size - 1); start++)
+    {
+        minIndex = start;
+        minValue = array[start];
+
+        for (int index = start + 1; index &lt; size; index++)
+        {
+            if (array[index] &lt; minValue)
+            {
+                minValue = array[index];
+                minIndex = index;
+            }
+        }
+        // Swap the minimum with the start position
+        array[minIndex] = array[start];
+        array[start] = minValue;
+    }
+}</pre>
+                <div class="grid">
+                    <div class="card"><h3>Benefits</h3><p>More efficient than bubble sort — performs exactly N-1 swaps regardless of initial order. Fewer writes to memory.</p></div>
+                    <div class="card"><h3>Disadvantages</h3><p>Still O(n²) comparisons. Slightly harder to understand than bubble sort. Not as fast as advanced sorts (quicksort, mergesort) on large datasets.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="comparison">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Algorithm Comparison</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Algorithm</th><th>Type</th><th>Requires Sorted?</th><th>Complexity</th><th>Best Use</th></tr>
+                    <tr><td>Linear Search</td><td>Search</td><td>No</td><td>O(n)</td><td>Small or unsorted arrays</td></tr>
+                    <tr><td>Binary Search</td><td>Search</td><td>Yes</td><td>O(log n)</td><td>Large sorted arrays</td></tr>
+                    <tr><td>Bubble Sort</td><td>Sort</td><td>N/A</td><td>O(n²)</td><td>Small arrays, learning</td></tr>
+                    <tr><td>Selection Sort</td><td>Sort</td><td>N/A</td><td>O(n²)</td><td>Small arrays, fewer swaps needed</td></tr>
+                </table>
+                <div class="highlight"><p>Both search algorithms work on vectors too — just modify the function signature to use vector&lt;type&gt;&amp; instead of an array parameter, and use the .size() member function instead of passing size as a separate argument.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="complexity">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Asymptotic Analysis (Big-O)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Asymptotic analysis quantifies algorithm efficiency by describing how runtime grows as data size grows. We throw a massive amount of data at the problem and measure the impact.</p>
+                <table>
+                    <tr><th>Notation</th><th>Name</th><th>Impact of doubling data</th><th>Example</th></tr>
+                    <tr><td>O(log n)</td><td>Logarithmic</td><td>Negligible — adds one step</td><td>Binary search</td></tr>
+                    <tr><td>O(n)</td><td>Linear</td><td>Runtime doubles</td><td>Linear search</td></tr>
+                    <tr><td>O(n²)</td><td>Polynomial</td><td>Runtime quadruples</td><td>Bubble sort, selection sort</td></tr>
+                    <tr><td>O(2ⁿ)</td><td>Exponential</td><td>Runtime squares</td><td>Brute-force combinatorics</td></tr>
+                </table>
+                <div class="highlight"><p>O(log n) is incredibly powerful — binary search on 1 billion sorted elements takes at most 30 comparisons. O(n²) becomes painfully slow fast — sorting 1 million elements with bubble sort requires ~500 billion comparisons. O(2ⁿ) is effectively unusable beyond tiny inputs. Always choose the best complexity available for the problem.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

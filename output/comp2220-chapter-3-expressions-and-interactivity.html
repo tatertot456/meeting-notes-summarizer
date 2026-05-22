@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 3: Expressions and Interactivity</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b45309; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #b45309; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b45309; color: white; border-color: #b45309; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #b45309; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #b45309; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #b45309; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #b45309; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #b45309; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b45309; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #b45309; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 3</div>
+        <h1>Expressions and Interactivity</h1>
+        <p class="subtitle">cin, expressions, type conversion, assignment operators, output formatting, and string input</p>
+    </header>
+    <nav>
+        <a href="#cin">cin Input</a>
+        <a href="#expressions">Expressions</a>
+        <a href="#types">Type Conversion</a>
+        <a href="#assignment">Assignment Operators</a>
+        <a href="#formatting">Output Formatting</a>
+        <a href="#strings">String Input</a>
+        <a href="#math">Math Functions</a>
+        <a href="#tracing">Hand Tracing</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="cin">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The cin Object</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>cin is the standard input object. Like cout, it requires the iostream header. Use the stream extraction operator <code>&gt;&gt;</code> to read input from the keyboard into variables. cin automatically converts input to match the variable's data type.</p>
+                <pre>int height;
+cout &lt;&lt; "How tall is the room? ";  // always prompt before cin
+cin &gt;&gt; height;
+
+// Read multiple values at once (separated by spaces when entered)
+cin &gt;&gt; height &gt;&gt; width;</pre>
+                <div class="highlight"><p>Always display a prompt with cout BEFORE every cin statement — otherwise the user stares at a blank screen with no idea what to type. When reading multiple values, the user separates them with spaces. Order matters: first value entered → first variable, second → second, and so on.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="expressions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Mathematical Expressions & Order of Operations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An expression can be a literal, a variable, or a mathematical combination of constants and variables. Expressions can appear in assignments, cout statements, and anywhere a value is expected.</p>
+                <pre>area = 2 * PI * radius;
+cout &lt;&lt; "border is: " &lt;&lt; 2 * (l + w);</pre>
+                <p><strong>Order of operations (precedence, highest to lowest):</strong></p>
+                <ol style="padding-left:20px; color:#ccc; line-height:1.8; margin-bottom:12px;">
+                    <li>Unary negation (-), right to left</li>
+                    <li>*, /, % — left to right</li>
+                    <li>+, - — left to right</li>
+                </ol>
+                <pre>2 + 2 * 2 - 2   = 4   // * first: 2 + 4 - 2 = 4
+(2 + 2) * 2 - 2 = 6   // parentheses first: 4*2-2 = 6
+2 + 2 * (2 - 2) = 2   // parentheses first: 2+2*0 = 2
+(2 + 2) * (2 - 2) = 0 // both parentheses: 4*0 = 0</pre>
+                <div class="highlight"><p>Algebraic expressions must be explicitly written out: Area = lw becomes <code>Area = l * w;</code>. There is no exponentiation operator in C++ — use <code>pow(s, 2)</code> from the cmath library instead of s². Parentheses are your best tool for controlling evaluation order.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="types">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Type Conversion & Casting</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Operations are performed between operands of the same type. When types differ, C++ automatically converts one — this is called <strong>type coercion</strong>.</p>
+                <p><strong>Type hierarchy (highest to lowest):</strong> long double → double → float → unsigned long → long → unsigned int → int</p>
+                <p><strong>Coercion rules:</strong></p>
+                <ul>
+                    <li>char, short, unsigned short are automatically promoted to int</li>
+                    <li>When operating on different types, the lower type is promoted to the higher</li>
+                    <li>With =, the right side is converted to the type of the left side variable</li>
+                </ul>
+                <div class="highlight"><p>Integer division trap: if both operands are int, / returns only the whole number quotient. To force floating point division, cast one operand: <code>static_cast&lt;double&gt;(y2-y1) / (x2-x1)</code>. Overflow occurs when a value is too large for its variable type — the value wraps around unpredictably.</p></div>
+                <pre>// static_cast: preferred modern C++ style
+double m;
+m = static_cast&lt;double&gt;(y2 - y1) / (x2 - x1);
+
+// See the ASCII value of a char
+char ch = 'C';
+cout &lt;&lt; ch &lt;&lt; " is " &lt;&lt; static_cast&lt;int&gt;(ch);  // C is 67
+
+// C-style cast (older, still supported)
+cout &lt;&lt; (int)ch;
+
+// Prestandard C++ cast (older, still supported)
+cout &lt;&lt; int(ch);</pre>
+            </div>
+        </div>
+
+        <div class="section" id="assignment">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Assignment & Combined Assignment Operators</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The = operator assigns values right to left. You can chain assignments:</p>
+                <pre>x = y = z = 5;   // assigns 5 to z, then y, then x (right to left)</pre>
+                <p><strong>Combined assignment operators</strong> provide shorthand for modifying a variable:</p>
+                <table>
+                    <tr><th>Operator</th><th>Example</th><th>Equivalent To</th></tr>
+                    <tr><td>+=</td><td>sum += 1</td><td>sum = sum + 1</td></tr>
+                    <tr><td>-=</td><td>sum -= 1</td><td>sum = sum - 1</td></tr>
+                    <tr><td>*=</td><td>sum *= 2</td><td>sum = sum * 2</td></tr>
+                    <tr><td>/=</td><td>sum /= 2</td><td>sum = sum / 2</td></tr>
+                    <tr><td>%=</td><td>sum %= 2</td><td>sum = sum % 2</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="formatting">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Formatting Output</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Requires <code>#include &lt;iomanip&gt;</code>. Stream manipulators control how output is displayed.</p>
+                <table>
+                    <tr><th>Manipulator</th><th>Effect</th><th>Persists?</th></tr>
+                    <tr><td>setw(x)</td><td>Print in a field at least x spaces wide</td><td>No — next value only</td></tr>
+                    <tr><td>fixed</td><td>Use decimal notation for floating-point</td><td>Yes</td></tr>
+                    <tr><td>setprecision(x)</td><td>With fixed: x digits after decimal. Without: x significant digits</td><td>Yes</td></tr>
+                    <tr><td>showpoint</td><td>Always show decimal point for floats</td><td>Yes</td></tr>
+                </table>
+                <pre>#include &lt;iomanip&gt;
+
+cout &lt;&lt; setw(10) &lt;&lt; "Name" &lt;&lt; setw(10) &lt;&lt; "Score";
+
+double price = 14.5;
+cout &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; price;  // displays 14.50</pre>
+                <div class="highlight"><p>setw() only affects the next value printed — you must repeat it for each value. fixed, setprecision(), and showpoint stay in effect until changed — set them once and they apply to all subsequent floating-point output.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="strings">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>String & Character Input</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Using cin &gt;&gt; for strings causes problems — it stops at whitespace, so "John Smith" would only read "John". Use <strong>getline</strong> instead:</p>
+                <pre>string fullName;
+getline(cin, fullName);   // reads the entire line including spaces</pre>
+                <p><strong>Reading a single character:</strong></p>
+                <pre>char ch;
+cin &gt;&gt; ch;       // skips whitespace — won't read spaces/tabs/enter
+cin.get(ch);     // reads the very next character, including whitespace</pre>
+                <div class="highlight"><p>Mixing cin &gt;&gt; and cin.get() in the same program causes subtle bugs — the enter key left in the buffer by cin &gt;&gt; gets read by cin.get() as a character. Use cin.ignore() to skip leftover characters: <code>cin.ignore();</code> skips the next character, <code>cin.ignore(10, '\n');</code> skips up to 10 characters or until a newline.</p></div>
+                <p><strong>String operations:</strong></p>
+                <pre>string state = "Texas";
+int size = state.length();         // get length
+
+string greeting1 = "Hello, ";
+string name = "World";
+string result = greeting1 + name;  // concatenate with +
+greeting1 += name;                 // concatenate with +=</pre>
+            </div>
+        </div>
+
+        <div class="section" id="math">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Mathematical Library Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card">
+                        <h3>cmath functions (#include &lt;cmath&gt;)</h3>
+                        <p>Take double input, return double. Common functions: pow(base, exp), sqrt(x), abs(x), ceil(x), floor(x), sin(x), cos(x), log(x).</p>
+                    </div>
+                    <div class="card">
+                        <h3>cstdlib functions (#include &lt;cstdlib&gt;)</h3>
+                        <p>rand(): returns random int 0 to max int. Same sequence every run. srand(x): seeds the generator with x — use srand(time(0)) for different sequences each run.</p>
+                    </div>
+                </div>
+                <pre>#include &lt;cmath&gt;
+double area = pow(s, 2);     // s squared
+double hyp = sqrt(a*a + b*b);
+
+#include &lt;cstdlib&gt;
+#include &lt;ctime&gt;
+srand(time(0));              // seed with current time
+int roll = rand() % 6 + 1;  // random number 1-6</pre>
+            </div>
+        </div>
+
+        <div class="section" id="tracing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Hand Tracing & Case Study</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Hand tracing</strong> means acting as the computer — stepping through each statement one by one and recording variable values in a trace chart. It's the most reliable way to find logic and math errors without running the program.</p>
+                <p><strong>Case study — crate calculator:</strong> General Crates Inc. needs a program to calculate volume, cost, charge, and profit for custom wooden crates.</p>
+                <pre>// Formulas used:
+volume = length * width * height;
+cost   = volume * 0.23;
+charge = volume * 0.50;
+profit = charge - cost;
+
+// Program structure follows IPO:
+// Input:   get length, width, height from user
+// Process: calculate volume, cost, charge, profit
+// Output:  display all four calculated values</pre>
+                <div class="highlight"><p>The IPO pattern (Input → Process → Output) is the foundation of most programs. Notice the case study follows it exactly: gather all inputs first, then do all calculations, then display all results. Mixing these phases makes programs harder to read and debug.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

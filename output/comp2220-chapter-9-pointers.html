@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 9: Pointers</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a1f2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #075985; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #075985; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #075985; color: white; border-color: #075985; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #075985; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #075985; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #075985; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #075985; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #075985; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #075985; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #075985; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 9</div>
+        <h1>Pointers</h1>
+        <p class="subtitle">Addresses, pointer variables, indirection, pointer arithmetic, dynamic memory, and smart pointers</p>
+    </header>
+    <nav>
+        <a href="#addresses">Addresses</a>
+        <a href="#pointers">Pointer Variables</a>
+        <a href="#indirection">Indirection</a>
+        <a href="#arrays">Arrays & Pointers</a>
+        <a href="#arithmetic">Pointer Arithmetic</a>
+        <a href="#functions">Pointers & Functions</a>
+        <a href="#const">Const Pointers</a>
+        <a href="#dynamic">Dynamic Memory</a>
+        <a href="#smart">Smart Pointers</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="addresses">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Memory Addresses</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every variable in a program is stored at a unique memory address. Use the <strong>address operator &amp;</strong> to get the address of any variable.</p>
+                <pre>int num = -99;
+cout &lt;&lt; &amp;num;   // prints the memory address in hexadecimal
+                // e.g., 0x7ffee4bc</pre>
+                <div class="highlight"><p>You've already worked with addresses without knowing it. When you pass an array to a function, C++ automatically passes the array's starting address. When you use a reference parameter (&), C++ automatically stores the address of the argument. Pointers make this mechanism explicit and give you direct control over it.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="pointers">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pointer Variables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A pointer variable holds the address of another variable. The <code>*</code> in the definition means "this is a pointer to" — it does NOT dereference here, it's part of the type declaration.</p>
+                <pre>// Definition — all three mean the same thing
+int *intptr;       // preferred style
+int * intptr;
+int* intptr;
+
+// Assign an address
+int num = 42;
+intptr = &amp;num;     // intptr now "points to" num
+
+// Always initialize pointers — use nullptr if no address yet
+int *ptr = nullptr;    // C++11: nullptr means "points to nothing"
+
+// Test for invalid/null pointer
+if (!ptr)
+    cout &lt;&lt; "Pointer is null\n";
+if (ptr == nullptr)
+    cout &lt;&lt; "Also null\n";</pre>
+                <div class="highlight"><p>An uninitialized pointer contains garbage — a random address that could point anywhere in memory. Using an uninitialized pointer causes undefined behavior, often crashing the program. ALWAYS initialize pointers to nullptr or a valid address before using them.</p></div>
+                <p><strong>Rules:</strong> pointer type must match the type it points to — you cannot store the address of a double in an int pointer. Pointers to different types are incompatible.</p>
+            </div>
+        </div>
+
+        <div class="section" id="indirection">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Indirection (Dereference) Operator</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The <code>*</code> operator, when used with a pointer variable in an expression (not a definition), <strong>dereferences</strong> the pointer — it accesses the value at the address the pointer holds.</p>
+                <pre>int x = 25;
+int *intptr = &amp;x;
+
+cout &lt;&lt; intptr;    // prints the ADDRESS (e.g., 0x7ffee4bc)
+cout &lt;&lt; *intptr;   // prints the VALUE at that address: 25
+
+// Dereferencing lets you modify the original variable
+*intptr = 99;
+cout &lt;&lt; x;         // prints 99 — x was changed through the pointer!</pre>
+                <div class="highlight"><p>* means two different things depending on context: in a definition (int *ptr), it declares a pointer variable. In an expression (*ptr), it dereferences — accesses the value at the pointer's address. Context is everything.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="arrays">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Arrays and Pointers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An array name IS a pointer constant — it holds the address of the first element. This is why arrays behave differently from regular variables when passed to functions.</p>
+                <pre>int vals[] = {4, 7, 11};
+
+cout &lt;&lt; vals;       // prints starting address (e.g., 0x4a00)
+cout &lt;&lt; vals[0];    // prints 4
+cout &lt;&lt; *vals;      // also prints 4 — dereference the array name
+
+// Pointer can be used like an array name
+int *valptr = vals;
+cout &lt;&lt; valptr[1];  // prints 7
+cout &lt;&lt; valptr[2];  // prints 11
+
+// vals[i] is EXACTLY equivalent to *(vals + i)
+cout &lt;&lt; vals[2];         // 11
+cout &lt;&lt; *(vals + 2);     // also 11</pre>
+                <div class="highlight"><p>vals[i] and *(vals + i) are identical — the compiler converts one to the other internally. No bounds checking happens either way. The array name is a CONSTANT pointer — you can't change what it points to (vals = something_else is illegal), but a pointer variable assigned to it can be moved freely.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="arithmetic">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pointer Arithmetic</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Adding or subtracting integers from pointers moves them by multiples of the pointed-to type's size — not by raw bytes.</p>
+                <pre>int vals[] = {4, 7, 11};
+int *valptr = vals;        // points to vals[0]
+
+// valptr + 1 means address + (1 * sizeof(int)) = next element
+cout &lt;&lt; *(valptr + 1);    // 7
+cout &lt;&lt; *(valptr + 2);    // 11
+
+// Move the pointer itself
+valptr++;                  // now points to vals[1]
+cout &lt;&lt; *valptr;          // 7
+
+valptr--;                  // back to vals[0]</pre>
+                <table>
+                    <tr><th>Operation</th><th>Allowed?</th></tr>
+                    <tr><td>ptr + n / ptr - n</td><td>Yes — moves n elements forward/back</td></tr>
+                    <tr><td>ptr++ / ptr--</td><td>Yes — moves one element</td></tr>
+                    <tr><td>ptr1 - ptr2</td><td>Yes — gives number of elements between them</td></tr>
+                    <tr><td>ptr1 == ptr2</td><td>Yes — compares addresses</td></tr>
+                    <tr><td>ptr * n / ptr + ptr</td><td>No — not meaningful</td></tr>
+                </table>
+                <div class="highlight"><p>ptr1 == ptr2 compares ADDRESSES (are they pointing to the same location?). *ptr1 == *ptr2 compares CONTENTS (do both locations hold the same value?). These are very different questions — always know which one you need.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="functions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pointers as Function Parameters</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Passing a pointer to a function allows the function to modify the original variable — like pass by reference, but explicit. This is how C (which has no reference parameters) achieves pass-by-reference behavior.</p>
+                <pre>// Prototype: * declares pointer parameter
+void getNum(int *ptr);
+
+// Definition: * dereferences to access original
+void getNum(int *ptr)
+{
+    cin &gt;&gt; *ptr;    // stores input directly into the pointed-to variable
+}
+
+// Call: & passes the address of the variable
+int num;
+getNum(&amp;num);       // pass address of num
+
+// Classic swap using pointers
+void swap(int *x, int *y)
+{
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+int num1 = 2, num2 = -3;
+swap(&amp;num1, &amp;num2);  // pass addresses
+// num1 = -3, num2 = 2 after the call</pre>
+                <div class="highlight"><p>Functions should only return pointers to: (1) data passed in as an argument, or (2) dynamically allocated memory. NEVER return a pointer to a local variable — local variables are destroyed when the function ends, leaving a dangling pointer to invalid memory.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="const">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Const Pointers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Three combinations of const with pointers — each restricts something different:</p>
+                <pre>int value = 22;
+const double payRates[] = {18.55, 17.45, 12.85};
+
+// 1. Pointer to const: cannot change the VALUE through the pointer
+//    (but can change where the pointer points)
+const int *ptr = &amp;value;
+*ptr = 99;          // ERROR — can't modify through pointer-to-const
+ptr = &amp;otherVar;    // OK — can point elsewhere
+
+// Use for array parameters you don't want modified:
+void display(const double *rates, int size)  // protects the array
+
+// 2. Constant pointer: cannot change WHERE it points
+//    (but can change the value at the address)
+int * const ptr2 = &amp;value;
+*ptr2 = 99;         // OK — can modify the value
+ptr2 = &amp;otherVar;   // ERROR — can't repoint
+
+// 3. Constant pointer to constant: cannot change either
+const int * const ptr3 = &amp;value;
+*ptr3 = 99;         // ERROR
+ptr3 = &amp;otherVar;   // ERROR</pre>
+                <div class="highlight"><p>When passing arrays to functions that should NOT modify them, use const pointer parameters. This protects the original array from accidental changes and documents the function's intent clearly.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="dynamic">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Dynamic Memory Allocation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Dynamic allocation lets you request memory at runtime rather than compile time. The <code>new</code> operator allocates memory and returns its address. The <code>delete</code> operator releases it.</p>
+                <pre>// Allocate a single variable
+double *dptr = nullptr;
+dptr = new double;     // allocate, get address back
+*dptr = 3.14;          // use it
+delete dptr;           // free it when done
+dptr = nullptr;        // good practice — avoid dangling pointer
+
+// Allocate an array
+const int SIZE = 25;
+double *arrayptr = new double[SIZE];
+
+for (int i = 0; i &lt; SIZE; i++)
+    arrayptr[i] = i * i;    // use like a regular array
+
+delete [] arrayptr;          // free array — note the []
+arrayptr = nullptr;</pre>
+                <div class="highlight"><p>Memory leaks happen when you allocate with new but never call delete — the memory is reserved for the program's lifetime but inaccessible. In long-running programs this is serious. Rules: always pair new with delete, always pair new[] with delete[] (never mix them), only call delete on dynamically allocated memory — never on local/global variables.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="smart">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Smart Pointers (C++11)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Smart pointers automatically release memory when they go out of scope — no manual delete needed, no memory leaks. Requires <code>#include &lt;memory&gt;</code>.</p>
+                <pre>#include &lt;memory&gt;
+
+// unique_ptr: one owner, auto-deleted when out of scope
+unique_ptr&lt;int&gt; ptr(new int);
+*ptr = 42;
+cout &lt;&lt; *ptr;
+// No delete needed — memory freed automatically when ptr goes out of scope
+
+// unique_ptr for an array
+unique_ptr&lt;int[]&gt; arrPtr(new int[10]);
+arrPtr[0] = 5;   // use like array</pre>
+                <div class="grid">
+                    <div class="card"><h3>unique_ptr</h3><p>Only one pointer can own the resource. Auto-deletes when the pointer goes out of scope. Cannot be copied — only moved. Best default choice.</p></div>
+                    <div class="card"><h3>shared_ptr</h3><p>Multiple pointers can share ownership. Memory freed when the last shared_ptr releases it. Uses reference counting. More overhead than unique_ptr.</p></div>
+                    <div class="card"><h3>weak_ptr</h3><p>Non-owning reference to a shared_ptr's resource. Doesn't prevent deletion. Used to break circular reference cycles between shared_ptrs.</p></div>
+                    <div class="card"><h3>Why Smart Pointers?</h3><p>Eliminate memory leaks automatically. Make ownership semantics explicit. Exception-safe — memory freed even if an exception is thrown. Prefer over raw pointers in modern C++.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

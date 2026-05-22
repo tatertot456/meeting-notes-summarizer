@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 11: Structs and Enumerated Types</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #92400e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #92400e; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #92400e; color: white; border-color: #92400e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #92400e; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #92400e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #92400e; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #92400e; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #92400e; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #92400e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #92400e; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 11</div>
+        <h1>Structs and Enumerated Types</h1>
+        <p class="subtitle">Abstract data types, structures, nested structs, struct pointers, and enums</p>
+    </header>
+    <nav>
+        <a href="#adt">Abstract Data Types</a>
+        <a href="#structs">Structures</a>
+        <a href="#access">Accessing Members</a>
+        <a href="#arrays">Arrays of Structs</a>
+        <a href="#nested">Nested Structs</a>
+        <a href="#functions">Structs & Functions</a>
+        <a href="#pointers">Struct Pointers</a>
+        <a href="#enum">Enumerated Types</a>
+        <a href="#enumops">Enum Operations</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="adt">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Abstract Data Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An <strong>Abstract Data Type (ADT)</strong> specifies what values can be stored and what operations can be performed on those values — without specifying how it's implemented internally. Users of an ADT don't need to know the implementation details.</p>
+                <div class="highlight"><p>Abstraction captures general characteristics without details. An abstract triangle is "a 3-sided polygon" — the specific type (scalene, isosceles, equilateral) is an implementation detail. This principle drives all of object-oriented programming. Structures are our first step toward creating our own data types.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="structs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Structures</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>struct</strong> groups multiple variables of different types together under one name. It's C++'s way of creating a custom composite data type.</p>
+                <pre>// struct declaration (defines the TYPE — no memory allocated yet)
+struct Student
+{
+    int studentID;
+    string name;
+    short yearInSchool;
+    double gpa;
+};                      // semicolon required after closing brace!
+
+// Define variables of the struct type
+Student bill;           // now memory is allocated
+Student stu1, stu2;
+
+// Initialize at definition
+Student s = {11465, "Joan", 2, 3.75};
+
+// Partial initialization — unset members get 0/empty
+Student bill2 = {14579};   // only studentID set
+
+// Cannot skip members in the list
+// Student bad = {1234, "John", , 2.83};  // ILLEGAL</pre>
+                <div class="highlight"><p>The struct declaration only defines a new TYPE — like a blueprint. It doesn't create any variables or allocate any memory. You then use that type name (Student) to define actual variables, just like you use int or double. Cannot initialize members inside the struct declaration itself for the same reason.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="access">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Accessing Structure Members</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Use the <strong>dot operator (.)</strong> to access individual members of a struct variable. Members can be used like any normal variable of their type.</p>
+                <pre>Student stu1;
+
+// Read into members
+cin &gt;&gt; stu1.studentID;
+getline(cin, stu1.name);
+
+// Assign to members
+stu1.gpa = 3.75;
+stu1.yearInSchool = 2;
+
+// Display members — must print each one separately
+cout &lt;&lt; stu1;              // WRONG — can't print whole struct
+cout &lt;&lt; stu1.studentID &lt;&lt; endl;
+cout &lt;&lt; stu1.name &lt;&lt; endl;
+cout &lt;&lt; stu1.yearInSchool &lt;&lt; " " &lt;&lt; stu1.gpa;
+
+// Compare members — cannot compare whole structs directly
+if (bill == william)       // WRONG
+if (bill.studentID == william.studentID)  // correct</pre>
+            </div>
+        </div>
+
+        <div class="section" id="arrays">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Arrays of Structures</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Arrays of structs are a cleaner alternative to parallel arrays — all related data for one entity stays together in one struct.</p>
+                <pre>const int NUM_STUDENTS = 20;
+Student stuList[NUM_STUDENTS];   // array of 20 Student structs
+
+// Access: subscript for array element, dot for member
+cout &lt;&lt; stuList[5].studentID;
+stuList[0].gpa = 3.9;
+getline(cin, stuList[3].name);
+
+// Process all students with a loop
+for (int i = 0; i &lt; NUM_STUDENTS; i++)
+{
+    cout &lt;&lt; stuList[i].name &lt;&lt; ": " &lt;&lt; stuList[i].gpa &lt;&lt; endl;
+}</pre>
+                <div class="highlight"><p>Arrays of structs replace parallel arrays elegantly. Instead of id[5], gpa[5], name[5] all referring to student 5, you have stuList[5].id, stuList[5].gpa, stuList[5].name — all grouped in one struct. Much easier to pass to functions and harder to accidentally misalign.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="nested">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Nested Structures</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A struct can contain another struct as a member — use the dot operator multiple times to reach nested fields.</p>
+                <pre>struct PersonInfo
+{
+    string name;
+    string address;
+    string city;
+};
+
+struct Student
+{
+    int studentID;
+    PersonInfo pData;    // nested struct member
+    short yearInSchool;
+    double gpa;
+};
+
+// Access nested members: chain dot operators
+Student s;
+s.pData.name = "Joanne";
+s.pData.city = "Tulsa";
+s.pData.address = "123 Main St";
+
+cout &lt;&lt; s.pData.name &lt;&lt; " in " &lt;&lt; s.pData.city;</pre>
+            </div>
+        </div>
+
+        <div class="section" id="functions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Structures as Function Arguments</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// Pass individual member
+computeGPA(stu.gpa);
+
+// Pass entire struct by value (copy — original unchanged)
+void showData(Student stu);
+showData(stu1);
+
+// Pass by reference (efficient — no copy, can modify original)
+void modifyData(Student &amp;stu);
+
+// Pass by const reference (efficient — no copy, read-only)
+void showItem(const Student &amp;stu);   // best for display functions
+showItem(stu1);
+
+// Return a struct from a function
+Student getStudentData();    // prototype
+stu1 = getStudentData();     // call
+
+Student getStudentData()
+{
+    Student tempStu;         // local struct
+    cin &gt;&gt; tempStu.studentID;
+    getline(cin, tempStu.pData.name);
+    cin &gt;&gt; tempStu.gpa;
+    return tempStu;          // return the local struct
+}</pre>
+                <div class="highlight"><p>Passing a struct by value copies ALL its members — expensive for large structs. Pass by reference for efficiency. Pass by const reference when the function only needs to read the struct — you get the speed of reference without risking accidental modification. This is the recommended pattern for display/output functions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="pointers">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pointers to Structures</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A pointer can hold the address of a struct. Two syntaxes exist for accessing members through a pointer.</p>
+                <pre>Student stu1;
+Student *stuPtr;
+stuPtr = &amp;stu1;        // point to stu1
+
+// Access member through pointer — must parenthesize the dereference
+cout &lt;&lt; (*stuPtr).studentID;    // (*ptr).member
+
+// Structure pointer operator: cleaner, preferred syntax
+cout &lt;&lt; stuPtr-&gt;studentID;     // ptr->member (equivalent)
+stuPtr-&gt;gpa = 3.75;
+cin &gt;&gt; stuPtr-&gt;yearInSchool;
+
+// Pointer as function parameter
+void printStudent(Student *ptr)
+{
+    cout &lt;&lt; ptr-&gt;name &lt;&lt; " " &lt;&lt; ptr-&gt;gpa;
+}
+printStudent(&amp;stu1);</pre>
+                <div class="highlight"><p>The arrow operator (-&gt;) is just shorthand for (*ptr).member. Always use -> when accessing struct members through a pointer — it's cleaner and less error-prone than the parenthesized dereference form. The parentheses in (*stuPtr).member are required because . has higher precedence than * — without them, *stuPtr.studentID would try to dereference the member, not the pointer.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="enum">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Enumerated Data Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An <strong>enumerated type</strong> is a programmer-defined type consisting of named integer constants called <strong>enumerators</strong>. The compiler assigns integer values starting at 0.</p>
+                <pre>// Declaration
+enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY };
+// MONDAY=0, TUESDAY=1, WEDNESDAY=2, THURSDAY=3, FRIDAY=4
+
+// Define a variable of that type
+Day workDay;
+workDay = WEDNESDAY;    // assign an enumerator
+
+// Enumerators print as their integer values
+cout &lt;&lt; MONDAY;      // 0
+cout &lt;&lt; WEDNESDAY;   // 2
+cout &lt;&lt; FRIDAY;      // 4
+
+// Can assign enumerator to int
+int x = THURSDAY;    // x = 3
+
+// Cannot assign int directly to enum — must cast
+workDay = 3;                           // ERROR
+workDay = static_cast&lt;Day&gt;(3);         // OK — THURSDAY
+
+// Compare enumerators
+if (FRIDAY &gt; MONDAY)   // true (4 > 0)
+    cout &lt;&lt; "Friday is later\n";
+
+// Declare type and variable in one statement
+enum Car { PORSCHE, FERRARI, JAGUAR } sportsCar;</pre>
+                <div class="highlight"><p>Enumerators are named integer constants — not strings. They make code more readable and self-documenting: workDay = WEDNESDAY is far clearer than workDay = 2. However, they print as integers (2), not as their names ("WEDNESDAY"). You need your own logic to display the name if needed.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="enumops">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Enum Operations, Arrays & Strongly Typed Enums</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// Using enum as array subscript
+enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY };
+double sales[5];
+sales[MONDAY]    = 1525.00;
+sales[WEDNESDAY] = 1975.63;
+
+// Looping with enum — cannot use ++ directly, must cast
+Day workDay;
+for (workDay = MONDAY; workDay &lt;= FRIDAY;
+     workDay = static_cast&lt;Day&gt;(workDay + 1))
+{
+    cout &lt;&lt; "Sales for day " &lt;&lt; workDay &lt;&lt; ": ";
+    cin &gt;&gt; sales[workDay];
+}
+
+// Math requires casting too
+Day day1 = TUESDAY;
+Day day2 = static_cast&lt;Day&gt;(day1 + 1);  // WEDNESDAY</pre>
+                <p><strong>Strongly Typed Enums (C++11)</strong> — fix the duplicate name problem and add type safety:</p>
+                <pre>// Without strongly typed: ROOSEVELT is ambiguous — ERROR
+// enum Presidents { MCKINLEY, ROOSEVELT, TAFT };
+// enum VicePresidents { ROOSEVELT, FAIRBANKS, SHERMAN }; // conflict!
+
+// With strongly typed enum class: no conflict
+enum class Presidents { MCKINLEY, ROOSEVELT, TAFT };
+enum class VicePresidents { ROOSEVELT, FAIRBANKS, SHERMAN };
+
+Presidents prez = Presidents::ROOSEVELT;
+VicePresidents vp = VicePresidents::ROOSEVELT;
+
+// Must cast to get integer value
+int x = static_cast&lt;int&gt;(Presidents::ROOSEVELT);  // 1</pre>
+                <div class="highlight"><p>Enumerators must be unique within the same scope — declaring the same name in two regular enums in the same scope causes a compiler error. Strongly typed enum class solves this by requiring the enum name as a prefix (Presidents::ROOSEVELT vs VicePresidents::ROOSEVELT). Prefer enum class in modern C++ code.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

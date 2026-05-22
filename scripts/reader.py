@@ -15,11 +15,11 @@ def read_file(filepath: str) -> str:
         doc = fitz.open(filepath)
         return "\n".join(page.get_text() for page in doc)
 
-    elif suffix == ".docx":
+    elif suffix in (".docx", ".doc"):
         doc = Document(filepath)
         return "\n".join(p.text for p in doc.paragraphs)
 
-    elif suffix == ".pptx":
+    elif suffix in (".pptx", ".ppt"):
         prs = Presentation(filepath)
         slides_text = []
         for i, slide in enumerate(prs.slides):

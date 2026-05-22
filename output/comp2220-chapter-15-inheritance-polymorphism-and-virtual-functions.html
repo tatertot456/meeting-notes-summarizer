@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 15: Inheritance, Polymorphism, and Virtual Functions</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b45309; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #b45309; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b45309; color: white; border-color: #b45309; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #b45309; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #b45309; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #b45309; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #b45309; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #b45309; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b45309; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #b45309; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 15</div>
+        <h1>Inheritance, Polymorphism, and Virtual Functions</h1>
+        <p class="subtitle">Base/derived classes, access specifiers, virtual functions, abstract classes, and multiple inheritance</p>
+    </header>
+    <nav>
+        <a href="#inheritance">Inheritance</a>
+        <a href="#access">Access & Protected</a>
+        <a href="#constructors">Constructors</a>
+        <a href="#redefining">Redefining Functions</a>
+        <a href="#virtual">Virtual Functions</a>
+        <a href="#polymorphism">Polymorphism</a>
+        <a href="#abstract">Abstract Classes</a>
+        <a href="#multiple">Multiple Inheritance</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="inheritance">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is Inheritance?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Inheritance provides a way to create a new class from an existing class. The new class is a specialized version of the existing (more general) class. It establishes an <strong>"is a" relationship</strong>.</p>
+                <ul>
+                    <li>A poodle <em>is a</em> dog</li>
+                    <li>A car <em>is a</em> vehicle</li>
+                    <li>An UnderGrad <em>is a</em> Student</li>
+                    <li>A Mammal <em>is an</em> Animal</li>
+                </ul>
+                <pre>// Base class (parent)
+class Student
+{
+private:
+    string name;
+    int studentID;
+public:
+    void setName(string n) { name = n; }
+    string getName() const { return name; }
+};
+
+// Derived class (child) — uses public inheritance
+class UnderGrad : public Student
+{
+private:
+    int hoursCompleted;
+public:
+    void setHours(int h) { hoursCompleted = h; }
+    int getHours() const { return hoursCompleted; }
+};
+
+// An UnderGrad object has ALL Student members PLUS its own
+UnderGrad ug;
+ug.setName("Alice");      // inherited from Student
+ug.setHours(45);          // defined in UnderGrad</pre>
+                <div class="highlight"><p>A derived class object has ALL members defined in both the child AND parent class. It can use all PUBLIC members from both. Private members of the base class are inherited but cannot be accessed directly by the derived class — only through public/protected accessor functions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="access">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Access Specifiers & Protected Members</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>protected</strong> is a new access level — like private, but accessible to derived classes directly.</p>
+                <table>
+                    <tr><th>Base Member</th><th>public inheritance</th><th>protected inheritance</th><th>private inheritance</th></tr>
+                    <tr><td>public</td><td>public in derived</td><td>protected in derived</td><td>private in derived</td></tr>
+                    <tr><td>protected</td><td>protected in derived</td><td>protected in derived</td><td>private in derived</td></tr>
+                    <tr><td>private</td><td>inaccessible</td><td>inaccessible</td><td>inaccessible</td></tr>
+                </table>
+                <div class="grid" style="margin-top:16px">
+                    <div class="card"><h3>public inheritance</h3><p>Most common. Derived object CAN be treated as a base class object. Maintains the "is a" relationship. Use this in most cases.</p></div>
+                    <div class="card"><h3>protected inheritance</h3><p>More restrictive. Allows derived classes to know parent details but outside code can't treat derived as base.</p></div>
+                    <div class="card"><h3>private inheritance</h3><p>Most restrictive. Derived objects CANNOT be treated as base class objects. Breaks the "is a" relationship.</p></div>
+                    <div class="card"><h3>protected members</h3><p>Accessible by the class itself AND by derived classes. Invisible to outside code. Useful when derived classes need direct access to parent data.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="constructors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Constructors & Destructors in Inheritance</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>When a derived object is created, the <strong>base class constructor runs first</strong>, then the derived class constructor. When destroyed, <strong>derived destructor runs first</strong>, then base class destructor.</p>
+                <pre>// Pass arguments to base class constructor
+// using initializer list syntax on derived constructor
+Square::Square(int side) : Rectangle(side, side)
+{
+    // Rectangle constructor already ran with (side, side)
+    // add Square-specific initialization here
+}
+
+// If base class has NO default constructor, MUST use initializer list
+class Rectangle
+{
+public:
+    Rectangle(double w, double l);  // no default constructor
+};
+
+class Square : public Rectangle
+{
+public:
+    Square(int side) : Rectangle(side, side) { }  // REQUIRED
+};
+
+// Constructor inheritance (C++11)
+class MyBase
+{
+public:
+    MyBase(int);
+    MyBase(int, double);
+};
+
+class MyDerived : public MyBase
+{
+public:
+    using MyBase::MyBase;   // inherit all base constructors
+    // MyDerived now has MyBase(int) and MyBase(int, double)
+};</pre>
+                <div class="highlight"><p>The default constructor, copy constructor, and move constructor cannot be inherited — you must define those in the derived class if needed. Base class constructors are called in the order listed in the class declaration (for multiple inheritance), not the order written in the initializer list.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="redefining">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Redefining Base Class Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A derived class can redefine a function from the base class using the same name and parameter list. Objects of the base class use the base version; objects of the derived class use the derived version.</p>
+                <pre>class GradedActivity
+{
+public:
+    virtual char getLetterGrade() const;  // base version
+    void setScore(double s) { score = s; }
+protected:
+    double score;
+};
+
+class PassFailActivity : public GradedActivity
+{
+public:
+    char getLetterGrade() const override;  // redefined version
+};
+
+// Objects use their own class's version
+GradedActivity exam;
+exam.setScore(75.0);
+cout &lt;&lt; exam.getLetterGrade();  // uses GradedActivity version
+
+PassFailActivity quiz;
+quiz.setScore(75.0);
+cout &lt;&lt; quiz.getLetterGrade(); // uses PassFailActivity version</pre>
+                <div class="highlight"><p><strong>Redefining vs. Overriding:</strong> a non-virtual redefined function is statically bound (resolved at compile time based on pointer/reference type — can call wrong version). A virtual overridden function is dynamically bound (resolved at runtime based on actual object type — always calls correct version). This distinction is the core of polymorphism.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="virtual">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Virtual Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>virtual function</strong> is dynamically bound — at runtime, C++ determines the actual type of the object and calls the correct version. Declared with the <code>virtual</code> keyword in the base class.</p>
+                <pre>class GradedActivity
+{
+public:
+    // virtual — will be dynamically bound
+    virtual char getLetterGrade() const;
+    virtual ~GradedActivity();   // virtual destructor — always do this!
+};
+
+class PassFailActivity : public GradedActivity
+{
+public:
+    // override keyword (C++11): tells compiler this overrides a virtual
+    char getLetterGrade() const override;
+};
+
+class SpecialExam : public PassFailActivity
+{
+public:
+    // final: cannot be overridden in further derived classes
+    char getLetterGrade() const override final;
+};</pre>
+                <p><strong>The problem virtual solves:</strong></p>
+                <pre>// Without virtual — static binding picks wrong version
+void displayGrade(GradedActivity &amp;activity)
+{
+    cout &lt;&lt; activity.getLetterGrade();  // always calls GradedActivity version!
+}
+
+PassFailActivity quiz;
+quiz.setScore(75.0);
+displayGrade(quiz);   // prints 'C' instead of 'P' — WRONG!
+
+// With virtual — dynamic binding picks correct version
+// Same displayGrade function, but getLetterGrade is now virtual
+displayGrade(quiz);   // correctly prints 'P' — RIGHT!</pre>
+                <div class="highlight"><p>Once a function is declared virtual in a base class, it is automatically virtual in ALL derived classes — you don't need to repeat the keyword. Always make destructors virtual if the class may be a base class — otherwise delete through a base pointer won't call the derived destructor, causing a resource leak. Use override to catch typos: the compiler will error if no matching virtual function exists in the base class.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="polymorphism">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Polymorphism</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Polymorphism</strong> means "the ability to take many forms." A base class pointer or reference can refer to derived class objects and call the correct overridden virtual function at runtime.</p>
+                <pre>// Base class pointer can point to any derived object
+GradedActivity *ptr;
+GradedActivity exam;
+PassFailActivity quiz;
+
+ptr = &amp;exam;
+cout &lt;&lt; ptr-&gt;getLetterGrade();   // calls GradedActivity version
+
+ptr = &amp;quiz;
+cout &lt;&lt; ptr-&gt;getLetterGrade();   // calls PassFailActivity version (polymorphism!)
+
+// Function taking base class reference accepts ANY derived object
+void displayGrade(GradedActivity &amp;activity)
+{
+    cout &lt;&lt; activity.getLetterGrade();  // correct version called at runtime
+}
+
+displayGrade(exam);  // GradedActivity version
+displayGrade(quiz);  // PassFailActivity version — polymorphism!</pre>
+                <div class="highlight"><p>Polymorphism ONLY works through pointers or references. If you use a base class variable directly (not pointer/reference), object slicing occurs — the derived part is lost. Always use pointers or references when you need polymorphic behavior. This is why function parameters for polymorphic use are typically references.</p></div>
+                <div class="grid">
+                    <div class="card"><h3>Static Binding (compile time)</h3><p>Non-virtual functions. Call resolved based on type of pointer/reference — may call wrong version for derived objects.</p></div>
+                    <div class="card"><h3>Dynamic Binding (runtime)</h3><p>Virtual functions. Call resolved based on actual type of object at runtime — always calls the correct version.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="abstract">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Abstract Base Classes & Pure Virtual Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>pure virtual function</strong> has no implementation in the base class — derived classes MUST override it. A class with at least one pure virtual function is an <strong>abstract base class</strong> — no objects of it can be created.</p>
+                <pre>class Shape   // abstract base class
+{
+public:
+    // Pure virtual functions — = 0 means no base implementation
+    virtual double getArea() const = 0;
+    virtual double getPerimeter() const = 0;
+    virtual void draw() const = 0;
+
+    // Can still have non-pure virtual functions
+    virtual void printInfo() const
+    {
+        cout &lt;&lt; "Area: " &lt;&lt; getArea() &lt;&lt; endl;
+    }
+
+    virtual ~Shape() { }   // virtual destructor
+};
+
+// Derived class MUST implement all pure virtual functions
+class Circle : public Shape
+{
+private:
+    double radius;
+public:
+    Circle(double r) : radius(r) { }
+    double getArea() const override { return 3.14159 * radius * radius; }
+    double getPerimeter() const override { return 2 * 3.14159 * radius; }
+    void draw() const override { cout &lt;&lt; "Drawing circle\n"; }
+};
+
+// Shape s;       // ERROR — cannot create abstract class object
+Shape *ptr = new Circle(5.0);   // OK — pointer to derived
+cout &lt;&lt; ptr-&gt;getArea();         // polymorphism works</pre>
+                <div class="highlight"><p>Abstract base classes define an interface that all derived classes must implement. They're a powerful design tool — you can write functions that accept a Shape* or Shape& and work with any shape: Circle, Rectangle, Triangle, etc., without knowing the specific type. If a derived class doesn't implement ALL pure virtual functions, it also becomes abstract.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="multiple">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Multiple Inheritance</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A derived class can inherit from more than one base class. Each base class gets its own access specifier.</p>
+                <pre>class Square
+{
+public:
+    Square(int side);
+    int getSide() const;
+};
+
+class RectSolid
+{
+public:
+    RectSolid(int l, int w, int h);
+    int getVolume() const;
+};
+
+// Cube inherits from BOTH Square and RectSolid
+class Cube : public Square, public RectSolid
+{
+public:
+    // Pass arguments to BOTH base constructors
+    Cube(int side) : Square(side), RectSolid(side, side, side) { }
+};
+
+// Base constructors called in ORDER LISTED in class declaration
+// Square constructor runs first, then RectSolid</pre>
+                <p><strong>Naming conflicts:</strong> if both base classes define a function with the same name:</p>
+                <pre>class A { public: void show() { cout &lt;&lt; "A\n"; } };
+class B { public: void show() { cout &lt;&lt; "B\n"; } };
+class C : public A, public B
+{
+public:
+    // Option 1: redefine in derived class
+    void show() { cout &lt;&lt; "C\n"; }
+
+    // Option 2: use scope resolution to call specific base version
+    void showA() { A::show(); }
+    void showB() { B::show(); }
+};
+
+C obj;
+obj.show();   // calls C's version — unambiguous
+obj.A::show(); // explicitly call A's version</pre>
+                <div class="highlight"><p>Multiple inheritance is powerful but complicated. Name conflicts, the "diamond problem" (two base classes sharing a common ancestor), and complex constructor ordering make it easy to get wrong. Use it sparingly and prefer composition (aggregation) or interface-style abstract base classes when possible.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

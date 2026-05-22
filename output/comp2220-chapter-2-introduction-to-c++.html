@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 2: Introduction to C++</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #15803d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #15803d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #15803d; color: white; border-color: #15803d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #15803d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a0a; border-left: 3px solid #15803d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #15803d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #15803d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #15803d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #15803d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #15803d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 2</div>
+        <h1>Introduction to C++</h1>
+        <p class="subtitle">Program structure, output, data types, variables, operators, and constants</p>
+    </header>
+    <nav>
+        <a href="#structure">Program Structure</a>
+        <a href="#output">Output</a>
+        <a href="#variables">Variables</a>
+        <a href="#datatypes">Data Types</a>
+        <a href="#operators">Operators</a>
+        <a href="#comments">Comments</a>
+        <a href="#constants">Constants</a>
+        <a href="#scope">Scope & Style</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="structure">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Parts of a C++ Program</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// sample C++ program          ← comment
+#include &lt;iostream&gt;           ← preprocessor directive
+using namespace std;           ← which namespace to use
+int main()                     ← beginning of function named main
+{                              ← beginning of block for main
+    cout &lt;&lt; "Hello World!";   ← output statement
+    return 0;                  ← send 0 to operating system
+}                              ← end of block for main</pre>
+                <table>
+                    <tr><th>Element</th><th>Purpose</th></tr>
+                    <tr><td>// comment</td><td>Ignored by compiler — for human readers only</td></tr>
+                    <tr><td>#include &lt;iostream&gt;</td><td>Preprocessor directive — inserts the iostream file for input/output</td></tr>
+                    <tr><td>using namespace std;</td><td>Allows use of cout, cin, endl without the std:: prefix</td></tr>
+                    <tr><td>int main()</td><td>Every C++ program must have a main() — execution starts here</td></tr>
+                    <tr><td>return 0;</td><td>Signals successful completion to the operating system</td></tr>
+                </table>
+                <div class="highlight"><p>The #include directive is a preprocessor directive — not part of C++ itself. The preprocessor handles it before the compiler sees the file. Never put a semicolon at the end of a #include line.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="output">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Output with cout</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The <strong>cout</strong> object displays output on the screen. Use the stream insertion operator <code>&lt;&lt;</code> to send data to it.</p>
+                <pre>cout &lt;&lt; "Programming is fun!";
+
+// Chain multiple items
+cout &lt;&lt; "Hello " &lt;&lt; "there!";
+
+// Two separate statements produce the same single line
+cout &lt;&lt; "Programming is ";
+cout &lt;&lt; "fun!";</pre>
+                <p><strong>Starting a new line — two ways:</strong></p>
+                <pre>// Using endl manipulator (outside the string)
+cout &lt;&lt; "Programming is" &lt;&lt; endl;
+cout &lt;&lt; "fun!";
+
+// Using \n escape sequence (inside the string)
+cout &lt;&lt; "Programming is\n";
+cout &lt;&lt; "fun!";</pre>
+                <div class="highlight"><p>endl vs \n: both start a new line, but endl also flushes the output buffer. The last character in endl is a lowercase L — not the number 1. \n must be placed INSIDE the string quotes. endl goes OUTSIDE the quotes, chained with &lt;&lt;.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="variables">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Variables, Literals & Identifiers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>variable</strong> is a named storage location in memory. It has a name and a data type, and must be defined before it can be used.</p>
+                <pre>int item;            // defines a variable named item of type int
+int length = 12;     // define AND initialize in one step
+int length, width;   // define multiple variables of the same type</pre>
+                <p>A <strong>literal</strong> is a value written directly into code:</p>
+                <pre>"hello world"   // string literal
+12              // integer literal
+3.14            // floating-point literal
+'A'             // character literal — single quotes!</pre>
+                <p><strong>Identifier rules</strong> — names you make up for variables, functions, etc.:</p>
+                <ul>
+                    <li>First character must be a letter or underscore _</li>
+                    <li>After that: letters, digits, or underscores are all fine</li>
+                    <li>Case sensitive — <code>Area</code> and <code>area</code> are different identifiers</li>
+                    <li>Cannot use C++ reserved keywords (int, double, return, etc.)</li>
+                    <li>Should be descriptive: <code>itemsOrdered</code> not <code>x</code></li>
+                </ul>
+                <div class="highlight"><p>The auto keyword (C++11) lets the compiler infer the type from the initialization value: <code>auto amount = 100;</code> → int, <code>auto rate = 12.0;</code> → double, <code>auto code = 'D';</code> → char. Use when the type is obvious from context.</p></div>
+                <p><strong>Assignment:</strong> the variable receiving a value MUST be on the LEFT side of =.</p>
+                <pre>item = 12;    // correct
+12 = item;    // ERROR — literals cannot receive values</pre>
+            </div>
+        </div>
+
+        <div class="section" id="datatypes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Type</th><th>Holds</th><th>Example</th></tr>
+                    <tr><td>int</td><td>Whole numbers</td><td>12, -99, 0</td></tr>
+                    <tr><td>long</td><td>Larger whole numbers</td><td>1234L</td></tr>
+                    <tr><td>long long</td><td>Very large whole numbers</td><td>324LL</td></tr>
+                    <tr><td>unsigned int</td><td>Non-negative whole numbers only</td><td>0 to ~4 billion</td></tr>
+                    <tr><td>float</td><td>Decimal numbers (single precision)</td><td>3.14f</td></tr>
+                    <tr><td>double</td><td>Decimal numbers (double precision)</td><td>3.14159</td></tr>
+                    <tr><td>long double</td><td>Extended precision decimal</td><td>0.0000625L</td></tr>
+                    <tr><td>char</td><td>Single character or tiny integer</td><td>'A' stored as 65</td></tr>
+                    <tr><td>bool</td><td>True or false</td><td>true=1, false=0</td></tr>
+                    <tr><td>string</td><td>Text (requires #include &lt;string&gt;)</td><td>"Hello"</td></tr>
+                </table>
+                <pre>// Integer literals
+int x = 075;      // base 8 (octal) — starts with 0
+int y = 0x75A;    // base 16 (hex) — starts with 0x
+
+// Floating-point literals
+double d = 31.4159;    // fixed point
+double e = 3.14159E1;  // E notation (= 31.4159)
+float f = 3.14159f;    // forced float with f suffix
+
+// char: stores ASCII numeric value in memory
+char letter = 'C';    // stores 67 (ASCII code for C)
+
+// bool
+bool allDone = true;   // stored as 1
+bool finished = false; // stored as 0
+
+// string (requires #include &lt;string&gt;)
+string firstName = "George";
+cout &lt;&lt; firstName;
+
+// sizeof: check how many bytes a type uses
+cout &lt;&lt; sizeof(double);  // typically 8</pre>
+                <div class="highlight"><p>Character literals use SINGLE quotes ('A'). String literals use DOUBLE quotes ("Hello"). Mixing them up is a common beginner mistake. Strings are stored with a null terminator \0 at the end — "Hello" takes 6 bytes, not 5.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="operators">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Arithmetic Operators</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Operator</th><th>Operation</th><th>Example</th><th>Result</th></tr>
+                    <tr><td>+</td><td>Addition</td><td>7 + 3</td><td>10</td></tr>
+                    <tr><td>-</td><td>Subtraction</td><td>7 - 3</td><td>4</td></tr>
+                    <tr><td>*</td><td>Multiplication</td><td>7 * 3</td><td>21</td></tr>
+                    <tr><td>/</td><td>Division</td><td>13 / 5</td><td>2 (integer!) or 2.6 (float)</td></tr>
+                    <tr><td>%</td><td>Modulus (remainder)</td><td>13 % 5</td><td>3</td></tr>
+                </table>
+                <div class="highlight"><p>Integer division: if BOTH operands are integers, / returns only the quotient with no remainder — 13/5 = 2, not 2.6. If EITHER operand is floating point, the result is floating point — 13/5.0 = 2.6. The % (modulus) operator requires both operands to be integers — 13 % 5.0 is an error.</p></div>
+                <pre>cout &lt;&lt; 13 / 5;    // 2  (integer division — remainder dropped)
+cout &lt;&lt; 13 / 5.0;  // 2.6 (float division — one operand is double)
+cout &lt;&lt; 13 % 5;    // 3  (remainder of 13 ÷ 5)</pre>
+                <p>Operator types by number of operands: <strong>unary</strong> (1 operand, e.g. -5), <strong>binary</strong> (2 operands, e.g. 13 - 7), <strong>ternary</strong> (3 operands, e.g. exp1 ? exp2 : exp3).</p>
+            </div>
+        </div>
+
+        <div class="section" id="comments">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Comments</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Comments document the program for human readers — they are completely ignored by the compiler. Use them to explain the purpose of the program, describe variables, and clarify complex sections.</p>
+                <pre>// Single-line comment: from // to end of line
+int length = 12; // length in inches
+
+/* Multi-line comment: from /* to */
+   Can span multiple lines.
+   Useful for longer explanations. */
+
+int area; /* can also be on one line */</pre>
+                <div class="highlight"><p>Good commenting habit: explain the WHY, not the WHAT. "// multiply length by width" is redundant — the code already shows that. "// area formula for rectangular room" adds context the code can't express.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="constants">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Named Constants</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>named constant</strong> (constant variable) is a variable whose value cannot be changed after it is set. Use the <code>const</code> keyword. By convention, named constants are written in ALL_CAPS.</p>
+                <pre>const double TAX_RATE = 0.0675;
+const int NUM_STATES = 50;
+
+// Attempting to change a const causes a compile error:
+TAX_RATE = 0.08;  // ERROR!</pre>
+                <div class="highlight"><p>Why use named constants instead of magic numbers? If your tax rate appears as 0.0675 in 50 places throughout your code and it changes, you have to update all 50. With const double TAX_RATE = 0.0675, you update one line. Named constants also make code self-documenting — TAX_RATE is far more readable than 0.0675.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="scope">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Scope & Programming Style</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Scope</strong> defines the part of the program where a variable can be accessed. A variable cannot be used before it is defined — the compiler will catch this.</p>
+                <pre>int main() {
+    cout &lt;&lt; x;  // ERROR — x hasn't been defined yet
+    int x = 5;
+}</pre>
+                <div class="highlight"><p>Programming style is the visual organization of source code — use of spaces, tabs, and blank lines. Style does NOT affect how the program runs (it doesn't change syntax) but dramatically affects readability. Consistent indentation, meaningful variable names, and strategic blank lines make code far easier to understand and maintain.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

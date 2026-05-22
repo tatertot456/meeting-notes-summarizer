@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 4: Making Decisions</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a0a2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #1d4ed8; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #1d4ed8; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #1d4ed8; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a0a2e; border-left: 3px solid #1d4ed8; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #1d4ed8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #1d4ed8; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #1d4ed8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #1d4ed8; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #1d4ed8; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 4</div>
+        <h1>Making Decisions</h1>
+        <p class="subtitle">Relational operators, if/else, logical operators, switch, and scope</p>
+    </header>
+    <nav>
+        <a href="#relational">Relational Operators</a>
+        <a href="#if">if Statement</a>
+        <a href="#ifelse">if/else</a>
+        <a href="#nested">Nested & else if</a>
+        <a href="#logical">Logical Operators</a>
+        <a href="#comparing">Comparing Chars & Strings</a>
+        <a href="#conditional">Conditional Operator</a>
+        <a href="#switch">switch Statement</a>
+        <a href="#scope">Scope</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="relational">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Relational Operators</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Relational operators compare values and produce a Boolean result — true (1) or false (0).</p>
+                <table>
+                    <tr><th>Operator</th><th>Meaning</th><th>Example</th><th>Result</th></tr>
+                    <tr><td>></td><td>Greater than</td><td>12 > 5</td><td>true</td></tr>
+                    <tr><td><</td><td>Less than</td><td>7 < 5</td><td>false</td></tr>
+                    <tr><td>>=</td><td>Greater than or equal</td><td>5 >= 5</td><td>true</td></tr>
+                    <tr><td><=</td><td>Less than or equal</td><td>7 <= 5</td><td>false</td></tr>
+                    <tr><td>==</td><td>Equal to</td><td>x == 10</td><td>true (if x is 10)</td></tr>
+                    <tr><td>!=</td><td>Not equal to</td><td>x != 8</td><td>true (if x is 10)</td></tr>
+                </table>
+                <pre>// Relational expressions can be assigned to variables
+result = x <= y;   // stores 0 or 1</pre>
+                <div class="highlight"><p>Never confuse = (assignment) with == (equality test). Writing if (x = 5) assigns 5 to x and always evaluates as true — a very common bug. Always use == inside conditions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="if">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The if Statement</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The if statement conditionally executes or skips a statement based on whether an expression is true or false.</p>
+                <pre>// Single statement
+if (score > 90)
+    grade = 'A';    // executed only if score > 90
+
+// Block of statements using { }
+if (score > 90)
+{
+    grade = 'A';
+    cout &lt;&lt; "Good Job!\n";
+}</pre>
+                <div class="highlight"><p>Important rules: never put a semicolon after the condition (if (score > 90); would make the if do nothing). Use curly braces {} any time you need more than one statement to execute. 0 is false; any nonzero value is true. Be careful comparing floats/doubles for equality — floating point rounding can cause unexpected results.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ifelse">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The if/else Statement</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>if/else provides two execution paths — one when the condition is true, another when it's false. Exactly one path always executes.</p>
+                <pre>if (expression)
+    statement1;   // executes when true
+else
+    statement2;   // executes when false
+
+// Example: check if number is even or odd
+if (number % 2 == 0)
+    cout &lt;&lt; "Even\n";
+else
+    cout &lt;&lt; "Odd\n";</pre>
+            </div>
+        </div>
+
+        <div class="section" id="nested">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Nested if & if/else if</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Nested if</strong> — an if statement inside another if statement. Used to test multiple conditions in sequence.</p>
+                <p><strong>if/else if</strong> — tests a series of conditions until one is true. Cleaner than deeply nested ifs for multiple alternatives.</p>
+                <pre>// if/else if chain
+if (score >= 90)
+    grade = 'A';
+else if (score >= 80)
+    grade = 'B';
+else if (score >= 70)
+    grade = 'C';
+else if (score >= 60)
+    grade = 'D';
+else
+    grade = 'F';   // trailing else catches everything else</pre>
+                <div class="highlight"><p>The trailing else at the end of an if/else if chain is optional but highly recommended — use it to catch invalid input or unexpected values. Always use consistent indentation so the structure is visually clear. Flags (bool variables) are useful for signaling conditions: set them before the if chain, test them inside.</p></div>
+                <pre>// Flag example
+bool isValid = false;
+if (score >= 0 && score <= 100)
+    isValid = true;
+
+if (isValid)
+    cout &lt;&lt; "Processing score...\n";</pre>
+            </div>
+        </div>
+
+        <div class="section" id="logical">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Logical Operators</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Operator</th><th>Meaning</th><th>True when...</th></tr>
+                    <tr><td>&&</td><td>AND</td><td>Both sides are true</td></tr>
+                    <tr><td>||</td><td>OR</td><td>At least one side is true</td></tr>
+                    <tr><td>!</td><td>NOT</td><td>The operand is false</td></tr>
+                </table>
+                <pre>int x = 12, y = 5, z = -4;
+
+// AND: both must be true
+if (x > 0 && y > 0)       // true (both positive)
+if (x > 0 && z > 0)       // false (z is negative)
+
+// OR: at least one must be true
+if (x > 0 || z > 0)       // true (x is positive)
+
+// NOT: reverses true/false
+if (!( x == y))            // true (x does not equal y)
+
+// Range testing
+if (grade >= 0 && grade <= 100)    // inside range
+    cout &lt;&lt; "Valid grade";
+
+if (grade &lt; 0 || grade > 100)     // outside range
+    cout &lt;&lt; "Invalid grade";
+
+// WRONG — mathematical notation doesn't work in C++
+if (0 <= grade <= 100)    // always true! Don't do this.</pre>
+                <div class="highlight"><p>Precedence: ! has highest precedence, then &&, then ||. Short-circuit evaluation: for &&, if the left side is false, the right side is never evaluated. For ||, if the left side is true, the right side is never evaluated. This matters when the right side has side effects or could cause errors (like division by zero).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="comparing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Comparing Characters & Strings</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Characters are compared by their ASCII values. Uppercase letters (A=65) have lower ASCII values than lowercase (a=97), so 'a' > 'Z'.</p>
+                <pre>// Character comparison
+'A' &lt; 'B'    // true (65 &lt; 66)
+'1' &lt; '2'    // true (49 &lt; 50)
+'a' > 'Z'    // true (97 > 90)</pre>
+                <p>String objects are also compared character by character using ASCII values:</p>
+                <pre>string name1 = "Mary";
+string name2 = "Mark";
+
+name1 != name2   // true  (y != k)
+name1 > name2    // true  ('y' > 'k')
+name1 &lt;= name2   // false
+name1 &lt; "Mary Jane"  // true (Mary is a prefix of Mary Jane)</pre>
+                <div class="highlight"><p>String comparison is case-sensitive and goes character by character. "Mary" and "mary" are NOT equal. Two strings are equal only when every character matches exactly, including length.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="conditional">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Conditional Operator</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The conditional operator <code>?:</code> is a compact if/else expression — the only ternary operator in C++ (takes 3 operands).</p>
+                <pre>// Format: condition ? value_if_true : value_if_false
+x &lt; 0 ? y = 10 : z = 20;
+
+// Common use: assign based on condition
+int abs_val = (x &lt; 0) ? -x : x;
+
+// Use in cout
+cout &lt;&lt; (score >= 60 ? "Pass" : "Fail");</pre>
+                <div class="highlight"><p>The conditional operator is useful for short, simple decisions — especially inline in expressions or cout statements. For anything more complex, a full if/else is clearer and easier to maintain. Parentheses may be needed due to the low precedence of the conditional operator.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="switch">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The switch Statement</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>switch selects among multiple alternatives based on the value of an integer (or char) expression. It's a natural fit for menu-driven programs.</p>
+                <pre>switch (expression)   // must be integer or char
+{
+    case 1:
+        cout &lt;&lt; "One\n";
+        break;           // exit the switch — required!
+    case 2:
+        cout &lt;&lt; "Two\n";
+        break;
+    case 3:
+        cout &lt;&lt; "Three\n";
+        break;
+    default:             // optional but recommended
+        cout &lt;&lt; "Invalid choice\n";
+}</pre>
+                <div class="highlight"><p>The break statement is critical — without it, execution "falls through" into the next case and keeps running until it hits a break or the end of the switch. This is almost never what you want. Case values must be constant integer expressions or literals — variables and ranges are not allowed. default catches anything that doesn't match any case.</p></div>
+                <pre>// switch for a menu system
+cout &lt;&lt; "1. Add\n2. Subtract\n3. Quit\n";
+cin &gt;&gt; choice;
+switch (choice)
+{
+    case 1: doAdd(); break;
+    case 2: doSubtract(); break;
+    case 3: cout &lt;&lt; "Goodbye\n"; break;
+    default: cout &lt;&lt; "Invalid selection\n";
+}</pre>
+            </div>
+        </div>
+
+        <div class="section" id="scope">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Scope & Input Validation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The <strong>scope</strong> of a variable is the block {} in which it is defined — from the point of definition to the closing brace. A variable cannot be used outside its scope.</p>
+                <pre>int main()
+{
+    int x = 10;         // x is in scope for all of main
+
+    {                   // inner block
+        int y = 20;     // y only exists inside this block
+        cout &lt;&lt; x;      // ok — x is still in scope
+        cout &lt;&lt; y;      // ok
+    }
+
+    cout &lt;&lt; y;          // ERROR — y is out of scope
+}</pre>
+                <div class="highlight"><p>You CAN define a variable with the same name in an inner block as in an outer block. Inside the inner block, the outer variable becomes inaccessible — the inner one shadows it. This compiles but is confusing and not recommended. Always give variables unique, descriptive names.</p></div>
+                <p><strong>Input validation</strong> — always check that user input is acceptable before processing it. Test for range, reasonableness, valid menu choices, and potential divide-by-zero conditions. Bad output from bad input ("garbage in, garbage out") is one of the most common program failures.</p>
+                <pre>// Validate before using
+cout &lt;&lt; "Enter a score (0-100): ";
+cin &gt;&gt; score;
+if (score &lt; 0 || score > 100)
+    cout &lt;&lt; "Error: score out of range\n";
+else
+    // process valid score</pre>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

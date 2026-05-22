@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 16: Exceptions, Templates, and the STL</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a0a2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #1d4ed8; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #1d4ed8; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #1d4ed8; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a0a2e; border-left: 3px solid #1d4ed8; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #1d4ed8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #1d4ed8; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #1d4ed8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #1d4ed8; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #1d4ed8; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 16</div>
+        <h1>Exceptions, Templates, and the STL</h1>
+        <p class="subtitle">Exception handling, function templates, class templates, and the Standard Template Library</p>
+    </header>
+    <nav>
+        <a href="#exceptions">Exceptions</a>
+        <a href="#flow">Flow of Control</a>
+        <a href="#exception-classes">Exception Classes</a>
+        <a href="#function-templates">Function Templates</a>
+        <a href="#class-templates">Class Templates</a>
+        <a href="#stl">The STL</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="exceptions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Exceptions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Exceptions indicate that something unexpected has occurred. They allow a program to deal with errors in a controlled, structured manner rather than crashing or producing bad output.</p>
+                <div class="grid">
+                    <div class="card"><h3>throw</h3><p>Sends a signal that an error has occurred. Followed by an argument — the exception object or value being thrown.</p></div>
+                    <div class="card"><h3>try</h3><p>Followed by a block {}. Wraps code that might throw an exception. If an exception is thrown, execution immediately exits the try block.</p></div>
+                    <div class="card"><h3>catch</h3><p>Followed by a block {}. Detects and processes exceptions from the preceding try block. Takes a parameter matching the type of exception thrown.</p></div>
+                    <div class="card"><h3>Exception</h3><p>An object or value that signals an error. Can be a primitive (int, string) or a class object. Carried from the throw point to the catch block.</p></div>
+                </div>
+                <pre>// Function that throws an exception
+int totalDays(int days, int weeks)
+{
+    if (days &lt; 0 || days &gt; 7)
+        throw "invalid number of days";   // throw a C-string
+    else
+        return (7 * weeks + days);
+}
+
+// Calling code uses try/catch
+try
+{
+    totDays = totalDays(days, weeks);
+    cout &lt;&lt; "Total days: " &lt;&lt; totDays;
+    // If exception thrown above, these lines don't execute
+}
+catch (const char *msg)    // catch matches thrown type
+{
+    cout &lt;&lt; "Error: " &lt;&lt; msg;
+}
+
+// Throwing different types
+throw 42;                  // throw an int
+throw string("bad input"); // throw a string
+throw MyException("msg");  // throw a class object</pre>
+            </div>
+        </div>
+
+        <div class="section" id="flow">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Flow of Control & Nested try Blocks</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>What happens when an exception is thrown:</strong></p>
+                <ol style="padding-left:20px; color:#ccc; line-height:1.8; margin-bottom:12px;">
+                    <li>The throwing function terminates immediately (does not return)</li>
+                    <li>The try block is immediately exited</li>
+                    <li>Any objects created in the try block are destroyed (stack unwinding)</li>
+                    <li>C++ searches catch blocks in order for one matching the thrown type</li>
+                    <li>First matching catch block executes</li>
+                    <li>If NO matching catch is found, the program terminates</li>
+                </ol>
+                <div class="highlight"><p>Once an exception is thrown, the program CANNOT return to the throw point. The function that threw it terminates. All intermediate functions between the throw and the matching catch also terminate — this is called "unwinding the stack." This is why proper cleanup (destructors, smart pointers) matters so much with exceptions.</p></div>
+                <pre>// An exception is NOT caught if:
+// 1. Thrown from outside a try block
+// 2. No catch block matches the thrown type
+// Result: program terminates (abort)
+
+// Nested try blocks — exceptions can be passed up
+try                           // outer try
+{
+    try                       // inner try
+    {
+        throw 42;
+    }
+    catch (int e)
+    {
+        cout &lt;&lt; "Inner caught: " &lt;&lt; e &lt;&lt; endl;
+        throw;    // re-throw same exception to outer level
+    }
+}
+catch (int e)
+{
+    cout &lt;&lt; "Outer caught: " &lt;&lt; e &lt;&lt; endl;
+}</pre>
+            </div>
+        </div>
+
+        <div class="section" id="exception-classes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Exception Classes</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Custom exception classes allow you to carry detailed error information from the throw point to the catch block.</p>
+                <pre>// Simple exception class — just signals an error
+class NegativeBalance { };
+
+// Exception class with data
+class InvalidInput
+{
+private:
+    string message;
+    int badValue;
+public:
+    InvalidInput(string msg, int val)
+        : message(msg), badValue(val) { }
+
+    string getMessage() const { return message; }
+    int getBadValue() const { return badValue; }
+};
+
+// Class with nested exception class
+class BankAccount
+{
+public:
+    // Nested exception class
+    class InsufficientFunds
+    {
+    private:
+        double amount;
+    public:
+        InsufficientFunds(double a) : amount(a) { }
+        double getAmount() const { return amount; }
+    };
+
+    void withdraw(double amount)
+    {
+        if (amount &gt; balance)
+            throw InsufficientFunds(amount);  // throw object
+        balance -= amount;
+    }
+private:
+    double balance = 0.0;
+};
+
+// Catching class exceptions
+try
+{
+    account.withdraw(1000.00);
+}
+catch (BankAccount::InsufficientFunds &amp;e)
+{
+    cout &lt;&lt; "Can't withdraw $" &lt;&lt; e.getAmount() &lt;&lt; endl;
+}</pre>
+                <div class="highlight"><p>Catch by reference (const ExceptionType&) not by value — avoids slicing and unnecessary copying. The thrown value doesn't need to be used in the catch block — you just need the type to match. A class can have multiple nested exception classes for different error conditions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="function-templates">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Function Templates</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A function template is a pattern for a function that works with many data types. Type parameters are left generic — the compiler generates specific code when the function is called.</p>
+                <pre>// Template prefix: T is a type parameter
+template &lt;class T&gt;
+T times10(T num)
+{
+    return 10 * num;
+}
+
+// Compiler generates the right version automatically
+int ival = 3;
+double dval = 2.55;
+cout &lt;&lt; times10(ival);   // compiler creates times10(int) → 30
+cout &lt;&lt; times10(dval);   // compiler creates times10(double) → 25.5
+
+// Multiple type parameters
+template &lt;class T1, class T2&gt;
+double mpg(T1 miles, T2 gallons)
+{
+    return miles / gallons;
+}
+cout &lt;&lt; mpg(250, 10.5);    // T1=int, T2=double
+
+// Overloaded templates — must have different parameter lists
+template &lt;class T&gt;
+T sumAll(T num) { return num; }
+
+template &lt;class T1, class T2&gt;
+T1 sumAll(T1 num1, T2 num2) { return num1 + num2; }</pre>
+                <div class="highlight"><p>A function template generates NO actual code — it's purely a pattern. Code is only generated when the template function is called with specific types. All type parameters in the template prefix MUST be used in the function definition. When passing class objects to templates, make sure all operators used in the template (like &lt; or +) are defined or overloaded in that class.</p></div>
+                <p><strong>How to write a template:</strong> write the function normally for a specific type first, then replace the type name with T and add the template prefix.</p>
+            </div>
+        </div>
+
+        <div class="section" id="class-templates">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Class Templates</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Classes can also be templates. Type information is supplied when defining objects — unlike function templates where the compiler deduces the type.</p>
+                <pre>// Class template definition
+template &lt;class T&gt;
+class Grade
+{
+private:
+    T score;
+public:
+    Grade(T s) : score(s) { }
+    void setGrade(T s) { score = s; }
+    T getGrade() const { return score; }
+};
+
+// Define objects — must specify the type explicitly
+Grade&lt;int&gt;    testList[20];      // holds int scores
+Grade&lt;double&gt; quizList[20];     // holds double scores
+Grade&lt;string&gt; letterGrades[5];  // holds string grades
+
+// Use like ordinary objects
+testList[0].setGrade(95);
+cout &lt;&lt; testList[0].getGrade();
+
+// Class template inheritance
+template &lt;class T&gt;
+class Rectangle { ... };
+
+template &lt;class T&gt;
+class Square : public Rectangle&lt;T&gt;   // use T everywhere base is named
+{
+public:
+    Square(T side) : Rectangle&lt;T&gt;(side, side) { }
+};</pre>
+                <div class="highlight"><p>Unlike function templates where the compiler deduces T from arguments, class templates require explicit type specification at object definition: Grade&lt;int&gt; not just Grade. The type parameter T must be used everywhere the base class name appears in derived class templates.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="stl">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Standard Template Library (STL)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The STL is a library of templates for frequently used data structures and algorithms. Two key components: <strong>containers</strong> and <strong>iterators</strong>.</p>
+                <div class="grid">
+                    <div class="card"><h3>Sequence Containers</h3><p>Organize data sequentially like arrays. Include vector (dynamic array), deque (double-ended queue), and list (doubly-linked list).</p></div>
+                    <div class="card"><h3>Associative Containers</h3><p>Use keys for fast data access. Include set (unique keys), multiset (duplicate keys), map (key-value pairs), and multimap.</p></div>
+                    <div class="card"><h3>Iterators</h3><p>Generalization of pointers for accessing container elements. Types: forward (++), bidirectional (++ and --), random-access, input (cin), output (cout).</p></div>
+                    <div class="card"><h3>Algorithms</h3><p>Function templates for common operations on containers. Requires #include &lt;algorithm&gt;. Examples: sort, find, count, reverse, min_element, max_element.</p></div>
+                </div>
+                <pre>#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+
+// vector — the most commonly used STL container
+vector&lt;int&gt; nums = {5, 2, 8, 1, 9, 3};
+
+// Iterator — like a pointer to an element
+vector&lt;int&gt;::iterator it;
+for (it = nums.begin(); it != nums.end(); it++)
+    cout &lt;&lt; *it &lt;&lt; " ";   // dereference like a pointer
+
+// Range-based for (simpler)
+for (int n : nums)
+    cout &lt;&lt; n &lt;&lt; " ";
+
+// STL algorithms
+sort(nums.begin(), nums.end());        // sort ascending
+auto pos = find(nums.begin(), nums.end(), 8);  // find 8
+int count = count(nums.begin(), nums.end(), 5); // count 5s
+reverse(nums.begin(), nums.end());    // reverse order</pre>
+                <div class="highlight"><p>The STL dramatically reduces the amount of code you need to write. Instead of implementing your own sorting, searching, and data structure code, you use well-tested, optimized templates. Containers + Iterators + Algorithms work together: algorithms operate on containers through iterators, making them independent of the specific container type.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

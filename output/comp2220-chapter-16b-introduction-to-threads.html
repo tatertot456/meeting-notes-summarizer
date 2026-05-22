@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Intro to C++ Threads</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1e0a3c, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #6d28d9; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #6d28d9; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #6d28d9; color: white; border-color: #6d28d9; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #6d28d9; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e0a3c; border-left: 3px solid #6d28d9; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #6d28d9; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #6d28d9; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #6d28d9; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        .back { display: inline-block; margin-bottom: 32px; color: #6d28d9; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Supplemental</div>
+        <h1>Introduction to C++ Threads</h1>
+        <p class="subtitle">Creating threads, joining, race conditions, mutexes, and callbacks — C++11/14</p>
+    </header>
+    <nav>
+        <a href="#what">What Is a Thread?</a>
+        <a href="#creating">Creating Threads</a>
+        <a href="#joining">Joining & Detaching</a>
+        <a href="#race">Race Conditions</a>
+        <a href="#mutex">Mutexes</a>
+        <a href="#callbacks">Thread Callbacks</a>
+        <a href="#params">Passing Parameters</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="what">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is a Thread?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Up to this point, all programs you've written are <strong>single-threaded</strong> — one instruction executes at a time, in sequence. A <strong>thread</strong> is an independent path of execution within a program. Multi-threading allows a program to run multiple tasks simultaneously.</p>
+                <div class="grid">
+                    <div class="card"><h3>Single-Threaded</h3><p>One sequence of instructions. Task A must finish before Task B starts. Simple, predictable, but can be slow for independent tasks.</p></div>
+                    <div class="card"><h3>Multi-Threaded</h3><p>Multiple sequences run concurrently. Task A and Task B run at the same time. Faster for independent work, but introduces new complexity.</p></div>
+                </div>
+                <div class="highlight"><p>Requires <code>#include &lt;thread&gt;</code> (C++11). Threads are not magic — they introduce real problems like race conditions and deadlocks that you must manage carefully. The concepts here build directly on everything you've learned about functions, pointers, and objects.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="creating">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Creating Threads</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A thread is created by constructing a <code>std::thread</code> object and passing it a callable — a function, functor, or lambda. The thread starts executing immediately upon construction.</p>
+                <pre>#include &lt;thread&gt;
+#include &lt;iostream&gt;
+
+// A function to run in a thread
+void countUp(int start, int end)
+{
+    for (int i = start; i &lt;= end; i++)
+        std::cout &lt;&lt; i &lt;&lt; " ";
+}
+
+int main()
+{
+    // Create two threads — both start immediately
+    std::thread t1(countUp, 1, 50);    // thread 1: counts 1-50
+    std::thread t2(countUp, 51, 100);  // thread 2: counts 51-100
+
+    // Wait for both to finish before main() exits
+    t1.join();
+    t2.join();
+
+    return 0;
+}</pre>
+                <div class="highlight"><p>The thread constructor takes the function name followed by the arguments to pass to that function — just like calling the function, but it runs on a new thread. The thread starts running the moment it's constructed. Without join() or detach(), the program will crash when main() exits while threads are still running.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="joining">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Joining & Detaching Threads</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every thread must be either <strong>joined</strong> or <strong>detached</strong> before the thread object is destroyed — failing to do so terminates the program.</p>
+                <pre>std::thread t(myFunction);
+
+// join(): parent waits here until t finishes
+t.join();
+// After join(), execution continues — t is done
+
+// detach(): thread runs independently in background
+// Parent does NOT wait — thread cleans itself up when done
+t.detach();
+// After detach(), you can no longer access t
+
+// Check if a thread is still joinable before joining
+if (t.joinable())
+    t.join();
+
+// Get the ID of the current thread
+std::thread::id myId = std::this_thread::get_id();</pre>
+                <div class="highlight"><p>Detached threads are sometimes called "daemon threads" or "background threads." Once detached, you lose all contact with the thread — you can't join it, check its status, or get its result. Only detach when you genuinely don't need to know when or whether the thread finishes. For most cases, join() is the right choice.</p></div>
+                <p><strong>RAII wrapper pattern</strong> — ensures threads are always joined/detached even if an exception is thrown:</p>
+                <pre>class ThreadGuard
+{
+    std::thread &amp;t;
+public:
+    explicit ThreadGuard(std::thread &amp;t_) : t(t_) { }
+    ~ThreadGuard()
+    {
+        if (t.joinable())
+            t.detach();   // auto-cleanup on destruction
+    }
+};</pre>
+            </div>
+        </div>
+
+        <div class="section" id="race">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Race Conditions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>race condition</strong> occurs when two or more threads access shared data simultaneously and at least one is writing. The result depends on which thread "wins" — producing inconsistent, unpredictable behavior.</p>
+                <pre>// BROKEN — race condition!
+int counter = 0;   // shared between threads
+
+void increment(int n)
+{
+    for (int i = 0; i &lt; n; i++)
+        counter++;   // NOT atomic — read, modify, write = 3 steps
+}
+
+std::thread t1(increment, 1000000);
+std::thread t2(increment, 1000000);
+t1.join();
+t2.join();
+
+// Expected: 2,000,000
+// Actual: some unpredictable smaller number — race condition!</pre>
+                <div class="highlight"><p>counter++ looks like one operation but is actually three: READ the value, ADD 1, WRITE back. If two threads both read the same value before either writes, one increment is lost. This is a <strong>critical section</strong> — a block of code that must not be executed by more than one thread at the same time. The solution is mutual exclusion.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="mutex">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Mutexes & Mutual Exclusion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>mutex</strong> (mutual exclusion object) ensures only one thread can execute a critical section at a time. Requires <code>#include &lt;mutex&gt;</code>.</p>
+                <pre>#include &lt;mutex&gt;
+
+int counter = 0;
+std::mutex m;      // declared globally, shared by all threads
+
+void increment(int n)
+{
+    for (int i = 0; i &lt; n; i++)
+    {
+        m.lock();      // acquire lock — other threads wait here
+        counter++;     // critical section — only one thread at a time
+        m.unlock();    // release lock — next thread can enter
+    }
+}
+
+// Better: use lock_guard for automatic unlock (even on exception)
+void saferIncrement(int n)
+{
+    for (int i = 0; i &lt; n; i++)
+    {
+        std::lock_guard&lt;std::mutex&gt; guard(m);  // locks on creation
+        counter++;
+    }   // guard goes out of scope here — automatically unlocks
+}</pre>
+                <div class="highlight"><p>Always prefer lock_guard or unique_lock over manual lock()/unlock(). Manual unlock is easy to forget, and if an exception is thrown between lock() and unlock(), the mutex is never released — deadlocking every other thread that tries to acquire it. lock_guard uses RAII to guarantee the mutex is always released.</p></div>
+                <p><strong>Performance tip:</strong> locking/unlocking has overhead, and other threads must wait. Minimize what's inside the critical section. For a counter, consider using a thread-local variable to accumulate results, then add to the shared counter only once at the end:</p>
+                <pre>void fasterIncrement(int n)
+{
+    int localCount = 0;       // private to this thread — no lock needed
+    for (int i = 0; i &lt; n; i++)
+        localCount++;          // no contention
+
+    std::lock_guard&lt;std::mutex&gt; guard(m);
+    counter += localCount;    // one lock, one write
+}</pre>
+            </div>
+        </div>
+
+        <div class="section" id="callbacks">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Thread Callbacks: Functions, Functors & Lambdas</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A thread can be started with any callable — a function pointer, a function object (functor), or a lambda expression.</p>
+                <pre>// 1. Function pointer (classic)
+void myTask(int x) { std::cout &lt;&lt; x; }
+std::thread t1(myTask, 42);
+
+// 2. Function object (functor)
+class Worker
+{
+public:
+    void operator()(int start, int end)
+    {
+        for (int i = start; i &lt;= end; i++)
+            std::cout &lt;&lt; i &lt;&lt; " ";
+    }
+};
+Worker w;
+std::thread t2(w, 1, 100);          // pass functor object
+std::thread t3(Worker(), 1, 100);   // pass temporary functor
+
+// 3. Lambda (most flexible, captures local variables)
+int multiplier = 5;
+std::thread t4([multiplier](int x)
+{
+    std::cout &lt;&lt; x * multiplier &lt;&lt; "\n";
+}, 10);
+
+t1.join(); t2.join(); t3.join(); t4.join();</pre>
+                <div class="highlight"><p>Lambdas are the most convenient for threads — they can capture local variables and define the thread's work inline without creating a separate named function. Be careful what you capture by reference in a lambda — if the variable goes out of scope before the thread finishes, you have a dangling reference.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="params">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Passing Parameters to Threads</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Arguments passed to a thread are copied by default. Passing pointers or references requires extra care — the original data must still exist when the thread accesses it.</p>
+                <pre>// Passing by value — safe, thread gets its own copy
+void processValue(int x) { ... }
+std::thread t1(processValue, 42);   // 42 is copied
+
+// Passing a pointer — DANGEROUS if local variable goes out of scope
+void processPtr(int *ptr) { *ptr += 1; }
+int val = 10;
+std::thread t2(processPtr, &amp;val);   // make sure val outlives t2!
+t2.join();   // must join before val goes out of scope
+
+// Passing by reference — use std::ref() wrapper
+void processRef(int &amp;x) { x += 1; }
+int num = 5;
+std::thread t3(processRef, std::ref(num));  // std::ref needed!
+t3.join();
+std::cout &lt;&lt; num;   // 6 — thread modified the original
+
+// With dynamically allocated memory — safe as long as
+// the memory isn't deleted before the thread finishes
+int *heapVal = new int(100);
+std::thread t4(processPtr, heapVal);
+t4.join();
+delete heapVal;</pre>
+                <div class="highlight"><p>std::thread always copies arguments by default — even if the function takes a reference parameter. To actually pass by reference, you must wrap it in std::ref(). Without std::ref(), the thread gets a copy and your function's reference parameter points to that copy, not the original. This is one of the most common threading bugs for beginners.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

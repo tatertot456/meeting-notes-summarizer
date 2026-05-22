@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 7: Arrays and Vectors</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f0a00, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #c2410c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #c2410c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #c2410c; color: white; border-color: #c2410c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #c2410c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f0a00; border-left: 3px solid #c2410c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c2410c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #c2410c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c2410c; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #c2410c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #c2410c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 7</div>
+        <h1>Arrays and Vectors</h1>
+        <p class="subtitle">Array basics, initialization, processing, 2D arrays, parallel arrays, functions, and vectors</p>
+    </header>
+    <nav>
+        <a href="#basics">Array Basics</a>
+        <a href="#init">Initialization</a>
+        <a href="#loops">Loop Processing</a>
+        <a href="#operations">Common Operations</a>
+        <a href="#functions">Arrays & Functions</a>
+        <a href="#2d">2D Arrays</a>
+        <a href="#parallel">Parallel Arrays</a>
+        <a href="#vectors">Vectors</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="basics">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Array Basics</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An array is a variable that stores multiple values of the same type in adjacent memory locations. All elements share one name, distinguished by a numeric subscript (index).</p>
+                <pre>// Definition
+int tests[5];              // array of 5 integers
+const int SIZE = 5;
+int scores[SIZE];          // use named constant for size — best practice
+
+// Subscripts start at 0, end at size-1
+tests[0] = 79;             // first element
+tests[4] = 84;             // last element (index 4 for a 5-element array)
+
+// Access like any variable
+cout &lt;&lt; tests[0];
+cin &gt;&gt; tests[1];
+tests[4] = tests[0] + tests[1];
+
+// Use integer expression as subscript
+int i = 3;
+cout &lt;&lt; tests[i];          // accesses tests[3]</pre>
+                <div class="highlight"><p>C++ does NOT check array bounds — using an out-of-range subscript silently corrupts other memory, crashes the program, or causes unpredictable bugs. Always stay within [0, size-1]. The classic off-by-one error: starting subscripts at 1 or using &lt;= SIZE instead of &lt; SIZE in a loop.</p></div>
+                <p><strong>Array size in bytes</strong> = number of elements × bytes per element. A 5-element int array uses 20 bytes (5 × 4).</p>
+            </div>
+        </div>
+
+        <div class="section" id="init">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Array Initialization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// Initialize with a list
+int tests[5] = {79, 82, 91, 77, 84};
+
+// Partial initialization — remaining elements set to 0
+int tests[5] = {79, 82};    // tests[2], [3], [4] = 0
+
+// Implicit size — compiler counts the list
+int quizzes[] = {12, 17, 15, 11};   // size = 4
+
+// Global arrays: all elements initialized to 0 automatically
+// Local arrays: uninitialized — must set values before use!</pre>
+                <div class="highlight"><p>Initialization list cannot exceed the array size. If you provide fewer values than the size, the remaining elements are zero-initialized. Use named constants for size declarators — if you need to change the array size later, you only change one line.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="loops">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Loop Processing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Loops are the primary tool for processing arrays. Use the regular for loop when you need the subscript, and the range-based for loop (C++11) when you don't.</p>
+                <pre>const int SIZE = 5;
+int numbers[SIZE];
+
+// Regular for loop — use when you need the index
+for (int i = 0; i &lt; SIZE; i++)
+    numbers[i] = 99;
+
+// Range-based for loop (C++11) — read-only
+for (int val : numbers)
+    cout &lt;&lt; val &lt;&lt; endl;
+
+// Range-based for loop with reference — modifies original
+for (int &amp;val : numbers)
+    cin &gt;&gt; val;
+
+// auto keyword with range-based for
+for (auto &amp;val : numbers)
+    cin &gt;&gt; val;</pre>
+                <div class="highlight"><p>The range-based for loop automatically knows the array size and stays in bounds — no counter, no off-by-one errors. However, it ONLY works with the full array — it can't process a partial array or process elements in reverse. For those cases, use the regular for loop. Without the & reference, the range variable is a copy — modifying it does NOT change the array.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="operations">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Common Array Operations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// Sum and average
+double sum = 0;
+for (int i = 0; i &lt; SIZE; i++)
+    sum += scores[i];
+double average = sum / SIZE;
+
+// Find highest value (seed with first element)
+int highest = numbers[0];
+for (int i = 1; i &lt; SIZE; i++)
+    if (numbers[i] &gt; highest)
+        highest = numbers[i];
+
+// Find lowest value
+int lowest = numbers[0];
+for (int i = 1; i &lt; SIZE; i++)
+    if (numbers[i] &lt; lowest)
+        lowest = numbers[i];
+
+// Copy array element-by-element (cannot use = on whole array)
+for (int i = 0; i &lt; SIZE; i++)
+    newTests[i] = tests[i];
+// newTests = tests;   // WRONG — will not work!
+
+// Compare two arrays element-by-element
+bool equal = true;
+for (int i = 0; i &lt; SIZE; i++)
+    if (first[i] != second[i])
+        equal = false;</pre>
+                <div class="highlight"><p>Always seed min/max searches with the first element (index 0), not 0 or INT_MAX — that way the code works correctly regardless of whether the values are positive, negative, or mixed. Don't confuse tests[i]++ (increment the element) with tests[i++] (increment the index, leave element unchanged).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="functions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Arrays as Function Arguments</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Pass an array to a function using just the array name. Always pass the size separately — the function has no other way to know how many elements to process.</p>
+                <pre>// Prototype: empty [] for array parameter
+void showScores(int [], int);
+
+// Header: parameter name + []
+void showScores(int tests[], int size)
+{
+    for (int i = 0; i &lt; size; i++)
+        cout &lt;&lt; tests[i] &lt;&lt; endl;
+}
+
+// Call: just the array name (no [] or subscript)
+showScores(tests, SIZE);</pre>
+                <div class="highlight"><p>Arrays are NOT passed by value — they behave like reference parameters. The function receives a pointer to the original array, so changes made inside the function affect the original. This is unlike regular variables which get copied. If you don't want the function to modify the array, declare the parameter as const: void showScores(const int [], int);</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="2d">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Two-Dimensional Arrays</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A 2D array is like a table — rows and columns. Two size declarators: first is rows, second is columns. Two subscripts to access an element.</p>
+                <pre>const int ROWS = 4, COLS = 3;
+int exams[ROWS][COLS];
+
+// Access: [row][col]
+exams[2][2] = 86;
+
+// Initialization — row by row
+int exams[2][2] = { {84, 78},
+                    {92, 97} };
+
+// Process with nested loops
+for (int row = 0; row &lt; ROWS; row++)
+    for (int col = 0; col &lt; COLS; col++)
+        cout &lt;&lt; exams[row][col] &lt;&lt; " ";
+
+// Sum all elements
+int total = 0;
+for (int row = 0; row &lt; ROWS; row++)
+    for (int col = 0; col &lt; COLS; col++)
+        total += numbers[row][col];
+
+// Sum each row (e.g., student averages)
+for (int row = 0; row &lt; NUM_STUDENTS; row++)
+{
+    double rowTotal = 0;
+    for (int col = 0; col &lt; NUM_SCORES; col++)
+        rowTotal += scores[row][col];
+    cout &lt;&lt; "Average: " &lt;&lt; rowTotal / NUM_SCORES;
+}
+
+// Function prototype — must specify all dimensions except first
+void getExams(int [][COLS], int rows);</pre>
+            </div>
+        </div>
+
+        <div class="section" id="parallel">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Parallel Arrays</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Parallel arrays are two or more arrays where elements at the same subscript are related. They can be of different types.</p>
+                <pre>const int SIZE = 5;
+int    id[SIZE];        // student ID
+double average[SIZE];   // course average
+char   grade[SIZE];     // letter grade
+
+// Elements at index i all belong to the same student
+for (int i = 0; i &lt; SIZE; i++)
+{
+    cout &lt;&lt; "Student ID: " &lt;&lt; id[i]
+         &lt;&lt; " Average: "   &lt;&lt; average[i]
+         &lt;&lt; " Grade: "     &lt;&lt; grade[i] &lt;&lt; endl;
+}</pre>
+                <div class="highlight"><p>Parallel arrays are a simple but effective way to associate related data before you learn about structs or classes. The shared subscript is the relationship — id[2], average[2], and grade[2] all describe the same student.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="vectors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>STL Vectors</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Vectors are from the Standard Template Library — they work like arrays but grow automatically as needed. Requires <code>#include &lt;vector&gt;</code>.</p>
+                <pre>#include &lt;vector&gt;
+
+// Declare vectors
+vector&lt;int&gt; scores;           // empty, size 0
+vector&lt;int&gt; scores(30);       // 30 elements
+vector&lt;int&gt; scores(30, 0);    // 30 elements, all initialized to 0
+vector&lt;int&gt; finals(scores);   // copy of another vector
+vector&lt;int&gt; numbers {10, 20, 30, 40}; // C++11 initializer list
+
+// Add / remove elements
+scores.push_back(75);    // add to end
+scores.pop_back();       // remove from end
+scores.clear();          // remove all elements
+
+// Query
+int size = scores.size();      // number of elements
+bool isEmpty = scores.empty(); // true if size == 0
+
+// Access like an array
+scores[0] = 100;
+cout &lt;&lt; scores[2];
+
+// Range-based for loop
+for (int val : scores)
+    cout &lt;&lt; val &lt;&lt; endl;</pre>
+                <div class="highlight"><p>Vectors solve the biggest problem with arrays — you don't need to know the size at compile time. They grow automatically with push_back(). Use vectors when the number of elements isn't known in advance. Use arrays when the size is fixed and known — arrays have slightly less overhead. Vectors are covered in more depth in Chapter 17.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

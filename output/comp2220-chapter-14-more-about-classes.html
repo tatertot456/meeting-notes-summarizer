@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 14: More About Classes</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #15803d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #15803d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #15803d; color: white; border-color: #15803d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #15803d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a0a; border-left: 3px solid #15803d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #15803d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #15803d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #15803d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #15803d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #15803d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 14</div>
+        <h1>More About Classes</h1>
+        <p class="subtitle">Static members, friends, copy constructors, this pointer, operator overloading, and aggregation</p>
+    </header>
+    <nav>
+        <a href="#static">Static Members</a>
+        <a href="#friends">Friend Functions</a>
+        <a href="#copy">Copy Constructors</a>
+        <a href="#this">The this Pointer</a>
+        <a href="#operators">Operator Overloading</a>
+        <a href="#conversion">Object Conversion</a>
+        <a href="#aggregation">Aggregation</a>
+        <a href="#rvalue">Lvalues, Rvalues & Move Semantics</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="static">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Instance and Static Members</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Normally each object gets its own copy of every member variable. A <strong>static member variable</strong> is shared by ALL objects of the class — there's only one copy regardless of how many objects exist.</p>
+                <pre>// Tree.h
+class Tree
+{
+private:
+    static int objectCount;   // ONE shared variable for all Tree objects
+public:
+    Tree() { objectCount++; } // each constructor call increments it
+
+    // Regular accessor
+    int getObjectCount() const { return objectCount; }
+
+    // Static accessor — can be called without an object
+    static int getStaticCount() const { return objectCount; }
+};
+
+// Must define and initialize OUTSIDE the class (in .cpp)
+int Tree::objectCount = 0;
+
+// Usage
+Tree t1, t2, t3;
+
+// Call via object (regular)
+cout &lt;&lt; t1.getObjectCount();      // 3
+
+// Call without any object (static function)
+cout &lt;&lt; Tree::getStaticCount();    // 3 — called before any object exists</pre>
+                <div class="highlight"><p>Static member variables must be defined and initialized outside the class — the class declaration only declares them. Static member functions can only access static member variables — they have no "this" pointer because they don't operate on a specific object. Use static members for data that belongs to the class as a whole, not to individual instances.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="friends">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Friend Functions and Classes</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>friend</strong> is a function or class that is NOT a member of a class but is granted access to its private members. Declared inside the class with the <code>friend</code> keyword.</p>
+                <pre>class Rectangle
+{
+private:
+    double width, length;
+public:
+    Rectangle(double w, double l) : width(w), length(l) {}
+
+    // Declare a standalone function as friend
+    friend void printDimensions(Rectangle r);
+
+    // Declare a member function of another class as friend
+    friend void Inspector::examine(Rectangle r);
+
+    // Declare an entire class as friend
+    friend class Validator;
+};
+
+// Friend function definition (NOT a member — no :: needed)
+void printDimensions(Rectangle r)
+{
+    // Can access private members directly
+    cout &lt;&lt; r.width &lt;&lt; " x " &lt;&lt; r.length &lt;&lt; endl;
+}</pre>
+                <div class="highlight"><p>Friendship is granted BY the class, not taken by the friend. It is not mutual — if A is a friend of B, that doesn't make B a friend of A. Friendship is also not inherited. Use friends sparingly — they break encapsulation and should only be used when there's a genuine design reason (like operator overloading).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="copy">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Memberwise Assignment & Copy Constructors</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Memberwise assignment</strong>: using = copies each member variable from one object to another. The default copy constructor does the same field-by-field copy.</p>
+                <pre>Rectangle r1(10, 5);
+Rectangle r2 = r1;    // copy constructor called — memberwise copy
+Rectangle r3;
+r3 = r1;              // assignment operator — memberwise copy</pre>
+                <p><strong>The problem with pointers:</strong> if a member variable is a pointer, memberwise copy copies the ADDRESS — both objects point to the same memory. Modifying one affects the other.</p>
+                <pre>class SomeClass
+{
+private:
+    int *value;    // pointer member!
+public:
+    SomeClass(int val = 0) { value = new int; *value = val; }
+};
+
+SomeClass obj1(5);
+SomeClass obj2 = obj1;   // both obj1 and obj2 point to SAME int!
+obj2.setVal(13);
+cout &lt;&lt; obj1.getVal();   // prints 13 — obj1 was changed too! Bug!</pre>
+                <p><strong>Solution: programmer-defined copy constructor</strong> that allocates separate memory:</p>
+                <pre>SomeClass::SomeClass(const SomeClass &amp;obj)
+{
+    value = new int;     // allocate NEW memory
+    *value = *obj.value; // copy the VALUE, not the address
+}
+
+// Now each object has its own memory
+SomeClass obj1(5);
+SomeClass obj2 = obj1;
+obj2.setVal(13);
+cout &lt;&lt; obj1.getVal();   // still 5 — independent!</pre>
+                <div class="highlight"><p>The copy constructor parameter must be a const reference — never by value (that would recursively call the copy constructor forever). The const prevents the copy constructor from accidentally modifying the source object. Rule of Three: if you define a destructor, copy constructor, or copy assignment operator, you should probably define all three.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="this">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The this Pointer</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every non-static member function has access to a predefined pointer called <strong>this</strong> that always points to the object that called the function.</p>
+                <pre>class Student
+{
+private:
+    string name;
+public:
+    string getName() const { return name; }
+
+    // this is implicitly available in every member function
+    void setName(string name)
+    {
+        // "name" is ambiguous — parameter or member?
+        // Use this-> to explicitly mean the member variable
+        this-&gt;name = name;
+    }
+};
+
+Student s1, s2;
+
+s1.getName();   // inside getName, this points to s1
+s2.getName();   // inside getName, this points to s2
+
+// Returning *this enables chaining
+SomeClass&amp; SomeClass::setValue(int v)
+{
+    value = v;
+    return *this;   // return the current object
+}
+obj.setValue(5).setName("test");  // chaining works!</pre>
+                <div class="highlight"><p>this is passed as a hidden argument to every non-static member function call. Static member functions do NOT have a this pointer — they don't operate on a specific object. The most common uses of this: disambiguating parameter names from member variable names, and returning the current object (*this) to enable operator chaining.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="operators">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Operator Overloading</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Operators like =, +, -, [], etc. can be redefined to work with class objects. The function name is <code>operator</code> followed by the symbol.</p>
+                <pre>class SomeClass
+{
+private:
+    int *value;
+public:
+    // Overloaded assignment operator
+    const SomeClass&amp; operator=(const SomeClass &amp;rval)
+    {
+        *value = *rval.value;   // deep copy the value
+        return *this;           // enables chaining: a = b = c
+    }
+
+    // Overloaded + operator
+    SomeClass operator+(const SomeClass &amp;right)
+    {
+        SomeClass temp;
+        *temp.value = *value + *right.value;
+        return temp;
+    }
+};
+
+// Two ways to call an overloaded operator
+object1.operator=(object2);   // explicit function call
+object1 = object2;            // conventional notation — same thing
+object1 = object2 = object3;  // chaining works because of return *this
+
+// Distance between two 2D points using overloaded -
+class Point2d
+{
+private:
+    int x, y;
+public:
+    double operator-(const Point2d &amp;right)
+    {
+        return sqrt(pow((x - right.x), 2) + pow((y - right.y), 2));
+    }
+};
+Point2d p1(2,2), p2(4,4);
+cout &lt;&lt; p2 - p1;   // displays 2.82843</pre>
+                <div class="highlight"><p>Cannot be overloaded: ?: . .* :: sizeof. Cannot change the number of operands. Overloaded relational operators should return bool. Overloaded &lt;&lt; and &gt;&gt; must return reference to ostream/istream and take them as parameters (must be friend functions, not member functions). Prefix and postfix ++ / -- are overloaded differently.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="conversion">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Object Conversion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>You can define how an object converts to a built-in type by writing an operator function with no return type declaration.</p>
+                <pre>class FeetInches
+{
+private:
+    int feet;
+    int inches;
+public:
+    // Convert FeetInches to int — returns just the feet
+    operator int() { return feet; }
+
+    // Convert FeetInches to double
+    operator double() { return feet + inches / 12.0; }
+};
+
+FeetInches distance(6, 3);
+
+// Automatic conversion
+int d = distance;         // calls operator int() — d = 6
+double d2 = distance;     // calls operator double() — d2 = 6.25
+
+// Works in expressions too
+cout &lt;&lt; distance + 2;    // converts distance to int, adds 2</pre>
+            </div>
+        </div>
+
+        <div class="section" id="aggregation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Aggregation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Aggregation</strong>: a class has another class as a member variable. Models the "has a" relationship between classes. Same notation as nested structs.</p>
+                <pre>class StudentInfo
+{
+private:
+    string firstName, lastName;
+    string address, city, state, zip;
+public:
+    // constructor, accessors, mutators...
+};
+
+class Student
+{
+private:
+    StudentInfo personalData;   // Student HAS A StudentInfo
+    double gpa;
+    int yearInSchool;
+public:
+    // Access nested object through dot operator chaining
+    void setName(string first, string last)
+    {
+        personalData.setFirstName(first);
+        personalData.setLastName(last);
+    }
+};
+
+// Real-world example: Course HAS an Instructor and a TextBook
+class Instructor { ... };
+class TextBook { ... };
+class Course
+{
+private:
+    Instructor teacher;    // Course HAS an Instructor
+    TextBook book;         // Course HAS a TextBook
+    string courseName;
+};</pre>
+                <div class="highlight"><p>Aggregation models "has a" relationships. Inheritance (coming in Chapter 15) models "is a" relationships. A Course HAS an Instructor (aggregation). A SavingsAccount IS A BankAccount (inheritance). Choosing the right relationship is a fundamental OOP design decision.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="rvalue">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Lvalues, Rvalues & Move Semantics</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Lvalue</h3><p>Persists beyond the statement that created it. Has a name that makes it accessible to other statements. Example: a variable (int x = 5 — x is an lvalue).</p></div>
+                    <div class="card"><h3>Rvalue</h3><p>Temporary, cannot be accessed beyond the statement that created it. Example: the result of 2 * 6, or the return value of a function that's immediately used.</p></div>
+                </div>
+                <pre>int x;
+x = 2 * 6;   // 2*6 produces a temporary rvalue (12)
+              // then 12 is assigned to x (lvalue)
+              // then the temporary is discarded
+
+int square(int a) { return a * a; }
+x = square(5);  // square(5) returns rvalue 25
+                // 25 is copied to x, then discarded</pre>
+                <p><strong>Rvalue References (&amp;&amp;)</strong> allow binding to temporary objects that would otherwise have no name:</p>
+                <pre>// Move constructor — transfers ownership instead of copying
+// Much more efficient when the source is a temporary
+class Person
+{
+private:
+    string *name;   // pointer member
+public:
+    // Copy constructor: allocates new memory, copies data
+    Person(const Person &amp;other)
+    {
+        name = new string(*other.name);
+    }
+
+    // Move constructor: steals the pointer from the temporary
+    Person(Person &amp;&amp;other)   // &amp;&amp; = rvalue reference
+    {
+        name = other.name;    // steal the pointer
+        other.name = nullptr; // leave source in valid empty state
+    }
+};</pre>
+                <div class="highlight"><p>Move semantics (C++11) dramatically improve performance when a class manages dynamic memory. Instead of copying all data to a new allocation (expensive), a move constructor "steals" the pointer from a temporary object — O(1) instead of O(n). Anytime a class has a pointer member, implement both copy AND move constructors/assignment operators (Rule of Five in modern C++).</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

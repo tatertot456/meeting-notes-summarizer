@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 10: Characters, C-Strings, and the String Class</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2010, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #166534; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #166534; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #166534; color: white; border-color: #166534; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #166534; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2010; border-left: 3px solid #166534; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #166534; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #166534; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #166534; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #166534; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #166534; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 10</div>
+        <h1>Characters, C-Strings, and the String Class</h1>
+        <p class="subtitle">Character testing, case conversion, C-strings, cstring functions, and the C++ string class</p>
+    </header>
+    <nav>
+        <a href="#chartesting">Character Testing</a>
+        <a href="#caseconv">Case Conversion</a>
+        <a href="#cstrings">C-Strings</a>
+        <a href="#cstringfuncs">C-String Functions</a>
+        <a href="#conversion">Numeric Conversion</a>
+        <a href="#stringclass">string Class</a>
+        <a href="#stringops">string Operators</a>
+        <a href="#stringfuncs">string Member Functions</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="chartesting">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Character Testing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Requires <code>#include &lt;cctype&gt;</code>. These functions test a single character and return a nonzero (true) or zero (false) value.</p>
+                <table>
+                    <tr><th>Function</th><th>Returns true if...</th></tr>
+                    <tr><td>isalpha(ch)</td><td>ch is a letter (A-Z or a-z)</td></tr>
+                    <tr><td>isdigit(ch)</td><td>ch is a digit (0-9)</td></tr>
+                    <tr><td>isalnum(ch)</td><td>ch is a letter or digit</td></tr>
+                    <tr><td>isspace(ch)</td><td>ch is whitespace (space, tab, newline)</td></tr>
+                    <tr><td>isupper(ch)</td><td>ch is an uppercase letter</td></tr>
+                    <tr><td>islower(ch)</td><td>ch is a lowercase letter</td></tr>
+                    <tr><td>ispunct(ch)</td><td>ch is a punctuation character</td></tr>
+                    <tr><td>isprint(ch)</td><td>ch is a printable character</td></tr>
+                </table>
+                <pre>#include &lt;cctype&gt;
+
+char input = 'A';
+if (isalpha(input))
+    cout &lt;&lt; "It's a letter\n";
+if (isdigit(input))
+    cout &lt;&lt; "It's a digit\n";</pre>
+            </div>
+        </div>
+
+        <div class="section" id="caseconv">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Character Case Conversion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Also requires <code>#include &lt;cctype&gt;</code>. These functions return the converted character — they do NOT modify the original.</p>
+                <pre>char ch1 = 'H', ch2 = 'e', ch3 = '!';
+
+// toupper: converts lowercase to uppercase, others unchanged
+cout &lt;&lt; toupper(ch1);  // 'H' (already upper, unchanged)
+cout &lt;&lt; toupper(ch2);  // 'E'
+cout &lt;&lt; toupper(ch3);  // '!' (not a letter, unchanged)
+
+// tolower: converts uppercase to lowercase, others unchanged
+cout &lt;&lt; tolower(ch1);  // 'h'
+cout &lt;&lt; tolower(ch2);  // 'e' (already lower, unchanged)
+cout &lt;&lt; tolower(ch3);  // '!'
+
+// Common use: normalize input for comparison
+char answer;
+cin &gt;&gt; answer;
+if (toupper(answer) == 'Y')
+    cout &lt;&lt; "You said yes\n";</pre>
+            </div>
+        </div>
+
+        <div class="section" id="cstrings">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>C-Strings</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A C-string is a sequence of characters stored in adjacent memory locations and terminated by a <strong>null character (\0)</strong>. String literals like "Hi there!" are automatically null-terminated — "Hi there!" actually takes 10 bytes, not 9.</p>
+                <pre>// Define a char array to hold a C-string
+const int SIZE = 20;
+char city[SIZE];         // can hold up to 19 chars + \0
+
+// Initialize at definition
+char name[] = "Missoula";  // automatically sized to 9 bytes (8 + \0)
+
+// Input with cin >> (stops at whitespace)
+cin &gt;&gt; city;
+
+// Input with getline (reads whole line including spaces)
+cin.getline(city, SIZE);   // reads up to SIZE-1 chars, adds \0
+
+// C-strings cannot use = for assignment after definition
+// city = "Billings";    // WRONG — use strcpy instead</pre>
+                <div class="highlight"><p>Always leave room for the null terminator — a C-string of N characters needs an array of at least N+1. cin &gt;&gt; stops at whitespace and does no bounds checking. Use cin.getline(array, size) to read strings with spaces and to limit how much is read.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="cstringfuncs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>C-String Library Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Requires <code>#include &lt;cstring&gt;</code>. These functions work with C-strings (char arrays or pointers to char).</p>
+                <pre>char city[20] = "Missoula";
+char location[20] = "Missoula, ";
+char state[3] = "MT";
+char fname[20] = "Maureen";
+char name[20];
+
+// strlen: returns length WITHOUT counting \0
+cout &lt;&lt; strlen(city);        // 8
+
+// strcat: appends str2 to the END of str1
+strcat(location, state);     // location = "Missoula, MT"
+
+// strcpy: copies str2 into str1
+strcpy(name, fname);         // name = "Maureen"
+
+// strstr: finds first occurrence of str2 in str1
+// returns pointer to match, or NULL if not found
+char river[] = "Wabash";
+char word[] = "aba";
+cout &lt;&lt; strstr(river, word); // displays "abash"
+
+// strcmp: compares two C-strings
+// returns 0 if equal, negative if str1 &lt; str2, positive if str1 &gt; str2
+if (strcmp(name, fname) == 0)
+    cout &lt;&lt; "Strings are equal\n";</pre>
+                <div class="highlight"><p>strcat and strcpy do NO bounds checking — if the destination array is too small, they write past the end of the array causing buffer overflow. This is a serious security vulnerability. Always make sure the destination is large enough. The C++ string class is safer — prefer it over C-strings in modern code.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="conversion">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>C-String / Numeric Conversion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Requires <code>#include &lt;cstdlib&gt;</code>. Converts between C-strings and numeric types.</p>
+                <pre>int iNum;
+long lNum;
+double dNum;
+char intChar[10];
+
+iNum = atoi("1234");       // "1234" → 1234 (int)
+lNum = atol("5678");       // "5678" → 5678 (long)
+dNum = atof("35.7");       // "35.7" → 35.7 (double)
+itoa(iNum, intChar, 10);   // 1234 → "1234" (base 10)</pre>
+                <div class="highlight"><p>If the C-string contains non-digit characters, results are undefined — the function may return the result up to the non-digit, or may return 0. itoa does no bounds checking on the destination buffer. For the C++ string class, use stoi(), stol(), stod(), and to_string() instead — they're safer and easier.</p></div>
+                <pre>// C++11 string class conversions (safer, preferred)
+string numStr = "1234";
+int n = stoi(numStr);        // string to int
+double d = stod("3.14");     // string to double
+string s = to_string(42);    // int to string</pre>
+            </div>
+        </div>
+
+        <div class="section" id="stringclass">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The C++ string Class</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The string class is a special data type that makes string handling dramatically easier and safer than C-strings. Requires <code>#include &lt;string&gt;</code>.</p>
+                <pre>#include &lt;string&gt;
+
+// Define string variables
+string firstName, lastName;
+
+// Assign values
+firstName = "George";
+lastName = "Washington";
+
+// Display
+cout &lt;&lt; firstName &lt;&lt; " " &lt;&lt; lastName;
+
+// Input: cin >> stops at whitespace
+string word;
+cin &gt;&gt; word;
+
+// getline: reads entire line including spaces
+string address;
+getline(cin, address);
+
+// Compare directly with relational operators
+string str1 = "George", str2 = "Georgia";
+if (str1 &lt; str2)
+    cout &lt;&lt; str1 &lt;&lt; " comes first\n";
+
+// Access individual characters like an array
+for (int i = 0; i &lt; 16; i++)
+    cout &lt;&lt; phrase[i];</pre>
+                <div class="highlight"><p>The string class handles memory management automatically — it grows as needed, no fixed size to worry about, no buffer overflows. Relational operators (&lt;, &gt;, ==, !=, etc.) work directly on string objects using lexicographic (alphabetical) comparison. This is far safer and more convenient than C-string equivalents.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="stringops">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>string Operators</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>string word1, word2, phrase;
+word2 = " Dog";
+
+cin &gt;&gt; word1;          // user enters "Hot Tamale" — word1 gets "Hot"
+
+// + concatenates strings
+phrase = word1 + word2;    // "Hot Dog"
+
+// += appends to existing string
+phrase += " on a bun";     // "Hot Dog on a bun"
+
+// [] accesses individual characters
+cout &lt;&lt; phrase[0];         // 'H'
+cout &lt;&lt; phrase[4];         // 'D'
+
+// = assigns one string to another (unlike C-strings!)
+string copy = phrase;      // copy = "Hot Dog on a bun"</pre>
+                <table>
+                    <tr><th>Operator</th><th>Purpose</th></tr>
+                    <tr><td>=</td><td>Assign string value</td></tr>
+                    <tr><td>+</td><td>Concatenate two strings</td></tr>
+                    <tr><td>+=</td><td>Append to string</td></tr>
+                    <tr><td>[]</td><td>Access individual character</td></tr>
+                    <tr><td>==, !=, &lt;, &gt;, &lt;=, &gt;=</td><td>Compare strings lexicographically</td></tr>
+                    <tr><td>&lt;&lt;, &gt;&gt;</td><td>Output to cout / input from cin</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="stringfuncs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>string Member Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Size & Space</h3><p>length() / size() — number of chars. empty() — true if empty. capacity() — allocated space. resize(n) — change size.</p></div>
+                    <div class="card"><h3>Modification</h3><p>append(str) — add to end. insert(pos, str) — insert at position. erase(pos, n) — remove n chars at pos. replace(pos, n, str) — replace. clear() — empty the string.</p></div>
+                    <div class="card"><h3>Substrings & Search</h3><p>substr(pos, n) — extract n chars at pos. find(str) — position of first match (or string::npos if not found). at(i) — access char at i with bounds checking.</p></div>
+                    <div class="card"><h3>Comparison</h3><p>compare(str) — like strcmp: 0 if equal, negative if less, positive if greater. Or just use ==, &lt;, &gt; operators directly.</p></div>
+                </div>
+                <pre>string word1, word2, phrase;
+cin &gt;&gt; word1;          // "Hot"
+word2.assign(" Dog");
+
+phrase.append(word1);
+phrase.append(word2);  // phrase = "Hot Dog"
+
+// append with character count limit
+phrase.append(" with mustard relish", 13);
+// phrase = "Hot Dog with mustard" (stops at 13 chars)
+
+// insert at position
+phrase.insert(8, "on a bun ");
+// phrase = "Hot Dog on a bun with mustard"
+
+// find and substr
+string sentence = "Hello World";
+int pos = sentence.find("World");     // pos = 6
+string sub = sentence.substr(6, 5);  // sub = "World"
+
+// length
+cout &lt;&lt; phrase.length();   // number of characters</pre>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

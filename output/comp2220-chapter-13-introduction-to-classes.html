@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Programming — Chapter 13: Introduction to Classes</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b91c1c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #b91c1c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b91c1c; color: white; border-color: #b91c1c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #b91c1c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a0a; border-left: 3px solid #b91c1c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #b91c1c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #b91c1c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #b91c1c; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b91c1c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #b91c1c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Computer Programming · Chapter 13</div>
+        <h1>Introduction to Classes</h1>
+        <p class="subtitle">OOP concepts, class design, access specifiers, constructors, destructors, and UML</p>
+    </header>
+    <nav>
+        <a href="#oop">OOP vs Procedural</a>
+        <a href="#classes">Classes & Objects</a>
+        <a href="#access">Access Specifiers</a>
+        <a href="#members">Member Functions</a>
+        <a href="#constructors">Constructors</a>
+        <a href="#destructors">Destructors</a>
+        <a href="#arrays">Arrays of Objects</a>
+        <a href="#files">Separate Files</a>
+        <a href="#uml">UML Diagrams</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="oop">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>OOP vs Procedural Programming</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Procedural Programming</h3><p>Focus is on the process — what actions occur. Data and functions are separate. If data structures change, many functions must change too. Complex function hierarchies become hard to maintain and extend.</p></div>
+                    <div class="card"><h3>Object-Oriented Programming</h3><p>Focus is on data and the functions that operate on it. Objects are instances of ADTs that bundle data and behavior together. Changes to one class don't ripple through unrelated code.</p></div>
+                </div>
+                <div class="highlight"><p>OOP key concepts: <strong>Encapsulation</strong> — bundling data and functions together and hiding internal details. <strong>Data hiding</strong> — restricting access to certain members. <strong>Public interface</strong> — the functions the outside world can use to interact with the object. A class is like a blueprint; objects are the houses built from it.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="classes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Classes and Objects</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>class</strong> is like a struct but can include both member variables (attributes) and member functions (methods/behaviors). An <strong>object</strong> is an instance of a class.</p>
+                <pre>// Class declaration
+class Rectangle
+{
+private:
+    double width;      // member variables (attributes)
+    double length;
+public:
+    void setWidth(double w);    // member function prototypes
+    void setLength(double l);
+    double getWidth() const;
+    double getLength() const;
+    double getArea() const;
+};
+
+// Define an object (instance of the class)
+Rectangle r;
+
+// Access public members with dot operator
+r.setWidth(5.2);
+r.setLength(10.0);
+cout &lt;&lt; r.getArea();
+
+// Pointer to an object
+Rectangle *rPtr = nullptr;
+rPtr = &amp;r;
+rPtr-&gt;setLength(12.5);
+cout &lt;&lt; rPtr-&gt;getLength();
+
+// Dynamically allocated object
+Rectangle *dynRect = new Rectangle(10, 20);
+delete dynRect;</pre>
+                <div class="highlight"><p>A class declaration only defines the TYPE — no memory is allocated. Defining an object (Rectangle r;) allocates the memory. The dot operator (.) accesses members of an object. The arrow operator (-&gt;) accesses members through a pointer. Attempting to access a private member from outside the class causes a compiler error.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="access">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Access Specifiers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Specifier</th><th>Who Can Access</th><th>Typical Use</th></tr>
+                    <tr><td>public</td><td>Any code, inside or outside the class</td><td>Member functions that form the public interface</td></tr>
+                    <tr><td>private</td><td>Only member functions of the class itself</td><td>Data members, internal helper functions</td></tr>
+                </table>
+                <pre>class Rectangle
+{
+private:                    // data is hidden from outside
+    double width;
+    double length;
+public:                     // interface is accessible from outside
+    void setWidth(double w);
+    void setLength(double l);
+    double getWidth() const;
+    double getArea() const;
+private:                    // can appear multiple times, any order
+    void validate(double);  // private helper function
+};</pre>
+                <div class="highlight"><p>If no access specifier is listed in a class, members default to private. This is different from struct, where the default is public. Always make data members private — this protects them from being directly modified by code outside the class, preventing data corruption.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="members">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Member Functions: Accessors, Mutators & Inline</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Mutator</strong>: sets or changes a private member variable. <strong>Accessor</strong>: retrieves a value — should be marked const since it doesn't change object data.</p>
+                <pre>// Prototype goes inside the class declaration
+class Rectangle
+{
+private:
+    double width = 0.0;    // in-place initialization (C++11)
+    double length = 0.0;
+public:
+    void setWidth(double w);           // mutator
+    double getWidth() const;           // accessor — marked const
+    double getArea() const;            // computed, never stored (avoids stale data)
+
+    // Inline: defined directly in the class (small functions)
+    double getLength() const { return length; }
+};
+
+// Definition outside class: use scope resolution operator ::
+void Rectangle::setWidth(double w)
+{
+    width = w;
+}
+
+double Rectangle::getWidth() const
+{
+    return width;
+}
+
+double Rectangle::getArea() const
+{
+    return width * length;    // computed on demand — never stale
+}</pre>
+                <div class="highlight"><p>Avoid storing computed values (like area) as member variables — if width or length changes and you forget to update area, the stored value becomes <strong>stale</strong>. Instead, compute them in const member functions on demand. Inline functions are copied into the call site at compile time — faster execution but larger binary. Use inline only for short, simple function bodies.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="constructors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Constructors</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A constructor is a member function automatically called when an object is created. It initializes the object. Constructor name = class name. No return type.</p>
+                <pre>class Rectangle
+{
+private:
+    double width;
+    double length;
+public:
+    Rectangle();                    // default constructor (no args)
+    Rectangle(double w, double l);  // parameterized constructor
+    Rectangle(double = 0, double = 0); // default args — also a default constructor
+};
+
+// Default constructor definition
+Rectangle::Rectangle()
+{
+    width = 0.0;
+    length = 0.0;
+}
+
+// Parameterized constructor
+Rectangle::Rectangle(double w, double l)
+{
+    width = w;
+    length = l;
+}
+
+// Creating objects
+Rectangle r1;           // calls default constructor
+Rectangle r2(10, 5);    // calls parameterized constructor
+
+// Overloaded constructors — different parameter lists
+Rectangle();
+Rectangle(double);
+Rectangle(double, double);</pre>
+                <div class="highlight"><p>If you write NO constructor, C++ generates a default constructor that does nothing. If you write ANY constructor that takes arguments but NO default constructor, then Rectangle r; becomes a compiler error — you must pass arguments. Constructor delegation (C++11) lets one constructor call another in the same class to avoid code duplication. Never define both Rectangle() and Rectangle(int = 0) — the compiler can't tell which to call with no arguments.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="destructors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Destructors</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A destructor is automatically called when an object is destroyed (goes out of scope or deleted). Name is ~ClassName. No return type, no parameters, cannot be overloaded — only one per class.</p>
+                <pre>class InventoryItem
+{
+private:
+    char *description;   // dynamically allocated
+public:
+    InventoryItem(const char *desc);
+    ~InventoryItem();    // destructor prototype
+};
+
+// Destructor definition — releases dynamic memory
+InventoryItem::~InventoryItem()
+{
+    delete [] description;    // free memory allocated in constructor
+}
+
+// With dynamic objects:
+Rectangle *r = new Rectangle(10, 20);
+// ... use r ...
+delete r;   // destructor called here, then memory freed</pre>
+                <div class="highlight"><p>If a constructor allocates dynamic memory with new, the destructor MUST release it with delete. Without a destructor, the dynamically allocated memory leaks — it's never freed. Local objects have their destructors called automatically when they go out of scope. Dynamically allocated objects need explicit delete.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="arrays">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Arrays of Objects</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// Array of objects — default constructor called for each
+InventoryItem inventory[40];
+
+// Initialize with constructor arguments (initializer list)
+InventoryItem inventory[3] = { "Hammer", "Wrench", "Pliers" };
+
+// Multi-argument constructor — use function call syntax
+InventoryItem inventory[3] =
+{
+    InventoryItem("Hammer", 5, 9.99),
+    InventoryItem("Wrench", 10, 14.99),
+    InventoryItem("Pliers", 7, 7.99)
+};
+
+// Different constructors per element
+InventoryItem inventory[3] =
+{
+    InventoryItem("Hammer", 5, 9.99),
+    InventoryItem("Wrench"),
+    InventoryItem()
+};
+
+// Access: subscript + dot operator
+inventory[2].setUnits(30);
+cout &lt;&lt; inventory[2].getUnits();
+
+// Dynamically allocated array — default constructor per element
+InventoryItem *inv = new InventoryItem[howMany];
+delete [] inv;</pre>
+            </div>
+        </div>
+
+        <div class="section" id="files">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Separating Specification from Implementation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Professional C++ code separates class declaration from implementation into two files:</p>
+                <div class="grid">
+                    <div class="card"><h3>Rectangle.h (Header)</h3><p>Contains the class declaration — member variable definitions and function prototypes. Programs that use the class #include this file.</p></div>
+                    <div class="card"><h3>Rectangle.cpp (Implementation)</h3><p>Contains the full member function definitions. Must #include "Rectangle.h". Compiled and linked with the program.</p></div>
+                </div>
+                <pre>// Rectangle.h — header guard prevents multiple inclusion
+#ifndef RECTANGLE_H
+#define RECTANGLE_H
+
+class Rectangle
+{
+private:
+    double width;
+    double length;
+public:
+    Rectangle();
+    Rectangle(double, double);
+    void setWidth(double);
+    void setLength(double);
+    double getWidth() const;
+    double getLength() const;
+    double getArea() const;
+};
+
+#endif
+
+// Rectangle.cpp
+#include "Rectangle.h"
+
+Rectangle::Rectangle()
+{
+    width = 0.0;
+    length = 0.0;
+}
+// ... rest of definitions ...</pre>
+                <div class="highlight"><p>The #ifndef / #define / #endif header guard prevents the header from being included multiple times in the same translation unit — which would cause duplicate declaration errors. This is standard practice for all C++ header files.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="uml">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>UML Class Diagrams</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>UML (Unified Modeling Language) provides standard diagrams for depicting object-oriented systems. A UML class diagram has three sections: class name, attributes, and methods.</p>
+                <table>
+                    <tr><th>UML Notation</th><th>Meaning</th><th>Example</th></tr>
+                    <tr><td>-</td><td>Private member</td><td>- width : double</td></tr>
+                    <tr><td>+</td><td>Public member</td><td>+ getWidth() : double</td></tr>
+                    <tr><td>name : type</td><td>Variable with data type</td><td>- length : double</td></tr>
+                    <tr><td>method(param : type) : returnType</td><td>Function signature</td><td>+ setWidth(w : double) : void</td></tr>
+                    <tr><td>No return type listed</td><td>Constructor or destructor</td><td>+ Rectangle()</td></tr>
+                </table>
+                <pre>// The Rectangle class in UML notation:
+// ┌─────────────────────────────────┐
+// │           Rectangle             │  ← class name
+// ├─────────────────────────────────┤
+// │ - width : double                │  ← private attributes
+// │ - length : double               │
+// ├─────────────────────────────────┤
+// │ + Rectangle()                   │  ← constructors (no return type)
+// │ + Rectangle(w:double, l:double) │
+// │ + setWidth(w : double) : void   │  ← public methods
+// │ + setLength(l : double) : void  │
+// │ + getWidth() : double           │
+// │ + getLength() : double          │
+// │ + getArea() : double            │
+// └─────────────────────────────────┘</pre>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
