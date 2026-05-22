@@ -90,7 +90,10 @@ def main():
         filepath = OUTPUT_FOLDER / page["filename"]
         recolor_page(filepath, page["accent"], page["glow"], page["badge"])
 
-    print("\nDone!")
+    print("\nDone! Rebuilding home page...")
+
+    from builder import rebuild_home
+    rebuild_home()
 
 
 if __name__ == "__main__":

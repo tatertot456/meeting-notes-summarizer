@@ -96,15 +96,6 @@ def delete_page(filename: str):
 def rebuild_home():
     registry = json.loads(REGISTRY_FILE.read_text(encoding="utf-8"))
 
-    CATEGORY_THEMES = {
-        "Machine Learning":  {"accent": "#4f46e5", "glow": "#1e1b4b", "badge": "#4338ca"},
-        "Work":              {"accent": "#0891b2", "glow": "#0c2233", "badge": "#0369a1"},
-        "Personal":          {"accent": "#059669", "glow": "#0a2318", "badge": "#047857"},
-        "Research":          {"accent": "#d97706", "glow": "#1f1200", "badge": "#b45309"},
-        "General":           {"accent": "#6b7280", "glow": "#1a1a1a", "badge": "#4b5563"},
-    }
-    DEFAULT_THEME = {"accent": "#6b7280", "glow": "#1a1a1a", "badge": "#4b5563"}
-
     categories = {}
     for page in registry:
         cat = page.get("category", "General")
@@ -112,10 +103,10 @@ def rebuild_home():
 
     sections = ""
     for cat, pages in categories.items():
-        theme = CATEGORY_THEMES.get(cat, DEFAULT_THEME)
-        accent = theme["accent"]
-        glow = theme["glow"]
-        badge = theme["badge"]
+        first_page = pages[0]
+        accent = first_page.get("accent", "#6b7280")
+        glow = first_page.get("glow", "#1a1a1a")
+        badge = first_page.get("badge", "#4b5563")
 
         cards = ""
         for page in pages:
