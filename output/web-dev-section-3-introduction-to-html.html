@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Dev — Section 3: Introduction to HTML</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1a0f3d, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #5b21b6; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #6d28d9; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #5b21b6; color: white; border-color: #5b21b6; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #6d28d9; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1a0f3d; border-left: 3px solid #5b21b6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #6d28d9; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #6d28d9; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #6d28d9; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #5b21b6; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #6d28d9; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Web Dev · Section 3</div>
+        <h1>Introduction to HTML</h1>
+        <p class="subtitle">What HTML is, page structure, tags, elements, attributes, and a brief history</p>
+    </header>
+    <nav>
+        <a href="#whatishtml">What Is HTML?</a>
+        <a href="#howworks">How It Works</a>
+        <a href="#structure">Page Structure</a>
+        <a href="#tags">Tags & Elements</a>
+        <a href="#attributes">Attributes</a>
+        <a href="#bodyelements">Body Elements</a>
+        <a href="#css">CSS Preview</a>
+        <a href="#history">History</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="whatishtml">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is HTML?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>HTML is the language of the World Wide Web — used primarily by browsers to <strong>render</strong> web pages.</p>
+                <div class="grid">
+                    <div class="card"><h3>Hypertext</h3><p>Text and other resources (images, video, etc.) connected by "links." Makes web pages interactive and connected to each other.</p></div>
+                    <div class="card"><h3>Markup</h3><p>A way to annotate text with "tags" that define how a page is structured and presents itself. Tags wrap content to give it meaning.</p></div>
+                    <div class="card"><h3>Language</h3><p>Not technically a programming language — it's a set of specifications defining a web page's contents and presentation. No logic, no loops, no decisions.</p></div>
+                    <div class="card"><h3>In Blazor</h3><p>Everything outside "@" lines is pure HTML and CSS. Lines with "@" are treated as Blazor/C# code. HTML = content. CSS = presentation. C# = behavior.</p></div>
+                </div>
+                <div class="highlight"><p>The three layers of a web page: <strong>HTML</strong> defines what's on the page (content), <strong>CSS</strong> defines how it looks (presentation), and <strong>C# or JavaScript</strong> defines what it does (behavior). Always implement elements first, then formatting, then behaviors.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="howworks">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>How HTML Works in the Browser</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>HTML and CSS serve as the <strong>blueprint</strong> for a web page. They are plain text files that the browser translates into visual elements rendered on screen.</p>
+                <ul>
+                    <li>The browser's job is to read the HTML/CSS text and turn it into visual objects</li>
+                    <li>Communication happens between a <strong>client</strong> (browser) and a <strong>server</strong></li>
+                    <li>The internet accepts requests and returns responses</li>
+                    <li>The server may interact with databases and other web services to build the response</li>
+                </ul>
+                <div class="highlight"><p>The browser is essentially an HTML/CSS interpreter. The same HTML file may look slightly different across browsers — they each have their own rendering engines. This is why cross-browser testing matters in web development.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="structure">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Structure of an HTML Page</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every HTML page follows the same fundamental structure:</p>
+                <pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+    &lt;head&gt;
+        &lt;meta charset="utf-8"&gt;
+        &lt;title&gt;Page Title&lt;/title&gt;
+        &lt;style&gt;
+            /* CSS goes here */
+        &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;!-- Page content goes here --&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</pre>
+                <table>
+                    <tr><th>Element</th><th>Purpose</th></tr>
+                    <tr><td>&lt;!DOCTYPE html&gt;</td><td>Instruction (not an element) — tells the browser this is an HTML5 document. Each version of HTML has its own DOCTYPE.</td></tr>
+                    <tr><td>&lt;html&gt;</td><td>Container for the entire page. Surrounds everything else. The lang attribute specifies the document language.</td></tr>
+                    <tr><td>&lt;head&gt;</td><td>Surrounds elements associated with the document as a whole — metadata, title, styles. NOT displayed on the page.</td></tr>
+                    <tr><td>&lt;body&gt;</td><td>Surrounds elements that actually display in the web page — all visible content goes here.</td></tr>
+                </table>
+                <div class="highlight"><p>Container elements must be properly nested — if you open a container inside another container, you must close the inner one before closing the outer one. Improper nesting causes rendering bugs that can be difficult to track down.</p></div>
+                <p><strong>head element contains:</strong> title (required by spec), meta elements, style (CSS), and links to external resources.</p>
+                <pre>&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta name="author" content="NNU Student"&gt;
+    &lt;meta name="description" content="My first page"&gt;
+    &lt;meta name="keywords" content="Blazor, awesome"&gt;
+    &lt;title&gt;Hello World&lt;/title&gt;
+&lt;/head&gt;</pre>
+            </div>
+        </div>
+
+        <div class="section" id="tags">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Tags, Elements & Content</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Elements define the structure of content. They surround their content with a start tag and end tag.</p>
+                <pre>&lt;h1&gt;Hello World!&lt;/h1&gt;
+&lt;!--  ↑ start tag    ↑ end tag (starts with /) --&gt;
+
+Dr. McCarty was &lt;strong&gt;very&lt;/strong&gt; disappointed.
+&lt;!-- strong makes text bold/important --&gt;</pre>
+                <div class="grid">
+                    <div class="card"><h3>Container Elements</h3><p>Have a start tag AND an end tag. Content lives between them. Examples: &lt;h1&gt;, &lt;p&gt;, &lt;div&gt;, &lt;body&gt;, &lt;html&gt;. Most HTML elements are containers.</p></div>
+                    <div class="card"><h3>Void Elements</h3><p>Have just ONE tag — content is stored within the tag itself as attributes. No end tag. Examples: &lt;meta&gt;, &lt;br&gt;, &lt;hr&gt;, &lt;img&gt;.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Common heading and text elements:</strong></p>
+                <table>
+                    <tr><th>Tag</th><th>Purpose</th></tr>
+                    <tr><td>&lt;h1&gt; to &lt;h6&gt;</td><td>Headings — h1 is largest, h6 is smallest</td></tr>
+                    <tr><td>&lt;p&gt;</td><td>Paragraph — adds blank lines above and below</td></tr>
+                    <tr><td>&lt;strong&gt;</td><td>Important/bold text</td></tr>
+                    <tr><td>&lt;br&gt;</td><td>Line break (void — no end tag)</td></tr>
+                    <tr><td>&lt;hr&gt;</td><td>Horizontal rule/line (void — no end tag)</td></tr>
+                    <tr><td>&lt;div&gt;</td><td>Generic container — groups related content, single line breaks above/below</td></tr>
+                </table>
+                <div class="highlight"><p>When discussing a tag in general (not a specific instance), drop the angled brackets and call it an element. &lt;h1&gt; = a specific tag. h1 element = the concept. When should you use &lt;p&gt; vs &lt;div&gt;? Use &lt;p&gt; for actual prose paragraphs. Use &lt;div&gt; as a structural container for grouping and layout purposes.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="attributes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Attributes</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Attributes are properties of an element that provide additional information. They appear inside the start tag and almost always have a value assigned with =.</p>
+                <pre>&lt;meta charset="utf-8"&gt;
+&lt;!--  ↑ attribute name  ↑ attribute value (always in quotes) --&gt;
+
+&lt;html lang="en"&gt;
+&lt;!-- lang attribute specifies the page language --&gt;
+
+&lt;meta name="author" content="NNU Student"&gt;
+&lt;meta name="description" content="My first program."&gt;
+&lt;meta name="keywords" content="Blazor, awesome"&gt;</pre>
+                <div class="highlight"><p>Always surround attribute values with quotes — this forms a string (zero or more characters surrounded by quotes). The charset attribute tells the browser what character encoding to use. UTF-8 supports virtually every character in every language and is the standard choice for modern web pages.</p></div>
+                <p>Most meta elements use the <strong>name</strong> attribute to specify what type of information is provided, and the <strong>content</strong> attribute to provide the actual value. Meta elements help search engines find and categorize your page.</p>
+            </div>
+        </div>
+
+        <div class="section" id="bodyelements">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Key Body Elements</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>&lt;!-- Horizontal rule: renders a full-width line --&gt;
+&lt;hr&gt;
+
+&lt;!-- Paragraph: blank lines above and below --&gt;
+&lt;p&gt;Welcome to your first HTML page.&lt;/p&gt;
+
+&lt;!-- Line break: forces a new line mid-paragraph --&gt;
+&lt;p&gt;
+    High of 95 degrees today.&lt;br&gt;
+    With 30% humidity it will feel like 102.
+&lt;/p&gt;
+&lt;!-- Note: pressing Enter in your code does NOT create a
+     line break on screen — only &lt;br&gt; does --&gt;
+
+&lt;!-- Div: generic container, single line breaks --&gt;
+&lt;div&gt;
+    Class Days:&lt;br&gt;
+    M, W, F
+&lt;/div&gt;</pre>
+                <div class="highlight"><p>The &lt;div&gt; element has a very special purpose beyond simple text grouping — it acts as a container for other objects. Use div to create "panels" for layout, isolate components for styling, and organize your page into sections. This is the foundation of modern web layout. Think of divs as invisible boxes you arrange on the page.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="css">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>CSS Preview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>CSS (Cascading Style Sheets) controls presentation. It can be embedded in the &lt;head&gt; section using a &lt;style&gt; element, or placed in a separate .css file.</p>
+                <pre>&lt;head&gt;
+    &lt;style&gt;
+        body {
+            font-family: Arial, sans-serif;   /* CSS property: value */
+            background-color: #ffffff;
+            color: #333333;
+            text-align: center;
+            margin-top: 20px;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;</pre>
+                <p>CSS works with <strong>properties</strong> and <strong>values</strong>. The property names what you're changing (font, color, size). The value specifies what to change it to. In Blazor, component-specific CSS goes in a .css file with the same name as the .razor file.</p>
+                <div class="highlight"><p>CSS is what separates a professional-looking site from a plain one. However, always implement your HTML structure first, then apply CSS styling. Trying to style elements before they exist leads to confusion. Structure first, then presentation, then behavior.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="history">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Brief History of HTML</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The web didn't appear out of nowhere — it evolved from decades of research into document publishing:</p>
+                <ul>
+                    <li><strong>1960s:</strong> Researchers recognized the need for a common text-based language for publishing electronic documents, regardless of the reader's display tool</li>
+                    <li><strong>1980/1986:</strong> SGML (Standard Generalized Markup Language) published — introduced DOCTYPE declarations and element tags</li>
+                    <li><strong>1989:</strong> Tim Berners-Lee at CERN proposed adding "hypertext links" to research papers to make related content easily accessible</li>
+                    <li><strong>1989–1991:</strong> Berners-Lee expanded SGML into HTML, introduced HTTP (so any server could exchange HTML with a client), and created a prototype browser</li>
+                    <li><strong>1993:</strong> First formal proposal for HTML submitted to the Internet Engineering Task Force (IETF)</li>
+                    <li><strong>1994:</strong> Berners-Lee founded the World Wide Web Consortium (W3C) at MIT — which has maintained the HTML standard ever since</li>
+                </ul>
+                <div class="highlight"><p>Mozilla Firefox got its name from a combination of "Mosaic" (an early browser) and "Godzilla." The lang attribute (e.g., &lt;html lang="en"&gt;) specifies the language of the page's content — not a meta element type attribute.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

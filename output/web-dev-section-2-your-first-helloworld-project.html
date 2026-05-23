@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Dev — Section 2: Your First HelloWorld Project</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f0a00, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #c2410c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #ea580c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #c2410c; color: white; border-color: #c2410c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #ea580c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e0a3c; border-left: 3px solid #c2410c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #ea580c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #ea580c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #ea580c; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #c2410c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #ea580c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Web Dev · Section 2</div>
+        <h1>Your First HelloWorld Project</h1>
+        <p class="subtitle">Blazor setup, project structure, file roles, routing, layouts, and hot reload</p>
+    </header>
+    <nav>
+        <a href="#blazor">What Is Blazor?</a>
+        <a href="#setup">Project Setup</a>
+        <a href="#structure">Project Structure</a>
+        <a href="#walkthrough">App Walkthrough</a>
+        <a href="#features">Key Features</a>
+        <a href="#layouts">Layouts</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="blazor">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is Blazor WebAssembly?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Rather than writing raw HTML, modern web development uses <strong>frameworks</strong> — sets of libraries that handle common tasks in a simpler, more powerful format. Frameworks combine HTML, JavaScript, and CSS with built-in components and utilities. They became popular because they make websites more sophisticated and developers more productive.</p>
+                <p>Blazor is Microsoft's web framework with a key advantage: <strong>it uses C# instead of JavaScript</strong> (most of the time).</p>
+                <div class="grid">
+                    <div class="card"><h3>Runs .NET in the Browser</h3><p>Blazor WebAssembly executes C# code directly in the browser — no server round-trips needed for most interactions.</p></div>
+                    <div class="card"><h3>Full-Stack Capable</h3><p>Handles both client-side (what the user sees) and server-side (data, logic) components in one framework.</p></div>
+                    <div class="card"><h3>Rich Component Library</h3><p>Comes with a wide set of free (or mostly free) prebuilt components — grids, charts, forms, and more.</p></div>
+                    <div class="card"><h3>Platform Independent</h3><p>Works across operating systems and browsers. Performance-focused by design — a common pain point for web apps.</p></div>
+                </div>
+                <div class="highlight"><p>Azure setup note: you have a $100 credit — use it carefully. Only create the web applications and resources explicitly mentioned in homework. Running out of credit means providing a credit card or losing access.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="setup">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Project Setup</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>We use <strong>Visual Studio Community Edition</strong> (free). Make sure ASP.NET components are installed via the Visual Studio installer.</p>
+                <ol style="padding-left:20px; color:#ccc; line-height:1.8; margin-bottom:12px;">
+                    <li>Download and install Visual Studio Community Edition</li>
+                    <li>Run the installer and select the <strong>ASP.NET and web development</strong> workload</li>
+                    <li>Create a new project → select <strong>Blazor Web App</strong></li>
+                    <li>Language: C# | Platform: Windows (or macOS) | Framework: Blazor</li>
+                    <li>Give your project a name and choose a save location</li>
+                    <li>Go with the basic default settings</li>
+                </ol>
+                <div class="highlight"><p>Visual Studio includes a local <strong>emulator</strong> that sets up a listening port on your computer and handles all web communication locally. This means you won't need to use your Azure account during development — saving your $100 credit for deployment only.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="structure">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Project Structure — File Roles</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Each file in a Blazor project has a specific purpose. Understanding them is essential before writing any code:</p>
+                <table>
+                    <tr><th>File</th><th>Purpose</th></tr>
+                    <tr><td>app.css</td><td>Global stylesheet — styles that apply across the entire application</td></tr>
+                    <tr><td>MainLayout.razor</td><td>Defines consistent look and feel — universal headers, footers, and navigation</td></tr>
+                    <tr><td>App.razor</td><td>Main routing component — all user requests come here first, then get directed to the right page</td></tr>
+                    <tr><td>Routes.razor</td><td>Centralized routing declaration — establishes all endpoints for all Razor components</td></tr>
+                    <tr><td>_Imports.razor</td><td>Shared import file — global imports available to all components (like a global using file)</td></tr>
+                    <tr><td>Home.razor</td><td>Landing page — what loads when a user visits the root URL. Uses @page "/"</td></tr>
+                    <tr><td>Error.razor</td><td>Error handling page — properly catches and displays exceptions so they aren't silently missed</td></tr>
+                    <tr><td>appsettings.json</td><td>Application configuration — connection strings, API URLs, and other settings</td></tr>
+                    <tr><td>Program.cs</td><td>Main hosting module — sets up Blazor environment, registers services, configures rendering, builds and runs the app</td></tr>
+                </table>
+                <div class="highlight"><p>Blazor pairs .razor files with .css files automatically: if a file named <code>MainLayout.css</code> exists in the same directory as <code>MainLayout.razor</code>, Blazor connects them. The .razor file holds HTML (and C# code), the .css file holds component-specific styles. This keeps styling scoped and organized.</p></div>
+                <p><strong>Pages folder contains:</strong></p>
+                <ul>
+                    <li><strong>Counter.razor</strong> — demonstrates event-driven controls (buttons)</li>
+                    <li><strong>Error.razor</strong> — displays error conditions</li>
+                    <li><strong>Home.razor</strong> — your landing/home page</li>
+                    <li><strong>Weather.razor</strong> — demonstrates data binding with a grid/table</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="walkthrough">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Blazor App Walkthrough</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The default Blazor app demonstrates three core web development patterns:</p>
+                <div class="grid">
+                    <div class="card">
+                        <h3>Home Page (Landing Page)</h3>
+                        <p>A typical modern site has a central display area and navigation. Navigation links to other pages, display area shows content. Links may also appear at top and/or bottom.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Counter Page (Event-Driven)</h3>
+                        <p>Demonstrates a button's Click event bound to a C# method. A paragraph updates dynamically when clicked — no server round-trip needed. Shows @page directive, render mode, dynamic variables, and event handling all in one file.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Weather Page (Data Binding)</h3>
+                        <p>A typical grid display using an HTML table. Each row is bound to a data element in a collection. Each column is bound to a specific field in a forecast object. C# code in the same file creates the data and stores it in a collection.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Standard Layout</h3>
+                        <p>Central display panel + navigation bar on left + about pane on top. This is a standard, industry-recognized way to organize a web application.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="features">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Key Blazor Features</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Hot Reload</strong> — make on-the-fly changes without restarting the app:</p>
+                <ol style="padding-left:20px; color:#ccc; line-height:1.8; margin-bottom:16px;">
+                    <li>Make changes to your code</li>
+                    <li>Click the Hot Reload button in Visual Studio</li>
+                    <li>Watch changes appear in the running app immediately</li>
+                </ol>
+                <p><strong>Page Routing</strong> — every page is defined by a human-readable route:</p>
+                <pre>@page "/"          // Home page — root URL
+@page "/counter"   // Counter page
+@page "/weather"   // Weather page
+
+// A page can have multiple routes
+@page "/store"
+@page "/shop"
+
+// Routes can be dynamic and bound to variables
+@page "/product/{id}"
+
+// Or optional
+@page "/item/{id?}"</pre>
+                <div class="highlight"><p>Routes look like file paths but are just names — they're more readable than traditional URLs and can be bound to variables, making navigation flexible and intuitive for both developers and users.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="layouts">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Layouts</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Layouts define common content that wraps all your pages — headers, footers, navigation — so you write it once and it appears everywhere automatically.</p>
+                <ul>
+                    <li>Layouts are special components stored in the <strong>Layouts folder</strong></li>
+                    <li>One layout handles the <strong>body/content area</strong> of the page</li>
+                    <li>One layout handles the <strong>navigation pane</strong></li>
+                    <li>The top and left panes you see in the default app are both layouts</li>
+                </ul>
+                <p>Blazor splits a page into three sections using HTML elements:</p>
+                <div class="grid">
+                    <div class="card"><h3>&lt;div&gt; — Navigation Bar</h3><p>The left sidebar with links to other pages. Defined in the navigation layout. Appears on every page automatically.</p></div>
+                    <div class="card"><h3>&lt;div&gt; — Top Pane</h3><p>The header area at the top of the page. Typically contains app name, branding, or global controls.</p></div>
+                    <div class="card"><h3>&lt;article&gt; — Content Area</h3><p>The main display area where each page's unique content renders. This is what changes as you navigate between pages.</p></div>
+                    <div class="card"><h3>Why Layouts Matter</h3><p>Without layouts, you'd copy/paste navigation and header code into every single page. Layouts follow the DRY principle — Don't Repeat Yourself. Change the nav once, it updates everywhere.</p></div>
+                </div>
+                <div class="highlight"><p>Understanding how layouts work requires understanding how HTML works — which is exactly what comes next. The three-section structure (nav / top / content) is the foundation of virtually every modern web application you'll build.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

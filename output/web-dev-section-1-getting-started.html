@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Dev — Section 1: Getting Started</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a28, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0f766e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0d9488; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0f766e; color: white; border-color: #0f766e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0d9488; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a28; border-left: 3px solid #0f766e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0d9488; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0d9488; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0d9488; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Web Dev · Section 1</div>
+        <h1>Getting Started</h1>
+        <p class="subtitle">COMP2040 — Course overview, web stack, Blazor, and what to expect</p>
+    </header>
+    <nav>
+        <a href="#overview">Course Overview</a>
+        <a href="#stack">The Web Stack</a>
+        <a href="#blazor">Why Blazor?</a>
+        <a href="#project">The Project</a>
+        <a href="#mindset">Mindset</a>
+        <a href="#whyweb">Why Web Dev?</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="overview">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Course Overview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>COMP2040 is a 3-credit course focused on designing and building professional web pages. It is the <strong>first of a 3-semester full-stack programming course</strong> — not a simple web design class. This is a programming course.</p>
+                <ul>
+                    <li>Focus: designing and building professional-looking web pages</li>
+                    <li>Combination of tests, homework assignments, and a project</li>
+                    <li>Weekly pop quizzes posted for exactly 2 minutes at the start of class — cannot be made up</li>
+                    <li>Canvas overrides the syllabus when there is a conflict</li>
+                    <li>Visual appeal may factor into grades, but technical skill is most important</li>
+                </ul>
+                <div class="highlight"><p>Everyone who fails this class does so due to failure to complete assignments. DO YOUR HOMEWORK. Treat this class like a job — show up on time and do the work when it's supposed to be done.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="stack">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Web Stack</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Modern websites use a combination of technologies. This course covers all three layers, though the emphasis shifts toward frameworks rather than raw HTML/CSS/JS:</p>
+                <div class="grid">
+                    <div class="card"><h3>HTML5</h3><p>Objects and components for input and output. The structure of every web page — defines what's on the page.</p></div>
+                    <div class="card"><h3>CSS</h3><p>Custom configuration for maintenance, reuse, and visual appeal. Controls how the page looks.</p></div>
+                    <div class="card"><h3>JavaScript</h3><p>Interactivity and communication with external resources. Makes pages dynamic — in Blazor, we replace this with C#.</p></div>
+                    <div class="card"><h3>Blazor / .NET</h3><p>The framework we study. Contains prebuilt components that make development faster. Lets us use C# instead of JavaScript.</p></div>
+                </div>
+                <div class="highlight"><p>This course emphasizes frameworks over raw HTML/CSS/JS. Most professional websites aren't built from scratch — they use frameworks. Knowing Blazor makes you more employable and demonstrates a more advanced skill level than basic HTML/CSS alone. Think power tools vs. hand tools.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="blazor">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why Blazor Instead of Plain HTML?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>This course deliberately focuses less on generic HTML tables/lists and more on grids, charts, flex containers, and application programming patterns. Here's why:</p>
+                <ul>
+                    <li>Employers value framework knowledge over basic HTML/CSS/JS</li>
+                    <li>Shows advanced skill level and greater productivity potential</li>
+                    <li>People who do regular HTML use tools like WordPress anyway</li>
+                    <li>This is a CS course — the focus is on advanced systems programming, design, and architecture</li>
+                    <li>Blazor lets us write C# instead of JavaScript, keeping the language consistent with the rest of your CS coursework</li>
+                </ul>
+                <div class="highlight"><p>We explore the Blazor/.NET framework rather than building pages from scratch. The goal is web APPLICATION programming, not basic web page construction. This distinction matters — it's the difference between knowing how to build something and knowing how to build it professionally at scale.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="project">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Project</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The main deliverable is a website supporting an <strong>online pet store and personal profile</strong>. The instructor provides back-end web and database services while you build the front-end pages.</p>
+                <ul>
+                    <li>Multiple iterations throughout the semester — first due by end of week 2</li>
+                    <li>Each iteration must include specified milestones</li>
+                    <li>You're welcome to add your own features on top of the requirements</li>
+                    <li>Work alone preferred — ask for help if stuck (TA, instructor, other students)</li>
+                    <li>Do NOT share code</li>
+                </ul>
+                <p><strong>Best Website Contest:</strong> TAs and class vote on the best site. Winners receive Amazon gift cards ($50 / $25 / $10) plus 5 extra grade points. Be creative and have fun — but don't count on this to compensate for weak overall performance.</p>
+            </div>
+        </div>
+
+        <div class="section" id="mindset">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Mindset for Success</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Some advice from someone who came from industry:</p>
+                <ul>
+                    <li><strong>Treat this like a job</strong> — show up on time, do the work when it's due, don't settle for less than your best</li>
+                    <li><strong>Everyone here was the smartest in high school</strong> — now you have to be the hardest working to stand out</li>
+                    <li><strong>Gratitude is attitude</strong> — appreciate the opportunity and put in the effort to match it</li>
+                    <li><strong>Read the materials</strong> and spend time each week working on your personal site</li>
+                    <li><strong>Don't wait until the last minute</strong> — there is some slack built in, but it goes fast</li>
+                </ul>
+                <div class="highlight"><p>Web developers do very well financially. With this course and your degree, expect to start at $50–60K+ annual salary. That makes the effort more than worth it — treat this class accordingly.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="whyweb">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why Web Development?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>What's great about it:</strong></p>
+                <ul>
+                    <li>No headaches from program updates — deploy once, everyone gets the latest version</li>
+                    <li>Little to install on the user's end</li>
+                    <li>Works across multiple operating systems and browsers</li>
+                    <li>Centralized storage of multimedia</li>
+                    <li>Your audience can be as small as one person or as large as the entire internet (~6 billion connected users)</li>
+                </ul>
+                <p><strong>What's challenging about it:</strong></p>
+                <ul>
+                    <li>Stateless programming — generally slower, requires workarounds</li>
+                    <li>Interactive/event-driven programming is trickier than desktop</li>
+                    <li>Visuals are more important — users judge quickly</li>
+                    <li>Security is significantly more complex — anyone with a code editor and internet access can attempt to exploit your site</li>
+                    <li>Visual design tooling still lags behind desktop development</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

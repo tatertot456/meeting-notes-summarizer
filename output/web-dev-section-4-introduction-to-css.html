@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Dev — Section 4: Introduction to CSS</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a1f2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #075985; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0369a1; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #075985; color: white; border-color: #075985; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0369a1; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #075985; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0369a1; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0369a1; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #0369a1; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #075985; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0369a1; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Web Dev · Section 4</div>
+        <h1>Introduction to CSS</h1>
+        <p class="subtitle">Rules, selectors, cascading, color, fonts, text, borders, and the box model</p>
+    </header>
+    <nav>
+        <a href="#overview">Overview</a>
+        <a href="#structure">CSS Structure</a>
+        <a href="#rules">Rules & Selectors</a>
+        <a href="#cascading">Cascading</a>
+        <a href="#color">Color</a>
+        <a href="#fonts">Fonts</a>
+        <a href="#text">Text Properties</a>
+        <a href="#borders">Borders</a>
+        <a href="#boxmodel">Box Model</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="overview">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>CSS Overview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>W3C's goal for HTML and CSS: <strong>use HTML for content, use CSS for appearance</strong>. CSS (Cascading Style Sheets) provides detailed control over a web page's visual presentation. The current standard is CSS3, supported by all major browsers.</p>
+                <div class="highlight"><p>Keep style and content separate. If you embed styles directly in each element, changing the appearance later requires editing every single element. With CSS in one place (the head or an external file), one change updates the entire page or site. This is the most important reason CSS exists.</p></div>
+                <p>In Blazor, everything outside "@" lines is HTML/CSS. Lines with "@" are C# code. CSS in Blazor can appear as inline styles, embedded styles, external stylesheets, themes, or component-scoped styles (.razor.css files).</p>
+            </div>
+        </div>
+
+        <div class="section" id="structure">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>CSS Structure — Where to Put It</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Type</th><th>Where</th><th>Scope</th></tr>
+                    <tr><td>Inline style</td><td>style attribute on an element</td><td>That element only — highest priority, least maintainable</td></tr>
+                    <tr><td>Embedded style</td><td>&lt;style&gt; tag in &lt;head&gt;</td><td>That page only — good organization but not reusable</td></tr>
+                    <tr><td>External stylesheet</td><td>Separate .css file, loaded via &lt;link&gt;</td><td>Any page that links it — best for site-wide consistency</td></tr>
+                    <tr><td>Theme</td><td>themes.css with global variables</td><td>Site-wide — less common, for design systems</td></tr>
+                    <tr><td>Component-scoped (Blazor)</td><td>myfile.razor.css in same folder</td><td>That Blazor component only — Blazor compiles into BlazorWithCSS.styles.css</td></tr>
+                    <tr><td>Dynamic style</td><td>Generated in C# code at runtime</td><td>Applied on the fly — used for show/hide UI patterns</td></tr>
+                </table>
+                <pre>&lt;!-- External stylesheet link --&gt;
+&lt;link rel="stylesheet" href="pumpkinPatch.css"&gt;
+
+/* pumpkinPatch.css */
+/* Dr. Kevin */
+.orange { color: darkorange; }
+.white  { color: white; }
+.orange-background { background-color: orange; }
+
+/* CSS comments use slash-star notation */
+/* // does NOT work in CSS */</pre>
+                <div class="highlight"><p>Avoid using the style attribute (inline styles) in your pages — it defeats the purpose of CSS. Use embedded or external styles. External CSS files are most appropriate when you have 5+ CSS rules OR when multiple pages share the same styles. Shared external CSS is where CSS truly shines — one file, consistent look everywhere.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="rules">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>CSS Rules & Selectors</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A CSS rule tells the browser which elements to style and how. Browsers match rules to elements using <strong>selectors</strong>.</p>
+                <pre>/* Short rule format */
+selector { property1: value; property2: value; }
+
+/* Block format for long rules */
+selector {
+    property1: value;
+    property2: value;
+}
+
+/* Type selector — matches all h1 elements */
+h1 { color: blue; }
+
+/* Universal selector — matches EVERY element */
+* { text-align: center; }
+
+/* Multiple selectors — comma separates them */
+h2, p { font-style: italic; color: blue; }
+
+/* hr element — set width to 50% */
+hr { width: 50%; }</pre>
+                <p><strong>Class selectors</strong> — apply to any element with a matching class attribute:</p>
+                <pre>/* Class selector uses a dot prefix */
+.red { background-color: tomato; }
+.bold-text { font-weight: bold; }
+
+/* Apply in HTML with class attribute */
+&lt;p class="red"&gt;This paragraph has a red background.&lt;/p&gt;
+
+/* Multiple classes on one element (space-separated) */
+&lt;span class="white orange-background"&gt;$10&lt;/span&gt;
+
+/* Element-type + class for more precision */
+q.red { background-color: tomato; }  /* only q elements with class red */
+h1.blue { color: blue; }             /* only h1 elements with class blue */</pre>
+                <p><strong>ID selectors</strong> — uniquely identify one specific element:</p>
+                <pre>/* ID selector uses # prefix */
+#lizards-lounge { color: green; }
+
+/* Applied in HTML */
+&lt;h3 id="lizards-lounge"&gt;Lizards Lounge&lt;/h3&gt;
+
+/* Use hyphens to separate words in id and class names */</pre>
+                <p><strong>span vs div</strong> for grouping without semantic meaning:</p>
+                <pre>&lt;div class="orange"&gt;
+    NNU Halloween on the River.&lt;br&gt;
+    Corn maze: &lt;span class="white orange-background"&gt;$10&lt;/span&gt;
+&lt;/div&gt;
+/* div = block element (line breaks above/below)  */
+/* span = inline element (flows within surrounding text) */</pre>
+                <div class="highlight"><p>Use span when you want to style text WITHIN a line of surrounding text. Use div when you want the styled content to sit on its own line(s). The local span rule overrides the broader div rule — that's cascading in action.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="cascading">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Cascading — Priority Order</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>"Cascading" means CSS rules from multiple sources can apply to the same element. When rules conflict, priority determines which wins:</p>
+                <ol style="padding-left:20px; color:#ccc; line-height:1.8; margin-bottom:12px;">
+                    <li><strong>Inline style attribute</strong> (highest priority — overrides everything)</li>
+                    <li><strong>style container in the &lt;head&gt;</strong></li>
+                    <li><strong>Blazor component file or external file</strong></li>
+                    <li><strong>User's browser settings</strong></li>
+                    <li><strong>Browser's native defaults</strong> (lowest priority)</li>
+                </ol>
+                <div class="highlight"><p>The browser checks for matching CSS rules starting from the highest priority source. The first match wins — the search stops. This is why a local span rule overrides a broader div rule, and why inline styles override everything. Understanding this cascade is essential for debugging unexpected styling behavior.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="color">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Color Properties</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Color is critical — it sets tone, creates contrast, highlights content, and drives emotion. Two key properties: <strong>color</strong> (text color) and <strong>background-color</strong>.</p>
+                <table>
+                    <tr><th>Format</th><th>Syntax</th><th>Example</th></tr>
+                    <tr><td>Color name</td><td>name</td><td>color: red;</td></tr>
+                    <tr><td>RGB (integer)</td><td>rgb(0-255, 0-255, 0-255)</td><td>rgb(144, 238, 144)</td></tr>
+                    <tr><td>RGB (percent)</td><td>rgb(0%-100%, 0%-100%, 0%-100%)</td><td>rgb(52%, 20%, 45%)</td></tr>
+                    <tr><td>RGB (hex)</td><td>#rrggbb</td><td>#ffd06c</td></tr>
+                    <tr><td>RGBA</td><td>rgba(r, g, b, 0-1)</td><td>rgba(255,255,0,.4)</td></tr>
+                    <tr><td>HSL</td><td>hsl(0-360, 0%-100%, 0%-100%)</td><td>hsl(240, 50%, 75%)</td></tr>
+                    <tr><td>HSLA</td><td>hsla(h, s, l, 0-1)</td><td>hsla(240, 50%, 75%, .5)</td></tr>
+                </table>
+                <pre>/* Hex: #000000=black, #ffffff=white */
+/* #bbbbff = light blue-purple */
+/* #005500 = dark green */
+
+/* RGBA opacity: 0=transparent, 1=opaque, .5=halfway */
+.yellow-transparent { background-color: rgba(255,255,0,.4); }
+
+/* HSL: hue 0-360 (0/360=red, 120=green, 240=blue) */
+/*      saturation: 0%=gray, 100%=full color         */
+/*      lightness:  0%=black, 100%=white              */
+.sky { background-color: hsl(210, 100%, 70%); }</pre>
+                <div class="highlight"><p>CSS3 defines 147 named colors. Hex is the most common format in professional code — #rrggbb where 00 = least intensity, ff = greatest. RGBA and HSLA add an opacity (alpha) value from 0 (fully transparent) to 1 (fully opaque). Use RGBA with background-color for overlay effects.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="fonts">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Font Properties</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Property</th><th>Values</th><th>Example</th></tr>
+                    <tr><td>font-style</td><td>normal, italic, oblique</td><td>font-style: italic;</td></tr>
+                    <tr><td>font-variant</td><td>normal, small-caps</td><td>font-variant: small-caps;</td></tr>
+                    <tr><td>font-weight</td><td>100-900, normal(400), bold(700), bolder, lighter</td><td>font-weight: bold;</td></tr>
+                    <tr><td>font-size</td><td>xx-small to xx-large, smaller, larger, em units</td><td>font-size: 1.5em;</td></tr>
+                    <tr><td>font-family</td><td>Comma-separated list, end with generic</td><td>font-family: Arial, sans-serif;</td></tr>
+                    <tr><td>line-height</td><td>percentage or em units</td><td>line-height: 2em;</td></tr>
+                </table>
+                <pre>/* font-family: browser uses first installed font in list */
+body { font-family: "DejaVu Sans Mono", Courier, monospace; }
+/* Always end with a generic family as fallback:        */
+/* serif, sans-serif, monospace, cursive, fantasy       */
+/* Multi-word font names need quotes                    */
+
+/* font shorthand: style variant weight size/line-height family */
+blockquote { font: italic large "Arial Black", Helvetica, sans-serif; }
+.smushed   { font: 2.5em/3em "Times New Roman", serif; }
+/* size/line-height = font size takes up 2.5em of 3em line height */
+
+/* em units: 1em = height of element's current font size */
+.disclaimer    { font-size: .5em; }  /* half normal size */
+.advertisement { font-size: 3em; }  /* three times normal */</pre>
+                <div class="highlight"><p>Always end font-family lists with a generic family name (serif, sans-serif, monospace, cursive, fantasy) as a fallback — all browsers recognize them. Generic names are lowercase. Regular font names use Title Case and are case-sensitive on some systems. One em = the height of the current font — it scales relative to context, making it flexible for responsive design.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="text">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Text Properties</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Property</th><th>Values</th><th>Effect</th></tr>
+                    <tr><td>text-align</td><td>left, right, center, justify</td><td>Horizontal alignment of block text</td></tr>
+                    <tr><td>text-decoration</td><td>none, underline, overline, line-through, blink</td><td>Decorative lines on text</td></tr>
+                    <tr><td>text-transform</td><td>none, capitalize, uppercase, lowercase</td><td>Controls capitalization</td></tr>
+                    <tr><td>text-indent</td><td>em units</td><td>Indents first line of a text block</td></tr>
+                    <tr><td>line-height</td><td>%, em units</td><td>Space between lines of text</td></tr>
+                </table>
+                <pre>p { text-align: justify; }
+p { text-indent: 4em; }       /* indent first line */
+.proof { line-height: 200%; } /* double-spaced */
+a { text-decoration: none; }  /* remove underline from links */
+.shout { text-transform: uppercase; }
+.title { text-transform: capitalize; }</pre>
+            </div>
+        </div>
+
+        <div class="section" id="borders">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Border Properties</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>/* border-style: required for border to show */
+.coupon { border-style: dashed; }
+/* Values: none, solid, dashed, dotted, double */
+
+/* border-width: requires border-style to also be set */
+h1 { border-style: solid; border-width: 4px; }
+/* px = CSS pixel (1/96th inch at 100% zoom on desktop) */
+
+/* Four-value shorthand: top right bottom left (clockwise) */
+h1 { border-style: solid; border-width: 4px 2px 0px 2px; }
+
+/* Two values: top-bottom / left-right */
+h1 { border-width: 4px 2px; }
+
+/* border-color: requires border-style to also be set */
+h1 { border-color: blue; } /* same color formats as color property */
+
+/* border shorthand: width style color */
+.box { border: thin dotted blue; }
+.box2 { border: 10px solid; }
+/* style is required — without it, border-style defaults to none */</pre>
+                <div class="highlight"><p>A CSS pixel is approximately 1/96th of an inch on a desktop at 100% zoom. However, actual pixel size varies by monitor and changes when users zoom in/out or change resolution. Using em or percentage units instead of px makes designs more flexible and resilient to user preferences.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="boxmodel">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The CSS Box Model</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every HTML element has an invisible box around it. The CSS box model defines four concentric layers:</p>
+                <div class="grid">
+                    <div class="card"><h3>Content</h3><p>The actual text or image inside the element. Width and height properties control this area.</p></div>
+                    <div class="card"><h3>Padding</h3><p>Space INSIDE the border between the content and the border. Adds breathing room inside the element. Same background color as content.</p></div>
+                    <div class="card"><h3>Border</h3><p>The visible line around the element. Controlled by border-style, border-width, and border-color.</p></div>
+                    <div class="card"><h3>Margin</h3><p>Space OUTSIDE the border between this element and neighboring elements. Transparent — shows the page background.</p></div>
+                </div>
+                <pre>/* padding: inside the border */
+h1 { padding: 5px; }
+h1 { padding: 10px 20px; }  /* top-bottom / left-right */
+
+/* margin: outside the border */
+p { margin: 10px; }
+
+/* Body has a default 8px margin — override it */
+body { margin: 0; }          /* remove all margin */
+body { margin: 10%; }        /* percentage — scales with window size */
+
+/* Individual sides */
+.box {
+    padding-top: 10px;
+    padding-right: 20px;
+    margin-left: 5px;
+    margin-bottom: 15px;
+}</pre>
+                <div class="highlight"><p>The default body margin (8px) is why content doesn't touch the edges of the browser window. Setting margin: 0 on the body removes this. Using percentage values for margin/padding makes them scale proportionally when the user resizes the browser — essential for responsive design. Quiz answers: background-color applies background color (not bgcolor or color attribute); the class attribute attaches CSS to an element.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

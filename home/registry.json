@@ -475,5 +475,50 @@
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
     "badge": "#6d28d9"
+  },
+  {
+    "title": "Web Dev Section 1 Getting Started",
+    "filename": "web-dev-section-1-getting-started.html",
+    "category": "Web Development",
+    "date": "2026-05-22 10:15 AM",
+    "accent": "#0d9488",
+    "glow": "#0a2a28",
+    "badge": "#0f766e"
+  },
+  {
+    "title": "Web Dev Section 2 Your First HelloWorld Project",
+    "filename": "web-dev-section-2-your-first-helloworld-project.html",
+    "category": "Web Development",
+    "date": "2026-05-22 10:18 AM",
+    "accent": "#ea580c",
+    "glow": "#1f0a00",
+    "badge": "#c2410c"
+  },
+  {
+    "title": "Web Dev Section 3 Introduction to HTML",
+    "filename": "web-dev-section-3-introduction-to-html.html",
+    "category": "Web Development",
+    "date": "2026-05-22 10:21 AM",
+    "accent": "#6d28d9",
+    "glow": "#1a0f3d",
+    "badge": "#5b21b6"
+  },
+  {
+    "title": "Web Dev Section 4 Introduction to CSS",
+    "filename": "web-dev-section-4-introduction-to-css.html",
+    "category": "Web Development",
+    "date": "2026-05-22 10:25 AM",
+    "accent": "#0369a1",
+    "glow": "#0a1f2e",
+    "badge": "#075985"
+  },
+  {
+    "title": "Web Dev Section 5 Web Content",
+    "filename": "web-dev-section-5-web-content.html",
+    "category": "Web Development",
+    "date": "2026-05-22 07:10 PM",
+    "accent": "#15803d",
+    "glow": "#0a2010",
+    "badge": "#166534"
   }
 ]

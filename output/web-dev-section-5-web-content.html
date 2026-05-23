@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Dev — Section 5: Web Content</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2010, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #166534; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #15803d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #166534; color: white; border-color: #166534; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #15803d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2010; border-left: 3px solid #166534; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #15803d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #15803d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #15803d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #166534; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #15803d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Web Dev · Section 5</div>
+        <h1>Web Content</h1>
+        <p class="subtitle">Lists, figures, tables, links, images, audio, video, layout, and organizational elements</p>
+    </header>
+    <nav>
+        <a href="#lists">Lists</a>
+        <a href="#organizational">Organizational Elements</a>
+        <a href="#tables">Tables</a>
+        <a href="#layout">Layout with CSS</a>
+        <a href="#links">Links & Navigation</a>
+        <a href="#images">Images</a>
+        <a href="#media">Audio & Video</a>
+        <a href="#background">Background Images</a>
+        <a href="#webfonts">Web Fonts</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="lists">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Lists — Unordered & Ordered</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Lists are fundamental content structures. Use CSS's <code>list-style-type</code> property rather than relying on browser defaults.</p>
+                <pre>&lt;!-- Unordered list --&gt;
+&lt;ul&gt;
+    &lt;li&gt;Get dressed&lt;/li&gt;
+    &lt;li&gt;Eat a good breakfast&lt;/li&gt;
+    &lt;li&gt;Take an apple for my professor&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- Ordered list --&gt;
+&lt;ol&gt;
+    &lt;li&gt;God the Father&lt;/li&gt;
+    &lt;li&gt;Jesus, His Son&lt;/li&gt;
+    &lt;li&gt;The Holy Spirit&lt;/li&gt;
+&lt;/ol&gt;</pre>
+                <table>
+                    <tr><th>Property</th><th>Unordered Values</th><th>Ordered Values</th></tr>
+                    <tr><td>list-style-type</td><td>disc, circle, square, none</td><td>decimal, upper-alpha, lower-alpha, upper-roman, lower-roman</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Descendant selectors</strong> for nested list styling:</p>
+                <pre>ul ul     { list-style-type: square; } /* second level */
+ul ul ul  { list-style-type: none; }   /* third level */
+
+/* Descendant selector: element inside another */
+p strong  { color: red; }   /* strong inside a paragraph */
+
+/* Child selector: immediately inside (not just any descendant) */
+section &gt; h2 { background-color: palegreen; }
+aside &gt; h3   { margin: 0; }</pre>
+                <div class="highlight"><p>The only element allowed immediately inside &lt;ul&gt; or &lt;ol&gt; is &lt;li&gt; — no plain text or other elements directly inside. Always specify list-style-type explicitly rather than relying on browser defaults which vary by nesting level across browsers.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="organizational">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Organizational & Structural Elements</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Organizational elements group content into meaningful sections without obvious visual manifestation. All are block elements by default — they span the full width of their container.</p>
+                <div class="grid">
+                    <div class="card"><h3>section</h3><p>Groups a section of a page. Typically contains a heading and one or more paragraphs.</p></div>
+                    <div class="card"><h3>article</h3><p>Groups one or more sections. Forms an independent part of the page or website.</p></div>
+                    <div class="card"><h3>aside</h3><p>Content related to but not part of the main flow. Position with float and width CSS properties.</p></div>
+                    <div class="card"><h3>nav</h3><p>Groups navigation links. Use with &lt;a&gt; elements and href attributes.</p></div>
+                    <div class="card"><h3>header</h3><p>Groups header content at the top of the page or a section.</p></div>
+                    <div class="card"><h3>footer</h3><p>Groups footer content. Often contains address, contact info, and copyright.</p></div>
+                </div>
+                <pre>&lt;nav&gt;
+    &lt;a href="#dining"&gt;Dining&lt;/a&gt;
+    &lt;a href="#hours"&gt;Hours&lt;/a&gt;
+&lt;/nav&gt;
+
+&lt;section&gt;
+    &lt;h2 id="dining"&gt;Dining&lt;/h2&gt;
+    &lt;p&gt;Great food here...&lt;/p&gt;
+&lt;/section&gt;
+
+&lt;footer&gt;
+    &lt;address display="inline"&gt;123 Main St&lt;/address&gt;
+&lt;/footer&gt;
+
+/* display: inline overrides address element's block default */
+address { display: inline; }</pre>
+                <div class="highlight"><p>User agent style sheets are the browser's built-in defaults — they form the lowest priority in the CSS cascade. The address element displays as block by default — use display: inline to override this. In Blazor, the &lt;a&gt; anchor technique for page navigation requires JavaScript interop — it doesn't work the same way as in plain HTML.</p></div>
+                <p>Figures group self-contained content with optional captions:</p>
+                <pre>&lt;figure&gt;
+    &lt;img src="images/photo.png" alt="Description of photo"&gt;
+    &lt;figcaption&gt;The Final HTML Tag&lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;!-- figcaption MUST be inside figure --&gt;
+&lt;!-- alt attribute is REQUIRED by HTML5 standard --&gt;</pre>
+            </div>
+        </div>
+
+        <div class="section" id="tables">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Tables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Use tables ONLY for tabular data — not for page layout. HTML5 is explicit: table elements are for data, CSS is for layout.</p>
+                <pre>&lt;table&gt;
+    &lt;caption&gt;My Semester Course Schedule&lt;/caption&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;th&gt;Course #&lt;/th&gt;
+            &lt;th&gt;Course Name&lt;/th&gt;
+            &lt;th&gt;Classroom&lt;/th&gt;
+        &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+        &lt;tr&gt;
+            &lt;td&gt;COMP2040&lt;/td&gt;
+            &lt;td&gt;Web Development&lt;/td&gt;
+            &lt;td&gt;Room 101&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;
+
+/* Table styling */
+table, th, td { border: thin solid; }
+th { text-align: center; font-weight: bold; }  /* default */
+td { text-align: left; }                         /* default */</pre>
+                <p><strong>Cell spanning:</strong></p>
+                <pre>&lt;th colspan="2"&gt;Events&lt;/th&gt;   /* spans 2 columns */
+&lt;th rowspan="2"&gt;Mesozoic&lt;/th&gt; /* spans 2 rows    */</pre>
+                <p><strong>Center a table horizontally:</strong></p>
+                <pre>/* Apply to the PARENT container, not the table itself */
+body { display: flex; justify-content: center; }
+
+/* In Blazor, wrap in a div */
+&lt;div style="display:flex; justify-content:center;"&gt;
+    &lt;table&gt;...&lt;/table&gt;
+&lt;/div&gt;</pre>
+                <div class="highlight"><p>thead/tbody separate header rows from data rows — use them when you have column headers at top AND row headers at left. The vertical-align property positions text vertically within a cell. Default: th = center/bold, td = left/normal, both have zero padding. Use CSS to override all of these.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="layout">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Layout with CSS — display, flex, position</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>CSS display property with table values</strong> — for layouts that grow/shrink with content:</p>
+                <pre>.table   { display: table; border-spacing: 20px; }
+.caption { display: table-caption; text-align: center; }
+.row     { display: table-row; }
+.row &gt; * { display: table-cell; text-align: center; }
+
+/* Usage */
+&lt;div class="table"&gt;
+    &lt;div class="caption"&gt;Ancient Wonders&lt;/div&gt;
+    &lt;div class="row"&gt;
+        &lt;span&gt;&lt;img src="pyramid.jpg" alt=""&gt;&lt;/span&gt;
+        &lt;span&gt;&lt;img src="gardens.jpg" alt=""&gt;&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+/* Use span wrappers for images — display:table-cell
+   doesn't work well with embedded elements directly */
+/* border-spacing adds space OUTSIDE cells */
+/* padding adds space INSIDE cells          */
+/* margin does NOT work with table cells    */</pre>
+                <p><strong>Flex container</strong> — the preferred Blazor approach:</p>
+                <pre>/* A div with display:flex is a flex container */
+&lt;div style="display:flex;"&gt;
+    &lt;div&gt;Item 1&lt;/div&gt;
+    &lt;div&gt;Item 2&lt;/div&gt;
+    &lt;div&gt;Item 3&lt;/div&gt;
+&lt;/div&gt;
+/* Flex components align horizontally (row) or vertically (column) */
+/* Blazor's rendering engine handles resizing automatically        */
+/* Much easier to add/remove items than HTML tables or div tables  */</pre>
+                <p><strong>CSS position: absolute</strong> — for fixed-position layouts:</p>
+                <pre>.sidebar {
+    position: absolute;
+    left: 20px;   /* distance from containing block's left edge */
+    top: 100px;   /* distance from containing block's top edge  */
+}
+/* position:absolute removes the element from normal flow */
+/* Normal flow: block elements top-to-bottom, phrasing left-to-right */</pre>
+            </div>
+        </div>
+
+        <div class="section" id="links">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Links & Navigation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>&lt;!-- Basic link --&gt;
+&lt;a href="http://www.nnu.edu"&gt;Northwest Nazarene University&lt;/a&gt;
+
+&lt;!-- Link to same server (relative URL) --&gt;
+&lt;a href="../hw2/weather.html"&gt;Weather Page&lt;/a&gt;
+
+&lt;!-- Link within current page (anchor) --&gt;
+&lt;a href="#pledge-drive"&gt;Pledge Drive&lt;/a&gt;
+&lt;h3 id="pledge-drive"&gt;Pledge Drive&lt;/h3&gt;
+
+&lt;!-- Download link --&gt;
+&lt;a download href="/files/catalog.pdf"&gt;Download Catalog&lt;/a&gt;
+
+&lt;!-- Open in new tab --&gt;
+&lt;a href="https://youtube.com" target="_blank"&gt;YouTube&lt;/a&gt;
+&lt;!-- target="_self" = overlay current page (default)    --&gt;
+&lt;!-- target="_blank" = open in new tab                  --&gt;</pre>
+                <p><strong>CSS for links:</strong></p>
+                <pre>a:link    { color: #00ff00; }   /* unvisited */
+a:visited { color: #ff0000; }   /* visited   */
+a         { text-decoration: none; }      /* remove underline */
+a:hover   { text-decoration: underline; } /* re-add on hover  */
+/* hover is more specific than a, so it overrides */</pre>
+                <p><strong>Relative URL rules:</strong> use / to separate directories, use .. to go up to parent directory. Path-absolute URLs start with / and are relative to the web server's root.</p>
+                <div class="highlight"><p>In Blazor, anchor navigation (jumping within a page) requires JavaScript interop — inject IJSRuntime, create onclick events, add a JS file under wwwroot, and reference it in App.razor. It's significantly more work than plain HTML. Always include an index.html in every directory that might be specified in a URL — without it, users see either directory listings or error pages.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="images">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Images & Image Formats</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>&lt;img src="/images/photo.png"
+     alt="Description of photo"
+     width="400" height="300"&gt;
+&lt;!-- alt is REQUIRED by HTML5 -- used by screen readers --&gt;
+&lt;!-- Specify natural width/height for faster download    --&gt;
+&lt;!-- Mismatched w/h degrades image quality              --&gt;
+
+&lt;!-- Float image to position text around it --&gt;
+&lt;img src="photo.jpg" alt="photo"
+     style="float: left; margin: 10px;"&gt;
+
+&lt;!-- Shortcut icon (favicon) in head section --&gt;
+&lt;link rel="icon" href="../images/tree.png"&gt;
+&lt;!-- In Blazor, use &lt;HeadContent&gt; element instead --&gt;</pre>
+                <table>
+                    <tr><th>Format</th><th>Best For</th><th>Notes</th></tr>
+                    <tr><td>GIF (.gif)</td><td>Line drawings, icons, cartoons</td><td>8-bit (256 colors). Small files. Transparency: 2 levels only.</td></tr>
+                    <tr><td>JPEG (.jpg)</td><td>Photographs</td><td>24-bit (16M colors). Lossy compression. Quality vs size tradeoff.</td></tr>
+                    <tr><td>PNG (.png)</td><td>Both photos & limited-color</td><td>Flexible bit depth. 256 transparency levels. Open source.</td></tr>
+                    <tr><td>SVG (.svg)</td><td>Icons, logos, diagrams</td><td>Vector — infinite scaling, no pixelation. XML-based. Not for photos.</td></tr>
+                </table>
+                <div class="highlight"><p>Bitmap images (GIF, JPEG, PNG) store a color per pixel — resizing adds/drops pixels and degrades quality. Vector images (SVG) are mathematical formulas — scaling redraws with no quality loss. Use &lt;img&gt; with an SVG src, or embed SVG code directly using an &lt;svg&gt; element. iframe elements display embedded web documents — useful for photo galleries where clicking thumbnails shows larger versions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="media">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Audio & Video</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>HTML5 provides native audio and video elements — no plugins required.</p>
+                <pre>&lt;!-- Audio --&gt;
+&lt;audio src="/audio/sound.mp3" preload="auto" controls&gt;&lt;/audio&gt;
+
+&lt;!-- Multiple sources for browser compatibility --&gt;
+&lt;audio autoplay controls loop&gt;
+    &lt;source src="/audio/rain.mp3" type="audio/mpeg"&gt;
+    &lt;source src="/audio/rain.wav" type="audio/wav"&gt;
+    &lt;source src="/audio/rain.ogg" type="audio/ogg"&gt;
+&lt;/audio&gt;
+&lt;!-- Include .mp3, .wav, .ogg for maximum compatibility --&gt;
+
+&lt;!-- Video --&gt;
+&lt;video width="397" height="225"
+       preload="metadata" controls
+       poster="/images/thumbnail.jpg"&gt;
+    &lt;source src="/video/cats.mp4" type="video/mp4"&gt;
+    &lt;source src="/video/cats.webm" type="video/webm"&gt;
+&lt;/video&gt;
+&lt;!-- Include .mp4 and .webm for maximum compatibility --&gt;
+
+&lt;!-- Alternative: embed YouTube via iframe --&gt;
+&lt;iframe width="400" height="225" allowfullscreen
+    src="//www.youtube.com/embed/VIDEO_ID"&gt;&lt;/iframe&gt;</pre>
+                <table>
+                    <tr><th>Attribute</th><th>Effect</th></tr>
+                    <tr><td>controls</td><td>Shows play/pause/volume controls</td></tr>
+                    <tr><td>autoplay</td><td>Starts playing on page load</td></tr>
+                    <tr><td>loop</td><td>Repeats continuously</td></tr>
+                    <tr><td>preload="auto"</td><td>Downloads file on page load</td></tr>
+                    <tr><td>preload="metadata"</td><td>Downloads only dimensions, duration, first frame</td></tr>
+                    <tr><td>poster (video)</td><td>Image shown while video isn't playing</td></tr>
+                </table>
+                <div class="highlight"><p>Quiz answers: controls attribute shows the play/pause/volume control bar. Default background image behavior: tiles multiple copies to fill the viewport. The alt attribute provides fallback text read by screen readers and displayed when images fail to load — required by HTML5.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="background">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Background Images</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>/* HTML/CSS approach */
+body {
+    background-image: url(../images/pumpkin.jpg);
+    background-size: cover;        /* scale to fill viewport */
+    background-attachment: fixed;  /* don't scroll with page */
+    background-position: center;   /* center horizontally    */
+}
+/* cover + fixed: scales image so one dimension fills viewport
+   exactly, crops the other — viewport is fully covered       */
+/* Without background-size: images tile by default            */
+
+/* Blazor approach: wrap page in a div */
+&lt;div style="background-image: url(./images/bg.jpg);
+             background-size: cover;
+             background-attachment: fixed;
+             background-position: center;
+             min-height: 100vh;"&gt;
+    @Body
+&lt;/div&gt;</pre>
+                <div class="highlight"><p>In Blazor, applying background-image to body through a global CSS rule affects all pages. For page-specific backgrounds, wrap the page content in a div and apply the background there. Pick background images that won't blend in with or hide your page's text — contrast is critical for readability.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="webfonts">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Web Fonts</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Standard fonts (Tahoma, Arial, Courier New) are safe to use directly. Non-standard fonts must be delivered with an @font-face at-rule — the server sends the font file alongside the page.</p>
+                <pre>/* In an external .css file (NOT in a .razor file —
+   @ is reserved for C# code in Razor pages) */
+
+@font-face {
+    font-family: Buffied;
+    src: url(/fonts/Buffied.woff2) format("woff2"),
+         url(/fonts/Buffied.woff)  format("woff");
+}
+
+h1, h3 { font-family: Buffied, serif; }</pre>
+                <div class="highlight"><p>In Blazor, put @font-face rules in a .razor.css or external .css file — never in a .razor file because @ is reserved for C# code. Prefer WOFF2 over WOFF (30% smaller files) and both over TrueType (.ttf). Include both WOFF and WOFF2 for compatibility with older browsers. Use a file converter (font-converter.net) to generate WOFF/WOFF2 from TTF files.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
