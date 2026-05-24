@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 9: Object-Oriented Python Part 2</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f0a00, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #c2410c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #c2410c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #c2410c; color: white; border-color: #c2410c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #c2410c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f0a00; border-left: 3px solid #c2410c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c2410c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #c2410c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c2410c; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #c2410c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #c2410c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 9</div>
+        <h1>Object-Oriented Python — Part 2</h1>
+        <p class="subtitle">Static variables, class methods, inheritance, polymorphism, overloading, access modifiers, and abstract classes</p>
+    </header>
+    <nav>
+        <a href="#static">Static Variables</a>
+        <a href="#classmethods">Class Methods</a>
+        <a href="#innerclasses">Inner Classes & GC</a>
+        <a href="#inheritance">Inheritance</a>
+        <a href="#polymorphism">Polymorphism</a>
+        <a href="#overloading">Overloading & Overriding</a>
+        <a href="#access">Access Modifiers</a>
+        <a href="#abstract">Abstract Classes & Interfaces</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="static">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Static (Class) Variables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Static variables are shared between ALL instances of a class — one copy total, regardless of how many objects exist. Unlike instance variables where each object gets its own copy.</p>
+                <pre># 5 ways to declare a static variable
+
+# 1. In the class body (most common)
+class Student:
+    universityName = "NNU"   # class/static variable
+    def __init__(self, myName, gradeLevel):
+        self.myName = myName
+        self.gradeLevel = gradeLevel
+
+# 2. Inside __init__ using class name
+Student.universityName = "NNU"
+
+# 3. Inside an instance method using class name
+def SetNNU(self):
+    Student.universityName = "NNU"
+
+# 4. Inside a class method using cls
+@classmethod
+def SetNNU(cls):
+    cls.universityName = "NNU"
+
+# 5. Inside a static method using class name
+@staticmethod
+def SetNNU():
+    Student.universityName = "NNU"</pre>
+                <p><strong>Shared behavior — changes affect ALL instances:</strong></p>
+                <pre>student1 = Student("Rufus McGee", "Sophomore")
+student2 = Student("Alice McGee", "Junior")
+
+print(student1.universityName)   # NNU
+print(student2.universityName)   # NNU
+
+Student.universityName = "Northwest Nazarene University"
+
+print(student1.universityName)   # Northwest Nazarene University
+print(student2.universityName)   # Northwest Nazarene University — both changed!
+
+# Delete a static variable
+del Student.universityName   # using del keyword</pre>
+                <div class="highlight"><p>Changing a static variable through the CLASS NAME (Student.universityName) updates it for all instances. If you accidentally assign through an INSTANCE (student1.universityName = "X"), Python creates a new INSTANCE variable on that object instead of changing the class variable — a common gotcha. Always use the class name or cls to modify class variables.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="classmethods">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Class Methods & Static Methods</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Method Type</th><th>Decorator</th><th>First Param</th><th>Can Access</th></tr>
+                    <tr><td>Instance method</td><td>(none)</td><td>self</td><td>Instance + class variables</td></tr>
+                    <tr><td>Class method</td><td>@classmethod</td><td>cls</td><td>Class variables only</td></tr>
+                    <tr><td>Static method</td><td>@staticmethod</td><td>(none)</td><td>Only what's passed in</td></tr>
+                </table>
+                <pre">class Major:
+    myConcentration = "Data Science"   # class variable
+
+    def __init__(self, myName):
+        self.myName = myName
+
+    @classmethod
+    def Concentration(cls, degree):
+        # cls refers to the class itself (like self refers to the instance)
+        print(f"{degree} has a concentration in {cls.myConcentration}")
+
+# Call on the CLASS itself — no object needed
+Major.Concentration("Computer Science")
+# "Computer Science has a concentration in Data Science"
+
+# Modify static variable — three equivalent ways
+class Student:
+    universityName = "NNU"
+
+    @classmethod
+    def SetNNU1(cls, name):
+        cls.universityName = name      # via cls
+
+    @classmethod
+    def SetNNU2(cls, name):
+        Student.universityName = name  # via class name
+
+    @staticmethod
+    def SetNNU3(name):
+        Student.universityName = name  # via class name (no cls available)
+
+student1 = Student("Rufus", "Sophomore")
+student1.SetNNU1("NWU")    # via instance
+Student.SetNNU3("NNU")     # via class (static methods only)</pre>
+            </div>
+        </div>
+
+        <div class="section" id="innerclasses">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Inner Classes & Garbage Collection</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Python allows classes to be declared inside other classes — useful for dependent relationships (a University NEEDS Students, not just HAS them).</p>
+                <pre">class University:
+    def __init__(self, myName):
+        self.myName = myName
+
+    def myDisplay(self):
+        print(f"University: {self.myName}")
+
+    class Info:               # inner class — defined INSIDE University
+        def __init__(self):
+            self.founded = 1913
+
+        def MyDisplay1(self):
+            print(f"Founded: {self.founded}")
+
+# Access inner class
+univ = University("NNU")
+info = University.Info()    # create inner class instance
+info.MyDisplay1()</pre>
+                <div class="highlight"><p>Inner classes model strong dependency — the inner class conceptually belongs to the outer class and has no meaningful existence without it. Unlike aggregation (HAS A), inner classes represent containment. Don't overuse them — most relationships are better expressed through regular composition.</p></div>
+                <p><strong>Garbage Collection & Destructors:</strong></p>
+                <pre">class Demo:
+    def __init__(self):
+        print("Object created — memory allocated")
+
+    def __del__(self):
+        print("Object destroyed — cleanup performed")
+
+obj = Demo()    # __init__ called
+del obj          # __del__ called — memory freed
+
+# Python's garbage collector runs automatically in the background
+# recovering memory from objects no longer referenced
+# GC can be disabled for performance but rarely should be</pre>
+            </div>
+        </div>
+
+        <div class="section" id="inheritance">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Inheritance</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A child class inherits ALL functionality from a parent and can extend or modify it. This is the "is a" relationship — a Graduate IS A Student.</p>
+                <pre">class Student:
+    def MyMajor(self):
+        print("My major is Computer Science")
+
+    @classmethod
+    def MyFavoriteFood(cls):
+        print("I love pizza")
+
+# Graduate inherits everything from Student
+class Graduate(Student):
+    def Occupation(self):
+        print("I am a Python developer.")
+
+grad = Graduate()
+grad.MyMajor()         # inherited from Student
+grad.MyFavoriteFood()  # inherited from Student
+grad.Occupation()      # defined in Graduate
+
+# super() — call the parent's version of a method
+class Student:
+    def myDisplay(self):
+        print(f"Name: {self.myName}")
+
+class Graduate(Student):
+    def myDisplay(self):
+        super().myDisplay()       # call parent's myDisplay first
+        print(f"Major: {self.myMajor}")   # then add Graduate-specific info
+
+# Access other classes — classes are just variables
+class UpdateMajor:
+    def myUpdate(student, major):   # no self — not an instance method
+        student.major = major
+        student.MyDisplay()</pre>
+                <div class="highlight"><p>super() is essential for extending (not replacing) parent behavior. Without it, overriding a method completely replaces the parent's version. With super().method(), you get the parent's behavior PLUS your additions. Always call super().__init__() in child constructors to properly initialize the parent's instance variables.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="polymorphism">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Polymorphism & Duck Typing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Polymorphism means changing behavior depending on the situation. Python uses <strong>Duck Typing</strong> — "if it walks like a duck and quacks like a duck, it's a duck." It assumes behaviors will work at runtime without requiring a shared base class.</p>
+                <pre">class Duck:
+    def Talk(self):
+        print("Quack!")
+
+class Bird:
+    def Talk(self):
+        print("Tweet!")
+
+class Dog:
+    def Talk(self):
+        print("Woof!")
+
+# Works on any object that has a Talk method — no inheritance needed
+def MakeNoise(animal):
+    animal.Talk()
+
+MakeNoise(Duck())   # Quack!
+MakeNoise(Bird())   # Tweet!
+MakeNoise(Dog())    # Woof!
+
+# Safe duck typing — check before calling
+def myfunc(obj):
+    if hasattr(obj, "Talk"):
+        obj.Talk()
+    elif hasattr(obj, "Eat"):
+        obj.Eat()
+    # no AttributeError if the method doesn't exist</pre>
+                <div class="highlight"><p>Duck typing is Python's approach to polymorphism — instead of requiring objects to inherit from a common base class, Python just tries to call the method and sees if it works. Use hasattr() when you're not sure an object has a particular method. This is more flexible than Java/C++ but puts more responsibility on the programmer to ensure objects have the right interface.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="overloading">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Operator Overloading & Method Overriding</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre"># Operator overloading — redefine what operators do for your class
+# + is tied to __add__, - to __sub__, * to __mul__, etc.
+class MyCylinder:
+    def __init__(self, myweight):
+        self.myweight = myweight
+
+    # override + operator
+    def __add__(self, other):
+        return self.myweight + other.myweight
+
+c1 = MyCylinder(10)
+c2 = MyCylinder(20)
+print(c1 + c2)   # 30 — calls __add__
+
+# Common dunder methods for overloading
+# __str__  → str(obj) and print(obj)
+# __len__  → len(obj)
+# __eq__   → obj1 == obj2
+# __lt__   → obj1 < obj2
+# __add__  → obj1 + obj2
+
+# Method overriding — redefine parent method in child
+class Parent:
+    def result(self, num1, num2):
+        print(f"Subtraction: {num1} - {num2} = {num1 - num2}")
+
+class Child(Parent):
+    def mydisplay(self):
+        print("Hey I am a child class")
+
+    # Override result — completely replaces parent version
+    def result(self, num1, num2):
+        print(f"Addition: {num1} + {num2} = {num1 + num2}")
+
+    # Override AND keep parent behavior using super()
+    def result_extended(self, num1, num2):
+        super().result(num1, num2)    # parent's subtraction
+        print(f"Also addition: {num1 + num2}")  # plus child's addition</pre>
+            </div>
+        </div>
+
+        <div class="section" id="access">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Access Modifiers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Access modifiers control who can access variables and methods. Python uses naming conventions rather than enforced keywords.</p>
+                <table>
+                    <tr><th>Modifier</th><th>Syntax</th><th>Accessible From</th></tr>
+                    <tr><td>Public</td><td>myVar (no underscore)</td><td>Everywhere — default</td></tr>
+                    <tr><td>Protected</td><td>_myVar (single underscore)</td><td>Class + subclasses (convention only — not enforced)</td></tr>
+                    <tr><td>Private</td><td>__myVar (double underscore)</td><td>Within the class only (Python name-mangles it)</td></tr>
+                </table>
+                <pre">class Student:
+    myPublicName = None      # public — accessible everywhere
+    _myProtectedId = None    # protected — flag: use getters/setters
+    __myPrivateSSN = None    # private — name-mangled to _Student__myPrivateSSN
+
+s = Student()
+print(s.myPublicName)        # OK
+print(s._myProtectedId)      # OK but you shouldn't — use getter
+print(s.__myPrivateSSN)      # AttributeError!
+print(s._Student__myPrivateSSN)  # works but very bad practice</pre>
+                <div class="highlight"><p>Python doesn't truly enforce access modifiers like C++ or Java do. Single underscore (_var) is a convention meaning "please don't touch this directly." Double underscore (__var) triggers name-mangling — Python renames it to _ClassName__var — making it harder (but not impossible) to access from outside. The real enforcement comes from code review and team discipline, not the language.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="abstract">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Abstract Classes & Interfaces</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Abstract classes define methods that MUST be implemented by any subclass. You cannot directly instantiate an abstract class — it's a template, not a usable object.</p>
+                <pre">from abc import ABC, abstractmethod
+
+# Abstract class — inherits from ABC
+class Person(ABC):
+    @abstractmethod
+    def MyMethod1(self):
+        pass           # no implementation — must be overridden
+
+    def MyMethod2(self):
+        print("I am a concrete method")   # has implementation
+
+# Concrete subclass — MUST implement all abstract methods
+class Student(Person):
+    def MyMethod1(self):
+        print("I am overriding the abstract method")
+
+p = Person()     # TypeError — cannot instantiate abstract class
+s = Student()    # OK
+s.MyMethod1()    # "I am overriding the abstract method"
+s.MyMethod2()    # "I am a concrete method" — inherited from Person
+
+# Simulating an interface — abstract class with ONLY abstract methods
+class Myengineer(ABC):
+    @abstractmethod
+    def mybranch(self):
+        pass
+
+    @abstractmethod
+    def myskills(self):
+        pass
+
+# Any class that "implements" Myengineer must define BOTH methods
+class MyEEE(Myengineer):
+    def mybranch(self):
+        print("Electrical and Electronics Engineer")
+    def myskills(self):
+        print("Circuit design, signal processing")</pre>
+                <div class="highlight"><p>Python doesn't have a true interface keyword like Java — it simulates interfaces with abstract classes containing only abstract methods. Any class inheriting from it must implement ALL abstract methods or it's also abstract. The abc module (Abstract Base Class) is the standard tool. Note: unlike Java/C++, Python won't force you to implement abstract methods at compile time — you'll only find out at runtime when you try to instantiate.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

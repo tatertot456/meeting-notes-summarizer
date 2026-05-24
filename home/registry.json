@@ -520,5 +520,104 @@
     "accent": "#15803d",
     "glow": "#0a2010",
     "badge": "#166534"
+  },
+  {
+    "title": "Python Section 1 About Python",
+    "filename": "python-section-1-about-python.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 03:52 AM",
+    "accent": "#b45309",
+    "glow": "#1f1200",
+    "badge": "#92400e"
+  },
+  {
+    "title": "Python Section 2 Basics",
+    "filename": "python-section-2-basics.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 04:04 PM",
+    "accent": "#be185d",
+    "glow": "#2a0a1a",
+    "badge": "#9d174d"
+  },
+  {
+    "title": "Python Section 3 Control Flow",
+    "filename": "python-section-3-control-flow.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 04:18 PM",
+    "accent": "#dc2626",
+    "glow": "#2a0a0a",
+    "badge": "#b91c1c"
+  },
+  {
+    "title": "Python Section 4 Functions and Methods",
+    "filename": "python-section-4-functions-and-methods.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 04:21 PM",
+    "accent": "#16a34a",
+    "glow": "#0a2a0a",
+    "badge": "#15803d"
+  },
+  {
+    "title": "Python Section 5 Advanced Variables",
+    "filename": "python-section-5-advanced-variables.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 04:29 PM",
+    "accent": "#d97706",
+    "glow": "#1f1200",
+    "badge": "#b45309"
+  },
+  {
+    "title": "Python Section 6 Logging and Exception Handling",
+    "filename": "python-section-6-logging-and-exception-handling.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 04:31 PM",
+    "accent": "#2563eb",
+    "glow": "#0a0a2e",
+    "badge": "#1d4ed8"
+  },
+  {
+    "title": "Python Section 7 Modules and Packages",
+    "filename": "python-section-7-modules-and-packages.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 04:34 PM",
+    "accent": "#7c3aed",
+    "glow": "#1e0a3c",
+    "badge": "#6d28d9"
+  },
+  {
+    "title": "Python Section 9 Object Oriented Programming Part 1",
+    "filename": "python-section-9-object-oriented-programming-part-1.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 04:39 PM",
+    "accent": "#0d9488",
+    "glow": "#0a2a28",
+    "badge": "#0f766e"
+  },
+  {
+    "title": "Python Section 9 Object Oriented Programming Part 2",
+    "filename": "python-section-9-object-oriented-programming-part-2.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 04:42 PM",
+    "accent": "#ea580c",
+    "glow": "#1f0a00",
+    "badge": "#c2410c"
+  },
+  {
+    "title": "Python Section 10 GUI Programming with Tkinter",
+    "filename": "python-section-10-gui-programming-with-tkinter.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 05:09 PM",
+    "accent": "#6d28d9",
+    "glow": "#1a0f3d",
+    "badge": "#5b21b6"
+  },
+  {
+    "title": "Python Secton 11 Advanced Tkinter Widgets",
+    "filename": "python-secton-11-advanced-tkinter-widgets.html",
+    "category": "Intro to Python",
+    "date": "2026-05-23 05:12 PM",
+    "accent": "#0369a1",
+    "glow": "#0a1f2e",
+    "badge": "#075985"
   }
 ]

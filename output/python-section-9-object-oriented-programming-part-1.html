@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 9: Object-Oriented Python Part 1</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a28, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0f766e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0f766e; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0f766e; color: white; border-color: #0f766e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0f766e; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a28; border-left: 3px solid #0f766e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0f766e; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0f766e; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #0f766e; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #0f766e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0f766e; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 9</div>
+        <h1>Object-Oriented Python — Part 1</h1>
+        <p class="subtitle">Classes, constructors, self, decorators, variables, getters/setters, properties, and closures</p>
+    </header>
+    <nav>
+        <a href="#concepts">OOP Concepts</a>
+        <a href="#class">Classes & Constructors</a>
+        <a href="#self">self</a>
+        <a href="#decorators">Decorators</a>
+        <a href="#variables">Variable Types</a>
+        <a href="#getset">Getters & Setters</a>
+        <a href="#properties">Properties</a>
+        <a href="#closures">Closures & Functions as Objects</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="concepts">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>OOP Concepts & Terminology</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Object-Oriented Programming is one of the most important developments in software — possibly the most significant in the past 50 years. It enables more complex, reusable software with faster development times and fewer bugs.</p>
+                <div class="grid">
+                    <div class="card"><h3>class</h3><p>A design document (blueprint) for creating objects. Defines methods, properties, permissions, behaviors, and attributes.</p></div>
+                    <div class="card"><h3>object</h3><p>An instantiation (creation) of a variable based on a class. Like a house built from a blueprint.</p></div>
+                    <div class="card"><h3>method</h3><p>A function built into an object. Called with object.method() syntax.</p></div>
+                    <div class="card"><h3>property</h3><p>A state variable built into an object — stores the object's current state.</p></div>
+                    <div class="card"><h3>constructor</h3><p>The method called when an object is created. In Python: __init__(). Initializes the object's state.</p></div>
+                    <div class="card"><h3>interface</h3><p>A behavior specification — guarantees certain methods exist and behave in a defined way.</p></div>
+                </div>
+                <div class="highlight"><p>The key insight of OOP: objects hide complicated procedures behind easy-to-use methods. You don't need to know HOW your leg muscles work to walk to class — you just walk. That's encapsulation. Objects let software work the same way.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="class">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Classes, Constructors & Instantiation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Minimal class with documentation
+class Employee:
+    ''' This is an employee class '''
+
+print(Employee.__doc__)   # prints the docstring
+help(Employee)            # full formatted help
+
+# Class with constructor (__init__)
+class Employee:
+    ''' This is an employee class '''
+    def __init__(self, name, age, staffnumber, designation):
+        self.name = name
+        self.age = age
+        self.staffnumber = staffnumber
+        self.designation = designation
+
+    def Display(self):
+        print(f"The name is: {self.name}")
+        print(f"The age is: {self.age}")
+        print(f"Staff #: {self.staffnumber}")
+        print(f"Designation: {self.designation}")
+
+# Instantiate (create) an object — call the class like a function
+EmpKevin = Employee("Kevin", 124, 100329, "Professor Extraordinaire")
+
+# Access attributes with dot notation
+print(EmpKevin.name)
+print(EmpKevin.age)
+print(EmpKevin.designation)
+
+# Call a method
+EmpKevin.Display()
+
+# Object dictionary — all attributes stored here
+print(EmpKevin.__dict__)
+# {'name': 'Kevin', 'age': 124, 'staffnumber': 100329, ...}</pre>
+                <div class="highlight"><p>__init__ is Python's constructor — it's called automatically when you create an object. It initializes the object's state by assigning values to instance variables using self. The __dict__ attribute gives you a dictionary of ALL instance variables and their current values — very useful for debugging.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="self">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>self</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><code>self</code> is Python's equivalent of C++'s <code>this</code>. It's a reference to the current object instance — necessary to distinguish the class's own variables and methods from local variables.</p>
+                <pre>class Employee:
+    def __init__(self, name, age):
+        self.name = name    # instance variable — attached to THIS object
+        self.age = age
+
+    # self is ALWAYS the first parameter of instance methods
+    def Display(self):
+        print(f"Name: {self.name}")    # WORKS — uses self
+        print(f"Age: {self.age}")
+
+    def DisplayNoSelf(self):
+        print(f"Name: {name}")         # NameError — name isn't defined
+        print(f"Age: {age}")           # without self, Python looks in
+                                       # local scope and can't find it
+
+# __call__ — makes an object callable like a function
+class DisplayName:
+    def __init__(self, myname):
+        self.myname = myname
+
+    def __call__(self):               # invoked when you do: obj()
+        print(f"My name is: {self.myname}")
+
+myobj = DisplayName("Kevin")
+myobj()   # calls __call__ — prints "My name is: Kevin"</pre>
+                <div class="highlight"><p>self is not a keyword — it's a convention. You could technically name it anything, but ALWAYS use self. It's the first parameter of every instance method. Without self.variable, Python looks for a local variable with that name and fails. The __call__ dunder method makes an object callable like a function — myobj() instead of myobj.display().</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="decorators">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Decorators</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A decorator extends an existing function by wrapping it with another function. It's Python's answer to function overloading (which Python doesn't natively support).</p>
+                <pre># The original function
+def greet(myname):
+    print("HI!", myname, "! Welcome!")
+
+# A decorator function — takes a function and returns a modified one
+def MyDecorator(myfunc):
+    def func1(myname):
+        if myname == "Michael":
+            print("Hello", myname, "! Your functionality is extended!")
+        else:
+            myfunc(myname)     # call the original function normally
+    return func1
+
+# Apply the decorator with @ syntax — binds MyDecorator to greet
+@MyDecorator
+def greet(myname):
+    print("HI!", myname, "! Welcome!")
+
+greet("Tom")       # normal path: "HI! Tom ! Welcome!"
+greet("Michael")   # extended path: "Hello Michael ! Your functionality is extended!"
+
+# Decorator chaining — outer runs first, then inner
+@MyHash          # outer decorator
+@MyAtSymbol      # inner decorator
+def MyPrint(mymsg):
+    print(mymsg)
+
+# When MyPrint("Hello") is called:
+# MyHash wraps MyAtSymbol wraps MyPrint
+# Order: MyHash → calls MyAtSymbol → calls MyPrint
+
+# Class decorator example
+class DisplayName:
+    def __init__(self, myname):
+        self.myname = myname
+
+    @SpecialName   # decorators work inside classes too
+    def MyDisplay(self):
+        print(f"My name is: {self.myname}")</pre>
+                <div class="highlight"><p>Decorators are functions that take a function as input and return a modified function. The @decorator syntax is shorthand for greet = MyDecorator(greet). In chained decorators, the bottom decorator (@MyAtSymbol) is applied first, then the top one (@MyHash) wraps the result. Outer calls inner which calls the original function.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="variables">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Variable Types in Classes</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Local Variables</h3><p>Declared inside methods. Only exist within that method's scope. Gone when the method returns.</p></div>
+                    <div class="card"><h3>Class Variables</h3><p>Declared in the class body (outside __init__). Shared among ALL objects of that class — one copy total.</p></div>
+                    <div class="card"><h3>Instance Variables</h3><p>Declared in __init__ with self. A separate copy created for EACH object — each object has its own value.</p></div>
+                </div>
+                <pre>class Employee:
+    company = "NNU"    # CLASS variable — shared by all Employee objects
+
+    def __init__(self, name, age):
+        self.name = name   # INSTANCE variable — unique per object
+        self.age = age
+
+emp1 = Employee("Kevin", 50)
+emp2 = Employee("Alice", 30)
+
+print(emp1.company)   # "NNU" — class variable
+print(emp2.company)   # "NNU" — same value, shared
+
+print(emp1.name)      # "Kevin" — instance variable
+print(emp2.name)      # "Alice" — different per object
+
+Employee.company = "EWU"   # change class variable
+print(emp1.company)   # "EWU" — ALL objects see the change
+print(emp2.company)   # "EWU"</pre>
+                <div class="highlight"><p>Use instance variables for attributes that differ per object (name, age, salary). Use class variables for attributes shared by ALL objects of that type (company name, species, constant values). Modifying a class variable changes it for ALL instances — a common gotcha when you accidentally modify a class variable instead of an instance variable.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="getset">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Getters & Setters</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Good OOP design avoids letting external code directly access instance variables. Getters and setters provide controlled access — the setter can validate values before assigning them.</p>
+                <pre># Problem: direct access allows bad values
+john = Person("John", 18)
+john.age = 19    # fine
+john.age = -1    # WRONG but Python allows it with direct access
+
+# Solution: add validation in a setter
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.set_age(age)   # use setter in constructor too!
+
+    def set_age(self, age):
+        if age &lt;= 0:
+            raise ValueError("Age must be positive")
+        self._age = age     # store in _age (convention: _ = "internal")
+
+    def get_age(self):
+        return self._age
+
+john = Person("John", 18)
+john.get_age()         # 18
+john.set_age(20)       # valid
+john.set_age(-1)       # ValueError: Age must be positive
+
+# Attribute vs variable
+# age is the parameter name (external interface)
+# _age is the internal attribute (convention: underscore = internal)
+john.age    # AttributeError — no .age without a property
+john._age   # 18 — _age IS accessible (Python has no true private)</pre>
+                <div class="highlight"><p>Python uses the underscore convention (_variable) to signal "internal use" — there's no true private like C++ has. Convention: get_age() and set_age() as getter/setter names. The constructor should always call the setter (not assign directly) so validation runs even at creation time.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="properties">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Properties — The Pythonic Getter/Setter</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Properties are Python's cleaner alternative to getters/setters. They let you use attribute syntax (john.age) while still running validation code behind the scenes.</p>
+                <pre">class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age   # this will call set_age through the property!
+
+    def set_age(self, age):
+        if age &lt;= 0:
+            raise ValueError("Age must be positive")
+        self._age = age
+
+    def get_age(self):
+        return self._age
+
+    # Create the property — connects get/set functions to 'age'
+    age = property(fget=get_age, fset=set_age)
+
+# Usage — looks just like direct attribute access!
+john = Person("John", 18)
+print(john.age)    # calls get_age() → 18
+john.age = 20      # calls set_age(20) — validates then stores
+john.age = -1      # calls set_age(-1) → ValueError!
+
+# Full property signature
+property(fget=None, fset=None, fdel=None, doc=None)
+# fget: getter function
+# fset: setter function
+# fdel: delete function (optional)
+# doc:  docstring (optional)</pre>
+                <div class="highlight"><p>Properties are the preferred Python pattern over explicit get_/set_ methods. With a property, the calling code uses john.age = 20 (clean, readable) rather than john.set_age(20) — but the validation code still runs transparently. The magic is that age = property(...) at the class level intercepts all reads and writes to the age attribute.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="closures">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Closures & Functions as Objects</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>In Python, functions are objects — they can be passed as arguments, returned from functions, and stored in variables. This enables powerful patterns.</p>
+                <pre"># CLOSURE — a nested function that "closes over" variables from its outer scope
+def outerFn(str1):
+    var1 = " is awesome"
+    def nestedFn():
+        print(str1 + var1)   # accesses str1 and var1 from outer scope
+    return nestedFn           # returns the inner function (not its result!)
+
+myobj = outerFn("Python")    # myobj is now the nestedFn function
+myobj()                       # "Python is awesome"
+
+# The nested function "remembers" str1 and var1 even after outerFn returns
+# This "closing over" of the outer scope is what makes it a closure
+
+# FUNCTIONS AS PARAMETERS — pass functions just like any other object
+def myUpper(mystr):
+    return mystr.upper()
+
+def myLower(mystr):
+    return mystr.lower()
+
+def worldVirus(myfunc):         # accepts a function as parameter
+    result = myfunc("Covid-19")
+    print(result)
+
+worldVirus(myUpper)   # "COVID-19"
+worldVirus(myLower)   # "covid-19"</pre>
+                <div class="highlight"><p>Closures are the mechanism behind decorators — a decorator is just a function that takes a function, creates a nested function that wraps it, and returns the nested function. Understanding closures explains why decorators work. Functions as parameters (higher-order functions) are central to functional programming in Python — map(), filter(), and sorted(key=...) all use this pattern.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

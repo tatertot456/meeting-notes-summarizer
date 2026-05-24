@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 2: Basics</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a1a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #9d174d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #9d174d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #9d174d; color: white; border-color: #9d174d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #9d174d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a1a; border-left: 3px solid #9d174d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #9d174d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #9d174d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #9d174d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #9d174d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #9d174d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 2</div>
+        <h1>Basics</h1>
+        <p class="subtitle">History of computing, variables, types, operators, strings, input, and dates</p>
+    </header>
+    <nav>
+        <a href="#history">CS History</a>
+        <a href="#casesensitive">Case & Magic</a>
+        <a href="#variables">Variables</a>
+        <a href="#binary">Binary & Types</a>
+        <a href="#typing">Dynamic Typing</a>
+        <a href="#strings">Strings</a>
+        <a href="#operators">Operators</a>
+        <a href="#input">User Input</a>
+        <a href="#othertypes">Other Types</a>
+        <a href="#dates">Dates & Times</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="history">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Brief History of Computing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Year</th><th>Milestone</th></tr>
+                    <tr><td>~1000 BC</td><td>Mathematics, logic, numerical computation — Greeks, Egyptians, Babylonians, Indians, Chinese, Persians</td></tr>
+                    <tr><td>1614</td><td>Logarithms — John Napier, to simplify mathematical computation</td></tr>
+                    <tr><td>1672</td><td>Pascaline — Blaise Pascal, mechanical calculator (add/subtract)</td></tr>
+                    <tr><td>1674</td><td>Leibnitz's Wheel — Gottfried Leibnitz, mechanical calculator (all four operations)</td></tr>
+                    <tr><td>1801</td><td>Jacquard Loom — Joseph Jacquard, automated loom using punched cards</td></tr>
+                    <tr><td>1823</td><td>Difference Engine — Charles Babbage, 6-digit arithmetic and polynomial equations</td></tr>
+                    <tr><td>1830s</td><td>Analytic Engine — Babbage, general-purpose: ALU (Mill), Memory (Store), Processor (Operator), I/O (Output)</td></tr>
+                    <tr><td>1890</td><td>Punched card census machines — Herman Hollerith, automated read/tally/sort</td></tr>
+                    <tr><td>1940s</td><td>Electronic computers: Mark I, ENIAC, ABC, Colossus (Turing/Enigma), Z1 — fueled by WWII</td></tr>
+                    <tr><td>1946</td><td>Von Neumann architecture — stored binary algorithm + data in memory; modern computers are still fundamentally Von Neumann machines</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Generations of computing:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>1st (1950–1959)</h3><p>Vacuum tubes. Room-sized. Unreliable.</p></div>
+                    <div class="card"><h3>2nd (1959–1965)</h3><p>Transistors. Room-sized. Reliable. High-level languages (Fortran, COBOL). Programmer occupation born.</p></div>
+                    <div class="card"><h3>3rd (1965–1975)</h3><p>Integrated circuits. Cabinet/desk-sized. First minicomputers. Software industry formed.</p></div>
+                    <div class="card"><h3>4th (1975–1985)</h3><p>Microcomputers. Typewriter-sized. Networks, email, GUIs, embedded systems. Altair 8800.</p></div>
+                    <div class="card"><h3>5th (1985–Today)</h3><p>Parallel processors, handheld devices, high-res graphics, multimedia interfaces, internet, wireless, ubiquitous computing.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="casesensitive">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Case Sensitivity & Magic Commands</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Python is <strong>case-sensitive</strong> — var and Var are completely different variables. This is a common source of errors for beginners.</p>
+                <pre>myVar = "Python is case-sensitive"
+print(MyVar)   # NameError — MyVar doesn't exist
+print(myVar)   # OK — prints the string</pre>
+                <div class="highlight"><p>Convention in this course: use camelCase (myVar) rather than the Python standard snake_case (my_var) — to stay consistent with C# conventions used in other courses.</p></div>
+                <p><strong>IPython Magic Commands</strong> — special built-in commands that aren't Python but can be embedded in scripts:</p>
+                <table>
+                    <tr><th>Command</th><th>Purpose</th></tr>
+                    <tr><td>%cd</td><td>Change directory</td></tr>
+                    <tr><td>%debug</td><td>Activate the interactive debugger</td></tr>
+                    <tr><td>%history</td><td>Print command history</td></tr>
+                    <tr><td>%pwd</td><td>Return current working directory</td></tr>
+                    <tr><td>%time / %timeit</td><td>Time execution of a statement or expression</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="variables">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Are Variables?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Variables are bits of computer memory used to store <strong>state information</strong>. State information is what allows programs to make informed decisions rather than arbitrary ones.</p>
+                <p>Think of it this way: "Are you hungry? Bored? Cold?" — your answer describes your current state. Programs need to track similar states to make decisions: stop when the light is red, go when it's green.</p>
+                <div class="grid">
+                    <div class="card"><h3>Numbers</h3><p>int, float, complex</p></div>
+                    <div class="card"><h3>Text</h3><p>str (strings)</p></div>
+                    <div class="card"><h3>Collections</h3><p>list, tuple, range, dict, set</p></div>
+                    <div class="card"><h3>Other</h3><p>bool, bytes, objects, and more</p></div>
+                </div>
+                <pre># A program is lines of code that, when run, "does something"
+print("Hello World!")
+
+# Multiple commands on one line (legal but avoid)
+print("First") ; print("Second")</pre>
+                <div class="highlight"><p>In Python, commands are (mostly) just text on a line. The command terminator (semicolon) is optional — unlike C++ or Java where it's required. Keep one command per line for readability.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="binary">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Binary Representation & Variable Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Computers represent all data internally in binary (base-2) because electronic systems have two reliable states: on and off.</p>
+                <pre># Base 10: each place is a power of 10
+1943 = 1×10³ + 9×10² + 4×10¹ + 3×10⁰
+
+# Base 2: each place is a power of 2
+1101 = 1×2³ + 1×2² + 0×2¹ + 1×2⁰ = 13 (base 10)
+
+# With k bits, largest unsigned integer = 2^k - 1
+# 4 bits → max = 2^4 - 1 = 15
+# Arithmetic overflow: 1110 + 0010 = 10000 (needs 5 bits!)</pre>
+                <p>Floating-point numbers are split into mantissa and exponent — not stored directly like integers. (More detail in Computer Architecture.)</p>
+                <p><strong>Python's native variable types:</strong></p>
+                <table>
+                    <tr><th>Category</th><th>Types</th></tr>
+                    <tr><td>Numeric</td><td>int, float, complex</td></tr>
+                    <tr><td>Text</td><td>str</td></tr>
+                    <tr><td>Sequence</td><td>list, tuple, range</td></tr>
+                    <tr><td>Mapping</td><td>dict</td></tr>
+                    <tr><td>Set</td><td>set, frozenset</td></tr>
+                    <tr><td>Binary</td><td>bytes, bytearray, memoryview</td></tr>
+                    <tr><td>Boolean</td><td>bool</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="typing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Dynamic Typing & Value vs Reference</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Strongly Typed (C++)</h3><p>Must declare variable type before using it. Compiler checks all type usage. Type cannot change.</p></div>
+                    <div class="card"><h3>Weakly Typed (JavaScript)</h3><p>Doesn't care about types at all. No enforcement. Easy to write but easy to get wrong.</p></div>
+                    <div class="card"><h3>Dynamically Typed (Python)</h3><p>No declaration needed. Python determines type from the assignment. Type IS enforced after assignment, but can change at runtime.</p></div>
+                    <div class="card"><h3>type() function</h3><p>Use type(var) to check a variable's current type at any time.</p></div>
+                </div>
+                <pre>a = 10
+print(type(a))      # &lt;class 'int'&gt;
+a = "Python"
+print(type(a))      # &lt;class 'str'&gt;
+a = False           # capitalization matters!
+print(type(a))      # &lt;class 'bool'&gt;</pre>
+                <p><strong>Pass by Value vs Pass by Reference:</strong></p>
+                <pre># Pass by VALUE — basic types (int, float, str, bool)
+# Changes to var2 do NOT affect var1
+var1 = 1
+var2 = var1
+var1 = 2
+# var2 is still 1
+
+# Pass by REFERENCE — complex types (list, dict, etc.)
+# Changes to var2 DO affect var1 (same memory location)
+var1 = list(range(3))   # [0, 1, 2]
+var2 = var1             # var2 points to SAME list
+var1.append(10)
+# var2 is now [0, 1, 2, 10] too!</pre>
+                <div class="highlight"><p>A reference is not the value itself — it's the memory address where the value lives. Think of it like a home address: the address isn't the house, but it tells you where to find it. Basic types (int, str, bool) are passed by value — copies. Complex types (list, dict) are passed by reference — same object in memory.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="strings">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Strings</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Single or double quotes (must match)
+var1 = "This is a string."
+var2 = 'Also a string.'
+
+# Triple quotes for multiline strings
+var3 = """This is a
+multiline string
+"""
+
+print(var1)   # This is a string.
+print(var3)   # prints across multiple lines
+
+# Strings are IMMUTABLE — cannot change characters in place
+var1[2] = "c"   # TypeError — strings can't be modified
+
+# Type conversion to string
+x = 10
+var5 = str(x)   # "10"</pre>
+                <p><strong>Escape sequences</strong> — special characters hard to represent visually:</p>
+                <table>
+                    <tr><th>Escape</th><th>Meaning</th></tr>
+                    <tr><td>\\</td><td>Backslash (\)</td></tr>
+                    <tr><td>\'</td><td>Single quote</td></tr>
+                    <tr><td>\"</td><td>Double quote</td></tr>
+                    <tr><td>\n</td><td>Newline (linefeed)</td></tr>
+                    <tr><td>\t</td><td>Tab</td></tr>
+                    <tr><td>\r</td><td>Carriage return</td></tr>
+                    <tr><td>\b</td><td>Backspace</td></tr>
+                    <tr><td>\a</td><td>Bell</td></tr>
+                </table>
+                <pre># Windows path — backslash problem
+print("C:\Data\project")    # \p and \D may be interpreted as escapes
+print(r"C:\Data\b1")        # raw string — backslashes treated literally
+print("C:\\Data\\b1")       # escaped backslashes — same result
+print("C:/Data/b1")         # forward slashes work on Windows too</pre>
+                <div class="highlight"><p>Strings are immutable BUT iterable — you can loop through them character by character. They are both a simple type (str) and a complex type (sequence/tuple-like). The r prefix before a string makes it a "raw string" — no escape processing, perfect for Windows paths.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="operators">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Operators</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Operators are <strong>polymorphic</strong> — they behave differently depending on what they operate on. The + operator adds numbers but concatenates strings.</p>
+                <div class="grid">
+                    <div class="card"><h3>Binary / Arithmetic</h3><p>Work on pairs of variables. +, -, *, /, //, %, **</p></div>
+                    <div class="card"><h3>Unary</h3><p>Handle a single variable. Note: Python does NOT have ++ or --. Use += 1 instead.</p></div>
+                    <div class="card"><h3>Logical</h3><p>Test true/false conditions. and, or, not. Note: AND precedes OR in precedence.</p></div>
+                    <div class="card"><h3>Assignment</h3><p>Assign and sometimes modify values. =, +=, -=, *=, /=</p></div>
+                    <div class="card"><h3>Ternary</h3><p>Three-variable conditional: value_if_true if condition else value_if_false</p></div>
+                    <div class="card"><h3>Bitwise</h3><p>Operate on individual bits. &amp;, |, ^, ~, &lt;&lt;, &gt;&gt;</p></div>
+                </div>
+                <div class="highlight"><p>When operator precedence is unclear, use parentheses — they always make intent explicit and code more readable. Multiplication/division precede addition/subtraction. AND precedes OR. When in doubt, add parentheses.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="input">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Capturing User Input</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The <code>input()</code> function prompts the user and returns their response as a <strong>string</strong>. Always convert if you need a number.</p>
+                <pre># Basic input
+player1 = input("What is your name, player? ")
+print("Welcome, ", player1)
+
+# Numeric input — input() ALWAYS returns a string
+num1 = input("Enter a number to square: ")
+num2 = float(num1)      # convert string to float first!
+print("The result is ", num2 * num2)
+
+# Exercise — try this yourself:
+firstName = input("Your first name is: ")
+lastName = input("Your last name is: ")
+print("Your name is: " + firstName + " " + lastName)</pre>
+                <div class="highlight"><p>input() always returns a string — even if the user types a number. If you try to do math with it without converting first, you'll get a TypeError. Use int() or float() to convert. This is one of the most common beginner mistakes in Python.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="othertypes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Numeric, Boolean & Null Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Numeric types
+x = 43
+y = 9
+x / y           # 4.777... (Python 3 always does true division)
+                # large ints auto-convert to long integer
+                # floats are 64-bit double precision
+
+# Boolean — True and False (capitalization matters!)
+x &lt; 50                      # True
+x &lt; 50 and y &gt; 15           # False (y is 9, not > 15)
+x &lt; 50 or y &gt; 15            # True
+
+# Booleans can be numeric — 0 is False, everything else is True
+print(bool(12))   # True
+print(bool(1))    # True
+print(bool(0))    # False
+print(bool(-1))   # True (non-zero!)
+
+if x:
+    print("x is not empty!")  # any non-zero number is truthy
+
+# Null — None is Python's reserved null value
+z = None
+print("not empty" if x else "empty!")   # not empty
+print("not empty" if z else "empty!")   # empty!
+bool(z)                                  # False</pre>
+                <div class="highlight"><p>In Python, truthiness extends beyond True/False: 0, None, empty strings (""), empty lists ([]), and empty dicts ({}) are all falsy. Everything else is truthy. This is extremely useful in loops and conditionals — you can write "if myList:" instead of "if len(myList) > 0:".</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="dates">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Dates & Times</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Dates and times are tricky in most languages. Python's <code>datetime</code> module handles this. Because datetime is a class, it has properties and methods to work with.</p>
+                <pre>import datetime
+
+# Current date and time
+x = datetime.datetime.now()
+print(x)            # 2025-01-15 14:30:00.123456
+print(x.year)       # 2025
+print(x.day)        # 15
+print(x.strftime("%A"))   # Wednesday (day name)
+
+# Specific date
+start_date = datetime.date(2023, 1, 1)
+print(start_date.strftime("%A"))   # Sunday
+
+# Find the day you were born
+birthday = datetime.date(2004, 6, 15)   # replace with your date
+print(birthday.strftime("%A"))
+
+# Common strftime format codes:
+# %A = full weekday name    %B = full month name
+# %d = day of month         %Y = 4-digit year
+# %H = hour (24hr)          %M = minute</pre>
+                <div class="highlight"><p>Reference: docs.python.org/3/library/datetime.html — Python's documentation is excellent and should be your first stop for anything datetime-related. strftime() formats a date as a string using format codes. strptime() does the reverse — parses a string into a date object.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

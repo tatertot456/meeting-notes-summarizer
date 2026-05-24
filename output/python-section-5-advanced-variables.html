@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 5: Advanced Variables</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b45309; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #b45309; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b45309; color: white; border-color: #b45309; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #b45309; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #b45309; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #b45309; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #b45309; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #b45309; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b45309; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #b45309; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 5</div>
+        <h1>Advanced Variables</h1>
+        <p class="subtitle">Tuples, lists, dicts, sets, slicing, vectorization, and value vs reference</p>
+    </header>
+    <nav>
+        <a href="#structures">Data Structures</a>
+        <a href="#tuples">Tuples</a>
+        <a href="#lists">Lists</a>
+        <a href="#slicing">Slicing</a>
+        <a href="#dicts">Dictionaries</a>
+        <a href="#sets">Sets</a>
+        <a href="#vectorization">Vectorization</a>
+        <a href="#refvalue">Reference vs Value</a>
+        <a href="#copy">Copy & Deep Copy</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="structures">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Python Data Structures Overview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Type</th><th>Syntax</th><th>Mutable?</th><th>Description</th></tr>
+                    <tr><td>tuple</td><td>(1, 2, 3) or 1,2,3</td><td>No</td><td>Immutable, fixed-length sequence. Strings are tuples of characters.</td></tr>
+                    <tr><td>list</td><td>[1, 2, 3]</td><td>Yes</td><td>Mutable, variable-length sequence of objects.</td></tr>
+                    <tr><td>dict</td><td>{"key": "value"}</td><td>Yes</td><td>Mapping of keys to objects. Keys must be unique.</td></tr>
+                    <tr><td>set</td><td>set("abc")</td><td>Yes</td><td>Unordered collection of UNIQUE objects. No duplicates.</td></tr>
+                    <tr><td>frozenset</td><td>frozenset(...)</td><td>No</td><td>Immutable version of set.</td></tr>
+                    <tr><td>range</td><td>range(1, 10, 2)</td><td>No</td><td>Sequence with defined start, stop, step endpoints.</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Immutability</strong> means you cannot edit or change the value of an object in place — to "change" it, you create a new object. Immutable types are faster to iterate through because Python can optimize their memory layout. Use tuples when you want implicit read-only protection and speed.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="tuples">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Tuples</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Create tuples — comma-separated, parens optional
+tup1 = 3, 4, 5, 6
+tup2 = (3, 4, 5, 6)
+tup1 == tup2    # True — same content
+
+# Immutable — cannot change elements
+tup1[1] = 10   # TypeError: 'tuple' object does not support item assignment
+
+# Convert any iterable to tuple
+b = tuple("long string!")
+print(b)  # ('l','o','n','g',' ','s','t','r','i','n','g','!')
+
+# Concatenation and nesting
+tup1 = (1, 2)
+tup2 = (3, 4)
+print(tup1 + tup2)   # (1, 2, 3, 4)
+
+nest = (("the", "first"), ("the", "second"))
+nest[0]       # ("the", "first")
+nest[0][0]    # "the"
+nest[0][0][2] # "e"  (strings are tuples too!)
+
+# Unpacking — tuples unpack on assignment
+a, b = nest
+print(a)   # ("the", "first")
+
+(a1, a2), (b1, b2) = nest
+print(a1)  # "the"
+print(a2)  # "first"</pre>
+                <div class="highlight"><p>Tuple unpacking is a "pythonic" feature — Python automatically assigns each element of a tuple to its corresponding variable. This is why functions can return multiple values that get unpacked into separate variables: a, b, c = my_func(). Strings are internally tuples of characters, which is why string indexing and iteration work the same way.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="lists">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Lists</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Create a list
+list1 = [3, 4, 5, 6]
+
+# Mutable — can change elements
+list1[2] = 10
+print(list1)    # [3, 4, 10, 6]
+
+# Variable length — can add/remove elements
+list1.append(36)
+print(list1)    # [3, 4, 10, 6, 36]
+
+# List functions
+list2 = ["a", "b", "c"]
+list2.append("d")          # add to end: ["a","b","c","d"]
+list2.insert(1, "a.5")     # insert at index 1
+list2.remove("a.5")        # remove first occurrence
+
+# append vs extend — common gotcha!
+list2.append(["d","e","f"])   # adds ONE element: a nested list
+# Result: ["a","b","c","d", ["d","e","f"]]
+
+list2.extend(["d","e","f"])   # adds THREE elements individually
+# Result: ["a","b","c","d","d","e","f"]
+
+help(list)   # full documentation</pre>
+                <div class="highlight"><p>append() adds one object to the end — if you pass a list, it adds the whole list as a single nested element. extend() unpacks an iterable and adds each item individually. This is one of the most common list mistakes. Use extend() when you want to merge lists; use append() when you want to add a single item (which may or may not be a list itself).</p></div>
+                <p><strong>Range data type</strong> — a sequence with defined endpoints, useful for generating numeric sequences:</p>
+                <pre>r1 = range(10)          # 0 through 9
+r1 = range(10, 20, 1)   # 10 through 19
+r1 = range(1, 20, 2)    # odd numbers: 1,3,5,7,...,19
+
+for i in r1:
+    print(i)</pre>
+            </div>
+        </div>
+
+        <div class="section" id="slicing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Slicing & Indexing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Slicing works on all sequence types — strings, lists, tuples, ranges. Syntax: <code>seq[start:stop:step]</code>. Start is inclusive, stop is exclusive. Counting starts at 0.</p>
+                <pre>seq1 = list(range(1, 11))   # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+seq1[0:2]     # [1, 2]        — elements 0 and 1
+seq1[2:]      # [3, 4, ..., 10] — element 2 to end
+seq1[:8]      # [1, 2, ..., 8]  — elements 0 through 7
+seq1[7:8]     # [8]            — just element at index 7
+
+# Step argument
+seq1[:9:2]    # every other element: [1, 3, 5, 7, 9]
+seq1[9:0:-2]  # reverse step: [10, 8, 6, 4, 2]
+seq1[::-1]    # REVERSE entire list: [10, 9, ..., 1]
+
+# Negative indices — count from the end
+seq1[-1]      # 10 (last element)
+seq1[-2:-5]   # empty — going wrong direction!
+seq1[-2:-5:-1]# [9, 8, 7] — step -1 goes backwards
+
+# Out of range — slices don't error, single index does
+seq1[2:20]    # no error — just returns up to end
+seq1[20]      # IndexError!
+
+# String slicing — same rules
+var1 = "This is a string."
+var1[0:3]     # 'Thi'
+var1[2]       # 'i'</pre>
+                <div class="highlight"><p>Think of negative indices as wrapping around: index -1 is the last element, -2 is second to last, etc. To reverse a list: seq[::-1]. Slices beyond the list boundary don't raise errors — they just return up to the end. Single index access beyond the boundary does raise IndexError. seq[9:-1:-2] produces an empty list because going from index 9 to -1 (which is index 9) with step -2 has no valid elements.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="dicts">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Dictionaries</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Dictionaries map keys to values. Mutable, unordered (insertion-ordered in Python 3.7+). Keys must be unique and immutable (strings, numbers, tuples).</p>
+                <pre># Five ways to create the same dictionary
+dict1 = dict(first="a", second="b", third="c")
+dict2 = dict(zip(["first","second","last"], ["a","b","c"]))
+dict3 = {"first": "a", "second": "b", "third": "c"}
+dict4 = dict([("second","b"), ("first","a"), ("third","c")])
+dict5 = dict({"third":"c", "first":"a", "second":"b"})
+
+dict1 == dict2 == dict3 == dict4 == dict5   # True
+
+# Access by key (not by index — dicts aren't ordered by position)
+dict1["first"]    # "a"
+dict1[1]          # KeyError — must use the actual key
+
+# Add or update
+dict1[1] = "update"    # adds a new key 1 with value "update"
+
+# Remove
+del dict1[1]           # removes key 1
+
+# Update existing key
+dict1.update({"first": "changed"})
+
+# Iterate
+for key, value in dict1.items():
+    print(f"{key}: {value}")</pre>
+                <div class="highlight"><p>Dictionaries are accessed by KEY, not by integer index (unless your key happens to be an integer). dict["key"] returns the value for that key. This is fundamentally different from list[0] which uses position. kwargs (**kwargs) in functions is essentially a dictionary of keyword arguments — that's why you iterate it with .items().</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="sets">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Sets</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A set is an unordered collection of UNIQUE objects. Duplicates are automatically ignored. Sets are mutable but their elements must be immutable. Sets are NOT subscriptable (no indexing).</p>
+                <pre># Create a set from a string — extracts unique characters
+x = set("A string in Python")
+print(x)
+# {' ', 'A', 'P', 'g', 'h', 'i', 'n', 'o', 'r', 's', 't', 'y'}
+# Note: order is not guaranteed, duplicates gone (multiple 'n's become one)
+
+# Create from a list
+s = {1, 2, 3, 2, 1}   # {1, 2, 3} — duplicates removed
+
+# Set operations
+s1 = {1, 2, 3, 4}
+s2 = {3, 4, 5, 6}
+s1 | s2    # union: {1,2,3,4,5,6}
+s1 &amp; s2    # intersection: {3,4}
+s1 - s2    # difference: {1,2}
+
+# frozenset — immutable version
+fs = frozenset({1, 2, 3})
+fs.add(4)   # AttributeError — can't modify</pre>
+            </div>
+        </div>
+
+        <div class="section" id="vectorization">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Vectorization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Vectorization applies an operation to an entire collection without an explicit for loop. For loops in Python are slow — vectorization is dramatically faster, especially for large data.</p>
+                <pre># Using NumPy (preferred)
+import numpy as np
+arr = np.array((1, 2, 3))
+print(arr * 3)    # [3, 6, 9] — applied to ALL elements at once
+print(arr + 10)   # [11, 12, 13]
+
+# Using map (built-in)
+from operator import add
+tup1 = (1, 2, 3)
+tup2 = (10, 20, 30)
+result = map(add, tup1, tup2)
+print(tuple(result))   # (11, 22, 33)
+
+# The slow way — avoid for large datasets
+result = []
+for i in range(len(tup1)):
+    result.append(tup1[i] + tup2[i])</pre>
+                <div class="highlight"><p>NumPy arrays support element-wise operations natively — arr * 3 multiplies every element by 3 in one call. This is backed by optimized C code running under the hood, making it orders of magnitude faster than Python for loops. Vectorization is foundational to data science in Python.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="refvalue">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Reference vs Value (Revisited)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># PASS BY VALUE — simple types (str, int, float, bool)
+# var2 gets a copy — changes don't affect var1
+var1 = "foo"
+var2 = var1
+var2 = "bar"
+print(var1)   # "foo" — unchanged
+print(var2)   # "bar"
+
+# PASS BY REFERENCE — complex types (list, dict, set)
+# var2 points to the SAME object as var1
+var1 = list(range(3))   # [0, 1, 2]
+var2 = var1             # var2 is NOT a copy — it's the same list!
+var1.append(10)
+print(var1)   # [0, 1, 2, 10]
+print(var2)   # [0, 1, 2, 10] — both changed!</pre>
+                <div class="highlight"><p>This is one of the most important concepts in Python programming. When you assign a complex type (list, dict, set) to another variable, you're copying the REFERENCE (memory address), not the data. Both variables point to the same object. Modifying through either variable modifies the same object. To get an independent copy, you must explicitly copy it.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="copy">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>copy() and deepcopy()</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># .copy() — shallow copy: creates independent copy of the outer object
+var1 = list(range(3))   # [0, 1, 2]
+var2 = var1.copy()      # var2 is a NEW list
+var1.append(10)
+print(var1)   # [0, 1, 2, 10]
+print(var2)   # [0, 1, 2]   — not affected!
+
+# BUT shallow copy only goes one level deep
+# Nested objects are still shared!
+var1 = [[1, 2, 3], [4, 5, 6]]
+var2 = var1.copy()
+var1[0].append(99)
+print(var1)   # [[1, 2, 3, 99], [4, 5, 6]]
+print(var2)   # [[1, 2, 3, 99], [4, 5, 6]] — inner list still shared!
+
+# deepcopy() — completely independent copy at ALL levels
+import copy
+var1 = [["a", "b", "c"], [1, 2, 3]]
+var2 = copy.deepcopy(var1)
+var1[1].append(10)
+print(var1)   # [["a","b","c"], [1, 2, 3, 10]]
+print(var2)   # [["a","b","c"], [1, 2, 3]]  — completely independent!</pre>
+                <div class="highlight"><p>Shallow copy (.copy()) creates a new outer container but the nested objects inside are still shared references. Deep copy (copy.deepcopy()) recursively copies every nested object — fully independent at all levels. Rule of thumb: use .copy() for flat collections, use copy.deepcopy() for nested structures (lists of lists, dicts of dicts, etc.).</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

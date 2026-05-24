@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 10: GUI Programming with Tkinter</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1a0f3d, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #5b21b6; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #5b21b6; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #5b21b6; color: white; border-color: #5b21b6; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #5b21b6; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1a0f3d; border-left: 3px solid #5b21b6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #5b21b6; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #5b21b6; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #5b21b6; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #5b21b6; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #5b21b6; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 10</div>
+        <h1>GUI Programming with Tkinter</h1>
+        <p class="subtitle">Windows, widgets, labels, buttons, entry, text, frames, geometry managers, and events</p>
+    </header>
+    <nav>
+        <a href="#intro">Intro & Window</a>
+        <a href="#widgets">Widgets Overview</a>
+        <a href="#label">Labels & Buttons</a>
+        <a href="#messagebox">Messagebox</a>
+        <a href="#entry">Entry & Text</a>
+        <a href="#frames">Frames</a>
+        <a href="#geometry">Geometry Managers</a>
+        <a href="#events">Events</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Introduction & Building a Window</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>GUIs make programs easier to use, allow more functionality, and are more visually appealing. Python provides several GUI libraries — we use <strong>tkinter</strong>, which is included with Anaconda.</p>
+                <div class="grid">
+                    <div class="card"><h3>Window</h3><p>The main interface for the user. Handles menus and base visualizations. Created with tk.Tk().</p></div>
+                    <div class="card"><h3>Widgets</h3><p>Controls inside the window — buttons, labels, text boxes, frames, etc. Everything the user interacts with.</p></div>
+                </div>
+                <pre>import tkinter as tk
+
+# Minimal window
+window = tk.Tk()
+window.mainloop()   # mainloop() = primary event handler
+                    # listens for events: button clicks, keypresses, redraws
+
+# Window with attributes
+window = tk.Tk()
+window.title("A Nicer Looking Window")
+window.geometry("300x200")         # width x height in pixels
+window.config(bg="#5FB691")        # background color
+window.mainloop()</pre>
+                <div class="highlight"><p>mainloop() is the heartbeat of a tkinter app. It runs continuously, listening for events and redrawing the window when needed. Your program stays alive inside mainloop() — code after it only runs after the window is closed. Always call it last.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="widgets">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Widgets Overview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Classic tkinter widgets:</p>
+                <div class="grid">
+                    <div class="card"><h3>Label</h3><p>Displays read-only text or images.</p></div>
+                    <div class="card"><h3>Button</h3><p>Clickable — triggers an event handler when clicked.</p></div>
+                    <div class="card"><h3>Entry</h3><p>Single-line text input field.</p></div>
+                    <div class="card"><h3>Text</h3><p>Multi-line text input area.</p></div>
+                    <div class="card"><h3>Frame</h3><p>Container for organizing other widgets.</p></div>
+                    <div class="card"><h3>Checkbutton / Radiobutton / Combobox</h3><p>Selection controls for boolean and multi-choice inputs.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="label">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Labels & Buttons</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>import tkinter as tk
+window = tk.Tk()
+
+# Label — read-only text
+greeting = tk.Label(text="Hello, Tkinter")
+greeting.pack()   # pack() binds widget to window, sizes window to fit
+
+# Label with colors and size
+label = tk.Label(
+    text="Hello, Tkinter",
+    fg="white",        # foreground (text) color
+    bg="black",        # background color
+    width=10,          # in TEXT UNITS (not pixels!)
+    height=10          # text units are taller than wide
+)
+label.pack()
+
+# Button
+button = tk.Button(
+    text="Click me!",
+    width=25,
+    height=5,
+    bg="blue",
+    fg="yellow",
+)
+button.pack()
+window.mainloop()</pre>
+                <div class="highlight"><p>Width and height in tkinter labels/buttons are measured in TEXT UNITS — not pixels. One text unit horizontally ≈ the width of the character "0" in the current font. Vertically, one unit ≈ the height of one line. This ensures consistent proportions across different platforms and screen resolutions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="messagebox">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Messagebox & Events</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A messagebox is a popup window for displaying info, errors, warnings, or questions. Attach functions to buttons using the <code>command</code> attribute.</p>
+                <pre>import tkinter as tk
+from tkinter import messagebox
+
+window = tk.Tk()
+window.title("Python Message Boxes")
+window.geometry("300x200")
+window.config(bg="#5FB691")
+
+def msg1():
+    messagebox.showinfo("Hello World!", "Hi! Welcome to Python GUIs.")
+
+tk.Button(window, text="Click Me", command=msg1).pack(pady=50)
+window.mainloop()</pre>
+                <table>
+                    <tr><th>Method</th><th>Shows</th><th>Returns</th></tr>
+                    <tr><td>showinfo()</td><td>Info message</td><td>None</td></tr>
+                    <tr><td>showwarning()</td><td>Warning message</td><td>None</td></tr>
+                    <tr><td>showerror()</td><td>Error message</td><td>None</td></tr>
+                    <tr><td>askyesno()</td><td>Yes/No question</td><td>True / False</td></tr>
+                    <tr><td>askquestion()</td><td>Yes/No question</td><td>"yes" / "no"</td></tr>
+                    <tr><td>askokcancel()</td><td>OK/Cancel</td><td>True / False</td></tr>
+                    <tr><td>askretrycancel()</td><td>Retry/Cancel</td><td>True / False</td></tr>
+                    <tr><td>askyesnocancel()</td><td>Yes/No/Cancel</td><td>True / False / None</td></tr>
+                </table>
+                <div class="highlight"><p>command=msg1 passes the FUNCTION OBJECT — not a call. Don't write command=msg1() with parentheses — that would call the function immediately at setup time and pass its return value (None) as the command. Write command=msg1 to let tkinter call it when the button is clicked.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="entry">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Entry & Text Widgets</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>import tkinter as tk
+from tkinter import messagebox
+window = tk.Tk()
+
+# Entry — single line input
+label = tk.Label(text="Name")
+entry = tk.Entry(fg="yellow", bg="blue", width=50)
+label.pack()
+entry.pack()
+entry.insert(0, "Hello World!")   # pre-fill with text
+
+# Entry methods
+def showName():
+    name = entry.get()                      # get all text
+    messagebox.showinfo("Got", "You typed: " + name)
+
+def helloWorld():
+    entry.insert(0, "Hello World!")         # insert at position 0
+
+def testDelete():
+    entry.delete(0)                         # delete char at index 0
+    # entry.delete(0, tk.END)              # delete everything
+
+# Text — multi-line input
+text_box = tk.Text()
+text_box.pack()
+
+# Text get — requires start and end positions: "line.charpos"
+def showAll():
+    content = text_box.get("1.0", tk.END)  # line 1, char 0 to end
+    messagebox.showinfo("Got", content)
+
+# Text delete
+def deleteRange():
+    text_box.delete("1.0", "1.5")          # line 1, chars 0-4
+    text_box.delete("1.0", tk.END)         # delete everything
+
+# Text insert
+def insertBeginning():
+    text_box.insert(1.0, "Hello")          # at line 1, start
+def insertEnd():
+    text_box.insert(tk.END, "World!")      # at the end
+
+window.mainloop()</pre>
+                <div class="highlight"><p>Entry.get() needs no arguments — returns the whole line. Text.get() needs "line.charposition" format — "1.0" means line 1, character 0. Lines start at 1 (not 0!), characters start at 0. tk.END is a special constant meaning "the very end of content." Use it whenever you want to operate on everything up to the end.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="frames">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Frames</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Frames are containers that organize other widgets, giving your app a cleaner, more professional layout.</p>
+                <pre">import tkinter as tk
+window = tk.Tk()
+
+# Create a frame and pack it
+frame_a = tk.Frame(master=window, relief=tk.RAISED, borderwidth=2)
+frame_a.pack()
+
+# Assign widget to a frame using master=
+label_a = tk.Label(master=frame_a, text="I'm in a frame!")
+label_a.pack()
+
+# Multiple frames — order of pack() determines order on screen
+frame_1 = tk.Frame(master=window)
+frame_2 = tk.Frame(master=window)
+label_1 = tk.Label(master=frame_1, text="First frame")
+label_2 = tk.Label(master=frame_2, text="Second frame")
+label_1.pack()
+label_2.pack()
+frame_1.pack()   # frame_1 appears first (top)
+frame_2.pack()   # frame_2 appears below
+
+# Frame relief styles — add visual borders
+border_effects = {
+    "flat": tk.FLAT, "sunken": tk.SUNKEN,
+    "raised": tk.RAISED, "groove": tk.GROOVE, "ridge": tk.RIDGE
+}
+for relief_name, relief in border_effects.items():
+    frame = tk.Frame(master=window, relief=relief, borderwidth=5)
+    frame.pack(side=tk.LEFT)
+    tk.Label(master=frame, text=relief_name).pack()
+
+window.mainloop()</pre>
+            </div>
+        </div>
+
+        <div class="section" id="geometry">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Geometry Managers: pack(), place(), grid()</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>pack()</h3><p>Simplest — stacks widgets top to bottom by default. Good for quick layouts. Use fill and side for more control.</p></div>
+                    <div class="card"><h3>place()</h3><p>Pixel-precise positioning from top-left origin (0,0). Full control but fragile — layouts break if window resizes.</p></div>
+                    <div class="card"><h3>grid()</h3><p>Best for most apps — rows and columns like a spreadsheet. More work but most flexible and predictable.</p></div>
+                </div>
+                <pre">## PACK
+frame1.pack()                          # stack vertically (default)
+frame1.pack(fill=tk.X)                 # fill full width
+frame1.pack(fill=tk.Y, side=tk.LEFT)   # fill full height, left column
+frame1.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)  # expand in both directions
+
+## PLACE — pixel coordinates from top-left (0,0)
+label1.place(x=0, y=0)       # top-left corner
+label2.place(x=75, y=75)     # 75 pixels right and down
+
+## GRID — row/column layout
+for i in range(3):
+    for j in range(3):
+        frame = tk.Frame(master=window, relief=tk.RAISED, borderwidth=1)
+        frame.grid(row=i, column=j, padx=5, pady=5)
+        label = tk.Label(master=frame, text=f"Row {i}\nColumn {j}")
+        label.pack(padx=5, pady=5)
+
+# Configure column/row resize behavior
+window.columnconfigure(i, weight=1, minsize=75)
+window.rowconfigure(i, weight=1, minsize=50)
+
+# Sticky — align widget within its cell (compass directions)
+label1.grid(row=0, column=0, sticky="ne")   # top-right
+label2.grid(row=1, column=0, sticky="sw")   # bottom-left
+label3.grid(row=0, column=0, sticky="nsew") # fill entire cell</pre>
+                <div class="highlight"><p>Never mix geometry managers (pack, place, grid) within the same container — it causes unpredictable layouts and can freeze your app. You CAN use different managers in different frames. grid() is usually the best choice for professional layouts because it gives the predictability of place() with the flexibility of pack().</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="events">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Events & Event Handlers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>mainloop() maintains a queue of all events. Widgets fire events (clicks, keypresses). Attach event handlers with <code>command=</code> or <code>bind()</code>.</p>
+                <pre">import tkinter as tk
+window = tk.Tk()
+
+# Counter app — demonstrates event handlers modifying widget state
+def increase():
+    value = int(lbl_value["text"])
+    lbl_value["text"] = f"{value + 1}"   # update label text directly
+
+def decrease():
+    value = int(lbl_value["text"])
+    lbl_value["text"] = f"{value - 1}"
+
+btn_decrease = tk.Button(master=window, text="-", command=decrease)
+btn_decrease.grid(row=0, column=0, sticky="nsew")
+
+lbl_value = tk.Label(master=window, text="0")
+lbl_value.grid(row=0, column=1)
+
+btn_increase = tk.Button(master=window, text="+", command=increase)
+btn_increase.grid(row=0, column=2, sticky="nsew")
+
+window.mainloop()
+
+# Two ways to attach event handlers:
+# 1. command= attribute at widget creation
+btn = tk.Button(text="Click", command=my_handler)
+
+# 2. bind() method — more powerful, can handle any event
+btn.bind("&lt;Button-1&gt;", my_handler)   # left mouse click
+entry.bind("&lt;Return&gt;", on_enter)     # Enter key pressed</pre>
+                <div class="highlight"><p>Event handlers modify widget state by updating their properties directly (lbl["text"] = "new"). This triggers a redraw. The calculator exercise brings everything together: grid layout, Entry widgets for operands, Button widgets with command handlers, and messagebox for results. Structure: two number entries, operator buttons (+,-,*,/), result label, and clear/undo controls organized in a clean grid.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

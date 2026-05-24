@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 3: Control Flow</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b91c1c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #b91c1c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b91c1c; color: white; border-color: #b91c1c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #b91c1c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a0a; border-left: 3px solid #b91c1c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #b91c1c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #b91c1c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #b91c1c; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b91c1c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #b91c1c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 3</div>
+        <h1>Control Flow</h1>
+        <p class="subtitle">Pseudocode, if/elif/else, for/while loops, comprehensions, strings, type casting, and numeric forms</p>
+    </header>
+    <nav>
+        <a href="#pseudocode">Pseudocode</a>
+        <a href="#whitespace">Whitespace</a>
+        <a href="#if">if / elif / else</a>
+        <a href="#for">for Loops</a>
+        <a href="#while">while Loops</a>
+        <a href="#comprehensions">Comprehensions</a>
+        <a href="#strings">Strings & Formatting</a>
+        <a href="#casting">Type Casting</a>
+        <a href="#numeric">Numeric Forms</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="pseudocode">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Representing Algorithms: Natural Language vs Pseudocode</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Natural language (English, Spanish, etc.) is too <strong>verbose, imprecise, and context-dependent</strong> for algorithm specification. Pseudocode bridges the gap — precise and structured, but not tied to any specific language syntax.</p>
+                <div class="grid">
+                    <div class="card"><h3>Natural Language</h3><p>Paragraphs of English describing selection sort take up an entire slide with ambiguous phrasing like "go through the entire list."</p></div>
+                    <div class="card"><h3>Pseudocode</h3><p>for i ← 0 to n-1: find the minimum from i onward, swap. Clean, unambiguous, language-agnostic.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Pseudocode → Python (Selection Sort example):</strong></p>
+                <pre>def selection_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        min_index = i
+        for j in range(i + 1, n):
+            if arr[j] &lt; arr[min_index]:
+                min_index = j
+        # Swap minimum element into position
+        arr[i], arr[min_index] = arr[min_index], arr[i]
+
+numbers = [64, 25, 12, 22, 11]
+print("Before:", numbers)
+selection_sort(numbers)
+print("After:", numbers)</pre>
+                <div class="highlight"><p>Use pseudocode when designing an algorithm before writing real code — it lets you think through logic without getting bogged down in syntax. Control flow is the mechanism for directing the ORDER of instruction execution. Every algorithm is built from sequential, conditional, and iterative operations.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="whitespace">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Whitespace Matters</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Unlike C++ or Java where braces {} define code blocks, Python uses <strong>indentation</strong>. This is not optional — wrong indentation is a syntax error.</p>
+                <pre># CORRECT — consistent 4-space indentation
+for i in range(10):
+    print(i, i+1)
+    if i &lt; 5:
+        print("Do it Again")
+
+# ERROR — inconsistent indentation
+for i in range(10):
+    print(i, i+1)
+  if i &lt; 5:          # IndentationError!
+      print("wrong")</pre>
+                <div class="highlight"><p>Always use 4 spaces to indent — configure your IDE to insert 4 spaces when you press Tab. Never mix tabs and spaces. Python's indentation requirement enforces readable code by design, but it means a single misplaced space can break your program.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="if">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>if / elif / else</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Basic if
+my_age = int(input("Enter your age: "))
+if my_age == 32:
+    print("I am 32 years old")
+
+# if / else
+if 2 &lt; 3:
+    print("Makes Sense.")
+else:
+    print("Huh?")
+
+# Ternary (one-line if/else)
+print("Makes sense.") if 2 &lt; 3 else print("Huh?")
+
+# Multiple conditions with elif
+x = -5
+if x &gt; 0:
+    print("Positive")
+elif x == 0:
+    print("Not sure")
+elif x &lt; 0:
+    print("Negative")    # prints this
+
+# Real-world elif chain with compound conditions
+my_age = float(input("Enter age: "))
+if my_age &gt; 0 and my_age &lt; 1.5:
+    print("Infant")
+elif my_age &gt;= 1.5 and my_age &lt; 12:
+    print("Child")
+elif my_age &gt;= 12 and my_age &lt; 17:
+    print("Teenager")
+elif my_age &gt;= 17 and my_age &lt; 30:
+    print("Adult")
+elif my_age &gt;= 30 and my_age &lt; 46:
+    print("Middle aged")
+else:
+    print("Elder")</pre>
+                <p><strong>Comparison operators:</strong></p>
+                <pre># Standard comparisons
+3 &lt; 4           # True
+"the" &lt; "thz"  # True (string comparison, character by character)
+"the" == "THE"  # False — case matters!
+"the" == "THE".lower()  # True
+"the" != "something"    # True</pre>
+                <div class="highlight"><p>Python has no switch/case in older versions — use elif chains. The ternary operator (value_if_true if condition else value_if_false) is handy for simple inline decisions. Combine conditions with and / or — remember AND has higher precedence than OR.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="for">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>for Loops</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Iterate over any sequence (string, list, range, etc.)
+for i in "long string":
+    if i != "n":
+        print(i)
+
+# C-style loop using range(start, stop) — stop is exclusive
+for i in range(1, 11):
+    print(i)    # prints 1 through 10
+
+# range(start, stop, step)
+for i in range(0, 10, 2):
+    print(i)    # 0 2 4 6 8
+
+# Nested for loops
+for i in range(1, 11):
+    for j in range(1, 6):
+        print(i, j)   # all combinations of i and j
+
+# pass — placeholder when a block needs to exist but do nothing
+for i in range(5):
+    pass    # valid syntax — does nothing, avoids IndentationError</pre>
+                <div class="highlight"><p>Python's for loop iterates over any iterable — strings, lists, ranges, tuples, dicts. It doesn't need an index counter like C++'s for(int i=0; i&lt;n; i++). Use range() when you need a numeric counter. Nested loops can go many levels deep, but each adds an order of magnitude to execution time — be careful with large datasets.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="while">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>while Loops & Loop Control</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Basic while — repeats as long as condition is True
+x = 7
+while x &gt; 0:
+    print(x)
+    x = x - 1
+# Output: 7 6 5 4 3 2 1
+
+# break — exit loop immediately
+# continue — skip rest of current iteration, go back to top
+x = 7
+while x &gt; 0:
+    if x == 1:
+        break        # stop when x hits 1
+    if x &gt; 5:
+        x -= 1
+        continue     # skip print when x &gt; 5
+    print(x)
+    x -= 1
+# Output: 5 4 3 2
+
+# pass — do nothing (placeholder)
+x = -5
+if x &gt; 0:
+    print("Positive")
+elif x == 0:
+    pass             # forgot to handle this case — placeholder
+elif x &lt; 0:
+    print("Negative")</pre>
+                <div class="highlight"><p>break exits the entire loop. continue skips the rest of the current iteration and jumps back to the condition check. pass does literally nothing — it's a syntactic placeholder required when Python needs a code block but you have nothing to put there yet. A while loop with no path to False is an infinite loop — always ensure the condition can eventually become False.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="comprehensions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>List Comprehensions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>List comprehension is a concise way to create a new list by applying an expression to each element of an existing collection — optionally filtered by a condition.</p>
+                <pre># The verbose way
+list1 = range(10)     # [0, 1, 2, ... 9]
+list2 = []
+for i in list1:
+    list2.append(i + 1)
+
+# Comprehension syntax: [expression for item in collection if condition]
+list2 = [i+1 for i in list1]
+# [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# With filter — only include elements where condition is True
+list3 = [i+1 for i in list1 if i &gt; 4]
+# [6, 7, 8, 9, 10]
+
+# With conditional expression (ternary inside comprehension)
+list4 = [i+1 if i &gt; 4 else i for i in list1]
+# [0, 1, 2, 3, 4, 6, 7, 8, 9, 10]
+
+# Exercise: multiply each element by 3
+myList = [1, 2, 3, 4, 5]
+result = [x * 3 for x in myList]
+# [3, 6, 9, 12, 15]</pre>
+                <div class="highlight"><p>Comprehensions are faster than equivalent for loops because they're optimized internally. They're also more readable once you get used to the pattern. Think of them as: "Give me [this expression] for [each item] in [this collection] [optionally: if condition]." Comprehensions work with lists, dicts, sets, and generators.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="strings">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Strings: Indexing, Iteration & Formatting</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Strings are sequences — access by index (0-based)
+var1 = "This is a string."
+print(var1[2])      # 'i' (third character)
+print(var1[0:3])    # 'Thi' (slicing: start inclusive, end exclusive)
+
+# Iterate character by character
+for i in var1:
+    print(i)
+
+# String formatting with .format()
+print("Hello, my name is {name}".format(name="Rufus"))
+print("Hello, {fname} {lname}".format(fname="Rufus", lname="McGee"))
+print("Hello, {0} {1}".format("Rufus", "McGee"))  # positional
+print("Hello, {} {}".format("Rufus", "McGee"))     # auto-numbered
+
+# Format with padding — left-align "Rufus" in 5-char field filled with _
+print("Hello, {0:_&lt;5} {1}".format("Rufus", "McGee"))
+# Output: Hello, Rufus McGee</pre>
+                <div class="highlight"><p>String slicing var1[start:end] returns characters from start up to BUT NOT INCLUDING end. Negative indices count from the end: var1[-1] is the last character. Strings are immutable sequences — you can read any character by index but cannot change it in place. The .format() method is powerful for building dynamic strings; see docs.python.org/3/library/string.html for all format specifiers.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="casting">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Type Casting</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Cast a value to change its type. Useful when combining variables of different types — especially converting user input (always a string) to numbers.</p>
+                <pre># int() and float() for numeric conversion
+int("  45")         # 45 — leading/trailing whitespace OK
+float("4.769  ")    # 4.769 — trailing whitespace OK
+
+# These FAIL with ValueError
+int("b6")           # letters not allowed
+float("4.68 97")    # internal spaces not allowed
+
+# Common pattern with input()
+num1 = input("Enter a number: ")  # returns string
+num2 = float(num1)                 # convert to float for math
+print(num2 ** 2)                   # square it
+
+# str() to convert numbers to strings
+x = 42
+print("The answer is " + str(x))  # can't concatenate int + str directly</pre>
+            </div>
+        </div>
+
+        <div class="section" id="numeric">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Numeric Forms, Math Module & Complex Numbers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Python supports multiple numeric bases
+decVar = 21;    print(decVar)   # 21 (decimal)
+binVar = 0b101; print(binVar)   # 5  (binary prefix: 0b)
+octVar = 0o101; print(octVar)   # 65 (octal prefix: 0o)
+hexVar = 0x101; print(hexVar)   # 257 (hex prefix: 0x)
+
+# Convert between bases
+print(bin(21))   # 0b10101
+print(oct(21))   # 0o25
+print(hex(21))   # 0x15
+
+# math module for common functions
+import math
+y = 10
+math.sqrt(y)     # 3.1622...
+math.log(y)      # natural log
+# Many more: math.pi, math.floor(), math.ceil(), math.pow()
+
+# Complex number support (real + imaginary)
+c1 = 3 + 2j
+c2 = 1 - 3j
+print(c1 + c2)   # (4-1j)
+print(c1 * c2)   # (9-7j)
+print(c1.real)   # 3.0
+print(c1.imag)   # 2.0
+
+# cmath module for complex math functions
+import cmath
+print(cmath.sqrt(-1))   # 1j</pre>
+                <div class="highlight"><p>Python integers have arbitrary precision — they never overflow (unlike C++ where int has a fixed size). Floats are 64-bit double precision. Binary (0b), octal (0o), and hex (0x) literals are just different ways to write the same number — Python stores them all the same way internally. Complex numbers use j (not i) for the imaginary unit.</p></div>
+                <pre># Exercise — try this yourself
+x = 16
+print(x ** 2)           # square: 256
+print(math.sqrt(x))     # square root: 4.0
+print(hex(x))           # hex: 0x10
+result = float(x) / 1.5 # 10.666...
+print(int(result))       # truncate to int: 10</pre>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

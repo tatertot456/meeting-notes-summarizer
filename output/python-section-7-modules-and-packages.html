@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 7: Modules and Packages</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1e0a3c, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #6d28d9; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #6d28d9; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #6d28d9; color: white; border-color: #6d28d9; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #6d28d9; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e0a3c; border-left: 3px solid #6d28d9; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #6d28d9; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #6d28d9; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #6d28d9; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #6d28d9; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #6d28d9; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 7</div>
+        <h1>Modules and Packages</h1>
+        <p class="subtitle">Creating modules, import paths, __name__, logging, assertions, and packages</p>
+    </header>
+    <nav>
+        <a href="#what">What Is a Module?</a>
+        <a href="#create">Creating Modules</a>
+        <a href="#importing">Importing</a>
+        <a href="#paths">Import Paths</a>
+        <a href="#name">__name__ & __main__</a>
+        <a href="#logging">Logging</a>
+        <a href="#assert">Assertions</a>
+        <a href="#packages">Packages</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="what">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is a Module?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Modules are how we organize code for portability, reusability, ease of maintenance, and organization. At its most basic, a module is just a Python file containing variables, functions, and classes that can be imported into other programs.</p>
+                <div class="grid">
+                    <div class="card"><h3>Function / Method</h3><p>A group of statements in a code block.</p></div>
+                    <div class="card"><h3>Module</h3><p>A group of functions, variables, and classes in a single .py file.</p></div>
+                    <div class="card"><h3>Package</h3><p>A group of modules organized in a folder (with an __init__.py file).</p></div>
+                    <div class="card"><h3>Library</h3><p>A group of packages in one or more folders. NumPy, Pandas, etc. are libraries.</p></div>
+                </div>
+                <div class="highlight"><p>Always set your working directory in code at the start of a script — don't rely on whatever directory happens to be active. This makes scripts portable and predictable regardless of where they're launched from.</p></div>
+                <pre>import os
+os.getcwd()                           # see current directory
+os.chdir(r"C:\MyProjects\Python")     # set working directory
+# r"..." = raw string — backslashes treated literally</pre>
+            </div>
+        </div>
+
+        <div class="section" id="create">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Creating a Module</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Creating a module is simple — write code in a .py file. Any .py file IS a module. Save it and import it elsewhere.</p>
+                <pre># Multiply.py  ← this IS the module
+myVal = 3
+
+def MyMultiply(num1, num2):
+    """ Takes 2 numbers, multiplies them and returns the result """
+    return num1 * num2
+
+class Multiply1:
+    pass</pre>
+                <div class="highlight"><p>The triple-quoted string immediately after a function or class definition is called a <strong>docstring</strong>. Python treats it as documentation for that object. It appears in help() output and in IDE tooltips (Spyder's Object Explorer / intellisense). Always write docstrings — they make your code dramatically easier for others (and future you) to understand.</p></div>
+                <pre># Access the docstring
+print(MyMultiply.__doc__)
+# "Takes 2 numbers, multiplies them and returns the result"
+
+help(MyMultiply)   # formatted help output</pre>
+            </div>
+        </div>
+
+        <div class="section" id="importing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Importing Modules</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Basic import — use module name as prefix
+import Multiply
+print(Multiply.myVal)             # 3
+print(Multiply.MyMultiply(3, 4))  # 12
+print(Multiply.MyMultiply.__doc__)
+
+# Import with alias — shorten or clarify the name
+import Multiply as Mult
+print(Mult.myVal)
+print(Mult.MyMultiply(3, 4))
+
+# Import everything (generally NOT recommended)
+from Modules import *
+# Pollutes namespace — unclear where names come from
+# OK for quick scripts, bad for production code
+
+# Import from a subfolder
+from Modules import Multiply   # relative path: Modules/ subfolder
+print(Multiply.myVal)</pre>
+                <div class="highlight"><p>Using an alias (import numpy as np, import pandas as pd) is standard practice for commonly used libraries — it reduces typing while keeping names clear. Avoid from module import * in production code because it floods the namespace with names whose origin becomes unclear, making debugging harder.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="paths">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Import Paths</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Python first looks in the current active directory for the module file. For other locations, use sys.path to tell Python where to search.</p>
+                <table>
+                    <tr><th>Location</th><th>How to Import</th></tr>
+                    <tr><td>Same folder</td><td>import Multiply (just works)</td></tr>
+                    <tr><td>Subfolder</td><td>from Modules import Multiply</td></tr>
+                    <tr><td>Parent folder</td><td>sys.path.append("..") then import</td></tr>
+                    <tr><td>Sibling of parent</td><td>sys.path.append(r"..\ParentModules") then import</td></tr>
+                    <tr><td>Absolute path</td><td>sys.path.append(r"C:\full\path") then import</td></tr>
+                </table>
+                <pre>import sys
+
+# Parent folder
+sys.path.append("..")
+import MultiplyParent as Multiply
+
+# Subfolder of parent
+sys.path.append(r"..\ParentModules")
+import Multiply
+
+# Full absolute path
+myPath = r"G:\My Drive\NNU\Python\ParentModules"
+sys.path.append(myPath)
+import Multiply
+
+print(Multiply.myVal)
+print(Multiply.MyMultiply(3, 4))
+print(Multiply.MyMultiply.__doc__)</pre>
+            </div>
+        </div>
+
+        <div class="section" id="name">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>__name__ and __main__</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Python sets a special variable <code>__name__</code> in every script. Its value depends on HOW the script is being run — directly, or imported by something else.</p>
+                <div class="grid">
+                    <div class="card"><h3>Run directly</h3><p>__name__ == "__main__". Python treats this as the entry point.</p></div>
+                    <div class="card"><h3>Imported as module</h3><p>__name__ == the module's filename (e.g., "Multiply"). Not "__main__".</p></div>
+                </div>
+                <pre>def myfunc():
+    print("Inside function")
+
+if __name__ == "__main__":
+    # This block only runs when this script is run DIRECTLY
+    print("Program execution is direct")
+    print("__name__ is:", __name__)   # "__main__"
+    myfunc()
+else:
+    # This block runs when this script is IMPORTED elsewhere
+    print("Running as a module from another program")
+    print("__name__ is:", __name__)   # "scriptname"</pre>
+                <div class="highlight"><p>This pattern is the Python equivalent of C's main() function — it gives your script a defined entry point. Without it, every statement at the top level runs whenever the file is imported, which can cause unwanted side effects. Always wrap your "run this script" code in if __name__ == "__main__": for any module you intend to also import elsewhere.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="logging">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Logging</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The logging module tracks events as they occur — invaluable for debugging, auditing, and maintaining a historical record without watching the program run live. It's thread-safe and used by many third-party packages.</p>
+                <table>
+                    <tr><th>Level</th><th>When to use</th></tr>
+                    <tr><td>DEBUG</td><td>Detailed diagnostic info, only useful during development</td></tr>
+                    <tr><td>INFO</td><td>Confirmation things are working as expected</td></tr>
+                    <tr><td>WARNING</td><td>Something unexpected — program still works (default level)</td></tr>
+                    <tr><td>ERROR</td><td>A serious problem — function couldn't complete</td></tr>
+                    <tr><td>CRITICAL</td><td>A very serious error — program may not continue</td></tr>
+                </table>
+                <pre>import logging
+
+# Simple warning to screen
+logging.warning("Watch out!")
+
+# Log to a file with timestamps
+logging.basicConfig(
+    filename="mywarninglog.txt",
+    level=logging.WARNING   # only WARNING and above get logged
+)
+
+logging.debug("Debug message")     # NOT logged (below WARNING)
+logging.info("Info message")       # NOT logged (below WARNING)
+logging.warning("Warning message") # logged
+logging.error("Error message")     # logged
+logging.critical("Critical message") # logged
+
+# Capture the full stack trace on exception
+import logging
+num1 = 3
+num2 = 0
+try:
+    result = num1 / num2
+except Exception as e:
+    # exc_info=True includes the full stack trace in the log
+    logging.error("Displaying Exception", exc_info=True)</pre>
+                <div class="highlight"><p>exc_info=True is critical for production debugging — it captures the full call stack (state of the program at the point of failure, including function calls and variable values). Without it, you only know that an error occurred but not where or why. Always use exc_info=True when logging exceptions in except blocks.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="assert">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Assertions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Assertions let you check conditions during development without adding temporary print statements you'll need to remove later. They can stay in the code permanently — they only trigger when the condition fails.</p>
+                <pre>def mySum(myElements):
+    assert len(myElements) != 0, "Empty list"   # condition, message
+    return sum(myElements)
+
+# Works fine
+list1 = [1, 2, 3, 4, 5, 6]
+print("Sum:", mySum(list1))   # 21
+
+# Fails — triggers AssertionError
+list2 = []
+print("Sum:", mySum(list2))   # AssertionError: Empty list
+
+# Square root with assertions
+import math
+
+def isNumber(n):
+    try:
+        float(n)
+        return True
+    except ValueError:
+        return False
+
+def safeSqrt(n):
+    assert isNumber(n), "Input must be numeric"
+    assert float(n) &gt;= 0, "Input must be non-negative"
+    return math.sqrt(float(n))
+
+user_input = input("Enter a number: ")
+print(safeSqrt(user_input))</pre>
+                <div class="highlight"><p>Assertions differ from exceptions: assert is for developer errors (things that should never happen if the code is correct), while try/except is for runtime errors (things that might reasonably happen). Assertions can be disabled globally with the -O (optimize) flag when running Python — so never use them for input validation in production. Use them to document and verify your assumptions about your own code's internal state.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="packages">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Packages</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A package is a folder containing related modules. Python requires an <code>__init__.py</code> file at the package root to recognize it as a package (it can be empty).</p>
+                <pre># Package structure example:
+# Games/
+#   __init__.py
+#   Cricket/
+#     __init__.py
+#     othercountrybatsman.py
+#     India/
+#       __init__.py
+#       indianbatsman.py
+#   Football/
+#     __init__.py
+#     goalkeeper.py
+#     forward.py
+
+# Importing from packages
+import Games.Cricket.othercountrybatsman
+Games.Cricket.othercountrybatsman.name_othercountrybatsman()
+
+import Games.Cricket.India.indianbatsman
+Games.Cricket.India.indianbatsman.name_indianbatsman()
+
+import Games.Football.goalkeeper
+Games.Football.goalkeeper.name_goalkeeper()
+
+# With alias for cleaner calls
+import Games.Football.forward as fwd
+fwd.name_forward()</pre>
+                <div class="highlight"><p>The __init__.py file is what tells Python "this folder is a package, not just a directory." Without it, imports across subdirectories won't work. It can be completely empty — its presence is what matters. Set sys.path appropriately so Python can find the package root directory before importing.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

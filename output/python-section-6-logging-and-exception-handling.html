@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 6: Logging and Exception Handling</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a0a2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #1d4ed8; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #1d4ed8; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #1d4ed8; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a0a2e; border-left: 3px solid #1d4ed8; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #1d4ed8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #1d4ed8; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #1d4ed8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #1d4ed8; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #1d4ed8; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 6</div>
+        <h1>Logging and Exception Handling</h1>
+        <p class="subtitle">Debugging, error types, try/except/else/finally, and multiple exception blocks</p>
+    </header>
+    <nav>
+        <a href="#debugging">Debugging</a>
+        <a href="#errortypes">Error Types</a>
+        <a href="#tryexcept">try / except</a>
+        <a href="#multiple">Multiple Exceptions</a>
+        <a href="#finally">finally Block</a>
+        <a href="#full">Full Structure</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="debugging">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Debugging with Breakpoints</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every language provides debugging tools. Python is no exception. The most important debugging tool is the <strong>breakpoint</strong> — it stops execution at a specific line of code so you can inspect the program's state.</p>
+                <div class="grid">
+                    <div class="card"><h3>Breakpoints in Spyder</h3><p>Use the Debug menu to set breakpoints. Similar to Visual Studio and other IDEs. Click next to a line number to toggle a breakpoint.</p></div>
+                    <div class="card"><h3>Conditional Breakpoints</h3><p>Breakpoints can be set with conditions — only pause execution when a specific condition is true (e.g., only when i == 5 in a loop).</p></div>
+                    <div class="card"><h3>IPython %debug</h3><p>After an exception, run %debug in the console to enter the interactive debugger at the point of failure. Step through code, inspect variables.</p></div>
+                    <div class="card"><h3>print() Debugging</h3><p>The classic approach — inserting print() statements to see variable values at different points. Simple but effective for quick checks.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="errortypes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Types of Errors</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Syntax Errors</h3><p>Arise from incorrect code syntax. Python catches these BEFORE running — the program won't start. Fix: correct the syntax.</p></div>
+                    <div class="card"><h3>Runtime Exceptions</h3><p>Arise during execution — from function calls, bad user input, division by zero, file not found, etc. Can be "caught" with try/except to prevent a crash.</p></div>
+                </div>
+                <pre># Syntax Error — caught before running
+int(1 2)
+# SyntaxError: invalid syntax
+
+# Runtime Exception — happens WHILE running
+int("1 2")
+# ValueError: invalid literal for int() with base 10: '1 2'</pre>
+                <div class="highlight"><p>If a runtime exception is NOT caught, it causes a "fatal" error and the program crashes (stops execution). The whole point of exception handling is to intercept these errors and respond gracefully — log the error, show a friendly message, or try a different approach — rather than letting the program blow up.</p></div>
+                <p><strong>Common Python exception types:</strong></p>
+                <table>
+                    <tr><th>Exception</th><th>When it occurs</th></tr>
+                    <tr><td>ValueError</td><td>Wrong type of value (e.g., int("abc"))</td></tr>
+                    <tr><td>ZeroDivisionError</td><td>Division by zero</td></tr>
+                    <tr><td>TypeError</td><td>Wrong type for an operation (e.g., "a" + 1)</td></tr>
+                    <tr><td>IndexError</td><td>List index out of range</td></tr>
+                    <tr><td>KeyError</td><td>Dictionary key doesn't exist</td></tr>
+                    <tr><td>FileNotFoundError</td><td>File doesn't exist at specified path</td></tr>
+                    <tr><td>NameError</td><td>Variable used before being defined</td></tr>
+                    <tr><td>AttributeError</td><td>Object doesn't have the attribute/method</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="tryexcept">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>try / except</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Catch a SPECIFIC exception
+try:
+    int("1 2")
+except ValueError:
+    print("1 2")   # handles only ValueError
+
+# Catch ALL exceptions (generic)
+# Good for beta testing — catches everything during development
+a = 10
+b = "zebra"
+try:
+    print(a + b)          # TypeError: can't add int and str
+except Exception as e:
+    print("Whoops, check yourself...\n", e)
+    # "Whoops, check yourself...
+    #  unsupported operand type(s) for +: 'int' and 'str'"</pre>
+                <div class="highlight"><p>Catching specific exceptions (ValueError, ZeroDivisionError) is better practice than catching all exceptions — it prevents accidentally hiding bugs you didn't intend to catch. Use generic Exception catching (with "as e" to see the message) during development/testing to discover what exceptions your code throws, then narrow it down to specific types for production code.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="multiple">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Multiple except Blocks</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Different errors require different responses. Stack multiple except blocks — each handles a specific exception type.</p>
+                <pre>try:
+    num1 = int(input("Enter the first number: "))
+    num2 = int(input("Enter the second number: "))
+    total = num1 / num2
+    print("The division is", total)
+except ValueError:
+    print("Please enter a valid integer.")
+except ZeroDivisionError:
+    print("Cannot divide by zero!")</pre>
+                <div class="highlight"><p>Real scenario: opening a file could fail in multiple ways — file doesn't exist (FileNotFoundError), wrong format (ValueError), file is locked (PermissionError). Each needs a different response. Python checks except blocks in order from top to bottom and executes the first one that matches the exception type.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="finally">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>finally Block</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The <code>finally</code> block <strong>always executes</strong> — whether or not an exception occurred. Use it for cleanup code that must run regardless: closing files, releasing database connections, freeing resources.</p>
+                <pre>try:
+    print("inside try")
+    num1 = int(input("Enter the first number: "))
+    num2 = int(input("Enter the second number: "))
+    total = num1 / num2
+    print("The division is", total)
+except ValueError:
+    print("inside except — bad input")
+finally:
+    print("inside finally — ALWAYS runs")
+    # close files, release connections here</pre>
+                <div class="highlight"><p>If your try block throws an exception, normal execution is interrupted — code after the error in the try block doesn't run. Without finally, any cleanup code below the try/except might be skipped. The finally block guarantees cleanup happens no matter what — success, error, or even if the program is being shut down.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="full">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Full Structure: try / except / else / finally</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Python supports an optional <code>else</code> block that runs only when NO exception was raised. The full structure:</p>
+                <pre>try:
+    print("inside try")
+    num1 = int(input("Enter the first number: "))
+    num2 = int(input("Enter the second number: "))
+    total = num1 / num2
+    print("The division is", total)
+except:
+    print("inside except block")
+else:
+    print("inside else — no exception occurred")
+finally:
+    print("inside finally — always runs")
+
+# The instructor's point: else is redundant.
+# This is equivalent — just put the else code in try:
+try:
+    print("inside try")
+    num1 = int(input("Enter the first number: "))
+    num2 = int(input("Enter the second number: "))
+    total = num1 / num2
+    print("The division is", total)
+    print("no exception — this only runs on success")
+except:
+    print("inside except block")
+finally:
+    print("inside finally — always runs")</pre>
+                <p><strong>Execution flow summary:</strong></p>
+                <table>
+                    <tr><th>Block</th><th>When it runs</th></tr>
+                    <tr><td>try</td><td>Always — this is where your main code goes</td></tr>
+                    <tr><td>except</td><td>Only when the matching exception is raised in try</td></tr>
+                    <tr><td>else</td><td>Only when NO exception was raised (optional, rarely needed)</td></tr>
+                    <tr><td>finally</td><td>ALWAYS — success, exception, or anything else</td></tr>
+                </table>
+                <div class="highlight"><p>The else block runs only if no exception was raised — but you can just put that code at the end of the try block and get the same behavior. The instructor recommends skipping else entirely and using the simpler try/except/finally pattern. The key pattern to master: try the risky code, except specific errors with helpful messages, finally clean up.</p></div>
+                <pre># Exercise template — full pattern
+try:
+    num1 = float(input("Enter the first number: "))
+    num2 = float(input("Enter the second number: "))
+    result = num1 / num2
+    print(f"Result: {result}")
+except ValueError:
+    print("Please enter a valid number.")
+except ZeroDivisionError:
+    print("Cannot divide by zero.")
+finally:
+    print("Calculation attempt complete.")</pre>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

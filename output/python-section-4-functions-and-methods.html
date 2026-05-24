@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 4: Functions and Methods</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #15803d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #16a34a; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #15803d; color: white; border-color: #15803d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #16a34a; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a0a; border-left: 3px solid #15803d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #16a34a; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #16a34a; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #15803d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #15803d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #16a34a; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 4</div>
+        <h1>Functions and Methods</h1>
+        <p class="subtitle">Built-ins, user-defined functions, parameters, scope, recursion, lambdas, and return values</p>
+    </header>
+    <nav>
+        <a href="#overview">Overview</a>
+        <a href="#builtins">Built-ins vs Methods</a>
+        <a href="#userdefined">User-Defined Functions</a>
+        <a href="#parameters">Parameters</a>
+        <a href="#varargs">Variable Arguments</a>
+        <a href="#scope">Scope</a>
+        <a href="#returns">Return Values</a>
+        <a href="#recursion">Recursion</a>
+        <a href="#lambda">Lambda Functions</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="overview">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why Functions?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Functions exist so we don't replicate code all over the place. We've already used functions Python provides — print(), len(), abs(), sqrt(). We can also create our own.</p>
+                <div class="highlight"><p>Never use Python keywords as function or variable names — they cannot be overwritten. Built-in function names (like list, input, print) CAN technically be overwritten, but never do it — you'll lose access to the original and produce confusing bugs.</p></div>
+                <pre># Check Python's keyword list
+import keyword
+keyword.kwlist
+# ['and', 'as', 'assert', 'break', 'class', 'continue',
+#  'def', 'del', 'elif', 'else', 'except', 'False', ...]</pre>
+                <p>A small sample of Python's built-in functions: abs(), all(), any(), bin(), bool(), chr(), dict(), dir(), enumerate(), eval(), filter(), float(), format(), frozenset(), getattr(), hasattr(), hash(), help(), hex(), input(), int(), isinstance(), iter(), len(), list(), map(), max(), min(), next(), object(), oct(), open(), ord(), pow(), print(), range(), repr(), reversed(), round(), set(), setattr(), slice(), sorted(), str(), sum(), tuple(), type(), vars(), zip().</p>
+            </div>
+        </div>
+
+        <div class="section" id="builtins">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Functions vs Methods</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Function</h3><p>Called standalone: some_function(arguments). Example: len(var1), print("hello"), abs(-5)</p></div>
+                    <div class="card"><h3>Method</h3><p>Called ON an object: object.function(argument). Example: var1.capitalize(), var1.upper(), var1.replace()</p></div>
+                </div>
+                <pre>var1 = "foo"
+
+# Function — len is standalone
+print(len(var1))          # 3
+
+# Method — capitalize is attached to the string object
+print(var1.capitalize())  # Foo
+
+# Both do the same thing here
+print(var1.__len__())     # 3 (dunder/magic method)
+
+# String methods
+s1 = "First part, "
+s2 = "Second part."
+print(s1 + s2)                              # concatenation
+print(s1.upper())                           # FIRST PART,
+print(s1.replace("First", "Gone").lower())  # gone part,
+print(s1.count("r"))                        # 2
+help(str)                                   # full string docs</pre>
+                <div class="highlight"><p>Objects have attached functions (methods) and attributes. In Spyder, use the Object Explorer to browse any object's methods and attributes — right-click in the Variable Explorer. Dunder (double-underscore) methods like __len__() are Python's internal method names — usually called through their shorthand (len()) instead of directly.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="userdefined">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>User-Defined Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Use the <code>def</code> keyword to create your own functions. Everything indented under def is part of the function body.</p>
+                <pre># Basic function
+def sayHello(name):
+    print("Hello " + name)
+
+sayHello("Rupert")   # Hello Rupert
+
+# Function template with default parameter and return value
+def new_func(par1, par2, some_other_par="default"):
+    # do some stuff
+    return some_related_stuff
+
+# Practical example
+def mult_by_3(x, weight=1):
+    result = x * weight * 3
+    return result
+
+mult_by_3(4)              # 12    (weight defaults to 1)
+mult_by_3(4, 0.5)         # 6.0  (weight = 0.5)
+mult_by_3(weight=0.25, x=4)  # 3.0 (keyword arguments — order doesn't matter)
+
+# result is undefined here — it's local to the function
+result   # NameError!</pre>
+                <div class="highlight"><p>Variables created inside a function exist only in that function's local namespace — they disappear when the function returns. This is called variable scope. To use a variable outside the function you must either return it or declare it global (more on this below).</p></div>
+                <p><strong>Nested functions</strong> — Python allows functions inside functions:</p>
+                <pre>def outsideFn(str1):
+    def insideFn():
+        print(str1 + " Inner Function")
+    print(str1 + " Outer Function")
+    insideFn()
+
+outsideFn("Hello ")
+# Hello  Outer Function
+# Hello  Inner Function</pre>
+            </div>
+        </div>
+
+        <div class="section" id="parameters">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Parameters — Positional, Keyword & Default</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Positional arguments — passed in declaration order
+def my_complex(my_real, my_imag):
+    return complex(my_real, my_imag)
+
+my_complex(6, 8)    # 6 is real, 8 is imag
+my_complex(8, 6)    # 8 is real, 6 is imag (different result!)
+# my_complex(8, 6, 10) — TypeError: too many arguments
+
+# Keyword arguments — pass by name, order doesn't matter
+my_complex(my_real=2, my_imag=8)
+my_complex(my_imag=8, my_real=2)   # same result
+my_complex(2, my_imag=8)           # mix: positional first, then keyword
+
+# Default arguments — used when parameter is infrequently specified
+import math
+def my_log(number, base=10):
+    return math.log(number, base)
+
+my_log(10, 2)    # log base 2 of 10 = 3.321...
+my_log(10)       # log base 10 of 10 = 1.0 (uses default base)</pre>
+                <div class="highlight"><p>Use default arguments when a parameter is optional or has a sensible standard value (like base=10 for logarithms, or middle_initial="" for a name function). Positional arguments must always come BEFORE keyword arguments in a function call. Once you use a keyword argument, all subsequent arguments must also be keyword.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="varargs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Variable-Length Arguments (*args & **kwargs)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>When you don't know in advance how many arguments will be passed, use *args (tuple of positional args) or **kwargs (dict of keyword args).</p>
+                <pre># *args — variable number of positional arguments
+def mymul3(*my_num):
+    myresult = 1
+    for n in my_num:
+        myresult *= n
+    return myresult
+
+mymul3(2, 3)          # 6
+mymul3(2, 3, 4, 5)    # 120 — works with any number of args
+
+# **kwargs — variable number of keyword arguments
+# (think: dictionary of name=value pairs)
+def func1(**kwargs):
+    print(kwargs)           # {'fname': 'Rufus', 'lname': 'McGee', ...}
+    print(type(kwargs))     # &lt;class 'dict'&gt;
+    for key, value in kwargs.items():
+        print(f"{key}:{value}")
+
+func1(fname="Rufus", lname="McGee", phone="208-534-5689")
+# fname:Rufus
+# lname:McGee
+# phone:208-534-5689
+
+# Dictionary unpacking with **
+d1 = dict(name="OldandCranky", age=31)
+func1(**d1)    # unpacks d1 as keyword arguments</pre>
+                <div class="highlight"><p>*args collects extra positional arguments into a tuple. **kwargs collects extra keyword arguments into a dictionary — very useful when processing JSON data or building flexible APIs where you don't know field names in advance. The names args and kwargs are conventions, not requirements — *nums or **options work just as well.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="scope">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Variable Scope & the global Keyword</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Variables inside a function are LOCAL — invisible outside
+def mult_by_3(x, weight=1):
+    result = x * weight * 3   # result is local
+    return result
+
+mult_by_3(4)    # 12
+result          # NameError — result doesn't exist here!
+
+# global keyword: declare the variable lives in global namespace
+def mult_by_3(x, weight=1):
+    global result             # now result is global
+    result = x * weight * 3
+    return result
+
+mult_by_3(4)
+result          # 12 — accessible outside the function now
+
+# Accessing an existing global variable inside a function
+my_global_var = 12
+
+def mult_by_3(x, weight=1):
+    global my_global_var      # tell Python to use the global one
+    result = x * weight * 3 * my_global_var
+    return result
+
+mult_by_3(4)   # 12 * 12 * 1 * 3 * 4 = 144... (4*1*3*12 = 144)</pre>
+                <div class="highlight"><p>Use global variables sparingly — they make code harder to reason about and debug because any function can change them. Prefer passing data through function parameters and returning results. The global keyword is occasionally necessary but should be a last resort, not a habit.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="returns">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Return Values & Multiple Returns</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre># Basic return
+def fullName(firstName, lastName):
+    return firstName + ' ' + lastName
+
+name = fullName('Rupert', 'Jones')   # 'Rupert Jones'
+
+# Multiple return values (returned as a tuple, unpacked automatically)
+def multi_func(a, b, c):
+    return (a + 1, b + 3, c - 3)
+
+a1, b1, c1 = multi_func(1, 1, 1)
+# a1=2, b1=4, c1=-2
+
+# Multiple return STATEMENTS — conditional returns
+def multi_func2(a):
+    if a &gt; 0:
+        return a + 1
+    if a &lt; 0:
+        return a - 1
+    # if a == 0, returns None implicitly
+
+multi_func2(5)    # 6
+multi_func2(-5)   # -6
+
+# Unpacking a returned list
+def namesFromFullName(fullName):
+    names = fullName.split(' ')   # split on space
+    return names
+
+firstName, lastName = namesFromFullName('Rupert Jones')
+# firstName = 'Rupert', lastName = 'Jones'</pre>
+                <div class="highlight"><p>Python functions can return multiple values by wrapping them in a tuple — and Python can automatically unpack that tuple into separate variables on the left side of an assignment. A function with no return statement (or just return) returns None. Multiple return statements are commonly used for conditional early exits.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="recursion">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Recursion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Recursion is where a function calls itself. It can save a lot of coding effort but uses more memory and can be slower than iteration. Always include a <strong>base case</strong> — a condition that stops the recursion — or you'll get infinite recursion.</p>
+                <pre># Factorial: n! = n * (n-1) * (n-2) * ... * 1
+def Factorial(a):
+    if a == 1:              # BASE CASE — stops recursion
+        return 1
+    else:
+        return a * Factorial(a - 1)   # recursive call
+
+print("The factorial of", 7, "is", Factorial(7))
+# 7 * 6 * 5 * 4 * 3 * 2 * 1 = 5040
+
+# Fibonacci sequence: F(n) = F(n-1) + F(n-2)
+def fibonacci(n):
+    if n &lt;= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+# First 10 Fibonacci numbers
+for i in range(10):
+    print(fibonacci(i), end=" ")
+# 0 1 1 2 3 5 8 13 21 34</pre>
+                <div class="highlight"><p>Every recursive function needs a base case — the condition that stops it from calling itself forever. Without a base case you get a RecursionError (Python's stack overflow). Python has a default recursion limit of 1000 calls — for deep recursion, iterative solutions are safer and usually faster.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="lambda">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Lambda Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Lambda functions are anonymous, single-expression functions built on the fly. Particularly useful in data science with map, filter, and reduce.</p>
+                <pre># Syntax: lambda parameters: expression
+lam_func = lambda x1, x2: x1 + x2
+lam_func(3, 4)    # 7
+
+# Multiple return values
+lam_func2 = lambda x1, x2: (x1 + x2, x1 - x2)
+lam_func2(3, 4)   # (7, -1)
+
+# Lambdas for "vectorized" / state-dependent functions
+# Myfn returns a different lambda depending on its argument
+def Myfn(n):
+    return lambda a: a * n
+
+myDoubler = Myfn(2)   # returns lambda a: a * 2
+myTripler = Myfn(3)   # returns lambda a: a * 3
+
+print(myDoubler(11))  # 22
+print(myTripler(11))  # 33
+
+# Common use: sorting with a custom key
+names = ["Alice", "Bob", "Charlie"]
+names.sort(key=lambda x: len(x))   # sort by string length
+print(names)   # ['Bob', 'Alice', 'Charlie']
+
+# With map and filter
+nums = [1, 2, 3, 4, 5]
+doubled = list(map(lambda x: x * 2, nums))       # [2, 4, 6, 8, 10]
+evens   = list(filter(lambda x: x % 2 == 0, nums)) # [2, 4]</pre>
+                <div class="highlight"><p>Lambdas are limited to a single expression — they can't contain statements, assignments, or multiple lines. For anything complex, use a regular def function. Lambdas shine in data science when passing small transformation functions to map(), filter(), apply() (Pandas), or sort key arguments. The pattern where a function returns a lambda creates specialized functions from a template — a powerful functional programming technique.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

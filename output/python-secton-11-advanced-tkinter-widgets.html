@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 11: Advanced Tkinter Widgets</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a1f2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #075985; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #075985; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #075985; color: white; border-color: #075985; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #075985; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #075985; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #075985; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #075985; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #075985; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #075985; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #075985; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 11</div>
+        <h1>Advanced Tkinter Widgets</h1>
+        <p class="subtitle">Radiobuttons, checkboxes, combobox, menus, listbox, spinbox, progress bar, dialogs, and images</p>
+    </header>
+    <nav>
+        <a href="#radio">Radiobuttons</a>
+        <a href="#check">Checkbuttons</a>
+        <a href="#combo">Combobox</a>
+        <a href="#menus">Menus</a>
+        <a href="#listbox">Listbox</a>
+        <a href="#spin">Spinbox & Progress</a>
+        <a href="#windows">Windows & Images</a>
+        <a href="#dialogs">Standard Dialogs</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="radio">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Radiobuttons</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Use radiobuttons for <strong>mutually exclusive</strong> choices — only one can be selected at a time. Use a <code>StringVar</code> (or IntVar) to track which button is selected across the group.</p>
+                <pre>import tkinter as tk
+from tkinter import ttk, StringVar, Radiobutton
+
+window = tk.Tk()
+
+# StringVar — a window-based variable for holding widget state
+v = StringVar(window, "1")   # default selection = "1"
+
+# Dictionary makes it easy to create multiple buttons
+values = {
+    "RadioButton 1": "1",
+    "RadioButton 2": "2",
+    "RadioButton 3": "3",
+}
+
+# Create all buttons in a loop
+for text, value in values.items():
+    Radiobutton(
+        window, text=text, variable=v,
+        value=value, command=lambda: print(v.get())
+    ).pack(side="top", ipady=5)
+
+# Styled as actual buttons (indicator=0 removes the circle dot)
+for text, value in values.items():
+    Radiobutton(
+        window, text=text, variable=v, value=value,
+        indicator=0, background="light blue"
+    ).pack(fill="x", ipady=5)
+
+# Event binding — use ButtonRelease-1 not Button-1
+# because the variable updates AFTER the click event
+for text, value in values.items():
+    rb = Radiobutton(window, text=text, variable=v, value=value)
+    rb.bind("&lt;ButtonRelease-1&gt;", lambda e: print(v.get()))
+    rb.pack(side="top", ipady=5)
+
+# Trace — attach callback to variable change (most reliable approach)
+v.trace("w", lambda name, index, mode, var=v: print(var.get()))
+
+window.mainloop()</pre>
+                <div class="highlight"><p>The key gotcha: binding to Button-1 (mouse down) fires BEFORE the StringVar updates — so you read the OLD value. Use ButtonRelease-1 (mouse up) or trace() to reliably read the NEW value after selection. trace("w", callback) fires whenever the variable is written to — this is the most reliable approach.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="check">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Checkbuttons</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Use checkbuttons for <strong>non-exclusive</strong> choices — multiple can be selected. Also great as a toggle (on/off switch). Each has an onvalue and offvalue.</p>
+                <pre>import tkinter as tk
+window = tk.Tk()
+
+# IntVar to track checked state (1=checked, 0=unchecked)
+var1 = tk.IntVar()
+var2 = tk.IntVar()
+
+checkbox1 = tk.Checkbutton(
+    window,
+    text="Tutorial",
+    variable=var1,
+    onvalue=1,     # value when checked
+    offvalue=0,    # value when unchecked
+    height=2,
+    width=10
+)
+checkbox1.pack()
+
+checkbox2 = tk.Checkbutton(window, text="Project", variable=var2)
+checkbox2.pack()
+
+def show_selections():
+    print(f"Tutorial: {var1.get()}, Project: {var2.get()}")
+
+tk.Button(window, text="Show", command=show_selections).pack()
+window.mainloop()</pre>
+            </div>
+        </div>
+
+        <div class="section" id="combo">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Combobox</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A combobox is a dropdown list — more space-efficient than a listbox. The user can select from the list or type their own value. Requires ttk (themed tkinter).</p>
+                <pre>import tkinter as tk
+from tkinter import ttk
+
+window = tk.Tk()
+
+# StringVar to hold the selected value
+n = tk.StringVar()
+
+dayChosen = ttk.Combobox(window, width=27, textvariable=n)
+
+# Set the dropdown options
+dayChosen["values"] = (
+    "Monday", "Tuesday", "Wednesday",
+    "Thursday", "Friday", "Saturday", "Sunday"
+)
+dayChosen.pack()
+
+# Get the selected value
+def show_choice():
+    print(n.get())          # what's in the StringVar
+    print(dayChosen.get())  # same thing, via widget
+
+tk.Button(window, text="Show", command=show_choice).pack()
+window.mainloop()</pre>
+            </div>
+        </div>
+
+        <div class="section" id="menus">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Menus — Menubar, Popup & Menubutton</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Menus sit on the menubar at the top of the window and handle app-wide functions (File, Edit, Help). Build them in steps: menubar → cascade → commands.</p>
+                <pre">from tkinter import Menu, Menubutton
+
+# Step 1: Create menubar
+menubar = Menu(window)
+
+# Step 2: Create top-level "File" menu
+file = Menu(menubar, tearoff=0)   # tearoff=0 prevents detaching
+
+# Step 3: Add commands to File menu
+file.add_command(label="New File",  command=mnuNewFile)
+file.add_command(label="Open File", command=mnuOpenFile)
+file.add_command(label="Save File", command=mnuSaveFile)
+file.add_separator()               # visual divider
+file.add_command(label="Exit",      command=window.destroy)
+
+# Step 4: Attach File menu to menubar
+menubar.add_cascade(label="File", menu=file)
+
+# Step 5: Attach menubar to window
+window.config(menu=menubar)
+
+# POPUP MENU — right-click context menu
+popup_menu = Menu(window, tearoff=0)
+popup_menu.add_command(label="say hi",    command=lambda: hey("hi"))
+popup_menu.add_command(label="say hello", command=lambda: hey("hello"))
+popup_menu.add_separator()
+popup_menu.add_command(label="say bye",   command=lambda: hey("bye"))
+
+# Bind right-click to show popup
+window.bind("&lt;Button-3&gt;", lambda e: popup_menu.post(e.x_root, e.y_root))
+
+# MENUBUTTON — free-floating menu (not on menubar)
+var1, var2, var3 = tk.IntVar(), tk.IntVar(), tk.IntVar()
+menubutton = Menubutton(window, text="Options")
+menubutton.menu = Menu(menubutton)
+menubutton["menu"] = menubutton.menu
+menubutton.menu.add_checkbutton(label="Courses",  variable=var1)
+menubutton.menu.add_checkbutton(label="Students", variable=var2)
+menubutton.menu.add_checkbutton(label="Careers",  variable=var3)
+menubutton.pack()</pre>
+                <div class="highlight"><p>Lambdas in menus: command= expects a function with NO arguments. To pass arguments, wrap with a lambda: command=lambda: hey("hi"). This creates an anonymous function that calls hey("hi") when the menu item is selected — without the lambda you'd have to create a separate named function for each menu item.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="listbox">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Listbox</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A listbox displays a scrollable list of selectable items — like a visible array. Supports single or multiple selection.</p>
+                <pre>import tkinter as tk
+from tkinter.messagebox import showinfo
+
+window = tk.Tk()
+
+# Method 1: insert items manually
+listbox = tk.Listbox(
+    window, height=10, width=15,
+    bg="grey", activestyle="dotbox",
+    font="Helvetica", fg="yellow"
+)
+listbox.insert(1, "Freshman")
+listbox.insert(2, "Sophomore")
+listbox.insert(3, "Junior")
+listbox.insert(4, "Senior")
+listbox.pack()
+
+# Method 2: use a Variable object (cleaner)
+langs = ("Java", "C#", "C", "C++", "Python", "Go", "JavaScript")
+varList = tk.Variable(value=langs)
+listbox2 = tk.Listbox(
+    window,
+    listvariable=varList,
+    height=6,
+    selectmode=tk.EXTENDED   # allows multiple selections
+)
+listbox2.pack()
+
+# Get selected items
+for i in listbox.curselection():
+    print(listbox.get(i))
+
+# Event handler for selection change
+def items_selected(event):
+    selected_indices = listbox2.curselection()
+    selected_langs = ", ".join([listbox2.get(i) for i in selected_indices])
+    showinfo(title="Selection", message=f"You selected: {selected_langs}")
+
+listbox2.bind("&lt;&lt;ListboxSelect&gt;&gt;", items_selected)
+window.mainloop()</pre>
+                <div class="highlight"><p>curselection() returns a tuple of selected indices. Use listbox.get(i) to retrieve the value at each index. For multiple selection, iterate through all indices. selectmode=tk.EXTENDED allows Shift+click and Ctrl+click for multiple selections. selectmode=tk.SINGLE restricts to one item at a time.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="spin">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Spinbox & Progress Bar</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre">from tkinter import Spinbox, Progressbar, HORIZONTAL
+
+# SPINBOX — numeric input with min/max limits and up/down arrows
+sp = Spinbox(window, from_=0, to=20)
+sp.pack()
+
+# Get current value
+print(sp.get())
+
+# PROGRESS BAR — shows completion status
+from tkinter.ttk import Progressbar
+
+progress = Progressbar(
+    window,
+    orient=HORIZONTAL,
+    length=100,
+    mode="determinate"   # shows actual % progress
+    # mode="indeterminate" — bouncing bar for unknown duration
+)
+progress.pack()
+
+def ShowBar():
+    bar_value = 0
+    while bar_value &lt;= 100:
+        progress["value"] = bar_value
+        window.update_idletasks()   # force redraw — REQUIRED
+        bar_value += 10
+        window.after(100)           # pause 100ms between steps
+
+tk.Button(window, text="Start", command=ShowBar).pack()
+window.mainloop()</pre>
+                <div class="highlight"><p>update_idletasks() is critical for the progress bar — without it the window freezes during the loop and you never see the bar move. It forces tkinter to process any pending drawing events. For long-running tasks, consider using threading instead of a while loop to keep the UI responsive.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="windows">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Additional Windows & Images</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre">from tkinter import Toplevel, Label
+from PIL import Image, ImageTk
+
+# TOPLEVEL — open a second window
+def open_new_window():
+    newWindow = Toplevel(window)
+    newWindow.title("New Window")
+    newWindow.geometry("200x200")
+    Label(newWindow, text="This is a new window!").pack()
+
+tk.Button(window, text="Open Window", command=open_new_window).pack()
+
+# IMAGES — use PIL/Pillow library for image support
+img = ImageTk.PhotoImage(Image.open("../images/photo.jpg"))
+panel = tk.Label(window, image=img)
+panel.pack()
+
+# IMAGE ON BUTTON
+photoimage = ImageTk.PhotoImage(Image.open("icon.png"))
+tk.Button(
+    window,
+    text="Click Me!",
+    image=photoimage,
+    compound="left"    # text to right of image
+).pack(side="top")
+
+# CUSTOM APP ICON
+window.iconbitmap(r"C:\path\to\icon.ico")
+window.title("Custom Icon App")</pre>
+            </div>
+        </div>
+
+        <div class="section" id="dialogs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Standard Dialogs</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Tkinter provides built-in standard dialogs so you don't have to build them from scratch — file open/save, color chooser, and more.</p>
+                <pre">from tkinter.filedialog import askopenfile, asksaveasfile
+from tkinter import colorchooser
+
+# FILE OPEN DIALOG
+def open_file():
+    file = askopenfile(
+        mode="r",
+        filetypes=[("Python Files", "*.py"), ("All Files", "*.*")]
+    )
+    if file is not None:
+        content = file.read()
+        print(content)
+        file.close()
+
+# FILE SAVE DIALOG
+def save_file():
+    file_types = [
+        ("All Files", "*.*"),
+        ("Python Files", "*.py"),
+        ("Text Document", "*.txt")
+    ]
+    file = asksaveasfile(
+        filetypes=file_types,
+        defaultextension=file_types
+    )
+    if file is not None:
+        file.write("Content to save")
+        file.close()
+
+# COLOR CHOOSER DIALOG
+def choose_color():
+    color_code = colorchooser.askcolor(title="Choose color")
+    print(color_code)
+    # Returns: ((R, G, B), "#hexcode") or (None, None) if cancelled
+
+tk.Button(window, text="Open File",   command=open_file).pack()
+tk.Button(window, text="Save File",   command=save_file).pack()
+tk.Button(window, text="Pick Color",  command=choose_color).pack()
+window.mainloop()</pre>
+                <div class="highlight"><p>Always check if the returned file is not None before using it — the user can cancel the dialog, which returns None. The color chooser returns a tuple: the first element is an (R, G, B) tuple, the second is the hex string "#rrggbb". Both are None if the user cancels. These dialogs are native OS dialogs — they match the user's operating system look and feel automatically.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

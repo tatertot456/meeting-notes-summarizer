@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python — Section 1: About Python</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #92400e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #92400e; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #92400e; color: white; border-color: #92400e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #92400e; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #92400e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #92400e; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #92400e; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #92400e; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #92400e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #92400e; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Intro to Python · Section 1</div>
+        <h1>About Python</h1>
+        <p class="subtitle">Computer science, algorithms, what Python is, why it matters, and getting started</p>
+    </header>
+    <nav>
+        <a href="#cs">Computer Science</a>
+        <a href="#algorithms">Algorithms</a>
+        <a href="#whatispython">What Is Python?</a>
+        <a href="#why">Why Python?</a>
+        <a href="#setup">Setup & Tools</a>
+        <a href="#basics">Python Basics</a>
+        <a href="#modules">Modules</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="cs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is Computer Science?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A common misconception is that computer science is the study of computers, or of how to write programs, or of applications and software. All of these are incomplete. The real definition:</p>
+                <div class="highlight"><p>Computer Science is the study of <strong>algorithms</strong> — including their formal and mathematical properties, hardware realizations, linguistic realizations, and applications.</p></div>
+                <p>A computer scientist <strong>designs and develops algorithms to solve problems</strong>. The four areas of study:</p>
+                <div class="grid">
+                    <div class="card"><h3>Formal & Mathematical Properties</h3><p>Studying the behavior of algorithms to determine whether they are correct and efficient.</p></div>
+                    <div class="card"><h3>Hardware Realizations</h3><p>Designing and building computer systems that are able to execute algorithms.</p></div>
+                    <div class="card"><h3>Linguistic Realizations</h3><p>Designing programming languages and translating algorithms into those languages.</p></div>
+                    <div class="card"><h3>Applications</h3><p>Identifying important problems and designing correct, efficient software to solve them.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="algorithms">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Algorithms</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An <strong>algorithm</strong> is a well-ordered collection of unambiguous and effectively computable operations that, when executed, produces a result and halts in a finite amount of time.</p>
+                <p>Breaking that down:</p>
+                <ul>
+                    <li><strong>Well-ordered:</strong> upon completion of any step, we always know which step comes next</li>
+                    <li><strong>Unambiguous:</strong> every operation can be understood and carried out directly by the computing agent without further explanation (called a "primitive")</li>
+                    <li><strong>Effectively computable:</strong> it must not only be understandable — it must be doable</li>
+                    <li><strong>Finite:</strong> the algorithm must terminate — infinite loops are a common mistake in algorithm design</li>
+                </ul>
+                <div class="highlight"><p>If we can specify an algorithm to solve a problem, we can <strong>automate its solution</strong>. The computing agent (machine, robot, person) does not need to understand the concepts behind the solution — it just follows the steps.</p></div>
+                <p><strong>Three categories of algorithmic operations:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Sequential</h3><p>Carry out one well-defined task, then move to the next. Example: "Set x to 1."</p></div>
+                    <div class="card"><h3>Conditional</h3><p>Ask a question and select the next step based on the answer. Example: "If x ≠ 0, set y = 1/x; otherwise print error."</p></div>
+                    <div class="card"><h3>Iterative</h3><p>Repeat a block of instructions. Example: "While there are more checks to process, do the following five steps."</p></div>
+                    <div class="card"><h3>Result</h3><p>The result of an algorithm can be a number, text, error message, image, sound, or change in the computing agent's environment.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="whatispython">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is Python?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Python is an open-source, high-level, interpreted programming language that looks like pseudocode. It supports object-oriented, functional, and procedural programming styles.</p>
+                <ul>
+                    <li>Started in 1989/1990</li>
+                    <li>Python 2.0 released in 2000</li>
+                    <li>Python 3.0 released in 2008 — broke backwards compatibility but removed duplication and added structural improvements</li>
+                    <li>#1 programming language in 2025 (TIOBE Index)</li>
+                </ul>
+                <div class="grid">
+                    <div class="card"><h3>Interpreted</h3><p>Unlike compiled languages, Python code is run through an interpreter line by line. This makes it "slower" than C or C++ but dramatically easier to develop in.</p></div>
+                    <div class="card"><h3>High-Level</h3><p>Abstracts away low-level details like memory management. Looks almost like English pseudocode — very readable.</p></div>
+                    <div class="card"><h3>Object-Oriented</h3><p>Everything is an object, including numbers and operators. Every object has a type. Supports full OOP with classes and inheritance.</p></div>
+                    <div class="card"><h3>Module System</h3><p>Can be extended with libraries written in Python or other languages (like C). This is Python's greatest strength — flexibility through modules.</p></div>
+                </div>
+                <div class="highlight"><p>Python works as a general programming language AND extends into specialized areas: data science, machine learning, blockchain, automation, web development, and more. Often described as "Python as Glue" — it connects different systems and languages together.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="why">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why Python? Why Multiple Languages?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>No one has created a "one size fits all" programming language. Different languages excel at different things — speed, flexibility, ease of use, software engineering principles. You should expect to use multiple languages throughout your career.</p>
+                <p><strong>Why Python specifically:</strong></p>
+                <ul>
+                    <li>Originally designed as a starter language — easy to learn and understand</li>
+                    <li>Promotes good programming habits</li>
+                    <li>Multiplatform (Mac, Windows, Linux)</li>
+                    <li>Concise — often fewer lines of code than other languages</li>
+                    <li>Flexible — object-oriented, functional, or procedural</li>
+                    <li>Open source and free with a massive developer community</li>
+                    <li>Huge library ecosystem for data science, ML, visualization, web, and more</li>
+                    <li>Platform-independent</li>
+                </ul>
+                <div class="highlight"><p>Don't rely too heavily on AI to write your code. Literally anyone can generate code with AI — what separates you is understanding HOW it works and WHY it's written that way. You may be able to fake it through college, but you won't at your job. Learn by doing, not watching.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="setup">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Setup & Tools</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>We use the <strong>Anaconda Python Distribution</strong> — it bundles everything needed in one free install:</p>
+                <div class="grid">
+                    <div class="card"><h3>Python Kernel</h3><p>The core Python interpreter (3.13.x). Everything runs through this.</p></div>
+                    <div class="card"><h3>IPython</h3><p>Enhanced interpreter with tab completion, magic commands, and inline display of plots.</p></div>
+                    <div class="card"><h3>Spyder IDE</h3><p>The IDE used in class. Has a variable explorer and interactive execution feature not available in Visual Studio — very useful for teaching and exploration.</p></div>
+                    <div class="card"><h3>Scientific Stack</h3><p>Pre-installed libraries: NumPy, Pandas, Matplotlib, SciKit-Learn, and more.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Key data science libraries:</strong></p>
+                <table>
+                    <tr><th>Library</th><th>Purpose</th></tr>
+                    <tr><td>NumPy</td><td>MATLAB-style ndarray object, numerical computing</td></tr>
+                    <tr><td>Matplotlib</td><td>2D (and some 3D) plotting and visualization</td></tr>
+                    <tr><td>Pandas</td><td>DataFrame class, time series analysis, data manipulation</td></tr>
+                    <tr><td>Stat Models</td><td>Basic regression and statistical modeling</td></tr>
+                    <tr><td>Scikit-Learn</td><td>Machine learning classification and algorithms</td></tr>
+                </table>
+                <div class="highlight"><p>Download Anaconda from anaconda.org. The IDE doesn't matter for the course — it's the code that's important. Spyder is recommended for class because of its interactive execution and variable explorer features.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="basics">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Python Basics — Shell, Comments & Working Directory</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The IDE sits on top of the Python shell. The shell lets you input commands one at a time — useful for initial development and exploration.</p>
+                <pre># Single line comment — use the hash mark
+""" 
+This is a 
+multiline comment 
+"""
+
+# Variables and output
+a_piece_of_code = "This is a string"
+print("Output " + a_piece_of_code)
+# Output: Output This is a string
+
+# Getting help
+help(str)               # full help for str class
+help(str.capitalize)    # help for a specific method
+str.capitalize?         # Spyder/IPython shorthand
+
+x = "hello"
+print(x.capitalize())   # Hello</pre>
+                <p><strong>Setting your working directory:</strong></p>
+                <pre>import os
+
+os.getcwd()                    # get current working directory
+os.chdir(r"C:\Project1")       # set working directory
+help(os)                       # explore the os module</pre>
+                <div class="highlight"><p>Setting your working directory matters because Python looks for files relative to it. The r before the string makes it a "raw string" — backslashes are treated literally, not as escape characters. This is important on Windows where paths use backslashes.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="modules">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Modules</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Modules extend Python with new functionality — math, statistics, date/time, graphics, machine learning, etc. Modules can also be user-defined as .py script files.</p>
+                <pre># Three ways to import modules
+import keyword                  # import the module
+import keyword as kw            # import with an alias (shorter name)
+from keyword import kwlist      # import specific object into namespace
+
+# Using an alias
+import keyword as kw
+print(kw.kwlist)                # list of all Python keywords
+
+# What NOT to do
+from keyword import *           # loads EVERYTHING into namespace
+                                # avoid — pollutes the namespace and
+                                # makes it unclear where things came from</pre>
+                <div class="highlight"><p>Use import module as alias for frequently used modules — numpy as np and pandas as pd are standard conventions you'll see everywhere. Avoid from module import * because it loads everything into the local namespace without clear labeling of where each name came from, making debugging much harder.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
