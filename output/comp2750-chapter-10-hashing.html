@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 10: Hashing</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f0a00, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #c2410c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #ea580c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #c2410c; color: white; border-color: #c2410c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #ea580c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #c2410c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #ea580c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #ea580c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #ea580c; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #c2410c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #ea580c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 10</div>
+        <h1>Hashing</h1>
+        <p class="subtitle">Hash functions, collision resolution, deletion, perfect hashing, rehashing, and extendible file hashing</p>
+    </header>
+    <nav>
+        <a href="#intro">Introduction</a>
+        <a href="#functions">Hash Functions</a>
+        <a href="#collision">Collision Resolution</a>
+        <a href="#deletion">Deletion</a>
+        <a href="#perfect">Perfect Hash Functions</a>
+        <a href="#rehashing">Rehashing & Cuckoo</a>
+        <a href="#extendible">Extendible Hashing</a>
+        <a href="#linear">Linear Hashing</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Introduction — What is Hashing?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>All prior search techniques (sequential, binary, BST) are comparison-based. Hashing takes a completely different approach: <strong>calculate the position directly from the key's value</strong>.</p>
+                <div class="grid">
+                    <div class="card"><h3>Hash Function h(K)</h3><p>Transforms a key K into a table index. Ideal: O(1) access regardless of table size. Real world: approximate O(1) with occasional collisions.</p></div>
+                    <div class="card"><h3>Collision</h3><p>When two different keys hash to the same position: h("abc") = h("acb") = 294 (ASCII sum). Collisions are inevitable — must be handled.</p></div>
+                    <div class="card"><h3>Perfect Hash Function</h3><p>Maps every key to a unique position — no collisions. Requires knowing all keys in advance. Rare in practice.</p></div>
+                    <div class="card"><h3>Minimal Perfect Hash</h3><p>Perfect hash that uses exactly n positions for n keys — no empty cells. Ideal but hard to construct.</p></div>
+                </div>
+                <div class="highlight"><p>The goal: reduce search from O(n) or O(log n) down to O(1). If h can transform any key into a unique index, we access data directly without any search at all. In practice, collisions prevent this ideal — but with good hash functions and collision resolution, average O(1) is achievable.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="functions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Hash Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Method</th><th>How It Works</th><th>Notes</th></tr>
+                    <tr><td>Division</td><td>h(K) = K mod TSize</td><td>Simple and fast. Best when TSize is prime. If not prime: h(K) = (K mod p) mod TSize for prime p &gt; TSize.</td></tr>
+                    <tr><td>Folding (Shift)</td><td>Split key into parts, add them, mod TSize</td><td>SSN 123-45-6789 → 123+456+789=1368 → 1368 mod TSize. Fast, especially with bitwise XOR on strings.</td></tr>
+                    <tr><td>Folding (Boundary)</td><td>Alternate parts are reversed before adding</td><td>SSN → 123+654+789=1566. Different distribution than shift folding.</td></tr>
+                    <tr><td>Mid-Square</td><td>Square the key, extract middle digits</td><td>3121² = 9,740,641 → middle 3 digits = 406. Entire key participates — better distribution. Use powers of 2 for table size.</td></tr>
+                    <tr><td>Extraction</td><td>Use only selected digits of the key</td><td>SSN: use first 4 (1234), last 4 (6789), or mixed (1289). Exclude known-redundant digits (e.g., publisher prefix in ISBN).</td></tr>
+                    <tr><td>Radix Transformation</td><td>Convert key to different base, then mod TSize</td><td>345 decimal → 423 in base 9. Cannot fully avoid collisions — 264 decimal = 323 base 9 collides with 345.</td></tr>
+                    <tr><td>Universal Hashing</td><td>Randomly choose from a class of functions</td><td>Carter & Wegman (1979). hₐ,ᵦ(K) = ((aK+b) mod p) mod TSize. Guarantees ≤1/TSize collision probability for random function choice.</td></tr>
+                </table>
+                <div class="highlight"><p>The division method is most common when key distribution is unknown. For string keys, XOR individual characters or XOR chunks of bytes (size = integer width) for better distribution than XORing individual bytes (limited to 0-127 range). The key tradeoff: more complex hash functions distribute better but take longer to compute.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="collision">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Collision Resolution</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Open Addressing</strong> — find another empty slot in the same table when a collision occurs:</p>
+                <pre>// Probing sequence: h(K), h(K)+p(1), h(K)+p(2), ...
+// Each probed position = norm(h(K) + p(i)) = (h(K) + p(i)) mod TSize
+
+// LINEAR PROBING — p(i) = i
+// Try: h(K), h(K)+1, h(K)+2, ...
+// Problem: PRIMARY CLUSTERING — filled cells near clusters fill faster,
+// causing clusters to grow, dramatically reducing efficiency.
+
+// QUADRATIC PROBING — p(i) = ±i²
+// Try: h(K), h(K)+1, h(K)-1, h(K)+4, h(K)-4, ...
+// Reduces primary clustering BUT creates SECONDARY CLUSTERING:
+// Same probe sequence for any key that hashes to same position.
+// TSize should be prime of form 4j+3 to ensure all positions are checked.
+
+// DOUBLE HASHING — use two hash functions
+// Probe sequence: h(K), h(K)+hp(K), h(K)+2·hp(K), ...
+// Different hp(K) for each key → different probe sequences → no secondary clustering
+// TSize must be prime (all positions reachable)
+// hp(K) = i·h(K) + 1 is a common choice</pre>
+                <div class="highlight"><p>Linear probing is simplest but creates primary clusters — once a cluster forms it tends to grow. Quadratic probing eliminates primary clustering but secondary clustering still occurs (same starting position → same probe sequence). Double hashing eliminates both by making the probe step key-dependent. As the table fills past ~70% occupancy, all open-addressing methods degrade rapidly.</p></div>
+                <p><strong>Separate Chaining</strong> — store colliding keys in linked lists:</p>
+                <pre">// Each table slot holds a pointer to a linked list
+// Collisions: append to the list at that slot
+// Table NEVER overflows (lists grow dynamically)
+// Fast for short chains; degrades with long chains
+// Use ordered lists or self-organizing lists for better performance
+// Space overhead: one pointer per table slot + node pointers
+
+// COALESCED HASHING — hybrid of chaining + open addressing
+// Colliding key goes in LAST AVAILABLE TABLE SLOT
+// index stored with existing key to link the chain
+// Less space than pure chaining
+// Overflow keys use a "cellar" — dedicated overflow area at end of table</pre>
+                <p><strong>Bucket Addressing</strong> — each table slot holds multiple items:</p>
+                <pre>// Each slot = a bucket capable of storing b items
+// Collision within bucket: bucket is full → overflow handling
+// Options: linear probing to next bucket, OR separate overflow area
+// Overflow area can use chaining (pointer stored in bucket)
+// Good for disk-based storage where one disk read retrieves whole bucket</pre>
+                <table style="margin-top:16px">
+                    <tr><th>Method</th><th>Successful Search</th><th>Unsuccessful Search</th><th>Space</th></tr>
+                    <tr><td>Linear Probing</td><td>½(1 + 1/(1-α))</td><td>½(1 + 1/(1-α)²)</td><td>O(n)</td></tr>
+                    <tr><td>Quadratic / Double Hash</td><td>-ln(1-α)/α</td><td>1/(1-α)</td><td>O(n)</td></tr>
+                    <tr><td>Separate Chaining</td><td>1 + α/2</td><td>α + e^(-α)</td><td>O(n + chains)</td></tr>
+                </table>
+                <p style="margin-top:8px; font-size:0.85rem; color:#888;">α = load factor = n/TSize (fraction of table occupied)</p>
+            </div>
+        </div>
+
+        <div class="section" id="deletion">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Deletion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Deletion in chaining is simple — just remove the node from the linked list. Open addressing is trickier.</p>
+                <pre>// PROBLEM with naive deletion in open addressing:
+// Linear probing table: A4 B4 (B4 placed at position 5 due to collision)
+// Delete A4 → position 4 is empty
+// Search for B4: hash to position 4, find empty → conclude B4 not in table!
+// WRONG — B4 is at position 5 but we stopped too early.
+
+// SOLUTION: Mark deleted slots with a "tombstone" (DELETED flag)
+// Searches: continue past tombstone (don't stop at DELETED)
+// Insertions: can reuse tombstone positions
+// Search finds key OR reaches truly EMPTY slot (never inserted)
+
+// PROBLEM with tombstones:
+// After many deletions, table fills with tombstones → slow searches
+// SOLUTION: Periodic rehashing to purge tombstones
+// Move valid keys to freed slots, mark remaining as EMPTY</pre>
+                <div class="highlight"><p>The key distinction: EMPTY (never used) stops a search; DELETED (tombstone) does not. Without tombstones, deleting a key can make other keys unreachable. With too many tombstones, search performance degrades because every tombstone must be examined. Chaining avoids this entirely — deletion is a standard linked list removal.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="perfect">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Perfect Hash Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>When data is known in advance (compiler reserved words, dictionaries), a perfect hash function can be constructed. Only 1 in a million random functions is perfect for 50 elements in a 100-slot table.</p>
+                <p><strong>Cichelli's Method (1980)</strong> — for small sets of reserved words:</p>
+                <pre>// Form: h(word) = (length(word) + g(firstLetter) + g(lastLetter)) mod TSize
+// Goal: find values for g() such that h() produces unique values for all words
+// g() values don't need to be unique — just h() values must be
+
+// Algorithm:
+// 1. Count first and last letter occurrences across all words
+// 2. Order words by letter frequency (most frequent letters first)
+// 3. Search: assign g-values 0..Max to letters, backtrack on collision
+
+// Example (Nine Muses):
+// Letter counts: A(3), C(2), E(6), M(1), O(2), P(1), T(2), U(1)
+// Order: Euterpe, Calliope, Erato, Terpsichore, Melpomene, Thalia, Clio, Polyhymnia, Urania
+// After backtracking: A=C=E=O=M=T=0, P=2, U=4 → minimal perfect hash!</pre>
+                <div class="highlight"><p>Cichelli's method is exponential in worst case and doesn't guarantee finding a perfect hash. It works well for small word sets (&lt;~50 words) like compiler keywords. Extensions by Sebesta-Taylor (1986) and Haggard-Karplus (1986) use more sophisticated formulas. The FHCD algorithm (Fox, Heath, Chen, Daoud, 1992) is more powerful, using three hash functions and a dependency graph to construct g() — but g must be stored as a lookup table, which can be large for big datasets.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="rehashing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Rehashing & Cuckoo Hashing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Rehashing</strong> — when a table becomes full or too slow, allocate a larger table and re-insert all items:</p>
+                <ul>
+                    <li>New table size: doubled, nearest prime to doubled, etc.</li>
+                    <li>New hash function uses new TSize</li>
+                    <li>All items from old table rehashed to new table</li>
+                    <li>Old table discarded</li>
+                    <li>Drawback: entire system halts during rehash — can be unacceptable for real-time systems</li>
+                </ul>
+                <p><strong>Cuckoo Hashing</strong> (Pagh & Rodler, 2001) — uses TWO tables and TWO hash functions:</p>
+                <pre>insert(K):
+    if K already in T1[h1(K)] or T2[h2(K)]: return   // already present
+    for i = 0 to maxLoop-1:
+        swap(K, T1[h1(K)])   // K goes in, displaced key comes out
+        if K is null: return  // empty slot found — done!
+        swap(K, T2[h2(K)])   // try second table
+        if K is null: return
+    rehash()                  // loop detected — expand and retry
+    insert(K)
+
+// Search: at most TWO lookups — check T1[h1(K)] and T2[h2(K)]
+// Guaranteed O(1) worst-case lookup!
+
+// Example:
+// Insert 2 → T1[h1(2)] = 2
+// Insert 7 → h1(7) = h1(2), displace 2 to T2[h2(2)], place 7 in T1
+// Insert 12 → h1(12) = h1(7), displace 7 to T2[h2(7)] = T2[h2(2)],
+//             displace 2 back to T1... potential loop → rehash!</pre>
+                <div class="highlight"><p>Cuckoo hashing's key insight: like the cuckoo bird evicting eggs from other nests, inserting a key evicts the current occupant who must find a new home. Search is guaranteed O(1) — check exactly two positions. Insertion is amortized O(1) but may trigger rehash. The name comes from the cuckoo bird's habit of laying eggs in other birds' nests, displacing the original eggs.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="extendible">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Extendible Hashing — Dynamic File Growth</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Standard rehashing stops all processing while rebuilding. Extendible hashing (Fagin et al., 1979) allows local expansion with no full reorganization — ideal for disk-based files.</p>
+                <pre>// Structure:
+// - Directory: expandable table of pointers to buckets
+// - Buckets: fixed-size pages on disk
+// - Each bucket has a LOCAL DEPTH (# of bits used to route to it)
+// - Directory has a GLOBAL DEPTH d (# of bits used to index directory)
+
+// Hash produces PSEUDOKEY (bit string): h(K) = 01011...
+// Use leftmost d bits to index directory → find bucket pointer
+
+// INSERTION — bucket has room: insert normally
+// INSERTION — bucket is full:
+//   if local_depth &lt; global_depth:
+//     Split bucket, redistribute keys
+//     Update HALF the directory pointers (only those pointing to old bucket)
+//   if local_depth == global_depth:
+//     DOUBLE the directory (depth++)
+//     Split bucket, redistribute keys
+//     newdir[2i] = olddir[i], newdir[2i+1] = olddir[i] for all i
+//     Update pointers for the split bucket
+
+// Example with depth 2:
+// Directory: 00→b00, 01→b01, 10→b10, 11→b10 (b10 has local depth 1)
+// Key with h-value 11001 arrives, first 2 bits = 11 → bucket b10
+// b10 overflows → split into b10 (local depth 2) and b11 (local depth 2)
+// Only directory[11] pointer needs updating → fast!</pre>
+                <div class="highlight"><p>Extendible hashing's key advantage: only the directory changes on overflow — not the entire file. Since directories are usually kept in main memory, expansion is cheap. Drawback: directory can double in size suddenly (when a bucket with local_depth = global_depth splits). With many small buckets, the directory can grow large enough to need disk storage, slowing access significantly.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="linear">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Linear Hashing — No Directory Needed</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Linear hashing (Litwin, 1980) achieves dynamic expansion WITHOUT any directory or index. Buckets split in a predetermined linear order, tracked by a single pointer.</p>
+                <pre>// TWO hash functions at each level:
+// h_level(K)   = K mod (TSize × 2^level)    // for unsplit buckets
+// h_level+1(K) = K mod (TSize × 2^(level+1)) // for already-split buckets
+
+// Split pointer 'split' indicates WHICH bucket splits NEXT (always linear)
+// Splitting is triggered by load factor exceeding a threshold (e.g., 80%)
+
+// INSERT algorithm:
+// 1. Compute h_level(K)
+// 2. If result &lt; split: use h_level+1(K) instead (bucket already split)
+// 3. Insert into computed bucket (use overflow area if full)
+// 4. If load factor > threshold: split bucket[split], increment split
+//    If split reaches end of level: split = 0, level++, define h_level+2
+
+// Example (TSize=3, threshold=80%):
+// Level 0: h0(K) = K mod 3, buckets: 0,1,2
+// Load exceeds 80% → split bucket 0 → new bucket 3
+//   h1(K) = K mod 6: keys with K mod 6 = 0 stay, K mod 6 = 3 go to bucket 3
+// split = 1, next overflow → split bucket 1 → new bucket 4, etc.
+// When split reaches 3: level=1, split=0, new h2(K) = K mod 12</pre>
+                <div class="highlight"><p>Linear hashing vs. extendible hashing: linear hashing is simpler (no directory = less memory, faster) and splits happen predictably in order. But splitting is predetermined — a lightly loaded bucket may split before a heavily loaded one. An overflow area is required because of this fixed split order. For very large files, linear hashing's lack of directory overhead makes it significantly faster than extendible hashing.</p></div>
+                <table>
+                    <tr><th>Method</th><th>Directory</th><th>Split Control</th><th>Best For</th></tr>
+                    <tr><td>Extendible Hashing</td><td>Yes (table)</td><td>Split any full bucket</td><td>Balanced splits, medium files</td></tr>
+                    <tr><td>Dynamic Hashing</td><td>Yes (binary tree)</td><td>Split any full bucket</td><td>Similar to extendible</td></tr>
+                    <tr><td>Linear Hashing</td><td>None</td><td>Predetermined linear order</td><td>Large files, minimal overhead</td></tr>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

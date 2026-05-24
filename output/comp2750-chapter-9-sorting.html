@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 9: Sorting</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a28, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0f766e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0d9488; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0f766e; color: white; border-color: #0f766e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0d9488; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a28; border-left: 3px solid #0f766e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0d9488; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0d9488; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #0d9488; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #0f766e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0d9488; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 9</div>
+        <h1>Sorting</h1>
+        <p class="subtitle">Elementary sorts, decision trees, Shell sort, heap sort, quicksort, mergesort, radix sort, counting sort, and STL sorting</p>
+    </header>
+    <nav>
+        <a href="#intro">Overview</a>
+        <a href="#elementary">Elementary Sorts</a>
+        <a href="#decision">Decision Trees</a>
+        <a href="#shell">Shell Sort</a>
+        <a href="#heap">Heap Sort</a>
+        <a href="#quick">Quicksort</a>
+        <a href="#merge">Mergesort</a>
+        <a href="#radix">Radix Sort</a>
+        <a href="#counting">Counting Sort</a>
+        <a href="#stl">STL Sorting</a>
+        <a href="#comparison">Comparison</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Introduction & Evaluation Criteria</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Sorting improves efficiency of data handling. Evaluating sorting algorithms requires machine-independent metrics applied across different input states.</p>
+                <div class="grid">
+                    <div class="card"><h3>Number of Comparisons</h3><p>How many times are two elements compared? The primary metric for comparison-based sorts.</p></div>
+                    <div class="card"><h3>Number of Data Movements</h3><p>How many times are elements moved or swapped? An algorithm can be fast on comparisons but slow on moves.</p></div>
+                    <div class="card"><h3>Best / Average / Worst Case</h3><p>Some algorithms behave very differently depending on whether input is sorted, reverse-sorted, or random. All three cases matter.</p></div>
+                    <div class="card"><h3>Practical Considerations</h3><p>Simpler O(n²) algorithms may outperform O(n log n) for small datasets due to lower constant factors and simpler code. Theory must be tempered by practice.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="elementary">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Elementary Sorting Algorithms</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>All elementary sorts are O(n²) — fine for small datasets, impractical for large ones.</p>
+                <p><strong>Insertion Sort</strong> — build sorted list one item at a time, inserting each into its correct position:</p>
+                <pre>template&lt;class T&gt;
+void insertionSort(T data[], int n) {
+    for (int i = 1, j; i &lt; n; i++) {
+        T tmp = data[i];
+        for (j = i; j &gt; 0 && tmp &lt; data[j-1]; j--)
+            data[j] = data[j-1];  // shift larger elements right
+        data[j] = tmp;            // insert in correct position
+    }
+}
+// [5 2 3 8 1] → [2 5 3 8 1] → [2 3 5 8 1] → [2 3 5 8 1] → [1 2 3 5 8]
+// Best case: O(n) when already sorted — only checks, no moves
+// Worst case: O(n²) when reverse sorted</pre>
+                <p><strong>Selection Sort</strong> — find minimum, swap to front, repeat:</p>
+                <pre>template&lt;class T&gt;
+void selectionSort(T data[], int n) {
+    for (int i = 0, j, least; i &lt; n-1; i++) {
+        for (j = i+1, least = i; j &lt; n; j++)
+            if (data[j] &lt; data[least]) least = j;
+        swap(data[least], data[i]);
+    }
+}
+// Always exactly n(n-1)/2 comparisons — no best/worst distinction
+// Very few moves: exactly n-1 swaps regardless of input</pre>
+                <p><strong>Bubble Sort</strong> — repeatedly swap adjacent out-of-order pairs:</p>
+                <pre>template&lt;class T&gt;
+void bubbleSort(T data[], int n) {
+    for (int i = 0; i &lt; n-1; i++)
+        for (int j = n-1; j &gt; i; --j)
+            if (data[j] &lt; data[j-1])
+                swap(data[j], data[j-1]);
+}
+// Small values "bubble" left, large values "bubble" right
+// Disadvantage: elements must be swapped one position at a time
+// Items that are already in place still get moved (unlike insertion sort)</pre>
+                <p><strong>Comb Sort</strong> — bubble sort improvement (Dobosiewicz 1980, popularized 1991). Uses a gap &gt; 1 to eliminate "turtles" (small values near the end that slow bubble sort). Gap starts at n/1.3 and shrinks by dividing by 1.3 each pass until gap = 1 (standard bubble sort finish). Rivals quicksort in practice.</p>
+                <div class="highlight"><p>The key insight of comb sort: bubble sort is slow because small values near the end (turtles) must move one position per pass. By comparing elements far apart first, turtles leap toward the front in a single pass. Large values near the start (rabbits) aren't a problem for bubble sort — only turtles are.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="decision">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Decision Trees — Lower Bound for Sorting</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Any comparison-based sort can be modeled as a <strong>decision tree</strong> — a binary tree where each internal node is a comparison and each leaf is a possible sorted ordering.</p>
+                <ul>
+                    <li>For n items, there are n! possible orderings → at least n! leaves needed</li>
+                    <li>A tree with m leaves has height ≥ ⌈lg m⌉</li>
+                    <li>Therefore minimum height ≥ ⌈lg(n!)⌉</li>
+                    <li>lg(n!) = Θ(n lg n) by Stirling's approximation</li>
+                </ul>
+                <div class="highlight"><p><strong>Fundamental lower bound:</strong> Any comparison-based sorting algorithm requires Ω(n log n) comparisons in the worst and average cases. This is provably optimal — no comparison sort can do better. This is why we aim for O(n log n) algorithms. Elementary O(n²) sorts are provably suboptimal. Non-comparison sorts (radix, counting) can beat this bound by not using comparisons.</p></div>
+                <table>
+                    <tr><th>n</th><th>n²</th><th>n lg n</th><th>Speedup factor</th></tr>
+                    <tr><td>16</td><td>256</td><td>64</td><td>4×</td></tr>
+                    <tr><td>256</td><td>65,536</td><td>2,048</td><td>32×</td></tr>
+                    <tr><td>1,024</td><td>1,048,576</td><td>10,240</td><td>102×</td></tr>
+                    <tr><td>1,000,000</td><td>10¹²</td><td>20,000,000</td><td>50,000×</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="shell">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Shell Sort — Diminishing Increment Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Shell sort (Donald Shell, 1959) generalizes insertion sort by comparing elements far apart first, then progressively reducing the gap. Far-apart comparisons move elements toward their final position quickly.</p>
+                <pre>// Shell sort with gap sequence: n/2, n/4, ..., 1
+void shellSort(T data[], int n) {
+    for (int h = n/2; h &gt; 0; h /= 2) {       // gap decreases
+        for (int i = h; i &lt; n; i++) {
+            T tmp = data[i];
+            int j = i;
+            while (j &gt;= h && tmp &lt; data[j-h]) {
+                data[j] = data[j-h];            // insertion sort with gap h
+                j -= h;
+            }
+            data[j] = tmp;
+        }
+    }
+}
+// Example with [10 8 6 20 4 3 22 1 0 15 16], gaps: 5, 3, 1
+// Gap 5: compare positions 0&5, 1&6, 2&7, ... — sorts 5 subarrays
+// Gap 3: sorts 3 subarrays of the partially-ordered result
+// Gap 1: final insertion sort — now nearly sorted, very fast</pre>
+                <div class="highlight"><p>Shell sort's complexity depends on the gap sequence chosen. The simple n/2 sequence gives O(n²) worst case. Better sequences (Hibbard: 1,3,7,15,...; Sedgewick: 1,5,19,41,...) give O(n^(3/2)) or better. Shell sort is not stable — equal elements may be reordered. In practice, it's often faster than O(n log n) sorts for medium-sized datasets due to simplicity.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="heap">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Heap Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Heap sort (John Williams, 1964) improves selection sort's comparison phase using a heap. Always O(n log n) — better worst-case than quicksort. In-place but not stable.</p>
+                <pre>template&lt;class T&gt;
+void heapSort(T data[], int n) {
+    // Phase 1: Build max-heap (Floyd's bottom-up algorithm)
+    for (int i = n/2 - 1; i &gt;= 0; --i)
+        moveDown(data, i, n-1);  // heapify each subtree
+
+    // Phase 2: Extract max repeatedly
+    for (int i = n-1; i &gt;= 1; --i) {
+        swap(data[0], data[i]);  // move largest to end
+        moveDown(data, 0, i-1); // restore heap on remaining elements
+    }
+}
+// Phase 1: O(n) — Floyd's algorithm is linear despite appearances
+// Phase 2: n-1 extractions × O(log n) each = O(n log n)
+// Total: O(n log n) guaranteed — no worst case degradation</pre>
+                <div class="highlight"><p>Selection sort is O(n²) because finding the minimum requires scanning all remaining elements each time. Heap sort achieves the same "find and remove the max" pattern but uses the heap property to find the max in O(log n) instead of O(n). The heap is maintained as an array — no extra memory needed. Heap sort is never faster than O(n log n) but also never slower.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="quick">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Quicksort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Quicksort (C.A.R. Hoare, 1960) — partition around a pivot, then recursively sort each partition. Fastest in practice for most inputs.</p>
+                <pre>// Quicksort — choose pivot, partition, recurse
+quicksort(data[], first, last):
+    if first &lt; last:
+        pivot = data[(first + last) / 2]  // middle element as pivot
+        partition data into:
+            left:  elements ≤ pivot
+            right: elements ≥ pivot
+        quicksort(left partition)
+        quicksort(right partition)
+
+// Partitioning (Hoare scheme):
+// i starts at first, j starts at last
+// Move i right while data[i] &lt; pivot
+// Move j left while data[j] &gt; pivot
+// Swap data[i] and data[j]
+// Repeat until i &gt;= j</pre>
+                <div class="grid">
+                    <div class="card"><h3>Pivot Choice Matters</h3><p>Middle element: good average case. First/last: O(n²) on sorted input. Median-of-three: robust choice. Random: good average, hard to exploit.</p></div>
+                    <div class="card"><h3>Best/Average Case</h3><p>O(n log n) when pivot splits array roughly in half each time. Average case O(n log n) for random input.</p></div>
+                    <div class="card"><h3>Worst Case</h3><p>O(n²) when pivot is always smallest or largest element — degenerate partitioning. Happens with sorted/reverse-sorted input and poor pivot choice.</p></div>
+                    <div class="card"><h3>In Practice</h3><p>Fastest sorting algorithm for most real-world inputs despite O(n²) worst case. Low constant factor, good cache performance, in-place. Not stable.</p></div>
+                </div>
+                <div class="highlight"><p>Quicksort is NOT stable — equal elements may be reordered. Elements equal to the pivot can go to either partition — this affects balance. The algorithm preprocesses to find the largest element and moves it to the end, simplifying the partition step. Once partitioning is complete, the pivot is already in its final position — the key invariant that makes quicksort correct.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="merge">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Mergesort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Mergesort (John von Neumann, 1945) — split in half, recursively sort each half, merge. Guaranteed O(n log n), stable, but requires O(n) extra memory.</p>
+                <pre>// Mergesort
+void mergeSort(T data[], int first, int last) {
+    if (first &lt; last) {
+        int mid = (first + last) / 2;
+        mergeSort(data, first, mid);     // sort left half
+        mergeSort(data, mid+1, last);    // sort right half
+        merge(data, first, last);        // merge sorted halves
+    }
+}
+
+// Merge — requires temp array
+void merge(T data[], int first, int last) {
+    int mid = (first + last) / 2;
+    int i1 = 0, i2 = first, i3 = mid + 1;
+    T temp[last - first + 1];
+
+    while (i2 &lt;= mid && i3 &lt;= last)
+        temp[i1++] = (data[i2] &lt; data[i3]) ? data[i2++] : data[i3++];
+
+    while (i2 &lt;= mid)  temp[i1++] = data[i2++]; // remaining left
+    while (i3 &lt;= last) temp[i1++] = data[i3++]; // remaining right
+
+    for (int i = 0; i &lt; i1; i++) data[first + i] = temp[i];
+}
+// Each merge: exactly 2×(last-first+1) moves, ≤(last-first+1) comparisons
+// Total: O(n log n) comparisons and moves — always, no worst case</pre>
+                <div class="highlight"><p>Mergesort's key advantage over quicksort: guaranteed O(n log n) with no worst-case degradation. It's also stable — equal elements maintain their original order. The key disadvantage: requires O(n) extra memory for the temp array. For external sorting (data on disk), mergesort is almost always the right choice because it accesses data sequentially.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="radix">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Radix Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Radix sort (Herman Hollerith, 1887) — sort by individual digits from least significant to most significant. No comparisons between elements — beats the O(n log n) lower bound by not being comparison-based.</p>
+                <pre>void radixSort(long data[], int n) {
+    const int radix = 10;
+    const int digits = 10;  // max digits in a long
+    Queue&lt;long&gt; queues[radix];
+
+    for (int d = 0, factor = 1; d &lt; digits; factor *= radix, d++) {
+        // Distribute into 10 buckets based on digit d
+        for (int j = 0; j &lt; n; j++)
+            queues[(data[j] / factor) % radix].enqueue(data[j]);
+
+        // Collect from buckets (maintains relative order!)
+        for (int j = 0, k = 0; j &lt; radix; j++)
+            while (!queues[j].empty())
+                data[k++] = queues[j].dequeue();
+    }
+}
+// Example: sort [93, 63, 64, 94] by LSD (least significant digit first)
+// Pass 1 (ones): bucket 3=[93,63], bucket 4=[64,94] → [93,63,64,94]
+//   wait — ordered within bucket by arrival → [93,63,94,64] then combine
+// Pass 2 (tens): bucket 6=[63,64], bucket 9=[93,94] → [63,64,93,94] ✓
+// MUST use queues (FIFO) to maintain order within each bucket!</pre>
+                <div class="highlight"><p>Using queues (not stacks) is critical — queues preserve the relative order established by previous passes. This stability property is what makes LSD radix sort work. Complexity: O(d × n) where d = number of digits — linear in n for fixed-size keys. Limitation: only works for non-negative integers (or data mappable to non-negative integers). Cannot handle negative numbers directly.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="counting">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Counting Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Counting sort — for small integer keys. Count occurrences, compute positions, place elements. O(n + k) where k is the range of key values. Fastest sort when k is small. Often used as a subroutine in radix sort.</p>
+                <pre>void countingSort(int data[], int n, int maxVal) {
+    int count[maxVal + 1] = {0};
+    int tmp[n];
+
+    // Step 1: Count occurrences
+    for (int i = 0; i &lt; n; i++) count[data[i]]++;
+
+    // Step 2: Accumulate counts (count[i] = # elements &lt; i)
+    for (int i = 1; i &lt;= maxVal; i++) count[i] += count[i-1];
+
+    // Step 3: Place elements in correct position (reverse for stability)
+    for (int i = n-1; i &gt;= 0; i--)
+        tmp[--count[data[i]]] = data[i];
+
+    // Step 4: Copy back
+    for (int i = 0; i &lt; n; i++) data[i] = tmp[i];
+}
+// Example: data = [7 1 1 3 0 7 5 5 7 3]
+// After count: count[0]=1, count[1]=2, count[3]=2, count[5]=2, count[7]=3
+// After accumulate: count gives starting positions for each value
+// Place elements right-to-left for stability</pre>
+                <div class="highlight"><p>Counting sort is the fastest sort in benchmark tests — but only when key values don't significantly exceed the number of items. If sorting 1,000 numbers with values up to 1,000,000, the O(n+k) = O(1,001,000) cost is worse than O(n log n) ≈ O(10,000). Cannot handle negative numbers without offset adjustment. Cannot handle non-integer keys directly.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="stl">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Sorting in the STL</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>#include &lt;algorithm&gt;
+
+vector&lt;int&gt; v = {5, 2, 8, 1, 9, 3};
+
+// Full sort — introsort (quicksort + heap sort fallback) O(n log n)
+sort(v.begin(), v.end());                          // ascending
+sort(v.begin(), v.end(), greater&lt;int&gt;());          // descending
+
+// Stable sort — mergesort O(n log n) guaranteed, preserves equal element order
+stable_sort(v.begin(), v.end());
+
+// Partial sort — find k smallest and sort them O(n log k)
+partial_sort(v.begin(), v.begin()+3, v.end());     // 3 smallest in front
+partial_sort(v.begin()+1, v.begin()+4, v.end(), greater&lt;int&gt;()); // 3 largest
+
+// Partial sort copy — copy k sorted elements to another container
+vector&lt;int&gt; v2(4);
+partial_sort_copy(v.begin(), v.begin()+4, v2.begin(), v2.end());
+
+// Partition — split by predicate (not sorted)
+partition(v.begin(), v.end(), [](int x){ return x % 2 == 0; });
+// Even elements before odd elements — relative order not preserved
+stable_partition(v.begin(), v.end(), [](int x){ return x % 2 == 0; });
+// Same but preserves relative order within each group</pre>
+            </div>
+        </div>
+
+        <div class="section" id="comparison">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Algorithm Comparison</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable</th></tr>
+                    <tr><td>Insertion Sort</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Yes</td></tr>
+                    <tr><td>Selection Sort</td><td>O(n²)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>No</td></tr>
+                    <tr><td>Bubble Sort</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Yes</td></tr>
+                    <tr><td>Shell Sort</td><td>O(n log n)</td><td>O(n^1.5)</td><td>O(n²)</td><td>O(1)</td><td>No</td></tr>
+                    <tr><td>Heap Sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(1)</td><td>No</td></tr>
+                    <tr><td>Quicksort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n²)</td><td>O(log n)</td><td>No</td></tr>
+                    <tr><td>Mergesort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>Yes</td></tr>
+                    <tr><td>Radix Sort</td><td>O(dn)</td><td>O(dn)</td><td>O(dn)</td><td>O(n+k)</td><td>Yes</td></tr>
+                    <tr><td>Counting Sort</td><td>O(n+k)</td><td>O(n+k)</td><td>O(n+k)</td><td>O(k)</td><td>Yes</td></tr>
+                </table>
+                <div class="highlight"><p>Benchmark results (runtime doubles when input doubles): O(n²) algorithms multiply by ~4×. O(n log n) algorithms multiply by ~2×. Counting sort is fastest overall but limited to small non-negative integer keys. Among general sorts, mergesort, quicksort, and Shell sort lead — typically twice as fast as all others. When data doubles, O(n²) sorts take 4× longer; O(n log n) sorts take just ~2× longer.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

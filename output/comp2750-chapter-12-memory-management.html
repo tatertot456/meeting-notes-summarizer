@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 12: Memory Management</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a1f2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #075985; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0369a1; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #075985; color: white; border-color: #075985; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0369a1; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #075985; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0369a1; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0369a1; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #075985; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #075985; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0369a1; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 12</div>
+        <h1>Memory Management</h1>
+        <p class="subtitle">Sequential-fit methods, buddy systems, garbage collection, mark-and-sweep, copying, incremental, and generational collectors</p>
+    </header>
+    <nav>
+        <a href="#intro">The Heap & Fragmentation</a>
+        <a href="#sequential">Sequential-Fit Methods</a>
+        <a href="#nonsequential">Non-Sequential Methods</a>
+        <a href="#buddy">Buddy Systems</a>
+        <a href="#gc">Garbage Collection</a>
+        <a href="#marking">Mark-and-Sweep</a>
+        <a href="#copying">Copying Methods</a>
+        <a href="#incremental">Incremental GC</a>
+        <a href="#generational">Generational GC</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Heap & Fragmentation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>When a program dynamically requests memory (via <code>new</code> in C++, <code>malloc()</code> in C), it is allocated from a region of main memory called the <strong>heap</strong>. The memory manager administers this region. In C++, memory management is the programmer's responsibility — <code>new</code> to allocate, <code>delete</code> to release.</p>
+                <div class="grid">
+                    <div class="card"><h3>External Fragmentation</h3><p>Wasted space BETWEEN allocated segments. Even with sufficient total free memory, a request may fail because no single contiguous block is large enough. The heap is broken into small scattered pieces.</p></div>
+                    <div class="card"><h3>Internal Fragmentation</h3><p>Wasted space WITHIN an allocated segment. Occurs when more memory is allocated than was requested (e.g., rounding to block sizes). The extra bytes inside the block are unused but unavailable.</p></div>
+                </div>
+                <div class="highlight"><p>After a series of allocations and deallocations, the heap becomes disorganized — allocated blocks mixed with free blocks of varying sizes. External fragmentation can refuse requests even with sufficient total free memory. Internal fragmentation wastes memory inside allocated blocks. Good memory management minimizes both.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="sequential">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Sequential-Fit Methods</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>All free blocks are maintained in a doubly linked list. When a request arrives, the list is searched for a suitable block. How the list is searched distinguishes the methods.</p>
+                <table>
+                    <tr><th>Method</th><th>Strategy</th><th>Pros</th><th>Cons</th></tr>
+                    <tr><td>First-Fit</td><td>Allocate the FIRST block large enough</td><td>Fast — stops at first match. Most efficient overall.</td><td>Scatters small fragments at the front of the list over time.</td></tr>
+                    <tr><td>Best-Fit</td><td>Allocate the CLOSEST-SIZE block</td><td>Minimizes wasted space in allocated block.</td><td>Leaves tiny unusable leftover fragments everywhere. Worst in practice.</td></tr>
+                    <tr><td>Worst-Fit</td><td>Allocate the LARGEST block</td><td>Leftover fragments are larger and more usable.</td><td>Quickly consumes large blocks needed for big requests.</td></tr>
+                    <tr><td>Next-Fit</td><td>Start search where LAST search ended</td><td>Similar speed to first-fit. Avoids rescanning front repeatedly.</td><td>More external fragmentation than first-fit — reaches end of list sooner.</td></tr>
+                </table>
+                <div class="highlight"><p>First-fit is empirically the most efficient. Best-fit sounds optimal but produces many tiny unusable fragments — it leaves "almost perfect" fits that waste surrounding space. The order blocks are maintained matters: best-fit/worst-fit benefit from size-ordered lists; first-fit/next-fit use address-ordered lists. Returned blocks are merged with neighboring free blocks to reduce fragmentation.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="nonsequential">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Non-Sequential Fit Methods</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>For large memories, sequential search becomes too slow. Non-sequential methods organize free blocks into multiple specialized lists.</p>
+                <div class="grid">
+                    <div class="card"><h3>Ross's Method (1967)</h3><p>Divide memory into multiple lists, each holding same-size blocks. Larger blocks split to create smaller ones. Lists organized as a tree for efficient lookup.</p></div>
+                    <div class="card"><h3>Cartesian Tree Variants</h3><p>Leftmost-fit and better-fit variants use a Cartesian tree structure. Only advantageous for large numbers of memory blocks (Stephenson, 1983).</p></div>
+                    <div class="card"><h3>Adaptive Exact-Fit (1985)</h3><p>Tracks most popular block sizes from recent allocations. Maintains short lists of popular sizes. Requests satisfied immediately from list; fall back to sequential search if needed. Blocks evicted from list if unused for T allocations.</p></div>
+                </div>
+                <pre>// Adaptive Exact-Fit:
+// size-list = block-list entries of sizes used in last T allocations
+// On request for size s:
+//   if size-list has entry for s:
+//     detach and return block immediately (O(1))
+//   else:
+//     search memory sequentially for block >= s (slow)
+//     add size s to size-list
+// On return of block size s:
+//   if size-list has entry for s: add to list
+//   else: return to general heap
+// Evict size-list entry if no request for that size in last T allocations</pre>
+            </div>
+        </div>
+
+        <div class="section" id="buddy">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Buddy Systems</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Buddy systems allocate memory in power-of-2 blocks and pair each block with a "buddy" of equal size. Two free buddies are always merged back together.</p>
+                <p><strong>Binary Buddy System (Knowlton, 1965):</strong></p>
+                <pre>// Memory of 2^m locations: addresses 0...2^m-1
+// avail[i] = doubly linked list of free blocks of size 2^i
+
+// Block's BUDDY address: flip bit (i+1) from right in block's address
+// For block at address X with size 2^i:
+//   buddy(X) = X XOR 2^i
+
+// Example (8 locations = 2^3):
+// Size 1: addresses {000,001,010,011,100,101,110,111}
+// Size 2: {000,010,100,110}  — buddy pairs: (000,010),(100,110)
+// Size 4: {000,100}         — buddy pair:  (000,100)
+// Size 8: {000}             — no buddy (entire memory)
+
+// ALLOCATION (request size s):
+// Find smallest k where 2^k >= s
+// If avail[k] is not empty: take a block from avail[k]
+// If empty: look in avail[k+1], split it into two buddies
+//           put one in avail[k], return the other
+// Continue splitting up until a block is found or fail
+
+// DEALLOCATION (return block of size 2^k at address X):
+// Check if buddy is free
+// If yes: merge, remove buddy from avail[k], put merged block in avail[k+1]
+// Check new buddy at level k+1... repeat until buddy not free or reach top</pre>
+                <div class="highlight"><p>Binary buddy system internal fragmentation: a request for 33 locations gets a 64-location block — nearly 50% waste! Requests slightly above a power of 2 are worst case. External fragmentation can also occur: two adjacent free blocks of different sizes can't be merged (they're not buddies). Long-term, up to 50% of memory can be wasted with pathological request patterns.</p></div>
+                <div class="grid">
+                    <div class="card"><h3>Fibonacci Buddy System (Hirschberg, 1973)</h3><p>Block sizes are Fibonacci numbers: 1,2,3,5,8,13,... More block size options reduces internal fragmentation. Finding buddies is more complex — need bit flags (buddy-bit and memory-bit) per block.</p></div>
+                    <div class="card"><h3>Weighted Buddy System (Shen & Peterson, 1974)</h3><p>Block sizes: 2^k AND 3×2^k. Even more size options. Simulations show worse external fragmentation and slower than binary buddy. Requires 2-bit flag per block.</p></div>
+                    <div class="card"><h3>Dual Buddy System (Page & Hagins, 1986)</h3><p>Two separate memory areas: one binary buddy, one with sizes 3,6,...,3×2^j. Internal fragmentation midway between binary and weighted. External fragmentation similar to binary.</p></div>
+                    <div class="card"><h3>Internal vs External Tradeoff</h3><p>Inverse relationship: reducing internal fragmentation (more block sizes) tends to create more external fragmentation (small splinter blocks). No perfect solution exists.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="gc">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Garbage Collection — Overview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Some languages (LISP, Java, Python) handle memory reclamation automatically. The programmer uses <code>new</code> freely and simply abandons unneeded memory — the <strong>garbage collector</strong> reclaims it automatically.</p>
+                <div class="grid">
+                    <div class="card"><h3>Root Set</h3><p>All root pointers — the starting points from which all reachable data is accessible. Everything reachable from the root set is "live" (in use). Everything else is garbage.</p></div>
+                    <div class="card"><h3>Marking Phase</h3><p>Identify all currently used (reachable) cells by traversing the root set. Mark every reachable cell. Unreachable cells = garbage.</p></div>
+                    <div class="card"><h3>Reclamation Phase</h3><p>Return all unmarked cells to the free memory pool. May also include compaction — moving live cells together to reduce fragmentation.</p></div>
+                    <div class="card"><h3>LISP Cell Structure</h3><p>Cells have head (car) and tail (cdr) pointers, plus header with atom/nonatom flag and marked/unmarked flag. Variable-size cells also store size in header.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="marking">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Mark-and-Sweep (McCarthy, 1960)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The classical garbage collection approach — two clear phases.</p>
+                <pre>// SIMPLE MARKING (recursive — like preorder traversal):
+marking(node):
+    if node is not marked:
+        mark node
+        if node is not an atom:
+            marking(head(node))
+            marking(tail(node))
+// Call for every element of root set
+// PROBLEM: Can overflow the runtime stack for long lists!
+
+// STACK-BASED MARKING (avoids stack overflow):
+markingWithStack(node):
+    push(node)
+    while stack not empty:
+        node = pop()
+        while node is unmarked nonatom:
+            mark node
+            push(tail(node))   // save tail for later
+            node = head(node)  // follow head immediately
+        if node is unmarked atom: mark node
+// Still can overflow if array-based stack is too small
+
+// SCHORR-WAITE (1967) — NO STACK, uses link inversion:
+// Reverse links during traversal to "remember" the way back
+// tag bit: 0 = coming from head path, 1 = coming from tail path
+// When marked node or atom reached: follow reversed links back
+// Visits each cell TWICE — slower but uses O(1) extra memory
+// Handles cycles correctly</pre>
+                <p><strong>Sweep phase:</strong></p>
+                <pre>sweep():
+    for each location from last to first:
+        if mark(location) == 0:
+            insert location at front of availList  // it's garbage
+        else:
+            mark(location) = 0    // reset for next GC cycle</pre>
+                <p><strong>Compaction (Two-Pointer Method):</strong></p>
+                <pre>// Like quicksort partitioning — two pointers from opposite ends
+// Left pointer: scans forward, finds unmarked (free) cells
+// Right pointer: scans backward, finds marked (live) cells
+// When both found: copy live cell to free location
+//   Record new location in old location (forwarding address)
+// After pointers cross: scan compacted area, update all pointers
+//   If pointer refers to old location: look up forwarding address
+
+// Cost: 2.5 passes (mark + move + update pointers)
+// Benefit: eliminates external fragmentation, contiguous free space</pre>
+                <div class="highlight"><p>Mark-and-sweep drawback: it stops program execution entirely while collecting. For long-running or real-time systems this pause is unacceptable. The Schorr-Waite algorithm trades speed (visits each cell twice) for stack safety (no overflow possible). The fastmark algorithm (Kurokawa, 1981) improves speed but can still fail on some inputs, making Schorr-Waite more reliable despite being slower.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="copying">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Copying Methods — Stop-and-Copy</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Instead of marking garbage and sweeping it, copying methods copy all LIVE cells to a new area — garbage is simply left behind.</p>
+                <pre>// STOP-AND-COPY (Fenichel & Yochelson, 1969):
+// Divide heap into two equal semispaces (semispace1, semispace2)
+// Allocate from semispace1 until full
+// When full: STOP program, COPY all live cells to semispace2
+//   - Traverse from root set
+//   - Copy each reachable cell to semispace2 (leave forwarding address in old location)
+//   - Update all pointers to refer to new locations
+// semispace2 becomes the active space, program resumes
+
+// CHENEY'S BREADTH-FIRST COPY (1970):
+// No stack, no separate marking phase!
+// Use two pointers in tospace: scan (processes cells) and free (next allocation spot)
+// Algorithm:
+//   copy all root-referenced cells to tospace
+//   while scan != free:
+//     for each pointer in cell at scan:
+//       if pointer refers to fromspace cell not yet copied:
+//         copy it to tospace (at free), leave forwarding address
+//       else if already copied: use forwarding address
+//     advance scan
+// BFS order: naturally handles cycles (forwarding addresses prevent infinite loops)
+// NEVER visits garbage — only traverses reachable cells!</pre>
+                <div class="highlight"><p>Counter-intuitive property: the more garbage in memory, the FASTER the copying collector works. It only copies live cells — garbage is simply ignored. As heap size increases, the frequency and cost of collection decreases. Appel (1987) showed that with a truly large heap, no GC is needed at all. The cost: half the total memory is always reserved as "tospace" — 50% memory overhead.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="incremental">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Incremental Garbage Collection</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Standard GC suspends the program entirely — unacceptable for real-time systems. Incremental GC interleaves collector and program (mutator) execution in small chunks.</p>
+                <div class="grid">
+                    <div class="card"><h3>Mutator</h3><p>The running program. Can modify the heap while the collector is partially done. Changes may invalidate partially-processed structures.</p></div>
+                    <div class="card"><h3>Cost</h3><p>Incremental collectors need ~2× the processing power of stop-the-world collectors (Wadler, 1976) due to re-processing modified structures.</p></div>
+                </div>
+                <p><strong>Baker's Incremental Copying Algorithm (1978):</strong></p>
+                <pre>// Uses fromspace and tospace (both active simultaneously)
+// Two collector pointers: scan (processes cells) and bottom (free space in tospace)
+// On each memory allocation:
+//   1. Allocate new cell at top of tospace
+//   2. Copy k cells from fromspace to tospace (collector's work quota)
+//   3. BFS copies descendants, places them at end of queue (after bottom)
+
+// READ BARRIER: Before mutator uses any pointer:
+//   if pointer refers to fromspace:
+//     check for forwarding address in tail field
+//     if exists: use it (already copied)
+//     if not: copy cell to tospace NOW, set forwarding address
+
+// When all live cells copied: swap roles (fromspace↔tospace)
+
+// Stanchina-Meyer improvement (2007):
+// Object space (fromspace) holds objects
+// Handle space (tospace) holds references to objects
+// Live objects compacted IN PLACE (fromspace)
+// Dead objects overwritten
+// Cleanup phase removes handles and restores direct pointers</pre>
+                <p><strong>Yuasa's Noncopying Incremental GC (1990):</strong></p>
+                <pre>// Incremental mark-and-sweep — avoids copying and address changes
+// k1 = cells marked per GC invocation
+// k2 = cells swept per GC invocation
+// Invoked after each memory allocation
+
+// WRITE BARRIER: Before mutator overwrites head(p) or tail(p):
+updateTail(p, q):
+    if collector in marking phase:
+        mark tail(p)       // save old value before overwriting
+        st.push(tail(p))   // push onto GC stack
+    tail(p) = q
+
+// This prevents destroying paths to reachable cells not yet marked
+// "Floating garbage": cells freed during sweep phase missed —
+//   collected in NEXT cycle (acceptable delay)</pre>
+            </div>
+        </div>
+
+        <div class="section" id="generational">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Generational Garbage Collection</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Key observation: most allocated objects die young — a few survive long-term. Generational GC exploits this by collecting young generations frequently and old generations rarely.</p>
+                <div class="grid">
+                    <div class="card"><h3>Minor Collections</h3><p>Frequent — collect young generation only. Most objects in young generation ARE garbage. Quick, cheap, handles most GC work.</p></div>
+                    <div class="card"><h3>Major Collections</h3><p>Infrequent — collect entire heap. Expensive but rarely needed. Old objects that survived many minor collections are likely long-lived.</p></div>
+                    <div class="card"><h3>Tenuring</h3><p>When a young object survives n collections it is "promoted" (tenured) to the older generation. Value of n depends on the GC implementation.</p></div>
+                    <div class="card"><h3>Remembrance Sets</h3><p>Track pointers FROM older generations TO younger ones (and vice versa). Used to find all references to young generation objects without scanning the entire heap.</p></div>
+                </div>
+                <p><strong>Train Algorithm (Hudson & Moss, 1992) — for mature objects:</strong></p>
+                <pre>// Divides MATURE object space into areas (cars) linked into trains
+// One area collected per cycle — bounded pause time!
+
+// Collection rules:
+// 1. If no outside reference to any object in a train → entire train is garbage
+// 2. If object reachable from root: copy to another train
+//    Then copy all objects in same area reachable from it
+// 3. If object referenced from another area: copy to END of that area's train
+// Objects move between trains based on who references them
+// Eventually circular structures gather into one train → collectible when cut off
+
+// Remembrance sets: one per area
+// Track all cross-area references
+// Allow finding referenced objects without full heap scan</pre>
+                <div class="highlight"><p>Generational GC efficiency depends critically on the assumption that most objects die young. If a program allocates objects with long lifetimes, minor collections become expensive as few objects are collected. The train algorithm solves the major collection pause problem by making mature object collection incremental — only one area per cycle, with bounded pause time. Hardware support can reduce GC overhead from ~50% to near-zero of program runtime.</p></div>
+                <table>
+                    <tr><th>Algorithm</th><th>Pauses</th><th>Memory</th><th>Overhead</th><th>Best For</th></tr>
+                    <tr><td>Mark-and-Sweep</td><td>Long (full GC)</td><td>1× heap</td><td>Full heap scan</td><td>General purpose</td></tr>
+                    <tr><td>Stop-and-Copy</td><td>Long (full GC)</td><td>2× heap</td><td>Only live cells</td><td>High garbage ratio</td></tr>
+                    <tr><td>Baker Incremental</td><td>Short (k cells)</td><td>2× heap</td><td>Read barrier</td><td>Real-time systems</td></tr>
+                    <tr><td>Yuasa Incremental</td><td>Short (k cells)</td><td>1× heap</td><td>Write barrier</td><td>Real-time, no copy</td></tr>
+                    <tr><td>Generational</td><td>Short (minor)</td><td>Multiple regions</td><td>Remembrance sets</td><td>Most applications</td></tr>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

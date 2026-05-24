@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 1: Object-Oriented Programming Using C++</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2010, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #166534; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #15803d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #166534; color: white; border-color: #166534; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #15803d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #166534; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #15803d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #15803d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #15803d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #166534; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #15803d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 1</div>
+        <h1>Object-Oriented Programming Using C++</h1>
+        <p class="subtitle">ADTs, encapsulation, inheritance, pointers, polymorphism, and the STL</p>
+    </header>
+    <nav>
+        <a href="#adt">Abstract Data Types</a>
+        <a href="#encapsulation">Encapsulation</a>
+        <a href="#inheritance">Inheritance</a>
+        <a href="#pointers">Pointers</a>
+        <a href="#polymorphism">Polymorphism</a>
+        <a href="#aggregation">Aggregation</a>
+        <a href="#stl">The STL</a>
+        <a href="#vectors">Vectors</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="adt">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Abstract Data Types (ADTs)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Proper planning is essential to successful program implementation. Good design methodology focuses on <strong>what</strong> needs to be done — not <strong>how</strong> it's done. This attention to operations before implementation is the foundation of ADTs.</p>
+                <p>A <strong>data structure</strong> is a technique of storing and organizing data so it can be used efficiently. In program models, data structures are described by ADTs — defined indirectly through operations, not inner structure.</p>
+                <p><strong>Example — Stack ADT (LIFO: Last In, First Out):</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>PUSH</h3><p>Add an item to the top of the stack.</p></div>
+                    <div class="card"><h3>POP</h3><p>Remove the item at the top of the stack.</p></div>
+                    <div class="card"><h3>TOP</h3><p>Return the value of the item at the top — without removing it.</p></div>
+                    <div class="card"><h3>EMPTY</h3><p>Determine if the stack is empty.</p></div>
+                    <div class="card"><h3>CREATE</h3><p>Create a new empty stack.</p></div>
+                </div>
+                <div class="highlight"><p>These operations describe WHAT we can do with a stack — not HOW it's implemented internally. The implementation details (array? linked list? dynamic memory?) are reserved for later. ADTs are then implemented through class definitions in C++. This separation of interface from implementation is the foundation of good software design.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="encapsulation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Encapsulation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The fundamental notion of OOP is the <strong>object</strong> — a data structure combined with the operations pertinent to that structure. In C++, objects are defined through <strong>classes</strong>.</p>
+                <div class="grid">
+                    <div class="card"><h3>Member Variables / Data Members</h3><p>The data stored inside the class — the object's state.</p></div>
+                    <div class="card"><h3>Methods / Member Functions</h3><p>The operations the object can perform — its behavior.</p></div>
+                    <div class="card"><h3>Public Interface</h3><p>Methods and data accessible from outside the object. What users interact with.</p></div>
+                    <div class="card"><h3>Private</h3><p>Implementation details hidden from outside. Protected from side effects and accidental corruption.</p></div>
+                </div>
+                <div class="highlight"><p><strong>Information hiding</strong>: every object is treated as a black box. You use it based on what it does, not how it does it. This confines implementation errors to the methods of a particular class — making bugs easier to detect and fix. Objects communicate through message passing (method calls) — the degree of interaction is precisely defined by these communication methods.</p></div>
+                <p>Advantages of encapsulation: stronger link between data and operations mirrors real-world behavior; errors are confined to specific classes; implementation details are hidden preventing side effects; objects can be replaced with more efficient versions while keeping the same public interface.</p>
+            </div>
+        </div>
+
+        <div class="section" id="inheritance">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Inheritance</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Inheritance is the technique of reusing existing class definitions to derive new classes. Derived classes inherit attributes and behavior from base classes — an <strong>"is a"</strong> relationship.</p>
+                <table>
+                    <tr><th>Access Specifier</th><th>Effect on Inherited Members</th></tr>
+                    <tr><td>public</td><td>Preserves base class access levels. Everyone aware of Base knows Child inherits from it.</td></tr>
+                    <tr><td>protected</td><td>Public and protected base members become protected in derived. Only Child and its children know about the inheritance.</td></tr>
+                    <tr><td>private</td><td>All base members become private in derived. No one outside Child knows about the inheritance.</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Multiple Inheritance & the Diamond Problem:</strong></p>
+                <pre>// B and C both inherit from A
+// D inherits from both B and C
+// If B and C both override a method from A,
+// D could inherit two different versions — compiler error!
+
+// Solution: virtual inheritance
+class B : virtual public A { ... };
+class C : virtual public A { ... };
+class D : public B, public C { ... };
+// Now only ONE copy of A exists in D</pre>
+                <div class="highlight"><p>Java avoids the diamond problem by prohibiting multiple inheritance entirely. C++ allows it but requires virtual inheritance to resolve ambiguity. Derived classes can add, delete, and modify (override) methods and data members from the base class. The inheritance hierarchy is represented in UML with a triangle/arrow pointing to the base class.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="pointers">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pointers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A pointer is a variable whose value is the <strong>address of another variable</strong> in memory. Every variable has two attributes: its value (what it stores) and its location (where it is stored).</p>
+                <pre>int i = 15, j, *p, *q;   // p and q are pointers to int
+// i and j are regular ints
+
+p = &i;      // p now holds the ADDRESS of i (&i = "address of i")
+*p = 20;     // dereference p: changes the VALUE at the address (i = 20)
+
+// Dynamic memory
+p = new int;    // allocate memory at runtime, p holds the address
+*p = 42;
+delete p;       // release the memory
+p = nullptr;    // ALWAYS set to nullptr after delete — avoids dangling pointer!
+
+// Dynamic array
+int *arr;
+arr = new int[n];      // allocate array of size n
+arr[0] = 5;            // array notation
+*(arr + 1) = 10;       // pointer arithmetic — same as arr[1]
+delete[] arr;          // delete array — note the []</pre>
+                <div class="grid">
+                    <div class="card"><h3>Dangling Reference</h3><p>Pointer still holds address of deleted memory. Dereferencing causes undefined behavior. Fix: set to nullptr after delete.</p></div>
+                    <div class="card"><h3>Memory Leak</h3><p>Allocating memory without deleting the previous allocation, or a pointer going out of scope. Memory becomes inaccessible — accumulates until none is available.</p></div>
+                    <div class="card"><h3>Pointer Arithmetic</h3><p>*(arr + n) is equivalent to arr[n]. The array name IS a pointer to the first element. Add offset to base address, dereference to access any element.</p></div>
+                    <div class="card"><h3>Copy Constructors</h3><p>Default copy copies pointer ADDRESS — both objects point to same memory. Write a copy constructor to deep-copy the pointed-to object. Also override operator= for the same reason.</p></div>
+                </div>
+                <pre>// Pointer vs reference — both give access to original variable
+int n = 5, *p = &n, &r = n;
+n = 7;     // n, *p, and r are all now 7
+*p = 7;    // same result
+r = 7;     // same result
+
+// Const pointer vs pointer to const
+int* const ptr1 = &n;    // constant pointer — can't change where it points
+const int* ptr2 = &n;    // pointer to constant — can't change value through pointer
+
+// Pointer to function
+void temp() { ... }
+void (*funcPtr)() = &temp;
+(*funcPtr)();    // call the function through the pointer</pre>
+                <div class="highlight"><p>Objects that contain pointer members MUST have a destructor defined. When a local pointer variable goes out of scope, the pointer's memory (the address) is freed — but the object it POINTS TO remains allocated, causing a memory leak. The destructor explicitly deletes that pointed-to memory. Similarly, the copy constructor must deep-copy to prevent two objects sharing the same dynamically allocated memory.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="polymorphism">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Polymorphism</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Polymorphism allows objects of different types to respond to method calls with the same name — each according to its own type-specific behavior.</p>
+                <div class="grid">
+                    <div class="card"><h3>Static Binding (Early)</h3><p>Method chosen at COMPILE TIME based on the pointer's declared type. Default behavior in C++. Faster but inflexible.</p></div>
+                    <div class="card"><h3>Dynamic Binding (Late)</h3><p>Method chosen at RUNTIME based on the actual type of the object being pointed to. Enabled with the virtual keyword. More flexible.</p></div>
+                </div>
+                <pre>class Base {
+public:
+    void Method1() { cout &lt;&lt; "Base::Method1" &lt;&lt; endl; }
+    virtual void Method2() { cout &lt;&lt; "Base::Method2" &lt;&lt; endl; }
+};
+
+class Derived : public Base {
+public:
+    void Method1() { cout &lt;&lt; "Derived::Method1" &lt;&lt; endl; }
+    void Method2() { cout &lt;&lt; "Derived::Method2" &lt;&lt; endl; }
+};
+
+Base* obj = new Derived();   // pointer is Base type, object is Derived
+
+obj->Method1();   // "Base::Method1"    — static binding, uses pointer type
+obj->Method2();   // "Derived::Method2" — dynamic binding, uses object type</pre>
+                <div class="highlight"><p>Without virtual: early binding — the compiler decides at compile time based on the POINTER TYPE (Base), so Base::Method1 runs even though the object is a Derived. With virtual: late binding — the runtime checks the actual object type (Derived) and calls Derived::Method2. This is the foundation of runtime polymorphism in C++ — you send a message (method call) without knowing the exact receiver type, and the object handles it appropriately.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="aggregation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Aggregation (Composition)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Aggregation models a <strong>"has a"</strong> relationship — one class contains another as a member. Distinct from inheritance ("is a"). Represented in UML with a diamond.</p>
+                <pre>class Address {
+    string street, city, state;
+};
+
+class Phone {
+    string number;
+};
+
+class Person {
+    Address permanentAddress;   // Person HAS AN Address
+    Address campusAddress;
+    Phone cell;                 // Person HAS A Phone
+    Phone landline;
+};</pre>
+                <div class="highlight"><p>Aggregation vs Inheritance: A Student IS A Person (inheritance). A Student HAS AN Address (aggregation). Choose the right relationship for the design — using inheritance when aggregation is more appropriate leads to fragile, tightly coupled designs. If in doubt, prefer aggregation ("has a") over inheritance ("is a").</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="stl">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Standard Template Library (STL)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The STL provides three generic entities plus function objects, implemented through templates enabling static binding polymorphism — often more efficient than dynamic binding.</p>
+                <div class="grid">
+                    <div class="card"><h3>Containers</h3><p>Data structures that hold objects of the same type. Implemented as template classes. Methods specify operations on the data AND the structure itself.</p></div>
+                    <div class="card"><h3>Iterators</h3><p>Objects that access container elements. Five types: input, output, forward, bidirectional, random. Essentially generalized pointers — can be dereferenced and manipulated like pointers.</p></div>
+                    <div class="card"><h3>Algorithms</h3><p>~70 generic functions for searching, sorting, etc. Independent of containers — work on any container that provides an iterator interface. Reduces library complexity dramatically.</p></div>
+                    <div class="card"><h3>Function Objects</h3><p>Classes that overload operator(). Maintain state information in functions passed to other functions. More powerful than raw function pointers for some STL manipulations.</p></div>
+                </div>
+                <table style="margin-top:16px">
+                    <tr><th>Iterator Type</th><th>Capabilities</th></tr>
+                    <tr><td>Input</td><td>Read a sequence of values</td></tr>
+                    <tr><td>Output</td><td>Write a sequence of values</td></tr>
+                    <tr><td>Forward</td><td>Read, write, move forward</td></tr>
+                    <tr><td>Bidirectional</td><td>Like forward, plus move backward</td></tr>
+                    <tr><td>Random</td><td>Move freely in any direction — most powerful</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="vectors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Vectors in the STL</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A vector is one of the simplest STL containers — a dynamic array. Elements stored contiguously in memory. Supports random access via index. Useful when list length is unknown but removal is rare.</p>
+                <pre>#include &lt;vector&gt;
+
+// Create vectors
+vector&lt;int&gt; v1;                    // empty vector
+vector&lt;int&gt; v2(5);                 // 5 elements, default-initialized
+vector&lt;int&gt; v3(5, 10);             // 5 elements, all = 10
+
+// Add elements
+v1.push_back(42);     // add to end — O(1) amortized
+v1.push_back(7);
+
+// Access elements
+v1[0];                // array notation — no bounds checking
+v1.at(0);             // bounds-checked access — throws out_of_range
+
+// Size and capacity
+v1.size();            // current number of elements
+v1.capacity();        // allocated storage (may be larger than size)
+v1.empty();           // true if size == 0
+
+// Iterator access
+for (auto it = v1.begin(); it != v1.end(); ++it) {
+    cout &lt;&lt; *it;      // dereference iterator like a pointer
+}
+
+// Range-based for (C++11)
+for (int x : v1) {
+    cout &lt;&lt; x;
+}
+
+// Remove last element
+v1.pop_back();
+
+// Remove all elements
+v1.clear();</pre>
+                <div class="highlight"><p>Vectors resize automatically when elements are added beyond capacity — but this involves allocating new memory and copying all elements, which is O(n). Normally push_back is O(1) amortized because vectors double their capacity when they resize, keeping the average cost constant. Use reserve(n) to pre-allocate if you know the approximate size — avoids repeated reallocations. The STL algorithms (sort, find, count, etc.) all work with vectors via iterators.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

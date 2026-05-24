@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 6: Binary Trees</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b45309; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #d97706; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b45309; color: white; border-color: #b45309; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #d97706; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #b45309; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #d97706; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #d97706; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #d97706; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b45309; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #d97706; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 6</div>
+        <h1>Binary Trees</h1>
+        <p class="subtitle">BSTs, traversal, insertion, deletion, balancing, AVL, heaps, treaps, k-d trees, and expression trees</p>
+    </header>
+    <nav>
+        <a href="#trees">Trees & BSTs</a>
+        <a href="#traversal">Tree Traversal</a>
+        <a href="#threaded">Threaded & Morris</a>
+        <a href="#insertion">Insertion</a>
+        <a href="#deletion">Deletion</a>
+        <a href="#balancing">Balancing & AVL</a>
+        <a href="#selfadj">Self-Adjusting Trees</a>
+        <a href="#heaps">Heaps</a>
+        <a href="#treaps">Treaps & k-d Trees</a>
+        <a href="#polish">Polish Notation</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="trees">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Trees, Binary Trees & Binary Search Trees</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Trees overcome the limitations of linear structures (lists, stacks, queues) by representing hierarchical data. A tree consists of nodes and edges, drawn with the root at the top growing downward.</p>
+                <div class="grid">
+                    <div class="card"><h3>Key Terminology</h3><p>Root = topmost node. Leaves (terminal nodes) = bottom nodes with no children. Level = path length from root + 1. Height = maximum level. Path = unique sequence of edges from root to any node.</p></div>
+                    <div class="card"><h3>Binary Tree</h3><p>Each node has at most two children: left and right (either can be empty). Complete binary tree: all non-leaf nodes have two children, all leaves on the same level. Level i+1 has 2^i nodes.</p></div>
+                    <div class="card"><h3>BST Property</h3><p>Left subtree values &lt; node value. Right subtree values &gt; node value. Values are unique. This ordering enables efficient search — navigate left or right based on comparison.</p></div>
+                    <div class="card"><h3>Why Trees?</h3><p>Applying consistent ordering to nodes dramatically reduces searches — similar to a skip list. A balanced BST finds any element in O(log n) comparisons vs O(n) for sequential search.</p></div>
+                </div>
+                <pre>// BST Node definition
+template &lt;class T&gt;
+class BSTNode {
+public:
+    T info;
+    BSTNode *left, *right;
+    BSTNode(T el, BSTNode *l = nullptr, BSTNode *r = nullptr)
+        : info(el), left(l), right(r) { }
+};
+
+// BST Search
+BSTNode&lt;T&gt;* search(T el) {
+    BSTNode&lt;T&gt; *p = root;
+    while (p != nullptr) {
+        if (el == p->info) return p;      // found!
+        else if (el &lt; p->info) p = p->left;   // go left
+        else p = p->right;                // go right
+    }
+    return nullptr;  // not found
+}</pre>
+                <div class="highlight"><p>Complete binary tree facts: an (i+1)-level complete tree has 2^i leaves, 2^i - 1 nonterminal nodes, totaling 2^(i+1) - 1 nodes total. For any binary tree where all nonterminal nodes have exactly two non-empty children: number of leaves = number of nonterminal nodes + 1. Searching is efficient only for randomly created or balanced trees — highly skewed trees degrade to O(n) sequential search.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="traversal">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Tree Traversal</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Tree traversal visits each node exactly once. With n nodes there are n! possible traversals, but a handful are especially useful.</p>
+                <p><strong>Breadth-First Search (BFS) — level by level:</strong></p>
+                <pre>void BFS() {
+    queue&lt;BSTNode*&gt; q;
+    q.push(root);
+    while (!q.empty()) {
+        BSTNode* p = q.front(); q.pop();
+        visit(p);                          // process node
+        if (p->left)  q.push(p->left);    // enqueue children
+        if (p->right) q.push(p->right);
+    }
+}
+// Top-down left-to-right BFS of tree with root 13, children 10,25:
+// Output: 13 10 25 2 12 20 31 29</pre>
+                <p><strong>Depth-First Traversals — three orderings (V=Visit, L=Left, R=Right):</strong></p>
+                <table>
+                    <tr><th>Traversal</th><th>Order</th><th>Property</th></tr>
+                    <tr><td>Preorder</td><td>V → L → R</td><td>Root first, then subtrees. Used in prefix notation.</td></tr>
+                    <tr><td>Inorder</td><td>L → V → R</td><td>Visits BST nodes in SORTED ORDER. Used in infix notation.</td></tr>
+                    <tr><td>Postorder</td><td>L → R → V</td><td>Root last. Used in postfix notation, evaluating expressions.</td></tr>
+                </table>
+                <pre>// Recursive implementations — simple and elegant
+void inorder(BSTNode* p) {
+    if (p != nullptr) {
+        inorder(p->left);   // L — traverse left subtree
+        visit(p);           // V — process this node
+        inorder(p->right);  // R — traverse right subtree
+    }
+}
+
+void preorder(BSTNode* p) {
+    if (p != nullptr) {
+        visit(p);
+        preorder(p->left);
+        preorder(p->right);
+    }
+}
+
+void postorder(BSTNode* p) {
+    if (p != nullptr) {
+        postorder(p->left);
+        postorder(p->right);
+        visit(p);
+    }
+}</pre>
+                <div class="highlight"><p>Inorder traversal of a BST always produces nodes in sorted order — this is a key property. The runtime stack tracks the backtrack points: going left pushes the current node's state, so after returning from the left subtree, the node is visited, then the right subtree is explored. Non-recursive versions require explicitly managing a stack — more code, avoids activation record overhead, but not always faster.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="threaded">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Threaded Trees & Morris Traversal</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Threaded Trees</strong> — incorporate the "stack" into the tree structure itself using threads (pointers to inorder predecessors/successors). Null pointers are repurposed as threads — left pointer → predecessor, right pointer → successor.</p>
+                <pre>// Threaded tree traversal — no stack needed!
+// Right-thread only (successor threads)
+BSTNode* p = leftmost node;
+while (p != nullptr) {
+    visit(p);
+    if (p->rightThread)   // right pointer is a thread
+        p = p->right;     // follow thread to successor
+    else
+        p = leftmost of p->right subtree;
+}</pre>
+                <p><strong>Morris Inorder Traversal</strong> — stackless, no threads, temporarily modifies tree structure:</p>
+                <pre>void MorrisInorder() {
+    BSTNode *p = root, *tmp;
+    while (p != nullptr) {
+        if (p->left == nullptr) {
+            visit(p);          // no left child — visit and go right
+            p = p->right;
+        } else {
+            tmp = p->left;
+            while (tmp->right != nullptr && tmp->right != p)
+                tmp = tmp->right;  // find rightmost of left subtree
+
+            if (tmp->right == nullptr) {
+                tmp->right = p;    // add temp link (thread)
+                p = p->left;
+            } else {
+                visit(p);          // temp link found — visit node
+                tmp->right = nullptr; // remove temp link
+                p = p->right;
+            }
+        }
+    }
+}</pre>
+                <div class="highlight"><p>Morris traversal achieves O(1) extra space (no stack, no threads) by temporarily modifying the tree during traversal and restoring it. The key insight: inorder traversal is trivial for trees with no left children (just VR). Morris makes every node temporarily have no left child by threading the rightmost node of the left subtree back to the current node. Tree is fully restored when traversal completes.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="insertion">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Insertion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>BST insertion follows the same logic as search — navigate to where the new node belongs, then attach it as a leaf.</p>
+                <pre>void insert(T el) {
+    BSTNode *p = root, *prev = nullptr;
+    while (p != nullptr) {        // find insertion point
+        prev = p;
+        if (el &lt; p->info) p = p->left;
+        else p = p->right;
+    }
+    // prev is now the future parent
+    if (prev == nullptr)          // tree was empty
+        root = new BSTNode(el);
+    else if (el &lt; prev->info)
+        prev->left = new BSTNode(el);
+    else
+        prev->right = new BSTNode(el);
+}</pre>
+                <div class="highlight"><p>Insertion always adds a new leaf — never restructures existing nodes (unless the tree is self-balancing). The new node's position is determined entirely by the BST ordering property. This means the shape of the tree depends heavily on insertion order — sorted input creates a completely skewed (degenerate) tree, degrading all operations to O(n).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="deletion">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Deletion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Three cases depending on the node's number of children:</p>
+                <div class="grid">
+                    <div class="card"><h3>Case 1: Leaf Node</h3><p>Simplest. Set parent's pointer to nullptr and delete the node. No restructuring needed.</p></div>
+                    <div class="card"><h3>Case 2: One Child</h3><p>Set parent's pointer to the node's only child (bypass the deleted node). Still simple — just relink.</p></div>
+                    <div class="card"><h3>Case 3a: Two Children — Merging</h3><p>Find the rightmost node in the left subtree (predecessor). Attach the right subtree there. Promote the left subtree to replace the deleted node. Can increase tree height.</p></div>
+                    <div class="card"><h3>Case 3b: Two Children — Copying</h3><p>Copy the predecessor's value into the deleted node, then delete the predecessor (which has at most one child). Avoids height increase but can create right-heavy bias.</p></div>
+                </div>
+                <pre>// Deletion by copying — preferred approach
+void deleteByCopying(BSTNode*& node) {
+    BSTNode *prev, *tmp = node;
+
+    if (node->right == nullptr)      // no right child
+        node = node->left;
+    else if (node->left == nullptr)  // no left child
+        node = node->right;
+    else {
+        // find rightmost node in left subtree (predecessor)
+        tmp = node->left;
+        prev = node;
+        while (tmp->right != nullptr) {
+            prev = tmp;
+            tmp = tmp->right;
+        }
+        node->info = tmp->info;      // copy predecessor's value
+        if (prev == node)
+            prev->left = tmp->left;  // predecessor was left child
+        else
+            prev->right = tmp->left; // relink around predecessor
+    }
+    delete tmp;
+}
+
+// Improvement: alternate between deleting predecessor (left) 
+// and successor (right) to avoid right-heavy bias</pre>
+                <div class="highlight"><p>Deletion by merging can increase tree height (bad for performance). Deletion by copying avoids height increase but creates asymmetry — always deleting from the left subtree makes the right subtree grow relatively larger over time. The symmetric fix: alternate between predecessor and successor deletion. This significantly improves balance without the overhead of formal rebalancing algorithms.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="balancing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Balancing — DSW Algorithm & AVL Trees</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A binary tree is <strong>height-balanced</strong> if the height difference of subtrees at every node is 0 or 1. Skewed trees search no better than linked lists.</p>
+                <p><strong>Simple rebalancing (sorted array → balanced tree):</strong></p>
+                <pre>void balance(T data[], int first, int last) {
+    if (first &lt;= last) {
+        int middle = (first + last) / 2;
+        insert(data[middle]);         // insert middle as root
+        balance(data, first, middle - 1);   // left half
+        balance(data, middle + 1, last);    // right half
+    }
+}
+// Drawback: requires all data sorted in array first
+// Can't be used while tree is being built</pre>
+                <p><strong>DSW Algorithm</strong> (Day-Stout-Warren) — balances any BST in-place using rotations:</p>
+                <pre">// Phase 1: Transform BST into a "backbone" (right-skewed vine)
+snagify(root):
+    tmp = root
+    while tmp != nullptr:
+        if tmp has left child:
+            rotate left child about tmp   // right rotation
+            set tmp to child that just became parent
+        else:
+            set tmp to its right child
+
+// Phase 2: Transform backbone into perfectly balanced tree
+// Apply left rotations: promote every second node
+createPerfectTree():
+    n = number of nodes
+    m = 2^floor(log₂(n+1)) - 1    // closest perfect tree size
+    make (n-m) rotations from top   // handle overflow
+    while m > 1:
+        m = m / 2
+        make m rotations from top</pre>
+                <p><strong>AVL Trees</strong> — maintain balance after every insertion/deletion using local rotations:</p>
+                <pre>// Each node stores a balance factor = height(right) - height(left)
+// Must be -1, 0, or +1 for AVL property
+
+// Case 1: Right-right imbalance → single left rotation of parent about right child
+// Case 2: Left-right imbalance → double rotation: left child's right subtree
+//         First: rotate right child about left child
+//         Then:  rotate that child about parent
+
+// After deletion: update balance factors from deleted node up to root
+// Rotate at every node where balance factor becomes ±2
+// May need multiple rotations up the tree (unlike insertion, which needs at most 1)</pre>
+                <div class="highlight"><p>AVL trees maintain height ≤ 1.44 log₂(n) — searches are always O(log n). The tradeoff: insertion and deletion require more work to maintain balance. DSW is ideal for batch rebalancing existing trees. AVL is ideal for trees that need to stay balanced as elements are added/removed individually. The minimum AVL tree formula: AVL_h = AVL_(h-1) + AVL_(h-2) + 1 (similar to Fibonacci numbers).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="selfadj">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Self-Adjusting Trees & Splaying</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Rather than maintaining perfect balance, self-adjusting trees move frequently accessed elements closer to the root — optimizing for actual access patterns.</p>
+                <div class="grid">
+                    <div class="card"><h3>Move-to-Root</h3><p>Each access rotates the accessed node to the root. Assumption: recently accessed elements will be accessed again soon. Works well for "hot" items.</p></div>
+                    <div class="card"><h3>Single Rotation</h3><p>Each access rotates the node one level up (toward root). More conservative than move-to-root. Slowly improves access for frequently used items.</p></div>
+                    <div class="card"><h3>Splaying (Tarjan & Sleator, 1985)</h3><p>Applies rotations in PAIRS based on the node-parent-grandparent relationship. Simultaneously moves the node toward root AND flattens the tree. Amortized O(log n) per operation.</p></div>
+                    <div class="card"><h3>Semisplaying</h3><p>A modification of splaying that continues with the parent of the node rather than the node itself after homogeneous splays. Produces more balanced results in some cases.</p></div>
+                </div>
+                <pre>// Splaying cases:
+// Case 1: Node R's parent is root → single rotation (R about parent)
+// Case 2: Homogeneous (both same direction: LL or RR)
+//   → rotate parent Q about grandparent P FIRST
+//   → then rotate R about Q
+//   (This flattens the tree more than move-to-root)
+// Case 3: Heterogeneous (different directions: LR or RL)
+//   → rotate R about Q FIRST
+//   → then rotate R about P
+
+Splaying(P, Q, R):
+    while R is not root:
+        if R's parent is root:
+            rotate R about its parent
+        else if homogeneous configuration:
+            rotate Q about P, then R about Q
+        else:    // heterogeneous
+            rotate R about Q, then R about P</pre>
+                <div class="highlight"><p>Empirical results: AVL trees generally outperform self-adjusting trees. Even regular BSTs sometimes outperform splay trees in practice. Self-adjusting trees shine when access patterns are highly non-uniform (some items accessed much more frequently than others). For uniform access, maintain structural balance instead.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="heaps">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Heaps</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A heap is a binary tree with two properties: (1) parent value ≥ children values (max-heap), and (2) perfectly balanced with leftmost leaves on the last level. Ideal for priority queues.</p>
+                <pre>// Heap stored efficiently as an array:
+// Parent of node at index i: (i-1)/2
+// Left child: 2i+1, Right child: 2i+2
+// heap[i] >= heap[2i+1] and heap[i] >= heap[2i+2]
+
+// ENQUEUE — add to end, heapify UP
+void heapEnqueue(T el) {
+    heap[++last] = el;           // add at end
+    int i = last;
+    while (i > 0 && heap[i] > heap[(i-1)/2]) {
+        swap(heap[i], heap[(i-1)/2]);  // swap with parent
+        i = (i - 1) / 2;
+    }
+}
+
+// DEQUEUE — remove root, heapify DOWN
+T heapDequeue() {
+    T el = heap[0];              // save root (max value)
+    heap[0] = heap[last--];      // move last leaf to root
+    int p = 0;
+    while (true) {
+        int left = 2*p+1, right = 2*p+2;
+        int largest = p;
+        if (left &lt;= last && heap[left] > heap[largest])
+            largest = left;
+        if (right &lt;= last && heap[right] > heap[largest])
+            largest = right;
+        if (largest == p) break;
+        swap(heap[p], heap[largest]);  // swap with larger child
+        p = largest;
+    }
+    return el;
+}
+
+// Floyd's bottom-up heapify — build heap from array O(n)
+// Start from last non-leaf (index n/2-1) and heapify down
+for (int i = n/2 - 1; i >= 0; i--)
+    moveDown(heap, i, n-1);</pre>
+                <div class="highlight"><p>Floyd's algorithm builds a heap from an unsorted array in O(n) time — better than inserting n elements one by one (O(n log n)). The trick: start from the bottom, treating each subtree as already heapified, and just fix the root of each subtree. Most nodes are near the leaves where little work is needed. This is the foundation of heapsort.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="treaps">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Treaps & k-d Trees</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Treap</strong> = BST + Heap. Each node has both a key (BST ordering) and a priority (heap ordering). Combines BST's efficient search with heap's priority structure.</p>
+                <pre>// Treap node
+struct TreapNode {
+    T key;
+    int priority;  // randomly assigned
+    TreapNode *left, *right;
+};
+
+// Insertion: insert as leaf (BST position), then rotate up if priority > parent
+// Deletion: rotate node with higher-priority child until leaf, then delete</pre>
+                <div class="highlight"><p>With randomly assigned priorities, a treap has the same expected structure as a randomly built BST — O(log n) expected height. The random priorities prevent the worst-case O(n) degradation of standard BSTs with sorted input.</p></div>
+                <p><strong>k-d Trees</strong> — binary search trees using multiple keys, alternating which key is used at each level:</p>
+                <pre">// 2-d tree: alternates x and y coordinate at each level
+// Level 1 (root): split on x coordinate
+//   Left subtree: points with x &lt; root.x
+//   Right subtree: points with x > root.x
+// Level 2: split on y coordinate
+//   Left subtree: points with y &lt; node.y
+//   Right subtree: points with y > node.y
+// Level 3: back to x, etc.
+
+// Level = depth % k   determines which key to use
+
+// Applications:
+// Exact match search: same as BST but use appropriate key per level
+// Range query: check if node is in range, then decide which subtrees to explore
+// Nearest neighbor search</pre>
+                <div class="highlight"><p>k-d tree deletion is complex: finding the predecessor or successor requires searching BOTH subtrees (not just one) because the key used to order nodes changes at every level. In general, for nodes on every kth level, only the left subtree need be searched for finding a minimum — otherwise both subtrees may need examination.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="polish">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Polish Notation & Expression Trees</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Expression trees represent arithmetic/logical expressions as binary trees where leaves are operands and internal nodes are operators. They eliminate ambiguity without parentheses.</p>
+                <table>
+                    <tr><th>Traversal</th><th>Notation</th><th>Output format</th><th>Use</th></tr>
+                    <tr><td>Preorder (VLR)</td><td>Prefix</td><td>+ 2 * 3 4</td><td>LISP, function calls</td></tr>
+                    <tr><td>Inorder (LVR)</td><td>Infix</td><td>2 + 3 * 4</td><td>Human-readable math (ambiguous without parens)</td></tr>
+                    <tr><td>Postorder (LRV)</td><td>Postfix (RPN)</td><td>2 3 4 * +</td><td>Forth, calculator stack evaluation</td></tr>
+                </table>
+                <pre>// Expression: (2 - 3*4 + 5) has multiple interpretations depending on order
+// Expression tree makes order EXPLICIT — no parentheses needed
+
+// Evaluating postfix (stack-based — very efficient for compilers):
+// Process left-to-right. Operand → push. Operator → pop 2, compute, push result.
+// "2 3 4 * -" → push 2, push 3, push 4, *, pop 3&4→12, push 12, -, pop 2&12→-10
+
+// Expression tree node
+class ExprTreeNode {
+    char *key;           // operator (+,-,*,/) or operand (number/variable)
+    ExprTreeNode *left, *right;
+};
+
+// Code generation from expression tree (compiler use):
+// Postorder traversal generates instructions in correct order
+// Left subtree → right subtree → operator instruction
+// This is why compilers use expression trees internally</pre>
+                <div class="highlight"><p>Inorder traversal of an expression tree produces infix notation — the same as the original expression. But ALL THREE trees in Fig 6.64 produce the same infix output despite having different structures, proving infix is ambiguous without parentheses. Preorder (prefix) and postorder (postfix) are unambiguous — operator position relative to operands fully determines evaluation order. This is why compilers and calculators prefer postfix (RPN).</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 2: Complexity Analysis</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #92400e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #b45309; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #92400e; color: white; border-color: #92400e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #b45309; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #92400e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #b45309; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #b45309; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #b45309; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #92400e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #b45309; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 2</div>
+        <h1>Complexity Analysis</h1>
+        <p class="subtitle">Big-O, Ω, Θ notations, asymptotic complexity, best/average/worst cases, amortized analysis, and NP-completeness</p>
+    </header>
+    <nav>
+        <a href="#intro">Complexity Overview</a>
+        <a href="#bigo">Big-O Notation</a>
+        <a href="#properties">Properties</a>
+        <a href="#omega">Ω and Θ</a>
+        <a href="#problems">Possible Problems</a>
+        <a href="#examples">Complexity Classes</a>
+        <a href="#finding">Finding Complexity</a>
+        <a href="#cases">Best/Avg/Worst</a>
+        <a href="#amortized">Amortized</a>
+        <a href="#np">NP-Completeness</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Computational and Asymptotic Complexity</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An algorithm's <strong>complexity</strong> is a function describing its efficiency in terms of the amount of data it must process. Some algorithms are more efficient than others — we need metrics to compare them.</p>
+                <div class="grid">
+                    <div class="card"><h3>Time Complexity</h3><p>Amount of time an algorithm takes in terms of the amount of input. How fast does it run as n grows?</p></div>
+                    <div class="card"><h3>Space Complexity</h3><p>Amount of memory an algorithm uses in terms of the amount of input. How much RAM does it need?</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Asymptotic complexity</strong> asks: when n (number of inputs) goes to infinity, what happens to performance? How scalable is the solution?</p>
+                <pre>f(n) = n² + 100n + log₁₀n + 1000
+
+// As n grows, the n² term dominates completely.
+// The 100n, log n, and constant terms become negligible.
+// Only the DOMINANT TERM matters asymptotically.
+// So f(n) = O(n²)</pre>
+                <div class="highlight"><p>The key insight: for large n, only the fastest-growing term matters. Constants and lower-order terms are dropped. This is why n² + 100n + 1000 is still O(n²) — for large enough n, the n² term so completely dominates that the others are irrelevant to the growth rate.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="bigo">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Big-O Notation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Big-O is the most commonly used asymptotic complexity notation. It provides a formal <strong>upper bound</strong> on how fast a function grows.</p>
+                <p><strong>Definition:</strong> f(n) = O(g(n)) if and only if there exists a real number c and positive integer N such that 0 &lt; f(n) &lt; c·g(n) for all n &gt; N.</p>
+                <p>In plain English: after some point N, f(n) never exceeds c times g(n). Constants and lower-order terms don't change the Big-O class.</p>
+                <pre>// Example: f(n) = 2n² + 3n + 1
+// Is this O(n²)?
+
+// Need: 2n² + 3n + 1 < c·n²
+// Divide by n²: 2 + 3/n + 1/n² < c
+// At N=1: 2 + 3 + 1 = 6 → c = 6 works
+// So: 2n² + 3n + 1 < 6n² for all n > 1
+// Confirmed: f(n) = O(n²) ✓
+
+// Example: 3n² + 4n - 2
+// 3 + 4/n - 2/n² < c
+// At N=1: 3 + 4 - 2 = 5 → c = 6 works
+// So 3n² + 4n - 2 < 6n² for all n > 1 ✓
+
+// All of these are O(n²):
+// n² + n,   4n² - n·log n + 12,   n²/5 - 100n,   n·log n? NO, that's O(n log n)</pre>
+                <div class="highlight"><p>The c and N in the Big-O definition don't have to be unique — many pairs work. The choice of c depends on N and vice-versa. What matters is that SOME pair exists. Big-O gives us a way to compare algorithms quickly by knowing their position in the complexity hierarchy.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="properties">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Properties of Big-O Notation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <ul>
+                    <li><strong>Transitivity:</strong> if f(n) = O(g(n)) and g(n) = O(h(n)), then f(n) = O(h(n))</li>
+                    <li><strong>Sum:</strong> if f(n) = O(h(n)) and g(n) = O(h(n)), then f(n) + g(n) = O(h(n))</li>
+                    <li><strong>Constant factor:</strong> a·nᵏ = O(nᵏ) for any a &gt; 0</li>
+                    <li><strong>Polynomial:</strong> any kth degree polynomial is O(nᵏ)</li>
+                    <li><strong>Constant multiple:</strong> if f(n) = c·g(n), then f(n) = O(g(n))</li>
+                    <li><strong>Limit form:</strong> f(n) = O(g(n)) is true if lim(n→∞) f(n)/g(n) is a constant</li>
+                    <li><strong>Logarithm base:</strong> logₐn = O(logᵦn) for any a, b &gt; 1 — the base of logarithms doesn't matter in Big-O</li>
+                </ul>
+                <div class="highlight"><p>The logarithm base property is particularly useful: since all logarithms differ only by a constant factor (change of base formula), and Big-O ignores constant factors, we can always write O(log n) without specifying the base. All logarithmic algorithms are in the same Big-O class.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="omega">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Ω (Omega) and Θ (Theta) Notations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Big-O alone gives too much freedom — selection sort is technically O(n³) since n² = O(n³), but that's not a useful bound. We need tighter notation.</p>
+                <div class="grid">
+                    <div class="card"><h3>Big-Ω (Lower Bound)</h3><p>f(n) = Ω(g(n)) if there exist c and N such that f(n) &gt; c·g(n) for all n &gt; N. g is a function that f never falls below (after N). "f grows at least as fast as g."</p></div>
+                    <div class="card"><h3>Big-Θ (Tight Bound)</h3><p>f(n) = Θ(g(n)) if f(n) = O(g(n)) AND f(n) = Ω(g(n)). Equivalently: c₁·g(n) &lt; f(n) &lt; c₂·g(n) for all n &gt; N. "f grows at exactly the same rate as g."</p></div>
+                </div>
+                <pre>// Big-Θ means: g(n) is a tight bound — not just an upper bound
+// Example: n² + 3n = Θ(n²)
+// Because: n² &lt; n² + 3n &lt; 2n² for large n
+// c₁ = 1, c₂ = 2, works for n > 3
+
+// Limit forms:
+// f(n) = Ω(g(n)) true if  lim(n→∞) g(n)/f(n) is constant
+// f(n) = Θ(g(n)) true if  lim(n→∞) f(n)/g(n) is NON-ZERO constant
+
+// Important ordering (slowest to fastest growth):
+// O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(n³) < O(2ⁿ) < O(n!)</pre>
+                <div class="highlight"><p>nᵏ = O((1+ε)ⁿ) for any positive k and ε — any polynomial is bounded above by any exponential. (log n)ε = O(nᵏ) — logarithms to any power grow slower than any polynomial. This gives us the ordering: logarithmic &lt; polynomial &lt; exponential. Prefer log-time algorithms over polynomial, and polynomial over exponential.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="problems">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Possible Problems with the Notation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Big-O focuses on asymptotic behavior — what happens as n → ∞. This can mislead for practical, finite values of n.</p>
+                <pre>// Algorithm A: 10⁸ · n steps  → O(n)  (linear)
+// Algorithm B: 10 · n²  steps → O(n²) (quadratic)
+
+// Big-O says: use Algorithm A (linear is better)
+// BUT: Algorithm B is FASTER when n < 10⁷!
+
+// If your data always has n &lt; 1,000,000 (n &lt; 10⁶):
+// A requires 10⁸ × 10⁶ = 10¹⁴ steps
+// B requires 10 × 10¹² = 10¹³ steps
+// B is 10x faster in practice!</pre>
+                <div class="highlight"><p>"Double-O" notation (OO) has been proposed for this: f(n) = OO(g(n)) if f(n) = O(g(n)) but the constant c is too large to be practically useful. The lesson: Big-O tells you about asymptotic behavior, but for real applications you must also consider the constants. An O(n²) algorithm with a tiny constant can easily outperform an O(n) algorithm with a huge constant for realistic input sizes.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="examples">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Complexity Classes</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Class</th><th>Notation</th><th>Example</th><th>n=1M ops/sec practicality</th></tr>
+                    <tr><td>Constant</td><td>O(1)</td><td>Array access</td><td>Instant regardless of n</td></tr>
+                    <tr><td>Logarithmic</td><td>O(log n)</td><td>Binary search</td><td>Excellent — scales perfectly</td></tr>
+                    <tr><td>Linear</td><td>O(n)</td><td>Sequential search</td><td>Good — proportional to data</td></tr>
+                    <tr><td>Log-linear</td><td>O(n log n)</td><td>Merge sort, heap sort</td><td>Good — practical for large n</td></tr>
+                    <tr><td>Quadratic</td><td>O(n²)</td><td>Bubble sort, selection sort</td><td>Acceptable for small n only</td></tr>
+                    <tr><td>Cubic</td><td>O(n³)</td><td>Naive matrix multiply</td><td>Impractical for large n</td></tr>
+                    <tr><td>Exponential</td><td>O(2ⁿ)</td><td>Brute force combinations</td><td>Completely impractical</td></tr>
+                    <tr><td>Factorial</td><td>O(n!)</td><td>Naive TSP</td><td>Impossible beyond tiny n</td></tr>
+                </table>
+                <div class="highlight"><p>Even with modern supercomputers, cubic O(n³) or higher algorithms are impractical for large datasets. This is why algorithm design matters so much — the difference between O(n log n) and O(n²) sorting can mean hours versus milliseconds on large datasets.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="finding">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Finding Asymptotic Complexity</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Count assignments and comparisons to determine time complexity. Each additional level of loop nesting typically multiplies complexity by n.</p>
+                <pre>// Simple loop — O(n)
+for (i = sum = 0; i < n; i++)
+    sum = sum + a[i];
+// Initialization: 2 assignments (sum=0, i=0)
+// Loop body: sum = sum + a[i] → n times
+// Loop increment: i++ → n times
+// Total: 2 + 2n assignments → O(n)
+
+// Nested loop — O(n²)
+for (i = 0; i < n; i++) {
+    for (j = 1, sum = a[0]; j <= i; j++)
+        sum += a[j];
+    cout << sum;
+}
+// Outer loop: n iterations
+// Inner loop: 0 + 1 + 2 + ... + (n-1) = n(n-1)/2 iterations total
+// Total assignments: 1 + 3n + 2·n(n-1)/2
+// = O(1) + O(n) + O(n²) = O(n²)
+
+// Rule of thumb:
+// k nested loops over n → O(nᵏ)
+// BUT: not all loops increase complexity — analyze carefully
+// Some loops may iterate log n times (binary search) → O(log n)</pre>
+            </div>
+        </div>
+
+        <div class="section" id="cases">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Best, Average, and Worst Cases</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Best Case</h3><p>The fewest number of steps the algorithm takes. The most favorable input. Often not very informative — almost never actually encountered.</p></div>
+                    <div class="card"><h3>Worst Case</h3><p>The maximum number of steps the algorithm takes. The most useful measure — guarantees the algorithm won't do worse than this.</p></div>
+                    <div class="card"><h3>Average Case</h3><p>Performance between extremes. Weight steps for each input by probability of occurrence and sum. Requires knowing the probability distribution of inputs.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Example: Sequential search in an unordered array for target value:</strong></p>
+                <pre>// Best case: target is in position 0 → 1 comparison → O(1)
+// Worst case: target is in last position or not found → n comparisons → O(n)
+
+// Average case (uniform distribution — equal probability 1/n for each position):
+// Expected steps = (1/n) × (1 + 2 + 3 + ... + n)
+//                = (1/n) × (n(n+1)/2)
+//                = (n+1)/2
+// Average case → O(n) (still linear, just roughly half the array on average)
+
+// Formal average case (weighted sum):
+// Σ (steps_for_input_i × probability_of_input_i)
+// This is the expected value from probability theory</pre>
+                <div class="highlight"><p>The worst case is most commonly reported because it provides a guarantee regardless of input distribution. The average case requires knowing the probability distribution of inputs, which is often unavailable or difficult to determine. The best case is usually uninteresting — it's the lucky scenario that rarely represents typical behavior.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="amortized">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Amortized Complexity</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>When data structures are manipulated by sequences of operations, some early operations impact later ones. <strong>Amortized analysis</strong> considers the entire sequence to get a more accurate overall performance picture.</p>
+                <pre>// Example: Dynamic array that doubles when full
+// Push n elements one at a time
+
+// Worst case for a SINGLE insertion when resizing: O(n)
+// (must copy all n existing elements to new array)
+
+// But resizing only happens at sizes 1, 2, 4, 8, 16, ...
+// Total copy operations for n insertions:
+// 1 + 2 + 4 + 8 + ... + n ≈ 2n
+
+// So n insertions total: O(n) time
+// Amortized cost per insertion: O(n)/n = O(1)
+
+// The expensive O(n) resize operations happen so RARELY
+// that cheaper O(1) insertions "pay back" the cost.
+// This is why vector::push_back is O(1) amortized.</pre>
+                <div class="highlight"><p>Amortized analysis guarantees worst-case performance over a sequence of operations without making assumptions about input. It's particularly useful when individual operations vary wildly in cost but the expensive ones are rare. The "bankers" and "potential" methods are formal techniques for amortized analysis — the key idea is spreading the cost of expensive operations over many cheap ones.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="np">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>NP-Completeness</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Deterministic Algorithm</h3><p>Behaves predictably — given the same input, always takes the same steps. One path through the computation.</p></div>
+                    <div class="card"><h3>Nondeterministic Algorithm</h3><p>Can "guess" what to do next. Different behaviors on different runs. Parallel algorithms may exhibit this via race conditions.</p></div>
+                    <div class="card"><h3>P (Polynomial)</h3><p>Problems solvable deterministically in O(nᵏ) time. These are "tractable" — feasibly solvable for large inputs.</p></div>
+                    <div class="card"><h3>NP (Nondeterministic Polynomial)</h3><p>Problems verifiable in polynomial time. A solution can be CHECKED quickly even if it can't be FOUND quickly. P ⊆ NP.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>NP-Complete:</strong> the hardest problems in NP. A problem is NP-complete if:</p>
+                <ul>
+                    <li>It is in NP (a proposed solution can be verified in polynomial time)</li>
+                    <li>Every other problem in NP can be reduced to it in polynomial time</li>
+                </ul>
+                <div class="highlight"><p>The million-dollar question: Does P = NP? If ANY NP-complete problem can be solved deterministically in polynomial time, then ALL NP-complete problems can be solved that way — and P = NP. If ANY NP problem is intractable (requires more than polynomial time), then ALL NP-complete problems are intractable. Despite decades of effort, no one has proven P = NP or P ≠ NP — it remains the most famous unsolved problem in computer science.</p></div>
+                <pre>// Reducibility: Problem A reduces to Problem B if
+// every instance of A can be transformed into B in polynomial time
+// → if B is solvable efficiently, so is A
+
+// Examples of NP-complete problems:
+// - Boolean satisfiability (SAT) — first proven NP-complete
+// - Travelling Salesman Problem (find shortest route visiting all cities)
+// - Graph coloring (color a graph with k colors so no adjacent nodes match)
+// - Knapsack problem
+
+// Current approach: since NP-complete problems can't be solved exactly
+// in polynomial time (as far as we know), use:
+// - Approximation algorithms (close-enough solutions)
+// - Heuristics (good solutions in practice)
+// - Special cases that ARE polynomial</pre>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

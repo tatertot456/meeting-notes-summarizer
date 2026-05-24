@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 3: Linked Lists</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a1a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #9d174d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #be185d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #9d174d; color: white; border-color: #9d174d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #be185d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #9d174d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #be185d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #be185d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #be185d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #9d174d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #be185d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 3</div>
+        <h1>Linked Lists</h1>
+        <p class="subtitle">Singly, doubly, circular, skip, and self-organizing lists, plus sparse tables and STL lists</p>
+    </header>
+    <nav>
+        <a href="#intro">Introduction</a>
+        <a href="#singly">Singly Linked Lists</a>
+        <a href="#doubly">Doubly Linked Lists</a>
+        <a href="#circular">Circular Lists</a>
+        <a href="#skip">Skip Lists</a>
+        <a href="#selforg">Self-Organizing Lists</a>
+        <a href="#sparse">Sparse Tables</a>
+        <a href="#stl">STL List</a>
+        <a href="#comparison">Arrays vs Lists</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Introduction — Why Linked Lists?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Arrays suffer from two significant limitations that linked lists overcome:</p>
+                <div class="grid">
+                    <div class="card"><h3>Fixed Size</h3><p>Array size must be known at compile time. Too large wastes memory. Too small causes overflow. Linked lists grow and shrink dynamically.</p></div>
+                    <div class="card"><h3>Expensive Insertion/Deletion</h3><p>Array elements are contiguous in memory — inserting or deleting requires shifting potentially all elements. Linked lists only update a few pointers.</p></div>
+                </div>
+                <p style="margin-top:16px">A <strong>linked list</strong> is a collection of independent memory locations called <strong>nodes</strong>. Each node stores data and a link (pointer/address) to another node. Moving between nodes means following these links — the nodes can be anywhere in memory.</p>
+                <div class="highlight"><p>The most common implementation uses pointers, providing great flexibility. The tradeoff: linked lists lose random access (you can't jump directly to element i like an array — you must traverse from the head). Arrays win for random access; linked lists win for frequent insertions and deletions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="singly">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Singly Linked Lists</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Each node contains data (info) and a pointer to the next node. A single head pointer accesses the entire list. The last node's next pointer is null.</p>
+                <pre>// Node definition — self-referential class
+class IntSLLNode {
+public:
+    int info;               // data stored in this node
+    IntSLLNode *next;       // pointer to next node (same type!)
+
+    IntSLLNode() {
+        next = nullptr;     // initialize to null — no dangling pointer
+    }
+    IntSLLNode(int i, IntSLLNode *in = nullptr) {
+        info = i;
+        next = in;
+    }
+};
+
+// List class — encapsulates the node class
+class IntSLList {
+    IntSLLNode *head;   // pointer to first node
+    IntSLLNode *tail;   // pointer to last node (avoids traversal to end)
+public:
+    // Core operations
+    bool isEmpty() { return head == nullptr; }
+    void addToHead(int);
+    void addToTail(int);
+    int  deleteFromHead();
+    int  deleteFromTail();
+    void deleteNode(int);   // delete by value
+    bool isInList(int);     // search
+};</pre>
+                <p><strong>Insertion at the beginning:</strong></p>
+                <pre>void IntSLList::addToHead(int el) {
+    head = new IntSLLNode(el, head);  // new node's next = old head
+    if (tail == nullptr)              // list was empty
+        tail = head;
+}
+// Steps: create node → set next to old head → update head</pre>
+                <p><strong>Insertion at the end:</strong></p>
+                <pre>void IntSLList::addToTail(int el) {
+    if (isEmpty()) {
+        head = tail = new IntSLLNode(el);
+    } else {
+        tail->next = new IntSLLNode(el);  // old tail points to new node
+        tail = tail->next;                // update tail
+    }
+}
+// Steps: create node → old tail's next = new node → update tail</pre>
+                <p><strong>Deletion from beginning:</strong></p>
+                <pre>int IntSLList::deleteFromHead() {
+    int el = head->info;           // save value to return
+    IntSLLNode *tmp = head;
+    if (head == tail)              // only one node
+        head = tail = nullptr;
+    else
+        head = head->next;        // advance head
+    delete tmp;                    // free memory
+    return el;
+}</pre>
+                <p><strong>Deletion from end:</strong> requires traversal to find the second-to-last node (no prev pointer!)</p>
+                <pre>// Must traverse entire list to find node before tail
+IntSLLNode *tmp = head;
+while (tmp->next != tail)   // find predecessor of tail
+    tmp = tmp->next;
+// Now tmp is second-to-last
+delete tail;
+tail = tmp;
+tail->next = nullptr;</pre>
+                <p><strong>Delete specific node by value:</strong> requires two pointers</p>
+                <pre>// pred trails behind tmp during traversal
+IntSLLNode *pred = head, *tmp = head->next;
+while (tmp != nullptr && tmp->info != el) {
+    pred = tmp;
+    tmp = tmp->next;
+}
+if (tmp != nullptr) {
+    pred->next = tmp->next;  // "link around" the target node
+    if (tmp == tail)
+        tail = pred;
+    delete tmp;
+}</pre>
+                <div class="highlight"><p>Special cases to always handle: empty list (deletion fails gracefully), single node (head and tail both become null), deleting the first or last node (head/tail pointers need updating). Missing any of these leads to memory leaks or dangling pointers.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="doubly">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Doubly Linked Lists</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Adding a <strong>prev pointer</strong> to each node allows traversal in both directions. This eliminates the need to scan forward to find the predecessor when deleting from the end or middle.</p>
+                <pre>class IntDLLNode {
+public:
+    int info;
+    IntDLLNode *next;
+    IntDLLNode *prev;   // NEW — points to previous node
+
+    IntDLLNode(int i, IntDLLNode *n = nullptr, IntDLLNode *p = nullptr)
+        : info(i), next(n), prev(p) { }
+};</pre>
+                <p><strong>Insertion at end:</strong></p>
+                <pre>// New node's prev = current tail
+// New node's next = nullptr
+// Old tail's next = new node
+// Update tail to new node
+// Special case: if list was empty, head = tail = new node
+
+new_node->prev = tail;
+new_node->next = nullptr;
+if (tail) tail->next = new_node;
+else head = new_node;
+tail = new_node;</pre>
+                <p><strong>Deletion from end:</strong> no traversal needed!</p>
+                <pre">int el = tail->info;
+IntDLLNode *tmp = tail;
+tail = tail->prev;       // jump directly to predecessor
+if (tail) tail->next = nullptr;
+else head = nullptr;     // list now empty
+delete tmp;
+return el;</pre>
+                <div class="highlight"><p>The key advantage of doubly linked lists: deletion from the end or middle is O(1) instead of O(n). With a singly linked list, finding the predecessor requires O(n) traversal. With a doubly linked list, every node already has a prev pointer — no traversal needed. The cost: each node requires an extra pointer (more memory overhead).</p></div>
+                <p>The STL implements its list container as a doubly linked list with head and tail pointers — use <code>#include &lt;list&gt;</code>.</p>
+            </div>
+        </div>
+
+        <div class="section" id="circular">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Circular Lists</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>In a circular list, the last node's next pointer points back to the first node — forming a ring. Only one permanent pointer (tail) is needed, since tail→next gives access to the head.</p>
+                <pre>void addToTail(int el) {
+    if (isEmpty()) {
+        tail = new IntSLLNode(el);
+        tail->next = tail;           // points to itself!
+    } else {
+        tail->next = new IntSLLNode(el, tail->next);
+        // new node's next = old head (tail->next was head)
+        tail = tail->next;           // advance tail to new node
+    }
+}</pre>
+                <div class="highlight"><p>Circular lists are useful for applications that cycle through data repeatedly — round-robin scheduling, buffers, game loops. The drawback: deleting from the end still requires finding the predecessor by traversal (like singly linked lists). Making the circular list doubly linked solves this by providing two rings — one forward through next pointers, one backward through prev pointers.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="skip">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Skip Lists</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The biggest drawback to linked lists is <strong>sequential search</strong> — finding an element always requires starting from the head and scanning one by one. A skip list adds "express lanes" — higher-level pointers that skip over multiple nodes.</p>
+                <div class="grid">
+                    <div class="card"><h3>Structure</h3><p>Nodes have varying numbers of pointers (levels). Higher-level pointers skip more nodes. Level 1 = direct links. Level 2 = skip every other. Level 4 = skip every 8th. etc.</p></div>
+                    <div class="card"><h3>Search</h3><p>Start at the highest level. Follow pointers until you overshoot or find target. Drop to next level. Repeat. Much faster than sequential — O(log n) average.</p></div>
+                    <div class="card"><h3>Insertion</h3><p>Assign new node a random level (using probability distribution). Number of nodes at each level stays balanced: 8 at level 1, 4 at level 2, 2 at level 3, 1 at level 4 (for 15 elements).</p></div>
+                    <div class="card"><h3>Node Structure</h3><p>Each node points to an array of pointers whose size equals the node's level. Avoids giving every node the maximum number of pointers (wasteful).</p></div>
+                </div>
+                <div class="highlight"><p>Skip lists trade insertion/deletion complexity for search speed. The level of a new node is determined randomly, which maintains the probabilistic balance without requiring expensive restructuring. Skip lists achieve O(log n) average search time — the same as a balanced binary search tree — but with simpler implementation.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="selforg">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Self-Organizing Lists</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Instead of a fixed structure, self-organizing lists <strong>dynamically reorganize</strong> as they are used — moving frequently accessed items closer to the front to reduce future search time.</p>
+                <table>
+                    <tr><th>Technique</th><th>When element found</th><th>When element not found</th></tr>
+                    <tr><td>Move-to-Front</td><td>Move target to head of list</td><td>Insert at end</td></tr>
+                    <tr><td>Transpose</td><td>Swap target with its predecessor</td><td>Insert at end</td></tr>
+                    <tr><td>Count</td><td>Increment access counter; reorder by count</td><td>Insert at end with count=1</td></tr>
+                    <tr><td>Ordering</td><td>No change — list is ordered on data value</td><td>Insert in sorted position</td></tr>
+                </table>
+                <div class="highlight"><p>Move-to-front and count perform best in practice. The goal: items accessed frequently end up near the head, reducing average search length. This works well when access patterns are non-uniform (some items accessed much more than others). For small lists, simple sequential search is fine — these techniques pay off as list size and access frequency increase.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="sparse">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Sparse Tables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>sparse table</strong> is a table that is mostly unoccupied. Storing it as a full 2D array wastes enormous amounts of memory.</p>
+                <p><strong>Example: Student grades — 8,000 students × 300 classes</strong></p>
+                <table>
+                    <tr><th>Approach</th><th>Storage</th><th>Wasted</th></tr>
+                    <tr><td>Full 2D array (1 byte/grade)</td><td>2,400,000 bytes</td><td>~99% (if avg 4 classes/student)</td></tr>
+                    <tr><td>Two parallel arrays</td><td>417,000 bytes</td><td>~17% — less waste but inflexible, data duplicated</td></tr>
+                    <tr><td>Two arrays of linked lists</td><td>288,000 bytes</td><td>0% wasted — no fixed allocation, fully flexible</td></tr>
+                </table>
+                <p><strong>Linked list approach:</strong> Two arrays of linked lists — one indexed by student (lists all classes a student takes), one indexed by class (lists all students in that class). Each node stores:</p>
+                <ul>
+                    <li>Student number</li>
+                    <li>Class number</li>
+                    <li>Grade</li>
+                    <li>Pointer to next class for this student</li>
+                    <li>Pointer to next student in this class</li>
+                </ul>
+                <div class="highlight"><p>The linked list approach uses only 10% of the original table's space with NO wasted storage — and the lists expand or contract as enrollment changes, unlike fixed arrays. The tradeoff: slightly more complex code and pointer overhead per node. For truly sparse data, this is almost always the right choice.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="stl">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Lists in the Standard Template Library</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The STL implements <code>std::list</code> as a generic doubly linked list with head and tail pointers.</p>
+                <pre>#include &lt;list&gt;
+
+list&lt;int&gt; myList;
+
+// Common operations
+myList.push_front(10);    // insert at beginning
+myList.push_back(20);     // insert at end
+myList.pop_front();       // remove from beginning
+myList.pop_back();        // remove from end
+myList.front();           // access first element
+myList.back();            // access last element
+myList.empty();           // check if empty
+myList.size();            // number of elements
+myList.clear();           // remove all elements
+
+// Iterate with iterator
+for (auto it = myList.begin(); it != myList.end(); ++it)
+    cout &lt;&lt; *it &lt;&lt; " ";
+
+// Range-based for
+for (int x : myList)
+    cout &lt;&lt; x &lt;&lt; " ";</pre>
+            </div>
+        </div>
+
+        <div class="section" id="comparison">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Arrays vs Linked Lists</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Operation</th><th>Array</th><th>Linked List</th></tr>
+                    <tr><td>Random access by index</td><td>O(1) — direct</td><td>O(n) — must traverse</td></tr>
+                    <tr><td>Search (unsorted)</td><td>O(n)</td><td>O(n)</td></tr>
+                    <tr><td>Insert at beginning</td><td>O(n) — shift all</td><td>O(1)</td></tr>
+                    <tr><td>Insert at end</td><td>O(1) amortized</td><td>O(1) with tail pointer</td></tr>
+                    <tr><td>Delete at beginning</td><td>O(n) — shift all</td><td>O(1)</td></tr>
+                    <tr><td>Delete at end (singly)</td><td>O(1)</td><td>O(n) — find predecessor</td></tr>
+                    <tr><td>Delete at end (doubly)</td><td>O(1)</td><td>O(1)</td></tr>
+                    <tr><td>Memory overhead</td><td>Low — just data</td><td>Higher — data + pointer(s)</td></tr>
+                    <tr><td>Size flexibility</td><td>Fixed at compile time</td><td>Dynamic — grows/shrinks</td></tr>
+                </table>
+                <div class="highlight"><p>Use arrays when: you need random access by index, data size is known and stable, memory overhead matters. Use linked lists when: frequent insertions/deletions at arbitrary positions, data size varies significantly, or you're implementing stacks/queues/deques. The STL provides both — vector for array-like needs, list for linked-list needs.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

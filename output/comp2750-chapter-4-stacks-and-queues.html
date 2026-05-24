@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 4: Stacks and Queues</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b91c1c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #dc2626; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b91c1c; color: white; border-color: #b91c1c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #dc2626; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #b91c1c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #dc2626; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #dc2626; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #dc2626; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b91c1c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #dc2626; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 4</div>
+        <h1>Stacks and Queues</h1>
+        <p class="subtitle">Stacks, queues, priority queues, deques, and STL implementations</p>
+    </header>
+    <nav>
+        <a href="#stacks">Stacks</a>
+        <a href="#stack-impl">Stack Implementation</a>
+        <a href="#queues">Queues</a>
+        <a href="#queue-impl">Queue Implementation</a>
+        <a href="#priority">Priority Queues</a>
+        <a href="#stl-stack">STL Stack</a>
+        <a href="#stl-queue">STL Queue</a>
+        <a href="#stl-pq">STL Priority Queue</a>
+        <a href="#deque">STL Deque</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="stacks">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Stacks — Concept & Operations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A stack is a <strong>restricted access linear data structure</strong> — data can only be added and removed from one end (the top). Classic analogy: a stack of cafeteria trays. The last tray added is the first one removed.</p>
+                <div class="highlight"><p><strong>LIFO — Last In, First Out.</strong> The most recently added element is always the first to be removed. This makes stacks naturally suited to any problem requiring reverse-order processing.</p></div>
+                <table>
+                    <tr><th>Operation</th><th>Description</th></tr>
+                    <tr><td>clear()</td><td>Remove all elements from the stack</td></tr>
+                    <tr><td>isEmpty()</td><td>Return true if stack has no elements</td></tr>
+                    <tr><td>push(el)</td><td>Add element el to the top of the stack</td></tr>
+                    <tr><td>pop()</td><td>Remove the top element</td></tr>
+                    <tr><td>topEl()</td><td>Return the top element's value WITHOUT removing it</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Applications of stacks:</strong></p>
+                <ul>
+                    <li>Evaluating expressions and parsing syntax (postfix/infix conversion)</li>
+                    <li>Balancing delimiters in program code — {}, (), []</li>
+                    <li>Converting numbers between bases</li>
+                    <li>Processing financial data</li>
+                    <li>AI search and backtracking algorithms</li>
+                    <li>Function call management — the call stack itself is a stack</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="stack-impl">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Stack Implementation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Stacks can be implemented with either a vector/array or a linked list. Both give the same ADT behavior — the choice affects memory usage and performance characteristics.</p>
+                <pre>// Stack as doubly linked list
+template &lt;class T&gt;
+class Stack {
+    list&lt;T&gt; lst;
+public:
+    void clear()      { lst.clear(); }
+    bool isEmpty()    { return lst.empty(); }
+
+    void push(T el)   { lst.push_front(el); }  // add to front = top
+    T    pop()        { T el = lst.front(); lst.pop_front(); return el; }
+    T    topEl()      { return lst.front(); }   // peek without removing
+};
+
+// Stack as vector
+template &lt;class T&gt;
+class Stack {
+    vector&lt;T&gt; vec;
+public:
+    void push(T el)  { vec.push_back(el); }    // back = top
+    T    pop()       { T el = vec.back(); vec.pop_back(); return el; }
+    T    topEl()     { return vec.back(); }
+    bool isEmpty()   { return vec.empty(); }
+};</pre>
+                <div class="highlight"><p>Both implementations give O(1) push and pop. The linked list uses dynamic memory (pointer overhead per node). The vector may occasionally need to resize (O(n) amortized O(1)). For small, bounded stacks use vector. For large or unbounded stacks, a linked list avoids the occasional reallocation cost. The STL stack defaults to deque as its underlying container.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="queues">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Queues — Concept & Operations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A queue is a <strong>restricted access linear data structure</strong> where additions happen at the rear and deletions at the front. Items migrate from rear to front before removal.</p>
+                <div class="highlight"><p><strong>FIFO — First In, First Out.</strong> Items are removed in the same order they were added. Classic analogy: a checkout line at a grocery store. The first person in line is the first to be served.</p></div>
+                <table>
+                    <tr><th>Operation</th><th>Description</th></tr>
+                    <tr><td>clear()</td><td>Remove all elements</td></tr>
+                    <tr><td>isEmpty()</td><td>Return true if queue has no elements</td></tr>
+                    <tr><td>enqueue(el)</td><td>Add element el to the REAR of the queue</td></tr>
+                    <tr><td>dequeue()</td><td>Remove the element from the FRONT</td></tr>
+                    <tr><td>firstEl()</td><td>Return the front element without removing it</td></tr>
+                </table>
+                <p style="margin-top:16px">Unlike a stack, both ends of the queue must be managed simultaneously. Queues appear throughout computer science: OS process scheduling, print spoolers, network packet buffering, breadth-first search, and service simulations (queuing theory).</p>
+            </div>
+        </div>
+
+        <div class="section" id="queue-impl">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Queue Implementation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Array implementation — circular array:</strong></p>
+                <p>As items dequeue, space opens at the front of the array. Rather than shifting everything or wasting that space, treat the array as circular — items can wrap around to the beginning.</p>
+                <pre>// Circular array queue
+template &lt;class T&gt;
+class Queue {
+    T*  arr;
+    int capacity, front, rear, size;
+public:
+    Queue(int cap) : capacity(cap), front(0), rear(-1), size(0) {
+        arr = new T[cap];
+    }
+    void enqueue(T el) {
+        rear = (rear + 1) % capacity;  // wrap around!
+        arr[rear] = el;
+        size++;
+    }
+    T dequeue() {
+        T el = arr[front];
+        front = (front + 1) % capacity; // advance front
+        size--;
+        return el;
+    }
+    bool isEmpty() { return size == 0; }
+    bool isFull()  { return size == capacity; }
+};</pre>
+                <p>The queue is full when front and last are adjacent — this can happen in two configurations depending on whether the last element is at the physical end or middle of the array.</p>
+                <p><strong>Linked list implementation:</strong> more flexible, no fixed capacity, no wrapping logic needed.</p>
+                <pre>// Queue as doubly linked list — much simpler
+template &lt;class T&gt;
+class Queue {
+    list&lt;T&gt; lst;
+public:
+    void enqueue(T el) { lst.push_back(el); }   // add to rear
+    T    dequeue()     { T el = lst.front(); lst.pop_front(); return el; }
+    T    firstEl()     { return lst.front(); }
+    bool isEmpty()     { return lst.empty(); }
+};</pre>
+                <div class="highlight"><p>The circular array approach is cache-friendly but requires a fixed maximum capacity. The linked list approach is flexible but has pointer overhead. The STL queue uses a deque under the hood by default — combining the benefits of both approaches.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="priority">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Priority Queues</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A priority queue overrides normal FIFO ordering — elements are removed based on priority, not arrival order. Elements typically arrive randomly without inherent priority ordering.</p>
+                <div class="grid">
+                    <div class="card"><h3>Linked List Approach</h3><p>Maintain sorted order by inserting new elements in priority order. O(n) insertion, O(1) removal. Empirically not useful beyond ~10 elements.</p></div>
+                    <div class="card"><h3>Heap Approach (Best)</h3><p>A binary tree where parent always has higher priority than children. O(log n) insertion and removal. Used by the STL priority_queue.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Heap-based priority queue operations:</strong></p>
+                <pre>// Enqueue: insert at bottom, heapify UP
+// 1. Add new node at the bottom of the heap
+// 2. Compare with parent — if new node has higher priority, swap
+// 3. Repeat until heap property restored
+
+// Dequeue: remove root, heapify DOWN
+// 1. Remove root (highest priority)
+// 2. Move last node to root position
+// 3. Compare with children — if lower priority than a child, swap with highest child
+// 4. Repeat until heap property restored
+
+// Both operations: O(log n) — the height of the heap</pre>
+                <div class="highlight"><p>The heap ensures the highest priority element is always at the root — O(1) to access the top priority item, O(log n) to insert or remove. This is dramatically better than a sorted linked list (O(n) insertion) or unsorted array (O(n) removal). The heap is the standard implementation for priority queues in production code.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="stl-stack">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>STL Stack</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The STL stack is a <strong>container adaptor</strong> — not a new container, but an adaptation of an existing one to enforce stack behavior. Default underlying container is deque.</p>
+                <pre>#include &lt;stack&gt;
+
+stack&lt;int&gt;              stack1;  // deque by default
+stack&lt;int, vector&lt;int&gt;&gt; stack2;  // vector as underlying container
+stack&lt;int, list&lt;int&gt;&gt;   stack3;  // list as underlying container
+
+stack1.push(10);         // add to top
+stack1.push(20);
+stack1.push(30);
+
+stack1.top();            // 30 — peek at top without removing
+stack1.pop();            // removes 30 (returns void!)
+stack1.top();            // now 20
+
+stack1.empty();          // false
+stack1.size();           // 2</pre>
+                <div class="highlight"><p>STL's pop() does NOT return the removed value — it returns void. This is intentional (exception safety). To get the value before removing it, always call top() first, then pop(). This two-step idiom is standard: int val = s.top(); s.pop();</p></div>
+                <table>
+                    <tr><th>Method</th><th>Description</th></tr>
+                    <tr><td>push(el)</td><td>Add element to top</td></tr>
+                    <tr><td>pop()</td><td>Remove top element (returns void!)</td></tr>
+                    <tr><td>top()</td><td>Return reference to top element</td></tr>
+                    <tr><td>empty()</td><td>True if stack is empty</td></tr>
+                    <tr><td>size()</td><td>Number of elements</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="stl-queue">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>STL Queue</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The STL queue is also a container adaptor. Default underlying container is deque; list may also be used.</p>
+                <pre>#include &lt;queue&gt;
+
+queue&lt;int&gt; q;
+
+q.push(10);   // enqueue — adds to rear
+q.push(20);
+q.push(30);
+
+q.front();    // 10 — peek at front (oldest element)
+q.back();     // 30 — peek at rear (newest element)
+
+q.pop();      // dequeue — removes front element (returns void!)
+q.front();    // now 20
+
+q.empty();    // false
+q.size();     // 2</pre>
+                <div class="highlight"><p>Like stack, queue's pop() returns void. Dequeue is a two-step operation: front() to get the value, pop() to remove it. Enqueue is push() — it goes to the back. front() and back() give you peek access to both ends without removal.</p></div>
+                <table>
+                    <tr><th>Method</th><th>Description</th></tr>
+                    <tr><td>push(el)</td><td>Enqueue — add to rear</td></tr>
+                    <tr><td>pop()</td><td>Dequeue — remove from front (void)</td></tr>
+                    <tr><td>front()</td><td>Return reference to front element</td></tr>
+                    <tr><td>back()</td><td>Return reference to rear element</td></tr>
+                    <tr><td>empty()</td><td>True if queue is empty</td></tr>
+                    <tr><td>size()</td><td>Number of elements</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="stl-pq">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>STL Priority Queue</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The STL priority_queue uses a vector (or deque) as its underlying container. The highest-valued element is always at the top by default (max-heap).</p>
+                <pre>#include &lt;queue&gt;
+
+// Max-heap by default (highest value = highest priority)
+priority_queue&lt;int&gt; pq;
+
+pq.push(30);
+pq.push(10);
+pq.push(50);
+pq.push(20);
+
+pq.top();    // 50 — always the maximum
+pq.pop();    // removes 50
+pq.top();    // 30
+
+// Min-heap (lowest value = highest priority)
+priority_queue&lt;int, vector&lt;int&gt;, greater&lt;int&gt;&gt; minPQ;
+minPQ.push(30);
+minPQ.push(10);
+minPQ.push(50);
+minPQ.top();   // 10 — the minimum
+
+// Custom comparator for objects
+struct Task { int priority; string name; };
+auto cmp = [](Task a, Task b) { return a.priority &lt; b.priority; };
+priority_queue&lt;Task, vector&lt;Task&gt;, decltype(cmp)&gt; taskQueue(cmp);</pre>
+                <div class="highlight"><p>The default uses operator&lt; so the LARGEST element has highest priority (max-heap). Use greater&lt;T&gt; as the third template argument to get a min-heap. The push() method internally re-heapifies to maintain the heap property — O(log n). top() is O(1), pop() is O(log n).</p></div>
+                <table>
+                    <tr><th>Method</th><th>Description</th></tr>
+                    <tr><td>push(el)</td><td>Add element, reorder by priority</td></tr>
+                    <tr><td>pop()</td><td>Remove highest priority element (void)</td></tr>
+                    <tr><td>top()</td><td>Return highest priority element</td></tr>
+                    <tr><td>empty()</td><td>True if empty</td></tr>
+                    <tr><td>size()</td><td>Number of elements</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="deque">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>STL Deque (Double-Ended Queue)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>deque</strong> (double-ended queue) allows additions and deletions at BOTH ends. It combines list-like flexibility with vector-like random access.</p>
+                <pre>#include &lt;deque&gt;
+
+deque&lt;int&gt; dq;
+
+// Add to either end
+dq.push_front(10);    // add to front
+dq.push_back(20);     // add to back
+dq.push_front(5);     // [5, 10, 20]
+
+// Remove from either end
+dq.pop_front();       // removes 5 → [10, 20]
+dq.pop_back();        // removes 20 → [10]
+
+// Random access — like an array!
+dq[0];                // direct access by index
+dq.front();           // first element
+dq.back();            // last element
+
+dq.size();
+dq.empty();</pre>
+                <div class="highlight"><p>The STL deque's internal implementation is NOT a doubly linked list — it's an array of pointers to fixed-size blocks of data (like an ArrayList of arrays). This allows O(1) random access (via pointer math to find the right block and offset), O(1) push/pop at both ends, and avoids the contiguous reallocation cost of vector. The deque is the default underlying container for both stack and queue adaptors.</p></div>
+                <table>
+                    <tr><th>Method</th><th>Description</th></tr>
+                    <tr><td>push_front(el)</td><td>Add to front</td></tr>
+                    <tr><td>push_back(el)</td><td>Add to back</td></tr>
+                    <tr><td>pop_front()</td><td>Remove from front</td></tr>
+                    <tr><td>pop_back()</td><td>Remove from back</td></tr>
+                    <tr><td>front()</td><td>Peek at front</td></tr>
+                    <tr><td>back()</td><td>Peek at back</td></tr>
+                    <tr><td>operator[]</td><td>Random access by index</td></tr>
+                    <tr><td>at(i)</td><td>Bounds-checked random access</td></tr>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

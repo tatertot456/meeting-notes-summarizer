@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 7: Multiway Trees</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a0a2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #1d4ed8; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #2563eb; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #2563eb; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #1d4ed8; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #2563eb; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #2563eb; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #2563eb; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #1d4ed8; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #2563eb; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 7</div>
+        <h1>Multiway Trees</h1>
+        <p class="subtitle">B-Trees, B*-Trees, B+-Trees, 2-4 Trees, Red-Black Trees, R-Trees, k-d B-Trees, and Tries</p>
+    </header>
+    <nav>
+        <a href="#mway">M-Way Trees</a>
+        <a href="#btrees">B-Trees</a>
+        <a href="#bstar">B*-Trees</a>
+        <a href="#bplus">B+-Trees</a>
+        <a href="#24trees">2-4 & Red-Black Trees</a>
+        <a href="#spatial">R-Trees & k-d B-Trees</a>
+        <a href="#stl">STL Sets & Maps</a>
+        <a href="#tries">Tries</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="mway">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>M-Way Search Trees</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Trees don't have to be binary — nodes can have multiple children. An <strong>m-way search tree</strong> generalizes the BST to nodes with up to m children and m-1 keys.</p>
+                <p><strong>Four characteristics of an m-way search tree:</strong></p>
+                <ul>
+                    <li>Each node has at most m children and m-1 keys</li>
+                    <li>Keys in each node are in ascending order</li>
+                    <li>Keys in the first i children are smaller than the ith key</li>
+                    <li>Keys in the last m-i children are larger than the ith key</li>
+                </ul>
+                <div class="highlight"><p>M-way trees offer the same benefits as BSTs (fast retrieval and updates) but suffer the same balance problems. An unbalanced 4-way tree may require different numbers of comparisons to find different keys. Balance is especially critical for disk-based storage — each level traversal potentially means an expensive disk seek.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="btrees">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>B-Trees — Disk-Optimized Search Trees</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>B-Trees (Bayer & McCreight, 1972) are designed specifically for secondary storage. A B-tree node can be as large as a disk block, dramatically reducing the number of disk accesses needed.</p>
+                <div class="highlight"><p>Why B-Trees? Binary trees spread nodes across many disk blocks — each pointer follow = another disk seek. Mechanical disk operations are orders of magnitude slower than memory. With B-trees of order m=200 and 2 million keys, the height h &lt; 4 — finding any key requires at most 4 disk seeks. If the root is kept in memory, only 3 disk seeks are needed.</p></div>
+                <pre>template &lt;class T, int M&gt;
+class BTreeNode {
+    bool leaf;
+    int keyTally;
+    T keys[M-1];          // up to M-1 keys per node
+    BTreeNode *pointers[M]; // M child pointers
+};
+
+// B-Tree properties:
+// Root has 2 to M children (or 0 if leaf)
+// Non-root nodes have ⌈M/2⌉ to M children
+// All leaves at the same level (perfectly balanced)
+// Average space utilization: ~69% over time</pre>
+                <p><strong>Insertion — three cases:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Case 1: Leaf has room</h3><p>Insert key in sorted order in the leaf. No structural change needed — just shift keys to maintain order.</p></div>
+                    <div class="card"><h3>Case 2: Leaf is full — split</h3><p>Split the full leaf. Distribute keys between old and new node. Promote the median key to the parent. If parent is also full, repeat up to root.</p></div>
+                    <div class="card"><h3>Case 3: Root splits</h3><p>If split propagates to root, create a new root. Tree grows upward — B-trees are always built bottom-up, staying perfectly balanced.</p></div>
+                    <div class="card"><h3>Presplitting variation</h3><p>Split full nodes proactively during top-down search, preventing splits from propagating upward later. Trades one extra pass for simpler insertion.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Deletion:</strong></p>
+                <ul>
+                    <li>If leaf is more than half full: simply remove the key</li>
+                    <li>If leaf is less than half full: borrow a key from a sibling</li>
+                    <li>If no sibling has an extra key: merge the node with a sibling</li>
+                    <li>B-trees must be at least 50% full at all times</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="bstar">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>B*-Trees — Delayed Splitting</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>B*-Trees delay splitting by redistributing keys between a node and its sibling when overflow occurs, instead of immediately splitting.</p>
+                <div class="grid">
+                    <div class="card"><h3>Redistribution (sibling has room)</h3><p>When a node overflows, redistribute keys between it and its sibling. The median key goes to the parent. No new node created.</p></div>
+                    <div class="card"><h3>Split (both nodes full)</h3><p>When both the overflowing node AND its sibling are full: create a new node, distribute keys among all three nodes. Two separating keys go to parent. All three nodes end up 2/3 full.</p></div>
+                </div>
+                <div class="highlight"><p>B*-Tree average utilization: ~81% (vs ~69% for standard B-Trees). The fill factor can be generalized: a Bn-tree has fill factor (n+1)/(n+2). B*-tree = B2-tree (2/3 full), B**-tree = B3-tree (3/4 full). The tradeoff: more complex insertion logic for better space utilization.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="bplus">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>B+-Trees — Sequential + Random Access</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Standard B-trees support random access but sequential access (inorder traversal) requires many page changes. B+-Trees separate random access indexes from sequential data access.</p>
+                <div class="grid">
+                    <div class="card"><h3>Index Set (Internal Nodes)</h3><p>Contains keys and child pointers only — used as navigation guides. Keys here may not correspond to actual data records. Optimized for fast top-down search.</p></div>
+                    <div class="card"><h3>Sequence Set (Leaf Nodes)</h3><p>Contains actual data (keys + record references). Leaves are linked sequentially — scanning all leaves gives data in sorted order without traversing internal nodes.</p></div>
+                </div>
+                <pre>// B+-tree structure:
+// Internal nodes: [key₁ | ptr₁ | key₂ | ptr₂ | ... | keyₙ | ptrₙ₊₁]
+// Leaf nodes:     [key₁ | ref₁ | key₂ | ref₂ | ... | keyₙ | refₙ | →next leaf]
+//                                                                    ↑ linked list!
+
+// Insertion into a leaf (leaf has room):
+// Insert key in sorted order in leaf only — no change to internal nodes
+
+// Insertion into a full leaf (splits):
+// Split leaf: distribute keys between old and new leaf
+// COPY first key of new node to parent (unlike B-tree which MOVES the key)
+// In B+ trees, all data stays in leaves; internal nodes are just separators
+
+// Deletion:
+// Key deleted from leaf can REMAIN in internal node — it's just a separator
+// Only fix internal nodes if underflow requires merging leaves</pre>
+                <div class="highlight"><p>B+-trees are the backbone of relational database indexes (MySQL InnoDB, PostgreSQL). Sequential scans (range queries, ORDER BY) can follow the linked leaf list — no tree traversal needed. Random access uses the index set. The key insight: a deleted key in a leaf CAN remain as a separator in an internal node since separators don't need to match actual data.</p></div>
+                <p><strong>Simple Prefix B+-Trees</strong> — use the shortest prefix that distinguishes adjacent keys as separators, rather than full keys. This fits more separators per node, reducing tree height and improving performance by 25% for trees of 400-800 nodes.</p>
+            </div>
+        </div>
+
+        <div class="section" id="24trees">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>2-4 Trees & Red-Black Trees</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>2-4 tree</strong> (also called 2-3-4 tree) is a B-tree of order 4 — each node holds 1, 2, or 3 keys and 2, 3, or 4 children. Unlike disk-based B-trees, 2-4 trees are useful for in-memory structures because they maintain balance automatically.</p>
+                <div class="highlight"><p>The problem: implementing 2-4 trees directly in memory wastes space — arrays of 3 keys and 4 pointers per node, where on average only 69% are used. Memory is more precious than disk. Solution: transform 2-4 trees into binary trees using two link colors.</p></div>
+                <p><strong>Red-Black Trees</strong> — a 2-4 tree represented as a binary tree:</p>
+                <div class="grid">
+                    <div class="card"><h3>Black links (vertical)</h3><p>Parent-child links between different 2-4 tree nodes. Represent the tree's actual hierarchical structure.</p></div>
+                    <div class="card"><h3>Red links (horizontal)</h3><p>Links between keys that belong to the SAME 2-4 tree node. A 3-node becomes two binary nodes connected by a red link.</p></div>
+                    <div class="card"><h3>VH-Trees</h3><p>Vertical-horizontal trees — an alternative representation. Better for generalizing to B-trees of any order. Properties: equal black-link path length from root to any null; no two consecutive horizontal links.</p></div>
+                    <div class="card"><h3>STL Use</h3><p>STL set, multiset, map, and multimap are ALL implemented as red-black trees. This gives O(log n) insert, delete, and search guaranteed.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="spatial">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>R-Trees & k-d B-Trees — Spatial Data</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>R-Trees</strong> (Guttman, 1984) handle spatial data — objects in 2D or nD space. Each leaf stores (rectangle, object_id) where rectangle is the smallest bounding box containing the object.</p>
+                <pre>// R-Tree leaf entry: (rect, id)
+// rect = smallest bounding rectangle containing object id
+// Example: Area X at coordinates (10,100),(5,52) → [(10,100),(5,52), X]
+
+// Internal nodes: (rect, child)
+// rect = smallest rectangle containing all rectangles in child subtree
+
+// Insertion: like B-tree, with splitting when nodes are full
+// Search: may follow "wrong" paths due to overlapping bounding rectangles
+//         → can require checking multiple paths</pre>
+                <div class="highlight"><p>R+-Trees fix R-Tree overlap by ensuring encompassing rectangles don't overlap. Each data rectangle is associated with all rectangles it intersects — a data object may appear in multiple leaves. This eliminates wrong-path searches but adds complexity: an object may need to be deleted from multiple leaves.</p></div>
+                <p><strong>k-d B-Trees</strong> — multiway version of k-d trees for multidimensional point data. Each leaf holds up to 'a' points, non-terminal nodes hold up to 'b' regions. Insertion may cause cascading splits upward (much more complex than B-tree splits). Splits use a discriminator key to partition points into two groups.</p>
+            </div>
+        </div>
+
+        <div class="section" id="stl">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>STL Sets, Maps, Multisets & Multimaps</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>All four STL associative containers are implemented as red-black trees internally.</p>
+                <pre>#include &lt;set&gt;
+#include &lt;map&gt;
+
+// SET — unique elements, sorted, O(log n) operations
+set&lt;int&gt; s;
+s.insert(42);
+s.insert(17);
+s.insert(42);   // ignored — duplicates not allowed
+s.count(42);    // 1
+s.find(17);     // iterator to 17
+s.erase(17);
+
+// MULTISET — like set but allows duplicates
+multiset&lt;int&gt; ms;
+ms.insert(42);
+ms.insert(42);   // allowed!
+ms.count(42);    // 2
+
+// MAP — key→value pairs, unique keys, sorted by key
+map&lt;string, int&gt; m;
+m["alice"] = 95;
+m["bob"]   = 87;
+m["alice"] = 99;   // update — keys are unique
+m["alice"];        // 99
+m.find("bob");     // iterator to ("bob", 87)
+
+// MULTIMAP — like map but allows duplicate keys
+multimap&lt;string, int&gt; mm;
+mm.insert({"alice", 95});
+mm.insert({"alice", 87});   // allowed!</pre>
+                <div class="highlight"><p>Sets store values; maps store key-value pairs ordered by key only (values can be modified, keys cannot). Ironically, set-theoretic operations (union, intersection) cannot be applied directly to STL sets because of the underlying tree structure — you must first convert to a vector or list. Elements in sets/multisets cannot be modified in place (they're const) because modification would break the sorted ordering.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="tries">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Tries</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>trie</strong> (pronounced "try") uses individual characters of keys — not whole keys — for navigation. Each level of the trie processes the ith character of the key. Internal nodes are arrays of pointers indexed by character.</p>
+                <pre>// Searching for a word:
+// At level i, check the ith character of the key
+// Follow the pointer at that character position
+// If null → search fails (or insert here)
+// Continue until a leaf containing the full key is found
+
+// Special character '#' handles words that are prefixes of other words:
+// "ARE" and "AREA" both in trie
+// After processing A-R-E, check '#' link
+// If '#' link is non-null → "ARE" is a word (search succeeds)
+// Then continue for A-R-E-A
+
+// Trie height = length of longest common prefix + 2
+// For 100,000 English words: typically 5-7 comparisons
+// Balanced BST for same data: height ≈ 17</pre>
+                <div class="highlight"><p>Trie advantages: search speed is independent of the number of keys (depends only on key length). Insertion order doesn't affect tree shape (unlike BSTs). Naturally handles prefix searches and autocompletion. The main problem: space waste — each internal node stores pointers for all possible characters (27 for letters + '#'), even if most are null.</p></div>
+                <p><strong>Space optimization approaches:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Remove null pointers</h3><p>Store only non-null pointers. Saves space but loses O(1) character indexing — must search through variable-length lists.</p></div>
+                    <div class="card"><h3>Trie a tergo</h3><p>Store reversed words to reduce height when words share common suffixes (e.g., "logged", "logging" → share "gnig..." prefix). Tradeoff: common suffixes become common prefixes.</p></div>
+                    <div class="card"><h3>Compressed tries</h3><p>Interleave node arrays into one large array. Space-efficient but search can yield incorrect results — need verification step. Compression is NP-hard for optimal solutions.</p></div>
+                    <div class="card"><h3>C-tries</h3><p>Store nodes of each level in consecutive memory. Use bit vectors and offsets. Excellent for static tries — very poor for dynamic updates (insertions require rebuilding).</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

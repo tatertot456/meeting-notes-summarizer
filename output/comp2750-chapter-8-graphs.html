@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 8: Graphs</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1e0a3c, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #6d28d9; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #7c3aed; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #6d28d9; color: white; border-color: #6d28d9; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #7c3aed; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #6d28d9; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #7c3aed; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #7c3aed; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #7c3aed; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #6d28d9; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #7c3aed; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 8</div>
+        <h1>Graphs</h1>
+        <p class="subtitle">Representation, traversal, shortest paths, spanning trees, connectivity, networks, matching, Eulerian/Hamiltonian graphs, coloring, and NP-completeness</p>
+    </header>
+    <nav>
+        <a href="#intro">Definitions</a>
+        <a href="#representation">Representation</a>
+        <a href="#traversal">Traversal</a>
+        <a href="#shortest">Shortest Paths</a>
+        <a href="#cycles">Cycle Detection</a>
+        <a href="#spanning">Spanning Trees</a>
+        <a href="#connectivity">Connectivity</a>
+        <a href="#topo">Topological Sort</a>
+        <a href="#networks">Networks & Flow</a>
+        <a href="#matching">Matching</a>
+        <a href="#eulerian">Eulerian & Hamiltonian</a>
+        <a href="#coloring">Graph Coloring</a>
+        <a href="#np">NP-Complete Problems</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Graph Definitions & Terminology</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A graph is a generalized tree with no restriction on connections — it can express any relationship, not just hierarchical ones. A <strong>simple graph</strong> G = (V, E) consists of a finite set of vertices V and a collection E of unordered pairs of distinct vertices (edges).</p>
+                <div class="grid">
+                    <div class="card"><h3>Vertex / Node</h3><p>Each element of V. The order of a graph is |V| — the number of vertices.</p></div>
+                    <div class="card"><h3>Edge / Arc</h3><p>Each element of E (a pair of vertices). The size of a graph is |E| — the number of edges.</p></div>
+                    <div class="card"><h3>Simple Graph</h3><p>No self-loops, no multiple edges between the same pair of vertices.</p></div>
+                    <div class="card"><h3>Multigraph</h3><p>Multiple edges allowed between the same pair of vertices. aᵢⱼ = number of edges between vᵢ and vⱼ.</p></div>
+                    <div class="card"><h3>Digraph</h3><p>Directed graph — edges have direction. A circuit revisits a vertex; a cycle does not revisit vertices.</p></div>
+                    <div class="card"><h3>Complete Graph Kₙ</h3><p>Every pair of vertices is connected by an edge. Kₙ has n(n-1)/2 edges.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="representation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Graph Representation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Adjacency List</h3><p>For each vertex, list all adjacent vertices. Space-efficient for sparse graphs. Good for traversal. Can be a table (star representation) or linked list.</p></div>
+                    <div class="card"><h3>Adjacency Matrix</h3><p>|V|×|V| binary matrix. aᵢⱼ = 1 if edge(vᵢ,vⱼ) exists. n! possible orderings. Fast edge lookup O(1) but O(V²) space.</p></div>
+                    <div class="card"><h3>Incidence Matrix</h3><p>|V|×|E| binary matrix. Row = vertex, Column = edge. Entry = 1 if vertex is endpoint of edge. Columns with one 1 represent loops (multigraph).</p></div>
+                </div>
+                <div class="highlight"><p>Choice of representation depends on the operations needed. Adjacency lists are best for sparse graphs and traversal. Adjacency matrices excel at edge-existence queries and dense graphs. Incidence matrices are useful for certain theoretical analyses but rare in practice.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="traversal">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Graph Traversals — DFS & BFS</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Graph traversals cannot simply reuse tree algorithms — graphs can have cycles and isolated vertices.</p>
+                <div class="grid">
+                    <div class="card"><h3>Depth-First Search (DFS)</h3><p>Visit a vertex, then recursively visit all unvisited adjacent vertices. Backtrack when stuck. Uses a stack (implicitly via recursion). Forward edges = tree edges; back edges = edges to already-visited nodes. Assigns unique numbers to vertices during traversal.</p></div>
+                    <div class="card"><h3>Breadth-First Search (BFS)</h3><p>Visit a vertex, enqueue all unvisited neighbors, process queue. Explores level by level — finds shortest path (unweighted). Uses a queue explicitly. Visits closer nodes before farther ones.</p></div>
+                </div>
+                <pre>// DFS pseudocode
+DFS(vertex v):
+    mark v as visited
+    assign v a number
+    for each neighbor u of v:
+        if u not visited:
+            DFS(u)   // recursive — uses runtime stack
+
+// BFS pseudocode
+BFS(start vertex s):
+    enqueue s, mark s as visited
+    while queue not empty:
+        v = dequeue
+        visit v
+        for each neighbor u of v:
+            if u not visited:
+                mark u as visited
+                enqueue u</pre>
+                <div class="highlight"><p>DFS creates a spanning tree (or forest). Edges included = forward edges; omitted = back edges. If vertices remain unvisited after DFS completes, restart at an unvisited vertex — this handles disconnected graphs. DFS is the foundation for cycle detection, topological sort, and finding strongly connected components.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="shortest">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Shortest Paths — Dijkstra & Ford</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Weighted graph edges represent distance, time, cost, etc. label(v) = (currDist(v), predecessor(v)). Two families of algorithms:</p>
+                <div class="grid">
+                    <div class="card"><h3>Label-Setting (Dijkstra, 1956)</h3><p>Once a vertex is assigned a distance, it never changes. Selects the unvisited vertex with the smallest current distance each iteration. CANNOT handle negative edge weights. O(V²) basic, O(E log V) with priority queue.</p></div>
+                    <div class="card"><h3>Label-Correcting (Ford)</h3><p>Any label can be updated at any time. Handles negative edge weights (but NOT negative cycles). Processes entire graph repeatedly until no improvement. Basis for Bellman-Ford algorithm.</p></div>
+                </div>
+                <pre>// Dijkstra's Algorithm
+DijkstraAlgorithm(graph, source):
+    dist[source] = 0; dist[all others] = ∞
+    toBeChecked = all vertices
+    while toBeChecked not empty:
+        v = vertex in toBeChecked with min dist[v]  // key step
+        remove v from toBeChecked
+        for each neighbor u of v:
+            if dist[v] + weight(v,u) &lt; dist[u]:
+                dist[u] = dist[v] + weight(v,u)
+                pred[u] = v
+
+// Ford's Algorithm (label-correcting)
+// Repeatedly scans all edges, updating distances
+// Terminates when no more updates occur
+// Queue variant: only add updated vertices to queue
+// Deque variant: first-time vertices added to back, revisits to front (~60% faster avg)</pre>
+                <p><strong>Warshall-Floyd — All-Pairs Shortest Path:</strong></p>
+                <pre>// O(V³) — computes shortest path between ALL pairs
+// Works with negative weights (but not negative cycles)
+// Initialize adjacency matrix with edge weights (∞ if no edge, 0 on diagonal)
+for k = 1 to |V|:
+    for i = 1 to |V|:
+        for j = 1 to |V|:
+            if dist[i][k] + dist[k][j] &lt; dist[i][j]:
+                dist[i][j] = dist[i][k] + dist[k][j]
+// Cycle detection: if diagonal of dist gets changed, graph has a cycle</pre>
+                <div class="highlight"><p>Dijkstra fails with negative edge weights because once a vertex is "settled" its distance is assumed final — but a negative edge discovered later could provide a shorter path. Use Ford/Bellman-Ford for graphs with negative edges. Note: negative weights are legitimate in some problems (profit/discount graphs). The efficiency of both algorithms depends heavily on the data structure used for toBeChecked.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="cycles">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Cycle Detection & Union-Find</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Many algorithms require detecting cycles. Warshall-Floyd can detect them (O(V³)), but that's too slow for many uses.</p>
+                <div class="grid">
+                    <div class="card"><h3>DFS-Based (Undirected)</h3><p>During DFS, if we encounter an already-visited vertex via a back edge (not the direct parent), a cycle exists. Simple and O(V+E).</p></div>
+                    <div class="card"><h3>DFS-Based (Digraph)</h3><p>Side edges between subtrees complicate detection. After all descendants are visited, assign a number larger than any descendant. If a vertex is about to be connected to a vertex with a lower number via a forward edge, a cycle exists.</p></div>
+                </div>
+                <p><strong>Union-Find</strong> — efficient cycle detection for spanning tree algorithms:</p>
+                <pre>// Each vertex starts in its own set (circular linked list)
+// union(u, v): merge the sets containing u and v
+//   - Interchange next pointers to merge lists
+//   - Update root[] array for shorter list's vertices
+//   - length[] array tracks list sizes for efficiency
+// find(v): return root[v] — O(1) after union
+
+// Cycle detection with Union-Find:
+// For each edge (u,v):
+//   if find(u) == find(v): adding this edge creates a cycle!
+//   else: union(u, v) — safe to add</pre>
+            </div>
+        </div>
+
+        <div class="section" id="spanning">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Spanning Trees — Kruskal & Dijkstra Methods</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>spanning tree</strong> of a connected graph includes all vertices with the minimum number of edges (|V|-1). A <strong>minimum spanning tree (MST)</strong> minimizes the total edge weight.</p>
+                <div class="grid">
+                    <div class="card"><h3>Kruskal's Algorithm (1956)</h3><p>Sort all edges by weight. Add each edge to the tree if it doesn't create a cycle (use Union-Find to check). Stop when |V|-1 edges are added. Greedy — always picks globally cheapest safe edge. O(E log E).</p></div>
+                    <div class="card"><h3>Dijkstra's MST Method (1960)</h3><p>Add edges one at a time in ANY order. If a cycle forms, remove the highest-weight edge from that cycle. No pre-sorting needed. More flexible but requires cycle detection per step.</p></div>
+                </div>
+                <pre>// Kruskal's Algorithm
+KruskalAlgorithm(graph):
+    tree = empty
+    edges = all edges sorted by weight (ascending)
+    for each edge eᵢ in edges:
+        if eᵢ does not form a cycle with edges already in tree:
+            add eᵢ to tree
+        if |tree| == |V| - 1: break   // spanning tree complete
+
+// Dijkstra's MST Method
+DijkstraMethod(graph):
+    tree = empty
+    for each edge eᵢ (any order):
+        add eᵢ to tree
+        if tree now contains a cycle:
+            remove the maximum-weight edge from that cycle</pre>
+            </div>
+        </div>
+
+        <div class="section" id="connectivity">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Connectivity</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Undirected graphs:</strong> A graph is <strong>connected</strong> if a path exists between any two vertices. An <strong>n-connected</strong> graph has at least n vertex-disjoint paths between any two vertices.</p>
+                <div class="grid">
+                    <div class="card"><h3>Cut-Vertex (Articulation Point)</h3><p>A vertex whose removal disconnects the graph. Found via DFS: a vertex v is an articulation point if it's the root with 2+ DFS subtrees, OR if some subtree has no back edge to v's ancestors.</p></div>
+                    <div class="card"><h3>Cut-Edge (Bridge)</h3><p>An edge whose removal disconnects the graph. If the graph can be split on an edge, that edge is a bridge.</p></div>
+                    <div class="card"><h3>Biconnected (2-connected)</h3><p>At least two non-overlapping paths between any two vertices. No articulation points or bridges. Subgraphs with no articulation points = blocks (biconnected components).</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Directed graphs — three types of connectivity:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Weakly Connected</h3><p>The underlying undirected graph (ignoring edge direction) is connected. Weakest form.</p></div>
+                    <div class="card"><h3>Strongly Connected</h3><p>For every pair of vertices u, v there is a directed path from u to v AND from v to u. Strictest form.</p></div>
+                    <div class="card"><h3>Strongly Connected Components (SCCs)</h3><p>Maximal subsets of vertices that are mutually reachable. Found via Tarjan's DFS algorithm using a stack and the pred(v) parameter.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="topo">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Topological Sort</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>topological sort</strong> of a DAG (Directed Acyclic Graph) linearly orders vertices so that for every directed edge u→v, u appears before v. Only possible if the graph has NO directed cycles.</p>
+                <pre>// Algorithm: repeatedly find and remove a sink (minimal vertex — no outgoing edges)
+topologicalSort(DAG):
+    for i = 1 to |V|:
+        find vertex v with no outgoing edges (sink)
+        assign num(v) = i
+        remove v and all edges pointing to v
+
+// DFS-based (more efficient — no actual deletion):
+// When DFS backtracks from vertex v (all successors processed),
+// assign the next number to v.
+// Vertices are numbered in reverse topological order.
+// Reverse the numbering at the end for correct order.</pre>
+                <div class="highlight"><p>Applications: task scheduling (prerequisite ordering), build systems (compile dependencies), course scheduling. The output is a valid sequence where all prerequisites come before their dependents. If a cycle exists (a task depends on itself, directly or indirectly), no topological sort is possible.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="networks">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Networks — Maximum Flow & Min Cost</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>network</strong> is a digraph where each edge has capacity and flow. Flow in = flow out at every vertex (except source s and sink t). Goal: maximize flow from s to t.</p>
+                <div class="highlight"><p><strong>Max-Flow Min-Cut Theorem:</strong> The maximum flow from s to t equals the minimum capacity of any cut separating s from t. A cut is a partition of vertices into two sets with s on one side and t on the other — cut capacity = sum of capacities of edges crossing from s-side to t-side.</p></div>
+                <table>
+                    <tr><th>Algorithm</th><th>Approach</th><th>Key Feature</th></tr>
+                    <tr><td>Ford-Fulkerson (1957)</td><td>Find augmenting paths DFS</td><td>Simple but may choose same path repeatedly — inefficient</td></tr>
+                    <tr><td>Edmonds-Karp (1972)</td><td>Shortest augmenting paths BFS</td><td>Always finds shortest path — O(VE²) guaranteed</td></tr>
+                    <tr><td>Dinic's Algorithm (1970)</td><td>BFS builds layered network, then DFS finds all paths</td><td>Blocks saturated edges; avoids redundant relabeling. Faster in practice.</td></tr>
+                </table>
+                <pre>// Flow-augmenting path: path s→t where:
+// - Forward edges: flow &lt; capacity (slack exists)
+// - Backward edges: flow > 0 (can reduce flow to reroute)
+// label(v) = (parent(v), flow(v))
+// slack(edge vu) = cap(vu) - f(vu)   // unused capacity
+
+// Min-Cost Max-Flow:
+// label(u) = (parent(u), flow(u), cost(u))
+// Find cheapest augmenting path (modified Dijkstra)
+// Send as much flow as possible through it
+// Repeat until no more augmenting paths exist</pre>
+            </div>
+        </div>
+
+        <div class="section" id="matching">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Matching</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>matching</strong> in a graph is a set of edges with no shared vertices. Used for job-applicant assignment, scheduling, resource allocation.</p>
+                <div class="grid">
+                    <div class="card"><h3>Maximum Matching</h3><p>Matching with the fewest unmatched vertices. Found by repeatedly finding augmenting paths (paths alternating matched/unmatched edges between two unmatched vertices).</p></div>
+                    <div class="card"><h3>Perfect Matching</h3><p>All vertices are matched. Exists only if |V| is even and the graph is sufficiently connected.</p></div>
+                    <div class="card"><h3>Bipartite Matching</h3><p>Graph vertices split into two sets; edges only cross between sets. Hungarian tree (BFS-based) finds augmenting paths efficiently.</p></div>
+                    <div class="card"><h3>Stable Matching (Gale-Shapley, 1962)</h3><p>Two sets with preference rankings. A matching is unstable if two elements prefer each other over current partners. Algorithm always finds a stable matching — favors proposing set's preferences.</p></div>
+                </div>
+                <div class="highlight"><p>Berge's Theorem (1957): A matching M is maximum if and only if there is no augmenting path in G. This gives us the algorithmic approach: start with any matching, find augmenting paths to grow it, stop when none exist. For non-bipartite graphs, odd cycles (blossoms) complicate the search — Edmonds' blossom algorithm (1965) handles this by contracting odd cycles into single vertices.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="eulerian">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Eulerian & Hamiltonian Graphs</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Eulerian Trail</h3><p>Visits every EDGE exactly once. Exists if the graph has exactly 0 or 2 vertices with odd degree. Named for Euler's 1736 Seven Bridges of Königsberg solution.</p></div>
+                    <div class="card"><h3>Eulerian Circuit</h3><p>Eulerian trail that starts and ends at the same vertex. Exists if and only if ALL vertices have even degree. Fleury's algorithm (1883) finds it.</p></div>
+                    <div class="card"><h3>Hamiltonian Path</h3><p>Visits every VERTEX exactly once. No simple characterization — determining existence is NP-complete. All complete graphs are Hamiltonian.</p></div>
+                    <div class="card"><h3>Hamiltonian Cycle</h3><p>Hamiltonian path returning to start. Foundation of the Travelling Salesman Problem (TSP). NP-complete — no efficient exact algorithm known.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Chinese Postman Problem</strong> — find shortest closed path visiting every edge (mail delivery analogy). If the graph is Eulerian, the Eulerian circuit is optimal. If not, add minimum-weight duplicate edges to make all vertices even-degree, then find an Eulerian circuit.</p>
+                <p><strong>Travelling Salesman Problem (TSP)</strong> — find minimum Hamiltonian cycle. Exact solution: (n-1)!/2 possible tours. Approximation using minimum spanning tree: preorder traversal of MST gives a tour at most 2× optimal (triangle inequality assumed).</p>
+            </div>
+        </div>
+
+        <div class="section" id="coloring">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Graph Coloring</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Assign colors to vertices so no two adjacent vertices share the same color. Minimum colors needed = <strong>chromatic number χ(G)</strong>. Applications: scheduling (tasks sharing a resource can't run simultaneously), register allocation in compilers, frequency assignment.</p>
+                <table>
+                    <tr><th>Graph Type</th><th>Chromatic Number</th></tr>
+                    <tr><td>Complete graph Kₙ</td><td>χ = n</td></tr>
+                    <tr><td>Even cycle C₂ₙ</td><td>χ = 2</td></tr>
+                    <tr><td>Odd cycle C₂ₙ₊₁</td><td>χ = 3</td></tr>
+                    <tr><td>Bipartite graph</td><td>χ ≤ 2</td></tr>
+                    <tr><td>General graph</td><td>NP-complete to determine exactly</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Approximation algorithms:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Sequential Coloring</h3><p>Order vertices, then assign the lowest-numbered color that doesn't conflict with neighbors. Simple but result depends heavily on vertex ordering.</p></div>
+                    <div class="card"><h3>Largest-First Ordering</h3><p>Order vertices by degree (highest first). Gives a better bound: χ(G) ≤ largest degree ordered + 1. Often closer to optimal.</p></div>
+                    <div class="card"><h3>Brélaz Algorithm (DSatur, 1979)</h3><p>Always color the vertex with the highest saturation degree (most differently-colored neighbors). Ties broken by largest uncolored degree. Often finds optimal coloring in practice.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="np">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>NP-Complete Problems in Graph Theory</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Several important graph problems are NP-complete — no polynomial-time algorithms are known. They are shown NP-complete through <strong>reduction</strong>: showing that a known NP-complete problem can be transformed into the new problem in polynomial time.</p>
+                <table>
+                    <tr><th>Problem</th><th>Description</th><th>Reduced From</th></tr>
+                    <tr><td>Clique Problem</td><td>Does G contain a complete subgraph Kₘ for given m?</td><td>3-SAT (satisfiability)</td></tr>
+                    <tr><td>3-Colorability</td><td>Can G be colored with only 3 colors?</td><td>3-SAT via 9-subgraph gadget</td></tr>
+                    <tr><td>Vertex Cover</td><td>Does G have a set of ≤k vertices covering all edges?</td><td>Clique problem (complement graph)</td></tr>
+                    <tr><td>Hamiltonian Cycle</td><td>Does G have a cycle visiting all vertices exactly once?</td><td>Vertex cover via 12-subgraph gadget</td></tr>
+                    <tr><td>Travelling Salesman</td><td>Does G have a Hamiltonian cycle of total weight ≤k?</td><td>Hamiltonian cycle</td></tr>
+                </table>
+                <div class="highlight"><p>The chain of reductions: 3-SAT → Clique → Vertex Cover → Hamiltonian Cycle → TSP. Since 3-SAT is the foundational NP-complete problem (Cook's theorem, 1971), and each subsequent problem can be transformed into the next, all inherit NP-completeness. A polynomial solution to ANY of these would imply P=NP and solve all NP problems — the most important open question in computer science.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

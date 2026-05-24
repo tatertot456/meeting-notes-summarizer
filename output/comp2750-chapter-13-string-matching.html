@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 13: String Matching</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2010, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #166534; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #15803d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #166534; color: white; border-color: #166534; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #15803d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #166534; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #15803d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #15803d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #15803d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #166534; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #15803d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 13</div>
+        <h1>String Matching</h1>
+        <p class="subtitle">Brute force, KMP, Boyer-Moore, shift-and, Aho-Corasick, suffix trees, approximate matching, and edit distance</p>
+    </header>
+    <nav>
+        <a href="#intro">Introduction</a>
+        <a href="#brute">Brute Force</a>
+        <a href="#kmp">KMP Algorithm</a>
+        <a href="#bm">Boyer-Moore</a>
+        <a href="#bitshift">Shift-And</a>
+        <a href="#multi">Multi-Pattern (Aho-Corasick)</a>
+        <a href="#regex">Regular Expressions</a>
+        <a href="#suffix">Suffix Trees & Arrays</a>
+        <a href="#approx">Approximate Matching</a>
+        <a href="#kerrors">k-Error Matching</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Introduction & Notation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>String matching (stringology) finds patterns within text. The larger the text, the more critical the algorithm's efficiency. Two major categories: <strong>exact matching</strong> (find identical copies) and <strong>approximate matching</strong> (find similar substrings).</p>
+                <div class="grid">
+                    <div class="card"><h3>Notation</h3><p>|T| = length of text T. Tj = character at position j. T(i...j) = substring from i to j. Positions start at 0. Pattern P is searched for in text T.</p></div>
+                    <div class="card"><h3>Regular expression aⁿ</h3><p>Represents a string of n copies of character a: "aaa...a" (n times). Used in pattern specification.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="brute">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Brute Force & Hancart's Algorithm</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Compare P and T from their beginnings. On mismatch: shift P one position right, restart. Discards all information from previous attempts.</p>
+                <pre>// Brute force
+for i = 0 to |T| - |P|:
+    j = 0
+    while j &lt; |P| and P[j] == T[i+j]:
+        j++
+    if j == |P|: return i  // match at position i
+// Worst case O(|T|·|P|) — e.g., T = aaa...a, P = aaa...ab</pre>
+                <p><strong>Hancart's Algorithm (1992)</strong> — compares P starting at P[1] (second character), ends with P[0]. Achieves shifts of two positions in some cases:</p>
+                <ul>
+                    <li>If P[0] == P[1]: shift by 2 when P[1] ≠ T[i+1] (since P[0] would also differ)</li>
+                    <li>If P[0] ≠ P[1]: shift by 2 after inner loop mismatch (since P[1] == T[i+1] means P[0] ≠ T[i+1])</li>
+                </ul>
+                <div class="highlight"><p>Brute force is O(|T|·|P|) worst case. Hancart performs better on average than some sophisticated algorithms despite similar worst case. The key problem with brute force: it throws away useful information every time it restarts — we've already compared some characters successfully but we ignore that knowledge.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="kmp">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Knuth-Morris-Pratt (KMP) Algorithm</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>KMP avoids redundant comparisons by precomputing how far to shift P when a mismatch occurs, based on P's own structure. The text index i is NEVER decremented — each character of T is processed at most once.</p>
+                <pre">// next[j] = length of longest proper suffix of P(0...j-1)
+//           that equals a prefix of P
+// next[0] = -1 (sentinel: shift entire pattern past mismatch)
+
+// Example: P = abababa
+// next = [-1, 0, 0, 1, 2, 3, 4]
+// Interpretation: if mismatch at position j, shift P by (j - next[j]) positions
+//   and restart comparison at P[next[j]]
+
+// KMP matching:
+i = j = 0
+while i &lt; |T|:
+    if j == -1 or T[i] == P[j]:
+        i++; j++
+    else:
+        j = next[j]   // DON'T increment i — rethink alignment of P
+    if j == |P|:
+        output match at i - |P|
+        j = next[j]   // find next possible match
+
+// Building next table (KMP applied to P itself):
+next[0] = -1; i = 1; j = 0
+while i &lt; |P|:
+    if j == -1 or P[i-1] == P[j]:
+        next[i] = j + 1; i++; j++
+    else:
+        j = next[j]</pre>
+                <p><strong>nextS improvement</strong> — eliminates redundant comparisons when P[j] == P[next[j]] (same character would mismatch again):</p>
+                <pre>// If P[i] == P[j], use nextS[j] instead of j
+// This skips known-futile comparisons
+// For P = abababa: nextS = [-1, 0, -1, 0, -1, 0, -1]
+// (compared to next = [-1, 0, 0, 1, 2, 3, 4])</pre>
+                <div class="highlight"><p>KMP runs in O(|T| + |P|) time. The preprocessing (building next) is O(|P|). The key insight: when a mismatch at P[j] occurs after matching P(0...j-1), we know P(0...j-1) was matched. The next table tells us the longest prefix of P that is also a suffix of the matched portion — we can restart from there without re-examining T.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="bm">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Boyer-Moore Algorithm & Sunday's Variants</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Boyer-Moore (BoM) compares P with T <strong>right-to-left</strong> and skips characters in T (not P) when mismatches occur. Typically faster than KMP in practice — can skip large portions of T.</p>
+                <p><strong>Two tables for shifting:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>delta1 — Character Occurrence</h3><p>Based on the mismatched character Ti. Three rules: No occurrence → shift P past Ti. Right-side occurrence → shift 1 position. Left-side occurrence → align Ti with closest match in P.</p></div>
+                    <div class="card"><h3>delta2 — Suffix Occurrence</h3><p>Based on the suffix of P following the mismatch. Full suffix rule: align matched suffix with its occurrence in P (preceded by different char). Partial suffix rule: align with prefix of P.</p></div>
+                </div>
+                <pre>// delta1 for P = dabacbd:
+// delta1['a'] = 3, delta1['b'] = 1, delta1['c'] = 2, delta1['d'] = 0
+// All other chars: delta1[ch] = |P| = 7
+
+// delta2 handles the suffix after the mismatch position
+// Takes the larger shift from delta1 and delta2
+
+// On each mismatch at P[j] against T[i]:
+// shift = max(delta1[T[i]] - (|P| - 1 - j), delta2[j])
+
+// SUNDAY'S QUICKSEARCH (1990) — Left-to-right scan, simpler rules:
+// After mismatch, look at character T[i + |P|] (just past current window)
+// delta1[ch] = position of RIGHTMOST ch in P, counting from right + 1
+// No occurrence: shift P past T[i+|P|] entirely
+// Occurrence: align T[i+|P|] with rightmost ch in P</pre>
+                <p><strong>Boyer-Moore-Galil</strong> — for multiple occurrences. After first match, shifts by the PERIOD of P (length of shortest repeating unit) and only re-checks the last p characters. Avoids redundant rechecking of overlapping occurrences.</p>
+                <div class="highlight"><p>Boyer-Moore is typically the fastest exact-matching algorithm for long patterns and large alphabets. It can skip entire blocks of text — sublinear average case. Sunday's quicksearch() is simpler to implement and often comparable in speed, making it sufficient for most practical uses. The delta2 computation using auxiliary table f runs in O(|P|) instead of the naive O(|P|²) or O(|P|³).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="bitshift">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Shift-And (Bit-Oriented) Algorithm</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Baeza-Yates & Gonnet (1992) — represents matching state as a bit vector. All prefix matches updated simultaneously using bitwise operations. No text buffering required.</p>
+                <pre>// charactersInP[ch] = bit string where bit j = 1 if P[j] == ch
+// state = bit string where bit j = 1 means P(0...j) matches T ending at current position
+
+// Transition:
+// state[i] = shiftBits(state[i-1]) AND charactersInP[T[i]]
+// shiftBits = left-shift + set bit 0 to 1 (give all prefixes a chance to start)
+
+// Example: P = ababac, match at T position 7 (pattern length 6)
+// On processing T[7]:
+//   shiftBits(state[6]) shifts all partial matches "forward" by one
+//   AND with charactersInP[T[7]] checks if the new character fits
+//   If bit |P|-1 is set in result: MATCH FOUND
+
+// PSEUDOCODE:
+// Preprocess:
+for each char ch: charactersInP[ch] = 0
+for j = 0 to |P|-1: set bit j of charactersInP[P[j]]
+state = 0
+// Match:
+for i = 0 to |T|-1:
+    state = ((state &lt;&lt; 1) | 1) &amp; charactersInP[T[i]]
+    if bit |P|-1 of state is set: output match at i-|P|+1</pre>
+                <div class="highlight"><p>The pattern length must not exceed the word size (typically 64 bits for modern systems). A dynamic version handles longer patterns by splitting into multiple 64-bit chunks and propagating carry bits between chunks. This algorithm processes each text character exactly once with a constant number of bit operations — O(|T|·|P|/w) where w is word size, effectively O(|T|) for short patterns.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="multi">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Multi-Pattern Matching — Aho-Corasick</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Find all occurrences of multiple patterns simultaneously in one pass through text. Used in UNIX fgrep. Builds a trie + failure function — analogous to KMP for multiple patterns.</p>
+                <pre>// Three components:
+// goto(state, ch): trie transitions (or fail)
+// failure(state): KMP-like fallback on mismatch
+// output(state): keywords that end at this state
+
+// BUILD: Insert all keywords into a trie
+// keywords = {inner, input, in, outer, output, out, put, outing, tint}
+// Root loops back for all unrecognized chars (no fail from root)
+
+// FAILURE FUNCTION (breadth-first construction):
+// For each state s reachable via ch from parent r:
+//   follow failure links from failure(r) until nonfail ch-transition found
+//   f(s) = that nonfail destination
+// This creates KMP-style fallback across ALL patterns simultaneously
+
+// OUTPUT FUNCTION expansion:
+// output(s) += output(failure(s))
+// Captures keywords that are SUFFIXES of the current match
+
+// MATCHING:
+state = 0
+for each char Ti:
+    while goto(state, Ti) == fail:
+        state = failure(state)
+    state = goto(state, Ti)
+    if output(state) not empty:
+        report all words in output(state) ending at i</pre>
+                <div class="highlight"><p>Aho-Corasick runs in O(|T| + total pattern length + number of matches) — optimal. The failure function handles cases where the current partial match fails: it finds the longest proper suffix of the current match that is also a prefix of some keyword, and continues from there. The output function expansion ensures that when "input" is matched, "in" and "put" (if they're substrings) are also reported.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="regex">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Regular Expression Matching (Thompson, 1968)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Regular expressions specify patterns: r|s (r or s), rs (concatenation), r* (zero or more r), (r) (grouping). Thompson's algorithm builds a Non-Deterministic Finite Automaton (NDFA) from the regex.</p>
+                <pre>// Regular expression components → NDFA fragments:
+// Single char c:  ○ →(c)→ ◎
+// r|s:  ○ →(ε)→ [r-NDFA] →(ε)→ ◎
+//       ↘(ε)→ [s-NDFA] →(ε)→ ↗
+// rs:   [r-NDFA] → [s-NDFA]
+// r*:   ○ →(ε)→ [r-NDFA] →(ε)→ ↺ (loop back) and skip edge
+
+// MATCHING with epsilon-closure:
+// epsilon(S) = all states reachable from S via ε-edges
+// goto(S, ch) = all states reachable from S via ch-edge
+
+// Algorithm:
+states = epsilon({initState})
+for each Ti:
+    states = epsilon(goto(states, Ti))
+    if acceptState in states: record match
+
+// For T = aabbcdeffaefc and regex = a(b|cd)*ef:
+// Matches: T(0...6) = abbcdef, T(8...10) = aef</pre>
+            </div>
+        </div>
+
+        <div class="section" id="suffix">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Suffix Tries, Suffix Trees & Suffix Arrays</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Preprocess the text once to enable efficient repeated queries.</p>
+                <div class="grid">
+                    <div class="card"><h3>Suffix Trie</h3><p>Trie containing all suffixes of T. Each root-to-leaf path = one suffix. Space: O(|T|²) — quadratic due to shared node elimination. Simple to build but impractical for large texts.</p></div>
+                    <div class="card"><h3>Suffix Tree</h3><p>Compressed suffix trie — merge chains of single-descendant nodes into single edges labeled with substrings (stored as index pairs). Space: O(|T|). Ukkonen's algorithm builds it in O(|T|) time using suffix links.</p></div>
+                    <div class="card"><h3>Suffix Array (Manber & Myers, 1993)</h3><p>Array of suffix starting positions in lexicographic order. Only O(|T|) space. Pattern search via binary search: O(|P| log |T|). More cache-friendly than suffix trees.</p></div>
+                    <div class="card"><h3>Suffix Links</h3><p>Link from suffix trie node representing string aX to node representing X. Used in Ukkonen's O(|T|) construction algorithm. Analogous to failure function in Aho-Corasick.</p></div>
+                </div>
+                <pre">// Suffix array for T = "proposition":
+// Lexicographically sorted suffixes:
+//   8: "ion"
+//   6: "ition"
+//   10: "n"
+//   9: "on"
+//   2: "oposition"
+//   4: "osittion"
+//   ...
+// pos = [8, 6, 10, 9, 2, 4, 3, 0, 1, 5, 7]
+
+// Search for pattern P using binary search on pos:
+// All occurrences of P are in a contiguous range of pos
+// Binary search finds left and right boundaries of that range
+// O(|P| log |T|) per query after O(|T|) or O(|T| log |T|) construction</pre>
+            </div>
+        </div>
+
+        <div class="section" id="approx">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Approximate String Matching — Edit Distance</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Exact matching is all-or-nothing. Approximate matching finds substrings within a similarity threshold using <strong>Levenshtein distance</strong> (Levenshtein, 1965) — minimum edit operations to transform one string into another.</p>
+                <div class="grid">
+                    <div class="card"><h3>Insertion (I)</h3><p>Add a character to the string. Cost: 1. D(i,j) from D(i,j-1)+1.</p></div>
+                    <div class="card"><h3>Deletion (D)</h3><p>Remove a character. Cost: 1. D(i,j) from D(i-1,j)+1.</p></div>
+                    <div class="card"><h3>Substitution (S)</h3><p>Replace one character with another. Cost: 1 (if different), 0 (if same = match). D(i,j) from D(i-1,j-1)+c(i,j).</p></div>
+                </div>
+                <pre>// Wagner-Fischer Algorithm (1974) — O(|Q|·|R|) dynamic programming
+// D(i,j) = edit distance between Q(0...i-1) and R(0...j-1)
+
+// Recurrence:
+// D(i,j) = min(D(i-1,j) + 1,       // delete Qi
+//              D(i,j-1) + 1,       // insert Rj
+//              D(i-1,j-1) + c(i,j)) // substitute/match
+// where c(i,j) = 0 if Qi == Rj, else 1
+
+// Base cases: D(i,0) = i, D(0,j) = j
+
+// Example: Q = "capital", R = "apple"
+// Edit table (7×5):
+//    ""  a  p  p  l  e
+// "" [0  1  2  3  4  5]
+// c  [1  1  2  3  4  5]
+// a  [2  1  2  3  4  5]
+// p  [3  2  1  2  3  4]
+// i  [4  3  2  2  3  4]
+// t  [5  4  3  3  3  4]
+// a  [6  5  4  4  4  4]
+// l  [7  6  5  5  4  5]
+// D("capital","apple") = 5
+
+// Longest Common Subsequence:
+// d2(Q,R) = |Q| + |R| - 2·lcs(Q,R)
+// lcs finds longest sequence of characters common to both strings
+// (need not be consecutive)</pre>
+                <div class="highlight"><p>The edit table is filled left-to-right, top-to-bottom. Each cell requires only its left, top, and top-left neighbors. To find an alignment (trace through edits), backtrack from the lower-right corner following the minimum path. The diff command in UNIX uses the longest common subsequence algorithm to show file differences.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="kerrors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Approximate Matching with k Errors (Shift-And Extension)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Find all substrings of T matching P with at most k errors (insertions, deletions, substitutions). Wu & Manber's agrep (1992) extends shift-and for approximate matching.</p>
+                <pre>// Use k+1 state tables: state0, state1, ..., statek
+// statek[j] = 1 means P(0...j) matches a substring ending at Ti
+//             with at most e errors
+
+// Recurrence (for each error level e):
+// statee,i+1 = (shiftBits(statee,i) AND charactersInP[Ti])   // exact match continues
+//              OR shiftBits(statee-1,i)                        // insertion of Ti
+//              OR shiftBits(statee-1,i+1)                      // deletion from P
+//              OR statee-1,i                                   // substitution
+
+// Each statee is derived from statee-1 using bitwise operations
+// A match is reported when bit |P|-1 is set in statek
+
+// PARTITION OPTIMIZATION for small k:
+// Divide P into k+1 blocks of size r = |P|/(k+1)
+// If P matches T with ≤k errors, at least one block matches EXACTLY
+// Find exact block matches using Aho-Corasick (simultaneously)
+// For each exact block match: search for approximate P match in neighborhood
+// This is much faster than the basic algorithm when k &lt;&lt; |P|</pre>
+                <table>
+                    <tr><th>Algorithm</th><th>Complexity</th><th>UNIX Command</th></tr>
+                    <tr><td>Brute Force</td><td>O(|T|·|P|)</td><td>—</td></tr>
+                    <tr><td>KMP</td><td>O(|T| + |P|)</td><td>—</td></tr>
+                    <tr><td>Boyer-Moore</td><td>O(|T|/|P|) avg</td><td>—</td></tr>
+                    <tr><td>Shift-And</td><td>O(|T|·|P|/w)</td><td>—</td></tr>
+                    <tr><td>Aho-Corasick</td><td>O(|T| + patterns + matches)</td><td>fgrep</td></tr>
+                    <tr><td>Wagner-Fischer (edit dist)</td><td>O(|Q|·|R|)</td><td>diff</td></tr>
+                    <tr><td>Wu-Manber (k errors)</td><td>O(|T|·k·|P|/w)</td><td>agrep</td></tr>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -619,5 +619,122 @@
     "accent": "#0369a1",
     "glow": "#0a1f2e",
     "badge": "#075985"
+  },
+  {
+    "title": "COMP2750 Chapter 1 Object Oriented Programming Using C++",
+    "filename": "comp2750-chapter-1-object-oriented-programming-using-c++.html",
+    "category": "Data Structures",
+    "date": "2026-05-23 09:53 PM",
+    "accent": "#15803d",
+    "glow": "#0a2010",
+    "badge": "#166534"
+  },
+  {
+    "title": "COMP2750 Chapter 2 Complexity Analysis",
+    "filename": "comp2750-chapter-2-complexity-analysis.html",
+    "category": "Data Structures",
+    "date": "2026-05-23 09:57 PM",
+    "accent": "#b45309",
+    "glow": "#1f1200",
+    "badge": "#92400e"
+  },
+  {
+    "title": "COMP2750 Chapter 3 Linked Lists",
+    "filename": "comp2750-chapter-3-linked-lists.html",
+    "category": "Data Structures",
+    "date": "2026-05-23 09:59 PM",
+    "accent": "#be185d",
+    "glow": "#2a0a1a",
+    "badge": "#9d174d"
+  },
+  {
+    "title": "COMP2750 Chapter 4 Stacks and Queues",
+    "filename": "comp2750-chapter-4-stacks-and-queues.html",
+    "category": "Data Structures",
+    "date": "2026-05-23 10:02 PM",
+    "accent": "#dc2626",
+    "glow": "#2a0a0a",
+    "badge": "#b91c1c"
+  },
+  {
+    "title": "COMP2750 Chapter 5 Recursion",
+    "filename": "comp2750-chapter-5-recursion.html",
+    "category": "Data Structures",
+    "date": "2026-05-23 10:05 PM",
+    "accent": "#16a34a",
+    "glow": "#0a2a0a",
+    "badge": "#15803d"
+  },
+  {
+    "title": "COMP2750 Chapter 6 Binary Trees",
+    "filename": "comp2750-chapter-6-binary-trees.html",
+    "category": "Data Structures",
+    "date": "2026-05-23 10:13 PM",
+    "accent": "#d97706",
+    "glow": "#1f1200",
+    "badge": "#b45309"
+  },
+  {
+    "title": "COMP2750 Chapter 7 Multiway Trees",
+    "filename": "comp2750-chapter-7-multiway-trees.html",
+    "category": "Data Structures",
+    "date": "2026-05-23 10:19 PM",
+    "accent": "#2563eb",
+    "glow": "#0a0a2e",
+    "badge": "#1d4ed8"
+  },
+  {
+    "title": "COMP2750 Chapter 8 Graphs",
+    "filename": "comp2750-chapter-8-graphs.html",
+    "category": "Data Structures",
+    "date": "2026-05-23 10:25 PM",
+    "accent": "#7c3aed",
+    "glow": "#1e0a3c",
+    "badge": "#6d28d9"
+  },
+  {
+    "title": "COMP2750 Chapter 9 Sorting",
+    "filename": "comp2750-chapter-9-sorting.html",
+    "category": "Data Structures",
+    "date": "2026-05-24 02:24 PM",
+    "accent": "#0d9488",
+    "glow": "#0a2a28",
+    "badge": "#0f766e"
+  },
+  {
+    "title": "COMP2750 Chapter 10 Hashing",
+    "filename": "comp2750-chapter-10-hashing.html",
+    "category": "Data Structures",
+    "date": "2026-05-24 02:28 PM",
+    "accent": "#ea580c",
+    "glow": "#1f0a00",
+    "badge": "#c2410c"
+  },
+  {
+    "title": "COMP2750 Chapter 11 Data Compression",
+    "filename": "comp2750-chapter-11-data-compression.html",
+    "category": "Data Structures",
+    "date": "2026-05-24 02:32 PM",
+    "accent": "#6d28d9",
+    "glow": "#1a0f3d",
+    "badge": "#5b21b6"
+  },
+  {
+    "title": "COMP2750 Chapter 12 Memory Management",
+    "filename": "comp2750-chapter-12-memory-management.html",
+    "category": "Data Structures",
+    "date": "2026-05-24 02:35 PM",
+    "accent": "#0369a1",
+    "glow": "#0a1f2e",
+    "badge": "#075985"
+  },
+  {
+    "title": "COMP2750 Chapter 13 String Matching",
+    "filename": "comp2750-chapter-13-string-matching.html",
+    "category": "Data Structures",
+    "date": "2026-05-24 02:39 PM",
+    "accent": "#15803d",
+    "glow": "#0a2010",
+    "badge": "#166534"
   }
 ]

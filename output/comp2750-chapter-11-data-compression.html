@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 11: Data Compression</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1a0f3d, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #5b21b6; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #6d28d9; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #5b21b6; color: white; border-color: #5b21b6; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #6d28d9; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #5b21b6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #6d28d9; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #6d28d9; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #6d28d9; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #5b21b6; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #6d28d9; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 11</div>
+        <h1>Data Compression</h1>
+        <p class="subtitle">Entropy, Huffman coding, adaptive Huffman, run-length encoding, and Ziv-Lempel (LZ77/LZW)</p>
+    </header>
+    <nav>
+        <a href="#intro">Entropy & Conditions</a>
+        <a href="#huffman">Huffman Coding</a>
+        <a href="#adaptive">Adaptive Huffman</a>
+        <a href="#rle">Run-Length Encoding</a>
+        <a href="#lz">Ziv-Lempel (LZ77/LZW)</a>
+        <a href="#comparison">Comparison</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Conditions for Data Compression — Entropy</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Data has inherent redundancy — "male"/"female" vs "M"/"F" vs "1"/"2" all convey the same information. Compression reduces size without losing information content, improving transmission speed without changing the channel.</p>
+                <p><strong>Entropy</strong> — the theoretical minimum average codeword length (Claude Shannon, 1948):</p>
+                <pre>// For n symbols m₁...mₙ with probabilities P(m₁)...P(mₙ):
+// L(mᵢ) = -lg P(mᵢ)   — optimal codeword length for symbol mᵢ
+
+// Entropy = average optimal length:
+// Lave = P(m₁)·L(m₁) + ... + P(mₙ)·L(mₙ)
+//       = -Σ P(mᵢ)·lg P(mᵢ)
+
+// Example: m₁ P=0.5, m₂ P=0.25, m₃ P=0.25
+// L(m₁) = -lg(0.5) = 1,  L(m₂) = L(m₃) = -lg(0.25) = 2
+// Lave = 0.5·1 + 0.25·2 + 0.25·2 = 1.5 bits/symbol</pre>
+                <p><strong>Requirements for an optimal code:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Unique Codewords</h3><p>Each symbol maps to exactly one codeword and vice versa. No two symbols share the same codeword.</p></div>
+                    <div class="card"><h3>Prefix Property</h3><p>No codeword is a prefix of another. Enables decoding without lookahead — when you reach end of a codeword, you know you have a complete symbol.</p></div>
+                    <div class="card"><h3>Probability Order</h3><p>More probable symbols get shorter codewords. If P(mᵢ) &lt; P(mⱼ) then L(mᵢ) &gt; L(mⱼ). Never assign longer codewords to more frequent symbols.</p></div>
+                    <div class="card"><h3>No Short Unused Codewords</h3><p>If a short codeword exists but isn't used, longer codewords were created unnecessarily — wasteful. Rearrange to use shorter ones first.</p></div>
+                </div>
+                <div class="highlight"><p>The prefix property is what allows streaming decoding without delimiters. Without it, "12" could mean A (codeword 1) then B (codeword 2), or C (codeword 12) — ambiguous. With prefix property, once you match a codeword, no extension of it is also a valid codeword, so you can decode symbol-by-symbol without backtracking.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="huffman">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Huffman Coding</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>David Huffman (1952) — constructs an optimal prefix code using a binary tree. More probable symbols get shorter paths (fewer bits) from root to leaf.</p>
+                <pre>// ALGORITHM (bottom-up, greedy):
+// 1. Create a leaf node for each symbol, weighted by probability
+// 2. Add all nodes to a priority queue (min-heap by probability)
+// 3. Repeat until one node remains:
+//    a. Remove two nodes with LOWEST probabilities
+//    b. Create a new internal node with these as children
+//    c. New node's probability = sum of children's probabilities
+//    d. Insert new node back into priority queue
+// 4. The remaining node is the root of the Huffman tree
+// 5. Assign 0 to left edges, 1 to right edges (or vice versa)
+// 6. Each symbol's codeword = path from root to its leaf
+
+// Example: A=0.39, B=0.21, C=0.19, D=0.12, E=0.09
+// Step 1: Combine D(0.12) + E(0.09) = DE(0.21)
+// Step 2: Combine B(0.21) + DE(0.21) = BDE(0.42)  [or C+DE first]
+// Step 3: Combine C(0.19) + BDE(0.42) or similar...
+// Result: A→2 bits, B→2 bits, C→2 bits, D→3 bits, E→3 bits
+// LHuf = 0.39·2 + 0.21·2 + 0.19·2 + 0.12·3 + 0.09·3 = 2.21
+// Optimal Lave = 2.09  (only ~5% overhead — very good!)</pre>
+                <div class="highlight"><p>Huffman trees are NOT unique — equal-probability nodes can be arranged differently, producing different codeword assignments. But the AVERAGE CODEWORD LENGTH is the same regardless of which tree is built. Multiple valid Huffman trees exist for the same data, all equally optimal.</p></div>
+                <p><strong>Implementation options:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Priority Queue (Min-Heap)</h3><p>Most natural implementation. Remove two minimums O(log n), insert merged node O(log n). Total O(n log n). Used in practice.</p></div>
+                    <div class="card"><h3>Sorted Linked List</h3><p>Maintain sorted order throughout. Remove first two O(1), re-insert merged node O(n). Simpler code, same O(n log n) overall.</p></div>
+                    <div class="card"><h3>Top-Down Recursive</h3><p>Always merge two smallest, recurse. When two left: base case. Build tree on the way back up. Same result as bottom-up.</p></div>
+                    <div class="card"><h3>Heap with Parent Array</h3><p>Three arrays: indexes, probabilities, parents. Positive parent = left child, negative = right. Generate codewords by traversing parent array from leaf to root.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Improving Huffman — symbol pairs:</strong></p>
+                <pre>// For symbols X(0.1), Y(0.1), Z(0.8):
+// Single symbols: LHuf = 1.2, optimal Lave = 0.922 (23% worse!)
+// Fix: encode PAIRS of symbols instead
+
+// 9 pairs: XX(0.01), XY(0.01), XZ(0.08), YX(0.01), YY(0.01),
+//          YZ(0.08), ZX(0.08), ZY(0.08), ZZ(0.64)
+// LHuf for pairs = 1.92, optimal Lave = 1.84 (only 4% overhead!)
+// Improvement: ~19% better compression at cost of larger table
+
+// UNIX compression rates (text/PL-I code/image):
+// Single chars:              40% / 60% / 50%
+// + 100 most frequent groups: 49% / 73% / 52%
+// + 512 most frequent groups: 55% / 71% / 62%</pre>
+                <p><strong>Decoding:</strong> both encoder and decoder must use the same Huffman tree. The decoder reconstructs the tree from the transmitted table, then reads bits one at a time, traversing the tree until a leaf (= decoded symbol) is reached.</p>
+            </div>
+        </div>
+
+        <div class="section" id="adaptive">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Adaptive Huffman Coding</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Standard Huffman requires knowing symbol probabilities before encoding — a full pass through data is needed. Adaptive Huffman (Gallagher 1978, Knuth 1985) builds and updates the tree on-the-fly during transmission.</p>
+                <div class="highlight"><p><strong>Sibling Property:</strong> A binary tree is a Huffman tree if and only if every node (except root) has a sibling, AND a breadth-first right-to-left traversal generates nodes in non-increasing frequency order. This property is maintained throughout adaptive encoding — if violated after a counter update, the tree is restructured.</p></div>
+                <pre">// Data structure: doubly linked list 'nodes' ordered by BFS right-to-left
+// Nodes grouped into blocks by frequency: block₀, block₁, block₂, ...
+// Each block's first node = "leader"
+
+// ENCODING a symbol:
+// 1. If symbol seen before:
+//    - Output path from root to symbol's node (its current codeword)
+//    - Increment symbol's frequency counter
+//    - If sibling property violated: swap node with leader of its block
+//    - Increment parent, check property again... up to root
+// 2. If symbol appearing for FIRST TIME:
+//    - Output codeword for 0-node + symbol's position in unused list
+//    - e.g., if 'c' is 3rd unused symbol: output 0-node code + "1110"
+//            (n 1s followed by 0, where n = position)
+//    - Split 0-node: symbol gets its own node (count=1)
+//    - Original 0-node and new node become children of new internal node
+
+// KEY ADVANTAGE: Only ONE PASS through data needed
+// No need to transmit full frequency table — tree adapts in real time
+// Both encoder and decoder maintain identical adaptive trees
+// Compression for executables: only 10-20% (uniform char distribution)</pre>
+            </div>
+        </div>
+
+        <div class="section" id="rle">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Run-Length Encoding (RLE)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Exploits <strong>runs</strong> — sequences of repeated identical characters. Instead of transmitting each character, transmit a (count, character) pair.</p>
+                <pre>// BASIC: encode as (count, char)
+// "nnnn***r%%%%%%%"  →  4n3*1r7%
+// PROBLEM: digits are ambiguous — "11111554" is "1111554" compressed?
+
+// SOLUTION 1: Use ASCII code of count as the count character
+// 43 "c"s → "+c" (ASCII '+' = 43)
+// 49 "1"s → "11" (ASCII '1' = 49)
+
+// SOLUTION 2: Compression marker triple <cm, ch, n>
+// Use infrequent character as marker (e.g., '~'+1 for text)
+// If cm appears normally: transmit cm twice; decoder drops one
+// Only compress runs of 4+ characters (3-char triple vs. original)
+// Max run length: 255 chars (8-bit count) BUT since we skip 1-3,
+//                 effectively compress up to 259 chars
+
+// NULL SUPPRESSION (blank-only compression):
+// Use pair <cm, n> — no need to specify the character (always blank)
+// Good for text files where blank is the most common repeated character
+
+// BEST USE CASES:
+// - Database files (padding creates long runs of null/space)
+// - Fax images (1.5M pixels/page, mostly white — long runs of same bit)
+// - Graphics with large solid-color areas
+
+// LIMITATION: Cannot compress "ABABABAB" — no runs!
+// Huffman handles this well; RLE does not.</pre>
+                <div class="highlight"><p>RLE and Huffman are complementary. RLE excels when identical characters repeat in long sequences. Huffman excels when some characters appear more frequently than others, regardless of consecutive repetition. Combining both (apply RLE first, then Huffman the result) can outperform either alone on many types of data.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="lz">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Ziv-Lempel Code — LZ77 & LZW</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>universal coding scheme</strong> — no prior knowledge of symbol frequencies needed. Builds a dictionary of patterns during encoding and decoding simultaneously.</p>
+                <p><strong>LZ77 — Sliding Window:</strong></p>
+                <pre>// STRUCTURE: Fixed buffer of l₁ + l₂ positions
+// Positions 0..l₁-1: recently encoded symbols (search buffer)
+// Positions l₁..l₁+l₂-1: symbols about to be encoded (lookahead)
+
+// ENCODING:
+// Search the search buffer for longest prefix match with lookahead
+// Output triple: (position, match_length, first_mismatch_char)
+// Shift buffer left by (match_length + 1)
+
+// Example: l₁=l₂=4, input "aababacbaacbaadaaa..."
+// Init: buffer = [aaaa | aaba]  (first l₁ filled with first char 'a')
+// Longest match: "aa" starting at position 2 → codeword (2,2,b)
+//   meaning: start at pos 2, length 2, then 'b'
+// Shift left by 3: buffer = [aaab | aca...]
+// Longest match: "aba" starting at pos 2, ends with 'c' → (2,3,c)
+// ...continues...
+
+// CODEWORD SIZE: 12 bits for l₁=l₂=4 (2 bits each + 8 for char)
+// IMPORTANT: l₁ and l₂ should be powers of 2 — no binary waste</pre>
+                <p><strong>LZW — Dictionary-Based (Miller & Wegman 1985, based on Welch 1984):</strong></p>
+                <pre>// ENCODING:
+// Initialize table with all single characters (entries 0-255)
+// s = first character
+// while more input:
+//     read character c
+//     if (s + c) is in table:
+//         s = s + c         // extend current string
+//     else:
+//         output codeword for s
+//         add (s + c) to table as new entry
+//         s = c             // start new string
+
+// DECODING: Same table gets built during decoding!
+// For each received codeword:
+//     look up string in table
+//     output it
+//     add previous_string + first_char_of_current to table
+
+// EXAMPLE: Input "aababacbaacbaadaaa..."
+// 'a' and 'b' are in table (single chars)
+// 'aa' → not in table → output code for 'a', add 'aa'=entry 2, s='a'
+// 'a'+'b' = 'ab' → not in table → output 'a', add 'ab'=entry 3, s='b'
+// 'b'+'a' = 'ba' → not in table → output 'b', add 'ba'=entry 4, s='a'
+// 'a'+'b' = 'ab' → IN TABLE (entry 3)! s = 'ab'
+// 'ab'+'a' = 'aba' → not in table → output entry 3, add 'aba'=5, s='a'
+// ... table grows, longer matches found, better compression
+
+// TABLE STORAGE: Store (codeword_for_prefix, last_char)
+// "baa" stored as (7, 'a') where 7 = codeword for "ba"
+// All entries same size → efficient hash table lookup
+
+// DECODING TRICK for "cScSc" case:
+// Sometimes decoder receives a codeword not yet in its table
+// This happens when encoder just added the entry
+// Solution: the string is s + first_char(s) — handle as special case</pre>
+                <div class="highlight"><p>LZW's elegant property: encoder and decoder build the SAME dictionary independently — no dictionary needs to be transmitted. The decoder always builds its table one step behind the encoder, but the special case (codeword not yet in table) is handled deterministically. This "free" dictionary synchronization is what makes LZW so practical.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="comparison">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Algorithm Comparison</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Algorithm</th><th>Prior Knowledge Needed</th><th>Passes</th><th>Compression (text)</th><th>UNIX Tool</th></tr>
+                    <tr><td>Huffman</td><td>Symbol frequencies</td><td>2 (frequency count + encode)</td><td>25–40%</td><td>pack</td></tr>
+                    <tr><td>Adaptive Huffman</td><td>None</td><td>1</td><td>~40%</td><td>compact</td></tr>
+                    <tr><td>LZW</td><td>None</td><td>1</td><td>40–50%</td><td>compress</td></tr>
+                    <tr><td>Run-Length Encoding</td><td>None</td><td>1</td><td>Poor (text), Good (fax/DB)</td><td>—</td></tr>
+                </table>
+                <div class="highlight"><p>LZW wins on both compression ratio and speed for most file types. Adaptive Huffman is competitive but slower. Standard Huffman achieves near-optimal compression (within ~5% of entropy) but requires a preliminary pass and table transmission. RLE is specialized — excellent for fax/database padding, poor for natural text. In modern systems, LZ-based methods dominate (gzip uses LZ77 + Huffman, zip uses DEFLATE = LZ77 + Huffman, PNG uses DEFLATE).</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

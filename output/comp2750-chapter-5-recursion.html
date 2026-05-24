@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2750 — Chapter 5: Recursion</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #15803d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #16a34a; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #15803d; color: white; border-color: #15803d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #16a34a; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a0a; border-left: 3px solid #15803d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #16a34a; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #16a34a; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #16a34a; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #15803d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; font-family: 'Courier New', monospace; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #16a34a; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Data Structures · Chapter 5</div>
+        <h1>Recursion</h1>
+        <p class="subtitle">Recursive definitions, activation records, tail/nontail/indirect/nested recursion, excessive recursion, and backtracking</p>
+    </header>
+    <nav>
+        <a href="#definitions">Recursive Definitions</a>
+        <a href="#implementation">Function Calls & Stack</a>
+        <a href="#anatomy">Anatomy of a Call</a>
+        <a href="#tail">Tail Recursion</a>
+        <a href="#nontail">Nontail Recursion</a>
+        <a href="#indirect">Indirect & Nested</a>
+        <a href="#excessive">Excessive Recursion</a>
+        <a href="#backtracking">Backtracking</a>
+        <a href="#guidelines">Guidelines</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="definitions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Recursive Definitions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A recursive definition defines something in terms of itself — with a formal basis ensuring no circular violation occurs. Particularly useful for defining infinite sets, since exhaustive enumeration is impossible.</p>
+                <p>Every recursive definition has exactly two parts:</p>
+                <div class="grid">
+                    <div class="card"><h3>Base Case (Anchor/Ground)</h3><p>Establishes the basis for all other elements. Provides a concrete result that stops the recursion. Without it: infinite recursion.</p></div>
+                    <div class="card"><h3>Inductive Clause</h3><p>Rules for creating new elements from existing ones. Reduces the problem toward the base case with each application.</p></div>
+                </div>
+                <pre>// Natural numbers defined recursively:
+// 0 ∈ N                        (base case)
+// if n ∈ N, then (n+1) ∈ N    (inductive clause)
+
+// Factorial defined recursively:
+// 0! = 1                       (base case)
+// n! = n × (n-1)!              (inductive clause)
+
+// 3! = 3 × 2! = 3 × 2 × 1! = 3 × 2 × 1 × 0! = 3 × 2 × 1 × 1 = 6
+
+unsigned int factorial(unsigned int n) {
+    if (n == 0)
+        return 1;               // base case — stops recursion
+    else
+        return n * factorial(n - 1);  // inductive clause
+}
+
+// x^n defined recursively:
+// x^0 = 1                     (base case)
+// x^n = x × x^(n-1)           (inductive clause)
+
+double power(double x, unsigned int n) {
+    if (n == 0)
+        return 1.0;
+    else
+        return x * power(x, n - 1);
+}</pre>
+                <div class="highlight"><p>Recursive code is often simpler and more faithful to the mathematical definition — but simplicity can hide underlying inefficiency. The translation from recursive specification to code is usually straightforward. The hard part is understanding what happens under the hood (the runtime stack) and recognizing when recursion is problematic.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="implementation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Function Calls & Recursive Implementation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every function call requires tracking: parameter values, local variables, return address, and where to resume. This information is stored in an <strong>activation record</strong> (stack frame) pushed onto the runtime stack.</p>
+                <p><strong>Activation record contains:</strong></p>
+                <ul>
+                    <li>Values of the function's parameters</li>
+                    <li>Addresses of reference parameters (including arrays)</li>
+                    <li>Local variables</li>
+                    <li>Return address in the calling function</li>
+                    <li>Dynamic link to the calling function's activation record</li>
+                    <li>The function's return value (if non-void)</li>
+                </ul>
+                <pre>// When main() calls f1(), which calls f2(), which calls f3():
+// Runtime stack (top to bottom):
+// [f3 activation record]  ← currently executing
+// [f2 activation record]  ← suspended, waiting for f3
+// [f1 activation record]  ← suspended, waiting for f2
+// [main activation record] ← suspended, waiting for f1
+
+// When f3() returns:
+// f3 record popped → f2 resumes from its saved return address
+
+// RECURSION: a function calling itself pushes a NEW activation record
+// Each recursive call = a new independent instance with its own state</pre>
+                <div class="highlight"><p>The runtime stack is WHY recursion works — each call gets its own activation record with its own copy of local variables and parameters. This is what prevents the calls from interfering with each other. A recursive call simply suspends the current instance and starts a new one. When the new instance returns, the old one resumes exactly where it left off.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="anatomy">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Anatomy of a Recursive Call</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Tracing power(5.6, 2) step by step through the runtime stack:</p>
+                <pre>// Call: y = power(5.6, 2)  — from line 136
+
+// Stack evolution:
+// 1. power(5.6, 2) pushed. n != 0, so calls power(5.6, 1)
+// 2. power(5.6, 1) pushed. n != 0, so calls power(5.6, 0)
+// 3. power(5.6, 0) pushed. n == 0, RETURNS 1.0
+
+// Unwinding:
+// power(5.6, 0) → returns 1.0, popped
+// power(5.6, 1) → resumes: 5.6 × 1.0 = 5.6, returns 5.6, popped
+// power(5.6, 2) → resumes: 5.6 × 5.6 = 31.36, returns 31.36, popped
+// y = 31.36
+
+// Pattern: wind DOWN to base case, then UNWIND back up
+// x^4 unwinds as:
+// x^4 = x·x^3 = x·x·x^2 = x·x·x·x^1 = x·x·x·x·x^0 = x·x·x·x·1</pre>
+                <div class="highlight"><p>All recursive algorithms have the same two-phase structure: the winding phase (recursive calls reducing the problem toward the base case) and the unwinding phase (returning and combining results back up the call chain). Understanding this wind/unwind pattern is key to reading and writing recursive code correctly.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="tail">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Tail Recursion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Tail recursion</strong>: the recursive call is the LAST statement in the function — nothing happens after it returns. No other statements follow the call, and no processing of the return value occurs.</p>
+                <pre>// Tail recursive — recursive call is the final action
+void tail(int i) {
+    if (i > 0) {
+        cout &lt;&lt; i &lt;&lt; " ";
+        tail(i - 1);    // last statement — nothing happens after this
+    }
+}
+
+// Equivalent iterative version — tail recursion is just a loop
+void iterative(int i) {
+    for (; i > 0; i--)
+        cout &lt;&lt; i &lt;&lt; " ";
+}</pre>
+                <div class="highlight"><p>Tail recursion is exactly equivalent to a loop — each call simply updates the parameter and repeats. Modern compilers can often optimize tail recursion into iteration (tail call optimization/TCO), eliminating stack growth. However, in C++, this is not guaranteed. Unless you're writing functional/logic code (Prolog, Haskell), convert tail recursion to a loop for guaranteed performance and no stack overflow risk.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="nontail">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Nontail Recursion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Nontail recursion</strong>: work happens AFTER the recursive call returns. The function must wait for the recursive call to complete, then do additional processing. This is the "real" power of recursion.</p>
+                <pre>// Reverses a line of input character by character
+void reverse() {
+    char ch;
+    cin.get(ch);              // read a character
+    if (ch != '\n') {
+        reverse();            // recursive call FIRST
+        cout.put(ch);         // THEN output — happens AFTER return!
+    }
+}
+// Input "ABC" → outputs "CBA"
+// The stack builds up: A, B, C are read going DOWN
+// On the way back UP, C is printed, then B, then A
+
+// Equivalent iterative version — must explicitly use a stack!
+void iterativeReverse() {
+    char stack[80];
+    int top = 0;
+    cin.get(stack[top]);
+    while (stack[top] != '\n')
+        cin.get(stack[++top]);
+    for (top -= 2; top >= 0; )
+        cout.put(stack[top--]);
+}</pre>
+                <div class="highlight"><p>To convert nontail recursion to iterative, you MUST explicitly implement a stack — the runtime stack can't be eliminated here because post-call processing depends on it. This usually results in longer, less clear code. Key lesson: if converting nontail recursion iteratively doesn't provide a clear performance benefit, keep the recursive version. Clarity and correctness are worth more than micro-optimization in most contexts.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="indirect">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Indirect & Nested Recursion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Direct Recursion</h3><p>A function calls itself directly: f() → f(). The standard case we've discussed throughout this chapter.</p></div>
+                    <div class="card"><h3>Indirect Recursion</h3><p>A function calls another function that eventually calls back: f() → g() → f(). Chains can be arbitrarily long: f() → f1() → f2() → ... → fn() → f().</p></div>
+                    <div class="card"><h3>Nested Recursion</h3><p>A function calls itself AND that call is one of the parameters: f(f(n)). The Ackermann function is the famous example.</p></div>
+                    <div class="card"><h3>Ackermann Function</h3><p>A(3,m) = 2^(m+3) - 3. A(4,2) has 19,729 digits in its expansion. Grows faster than any primitive recursive function. Elegantly recursive, impossible to define iteratively.</p></div>
+                </div>
+                <pre>// Indirect recursion example
+bool isEven(int n) {
+    if (n == 0) return true;
+    return isOdd(n - 1);   // calls isOdd
+}
+bool isOdd(int n) {
+    if (n == 0) return false;
+    return isEven(n - 1);  // calls isEven — cycle!
+}
+// isEven → isOdd → isEven → isOdd → ... → base case
+
+// Ackermann function (nested recursion)
+int A(int m, int n) {
+    if (m == 0) return n + 1;
+    if (n == 0) return A(m - 1, 1);
+    return A(m - 1, A(m, n - 1));   // A() is a parameter of A()!
+}</pre>
+            </div>
+        </div>
+
+        <div class="section" id="excessive">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Excessive Recursion — Fibonacci</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Recursion becomes <strong>excessive</strong> when the same subproblems are solved repeatedly. The Fibonacci sequence is the classic example.</p>
+                <pre>// Naive recursive Fibonacci — deceptively simple, catastrophically slow
+unsigned long Fib(unsigned long n) {
+    if (n &lt; 2)
+        return n;        // base cases: Fib(0)=0, Fib(1)=1
+    return Fib(n-2) + Fib(n-1);  // two recursive calls!
+}
+
+// Computing Fib(6):
+// Fib(6) calls Fib(4) AND Fib(5)
+// Fib(5) calls Fib(3) AND Fib(4) — Fib(4) computed AGAIN!
+// Total calls to compute Fib(6): 25
+// Total calls for Fib(n): 2×Fib(n+1) - 1 (exponential!)</pre>
+                <table>
+                    <tr><th>n</th><th>Fib(n)</th><th>Recursive calls</th></tr>
+                    <tr><td>5</td><td>5</td><td>15</td></tr>
+                    <tr><td>10</td><td>55</td><td>177</td></tr>
+                    <tr><td>20</td><td>6,765</td><td>21,891</td></tr>
+                    <tr><td>31</td><td>1,346,269</td><td>~2.9 million</td></tr>
+                </table>
+                <div class="highlight"><p>The problem: no intermediate values are remembered — every Fib(k) is recomputed from scratch each time it's needed. Drawing the call tree (Fig 5.8) reveals massive redundancy. Fix: <strong>Dynamic Programming</strong> — memoize previously computed values. Or use Binet's formula (closed form). Either approach reduces exponential time to linear or constant time.</p></div>
+                <pre>// Iterative Fibonacci — O(n) time, O(1) space
+unsigned long iterFib(unsigned long n) {
+    if (n &lt; 2) return n;
+    unsigned long a = 0, b = 1;
+    for (unsigned long i = 2; i &lt;= n; i++) {
+        unsigned long c = a + b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+// Binet's formula — O(1) time (for small n)
+unsigned long deMoivreFib(unsigned long n) {
+    return ceil(exp(n * log(1.6180339897) - log(2.2360679775)) - 0.5);
+}
+// φ = (1+√5)/2 ≈ 1.6180339897 (golden ratio)</pre>
+            </div>
+        </div>
+
+        <div class="section" id="backtracking">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Backtracking</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Backtracking</strong> is a systematic search approach that explores possible solution pathways. When a path fails, it backs up to the last decision point and tries a different direction — guaranteed to explore all possibilities.</p>
+                <div class="highlight"><p>Used in: AI search algorithms, constraint satisfaction problems, compilers (syntax parsing), and optimization. The key requirement: the algorithm must be able to undo its last decision and try alternatives. Recursion makes this natural — returning from a recursive call IS the backtrack.</p></div>
+                <p><strong>Classic example: Eight Queens Problem</strong> — place 8 queens on a chessboard so no two attack each other.</p>
+                <pre>// Backtracking pseudocode — Eight Queens
+putQueen(row):
+    for every position col in this row:
+        if position (row, col) is safe (no conflicts):
+            place queen at (row, col)
+            if row &lt; 8:
+                putQueen(row + 1)  // try to place next queen
+            else:
+                success!           // all 8 queens placed
+            remove queen from (row, col)  // BACKTRACK — try next col
+
+// C++ structure
+bool isSafe(int row, int col); // check no row/col/diagonal conflicts
+
+void putQueen(int board[][8], int row) {
+    for (int col = 0; col &lt; 8; col++) {
+        if (isSafe(board, row, col)) {
+            board[row][col] = 1;      // place queen
+            if (row == 7)
+                printSolution(board); // found a solution
+            else
+                putQueen(board, row + 1); // recurse to next row
+            board[row][col] = 0;      // remove queen (backtrack)
+        }
+    }
+}</pre>
+                <div class="highlight"><p>The backtrack step (remove queen from position) is what makes this work — it undoes the last placement so the algorithm can try the next column. Without the undo, there's no backtracking, just forward search. This algorithm finds ALL 92 solutions to the 8-queens problem (some are symmetrical). Backtracking is only practical when the solution space can be pruned aggressively — pure brute force would examine 8^8 = 16M positions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="guidelines">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>When to Use Recursion — Guidelines</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Situation</th><th>Recommendation</th></tr>
+                    <tr><td>Tail recursion</td><td>Convert to loop — tail recursion is just a loop, iterative is clearer and guaranteed stack-safe</td></tr>
+                    <tr><td>Nontail recursion, small data</td><td>Keep recursive — clarity and correctness outweigh minor performance cost</td></tr>
+                    <tr><td>Nontail recursion, large data</td><td>Consider iterative — explicitly implement a stack if needed</td></tr>
+                    <tr><td>Excessive repeated subproblems</td><td>Use Dynamic Programming (memoization) or a closed-form formula</td></tr>
+                    <tr><td>Real-time systems, Big Data</td><td>Prefer iterative — stringent time requirements demand predictable performance</td></tr>
+                    <tr><td>Backtracking / search</td><td>Recursion is natural and usually the right choice</td></tr>
+                    <tr><td>Unclear which is better</td><td>Implement both and benchmark on realistic data</td></tr>
+                </table>
+                <div class="highlight"><p>The call tree diagnostic: draw the recursive call tree. Deep, narrow trees → stack overflow risk, use iterative. Shallow, wide ("bushy") trees with no repeated nodes → recursion is probably fine. Trees with repeated identical subtrees (like Fibonacci) → dynamic programming. When in doubt, the recursive version is usually clearer and easier to verify correct — optimize only when profiling shows a real problem.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
