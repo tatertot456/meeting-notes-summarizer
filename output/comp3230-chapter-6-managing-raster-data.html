@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 6: Managing Raster Data</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a0a2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #1d4ed8; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #2563eb; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #2563eb; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a0a2e; border-left: 3px solid #1d4ed8; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #2563eb; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #2563eb; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #1d4ed8; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #2563eb; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 6</div>
+        <h1>Managing Raster Data</h1>
+        <p class="subtitle">Raster model, resolution, resampling, pixel depth, bands, compression, 3D data, georeferencing, and storage formats</p>
+    </header>
+    <nav>
+        <a href="#model">Raster Model</a>
+        <a href="#resolution">Resolution & Pyramids</a>
+        <a href="#resampling">Resampling</a>
+        <a href="#storage">Pixel Depth & Bands</a>
+        <a href="#compression">Compression</a>
+        <a href="#3d">3D Data</a>
+        <a href="#georef">Georeferencing</a>
+        <a href="#formats">Formats & Tables</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="model">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Raster Model</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A raster stores an n×m array of values in cells (pixels), each representing a square area on the ground. The raster is georeferenced by an x-y corner coordinate and a specified cell size. Each pixel contains exactly ONE numeric value — storing multiple attributes requires multiple rasters (bands).</p>
+                <div class="grid">
+                    <div class="card"><h3>Continuous Rasters</h3><p>Store numeric values measurable anywhere: elevation, temperature, precipitation, brightness (imagery). Brightness stored as digital numbers 0–255. Examples: DEM, color aerial photo.</p></div>
+                    <div class="card"><h3>Discrete Rasters</h3><p>Store categorical data: land use/cover, road type. Often converted from vector data. Can only store one attribute per cell. Join table to raster on cell values, or use multiple bands for more info.</p></div>
+                    <div class="card"><h3>Data Rasters</h3><p>Store values representing actual measurements or categories. CAN be analyzed. Examples: elevation DEM, aerial imagery, land use, roads.</p></div>
+                    <div class="card"><h3>Picture Rasters</h3><p>Store color display values — like photographing a map. CANNOT be analyzed. Examples: scanned topo map (DRG), ArcGIS Online basemap tiles.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Why use rasters?</strong> Better for continuous data storage and analysis, often faster than vector analysis, imagery is essential for certain maps. Tradeoffs: lower coordinate precision, high resolution = high storage cost, limited to one attribute per cell.</p>
+            </div>
+        </div>
+
+        <div class="section" id="resolution">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Spatial Resolution & Pyramids</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Resolution</strong> is the x-y dimension of each pixel (cell size). It defines the precision of the raster — a 10m raster can only represent features ≥10m. Storage grows by the square of resolution.</p>
+                <pre>Storage comparison:
+10m resolution raster = 9×9 = 81× more cells than 90m raster
+→ 81× more storage space for the same geographic area</pre>
+                <p><strong>Raster Pyramids</strong> — pre-built lower-resolution copies to speed display:</p>
+                <ul>
+                    <li>Built by representing four adjacent cells as one cell (successive halvings)</li>
+                    <li>Each pyramid level is efficient for a different display scale</li>
+                    <li>Scale ranges on layers control which pyramid level is shown at each scale</li>
+                    <li>Building pyramids takes time and increases storage by ~50%</li>
+                    <li>ArcGIS Online basemaps use multiple resolution layers with scale ranges to appear fast at all zoom levels</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="resampling">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Resampling</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Resampling changes the resolution of a raster, producing a new copy. A rule must be chosen to determine the value of each new cell. Required when projecting rasters or analyzing rasters with different resolutions.</p>
+                <table>
+                    <tr><th>Method</th><th>How It Works</th><th>Best For</th></tr>
+                    <tr><td>Nearest Neighbor</td><td>Grabs the value from the old cell whose center falls nearest the new cell center. Preserves original values exactly.</td><td>ALWAYS use for categorical/discrete data. Use when original values must be preserved. Fastest method.</td></tr>
+                    <tr><td>Bilinear</td><td>Distance-weighted average of the 4 nearest old cell centers to the new cell center.</td><td>Continuous data like elevation. Produces smoother results than nearest neighbor.</td></tr>
+                    <tr><td>Cubic Convolution</td><td>Distance-weighted average of the 16 nearest old cell centers. More complex calculation.</td><td>Continuous data like elevation. Smoothest results. Most time-consuming method.</td></tr>
+                    <tr><td>Block Resampling</td><td>Groups cells and applies a statistic (majority, mean, min, max) to determine new cell value.</td><td>Used in pyramid building. Majority preserves categorical data during coarsening.</td></tr>
+                </table>
+                <div class="highlight"><p>Resampling to a LOWER resolution degrades precision and accuracy — information is permanently lost. Resampling to a HIGHER resolution does NOT improve accuracy — you're just storing the same information in more cells. More cells ≠ more information. Never resample to a finer resolution and assume you've improved the data quality.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="storage">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pixel Depth, Bands & Spectral Data</h2>
+                <span name="pixel-depth"></name>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Pixel Depth (Radiometric Resolution)</strong> — the number of bits/bytes used per pixel determines the range of storable values:</p>
+                <table>
+                    <tr><th>Depth</th><th>Bytes</th><th>Value Range</th><th>Common Use</th></tr>
+                    <tr><td>8-bit</td><td>1 byte</td><td>0–255 (2⁸ = 256 values)</td><td>Single-band imagery, land cover categories</td></tr>
+                    <tr><td>16-bit</td><td>2 bytes</td><td>0–65,535 (2¹⁶ values)</td><td>High-precision elevation, multi-range sensors</td></tr>
+                    <tr><td>24-bit</td><td>3 bytes</td><td>0–16.7 million (2²⁴)</td><td>RGB color images (8 bits per channel)</td></tr>
+                    <tr><td>32-bit integer</td><td>4 bytes</td><td>0–4.2 billion (2³²)</td><td>Large integer datasets</td></tr>
+                    <tr><td>32-bit float</td><td>4 bytes</td><td>Decimal numbers with sign, mantissa, exponent</td><td>Elevation, continuous analysis outputs</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Bands</strong> — a multiband raster contains multiple raster arrays with the same dimensions and resolution stored together:</p>
+                <ul>
+                    <li>Each band = a single raster layer</li>
+                    <li>Satellite imagery (Landsat has 7+ bands) — each band captures a different wavelength of light (visible, near-infrared, thermal)</li>
+                    <li>Color aerial photos = 3 bands (Red, Green, Blue)</li>
+                    <li>Any band can be assigned to R, G, or B display channels for different composite views</li>
+                </ul>
+                <div class="grid">
+                    <div class="card"><h3>Natural Color Composite</h3><p>Red band → R display, Green band → G display, Blue band → B display. Looks like what the human eye would see. Familiar to non-specialists.</p></div>
+                    <div class="card"><h3>False Color Composite</h3><p>Non-visible bands (e.g., near-infrared) assigned to visible display channels. Highlights features invisible to the naked eye. Vegetation appears bright red in infrared false color.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="compression">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Compression & NoData</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Run-Length Encoding (Lossless)</h3><p>For discrete rasters. Stores how many consecutive times each value appears: "0 1 1 1 1 1 3 3 3 3" → "01 15 36". Original data perfectly recoverable. Reversible compression.</p></div>
+                    <div class="card"><h3>Decimal Truncation (Lossy)</h3><p>Rounds or truncates decimal values: 1.2 3.6 4.2 → 1 3 4. Original data cannot be recovered. Irreversible compression. Reduces storage but permanently loses precision.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>NoData</strong> — a special value indicating absent data (not zero):</p>
+                <ul>
+                    <li>Zero is a VALID measurement for many quantities (e.g., zero precipitation = it didn't rain)</li>
+                    <li>NoData means "no measurement was taken" or "outside the study area"</li>
+                    <li>Rasters are always rectangular — NoData fills the corners and edges outside the actual data extent</li>
+                    <li>Example: A DEM of South Dakota is rectangular, but NoData fills cells outside the state boundary</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="3d">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>3D Data Formats</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>3D data includes z values (height/elevation) in addition to x-y coordinates. Many formats exist:</p>
+                <div class="grid">
+                    <div class="card"><h3>DEM (Digital Elevation Model)</h3><p>Raster storing one elevation value per cell. Most common 3D surface data. Used for slope, aspect, hillshade, viewshed, watershed analysis. Symbolized low-to-high.</p></div>
+                    <div class="card"><h3>TIN (Triangulated Irregular Network)</h3><p>Vector-based surface. Stores x,y,z triplets (nodes) forming triangular facets. Efficient: fewer nodes for flat areas, more for steep. Preserves data points exactly.</p></div>
+                    <div class="card"><h3>Point Cloud</h3><p>Millions of x,y,z triplets from LiDAR or photogrammetry (Structure from Motion). Very high density — can represent individual trees, buildings. Often colored by elevation or return intensity.</p></div>
+                    <div class="card"><h3>Voxel</h3><p>A raster cell with height — occupies a 3D volume. Voxels stacked together store 3D volumetric data. Used for atmospheric, subsurface, or oceanographic data.</p></div>
+                    <div class="card"><h3>Multipatch</h3><p>Stores 3D building shapes using oriented surfaces (rectangles, circles, ovals). Represents complex 3D objects. Used for city building models.</p></div>
+                    <div class="card"><h3>Space-Time Cube</h3><p>Aggregates x,y points into a spatial grid across time slices. Shows patterns in space AND time. Uses netCDF format. Requires a Date/Time field.</p></div>
+                </div>
+                <div class="highlight"><p>2D data can be draped on a DEM surface by aligning x-y locations — creating a 3D visualization without actually having 3D data. 2D features with a base height field (e.g., building footprints with a height attribute) can be extruded to form 3D representations. This is much simpler than true 3D data but effective for visualization.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="georef">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Georeferencing Rasters</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Scanned maps have coordinates in pixels (image space) and must be georeferenced to real-world coordinates before use in GIS.</p>
+                <ul>
+                    <li>User identifies <strong>ground control points (GCPs)</strong> — pairs of points visible in both the raster and a reference dataset with known coordinates</li>
+                    <li>A <strong>transformation</strong> calculates real-world coordinates from the GCP pairs and applies them to the raster</li>
+                    <li><strong>Affine transformation</strong> — adjusts only scale, rotation, and translation (no warping). For maps with consistent distortion.</li>
+                    <li><strong>Polynomial transformation (rubbersheeting)</strong> — allows differential local adjustment. For maps with varying distortion (old maps, aerial photos).</li>
+                    <li><strong>RMSE (Root Mean Square Error)</strong> — measures transformation accuracy. Should be recorded in metadata.</li>
+                </ul>
+                <p><strong>Projecting rasters</strong> (converting between coordinate systems) requires resampling and is more complex than projecting vector data. It can introduce artifacts and should be done as few times as possible. On-the-fly projection is most efficient when the map coordinate system matches the raster's stored coordinate system.</p>
+            </div>
+        </div>
+
+        <div class="section" id="formats">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Storage Formats, Tables & Coordinate Systems</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Raster formats analyzable in ArcGIS Pro:</strong></p>
+                <ul>
+                    <li>File Geodatabase Raster (FGDR) — native ArcGIS format, recommended</li>
+                    <li>TIFF (.tif) — widely supported, lossless, can embed georeferencing</li>
+                    <li>ERDAS Imagine (.img) — common remote sensing format</li>
+                    <li>ArcGRID — old Arc/Info format, still readable</li>
+                </ul>
+                <p><strong>Read/display only (cannot analyze or save in ArcGIS):</strong> JPEG, PNG, MrSID, BIL, BSQ, and others.</p>
+                <p><strong>Raster attribute tables</strong> — created automatically for discrete rasters with a limited number of unique values:</p>
+                <ul>
+                    <li><strong>Value field</strong> — each unique cell value</li>
+                    <li><strong>Count field</strong> — number of cells with that value</li>
+                    <li>Additional fields — can include descriptive attributes (e.g., geology unit names from original polygon data)</li>
+                </ul>
+                <div class="highlight"><p>Rasters should be stored in a projected coordinate system that preserves area or distance to ensure analysis functions work correctly. A DEM in a Geographic Coordinate System (degrees) has different shapes and cell counts than the same DEM in State Plane (meters). Analysis results (slope, area calculations) will be incorrect if performed on unprojected rasters.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

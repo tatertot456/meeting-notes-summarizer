@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 7: Attribute Data</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a28, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0f766e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0f766e; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0f766e; color: white; border-color: #0f766e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0f766e; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a28; border-left: 3px solid #0f766e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #0f766e; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0f766e; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #0f766e; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #0f766e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0f766e; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 7</div>
+        <h1>Attribute Data</h1>
+        <p class="subtitle">DBMS types, table joins, cardinality, data storage, field types, domains, statistics, and table management</p>
+    </header>
+    <nav>
+        <a href="#tables">Tables & DBMS</a>
+        <a href="#joins">Joins & Cardinality</a>
+        <a href="#stats">Statistics & Charts</a>
+        <a href="#storage">Data Storage</a>
+        <a href="#fields">Fields & Schema</a>
+        <a href="#domains">Domains</a>
+        <a href="#views">Table Views & Editing</a>
+        <a href="#importing">Importing Data</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="tables">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Tables & Database Management Systems</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>GIS tables come in two types: <strong>attribute tables</strong> (data associated with a spatial feature class) and <strong>standalone tables</strong> (tabular data from any source — Excel, CSV, text files, database files).</p>
+                <p>Table structure: rows = <strong>records</strong>, columns = <strong>fields</strong> (attributes). The Feature ID (FID/OID) is a unique integer managed by the software to identify each record.</p>
+                <div class="grid">
+                    <div class="card"><h3>Flat File</h3><p>Simple ASCII text file. One record per line. Attributes separated by commas, spaces, or tabs. Simple but very inefficient for queries — no relationships between tables.</p></div>
+                    <div class="card"><h3>Hierarchical DBMS</h3><p>Multiple tables with predefined parent-child relationships. Very efficient for specific queries but inflexible — only predefined queries are possible. Limits what relationships can be explored.</p></div>
+                    <div class="card"><h3>Relational DBMS</h3><p>Multiple tables where relationships are defined as needed. Very flexible — any table can be linked to any other on matching fields. Ideal for open-ended applications. MOST COMMON type in GIS.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="joins">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Table Joins & Cardinality</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>join</strong> links two tables using a common field (key), allowing them to be used as a single table. The <strong>target table</strong> receives additional information from the <strong>join table</strong>.</p>
+                <ul>
+                    <li><strong>Primary key</strong> — column(s) that uniquely identify a row in its own table</li>
+                    <li><strong>Foreign key</strong> — column(s) that link a row to a row in another table</li>
+                    <li>The key field can have different names in each table as long as values match</li>
+                </ul>
+                <p><strong>Cardinality</strong> — how many join records match each target record:</p>
+                <table>
+                    <tr><th>Type</th><th>Relationship</th><th>Example</th><th>How to Handle</th></tr>
+                    <tr><td>One-to-One</td><td>1 join record = 1 target record</td><td>States to Governors, Countries to Capitals</td><td>Standard JOIN — works perfectly</td></tr>
+                    <tr><td>Many-to-One</td><td>1 join record = many target records</td><td>Cities to States, Schools to Districts</td><td>Standard JOIN — join record repeated as needed</td></tr>
+                    <tr><td>One-to-Many</td><td>Many join records = 1 target record</td><td>States to Cities, Districts to Schools</td><td>USE RELATE — tables stay separate but linked</td></tr>
+                    <tr><td>Many-to-Many</td><td>Many join records = many target records</td><td>Students to Classes, Stores to Customers</td><td>RELATE — rarely handled well in GIS</td></tr>
+                </table>
+                <div class="highlight"><p>JOIN RULE: Each record in the target table must match ONE AND ONLY ONE record in the join table. One-to-one and many-to-one satisfy this rule. One-to-many does NOT — use a Relate instead. In a Relate, tables remain separate but selections in one table highlight linked records in the other. Always put the target table first when evaluating cardinality.</p></div>
+                <p><strong>Unmatched records</strong> — if a target record has no match in the join table, its join fields show &lt;Null&gt;. Use "Keep All Target Features" (Outer Join) to retain unmatched records. Uncheck for Inner Join (only matched records).</p>
+                <p><strong>Multiple joins</strong> — more than two tables can be joined to one target. A bridge table (with shared fields from both) can link tables that have no direct common field. A table cannot be both a target and a join table simultaneously.</p>
+            </div>
+        </div>
+
+        <div class="section" id="stats">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Statistics, Charts & Critical Thinking</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Statistics and charts are data exploration tools — use them to understand your data before analysis and to identify problems.</p>
+                <div class="grid">
+                    <div class="card"><h3>Summary Statistics Tool</h3><p>Calculates statistics (sum, mean, min, max, count, std dev) for one or more fields. Results stored in a new table. Use a CASE FIELD to group results by category (e.g., sum earthquake damage by state instead of for all earthquakes).</p></div>
+                    <div class="card"><h3>Charts (Linked to Map)</h3><p>Scatterplots, bar charts, histograms linked to map selections. Features selected on the chart are simultaneously selected on the map. Useful for detecting outliers and correlations (e.g., temperature vs. latitude).</p></div>
+                </div>
+                <div class="highlight"><p>Apply the Straight Face Test to your statistics. Zero-magnitude earthquakes represent missing values — they'll distort your mean and std dev. Earthquake datasets screened to show only large events will look nothing like the natural distribution (which has exponentially more small quakes). Always understand what the data represents before interpreting statistics.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="storage">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Storage — Binary, ASCII & Field Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Computers store data as binary (base 2) numbers — sequences of 0s and 1s. 1 bit = 1 binary digit. 8 bits = 1 byte = stores values 0–255.</p>
+                <pre">ASCII storage: Text stored as character codes
+"CAT" = {67, 65, 84} = 3 bytes (one byte per character)
+"148" stored as ASCII = {49, 52, 56} = 3 bytes (text!)
+"148" stored as binary = 10010100 = 1 byte (efficient!)
+
+Binary is generally more efficient for numbers.
+Many GIS analysis tools REQUIRE numeric fields — not text.</pre>
+                <p><strong>Integer storage limits:</strong></p>
+                <table>
+                    <tr><th>Bytes</th><th>Unsigned Range</th><th>Signed Range</th></tr>
+                    <tr><td>1 byte</td><td>0 to 255</td><td>-127 to +127</td></tr>
+                    <tr><td>2 bytes</td><td>0 to 65,535</td><td>-32,767 to +32,767</td></tr>
+                    <tr><td>4 bytes</td><td>0 to 4.29 billion</td><td>-2.15B to +2.15B</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Floating point</strong> — stores decimals as scientific notation (mantissa × exponent). Single precision (32-bit) has ~7 significant digits. Double precision (64-bit) has ~15 significant digits. Large numbers lose precision in single precision.</p>
+                <p><strong>ArcGIS Pro field types:</strong></p>
+                <table>
+                    <tr><th>Type</th><th>Storage</th><th>Range / Notes</th></tr>
+                    <tr><td>Short Integer</td><td>2 bytes binary</td><td>-32,767 to +32,767</td></tr>
+                    <tr><td>Long Integer</td><td>4 bytes binary</td><td>-2.15B to +2.15B</td></tr>
+                    <tr><td>Float</td><td>4 bytes (32-bit float)</td><td>Decimal, ~7 significant digits</td></tr>
+                    <tr><td>Double</td><td>8 bytes (64-bit float)</td><td>Decimal, ~15 significant digits</td></tr>
+                    <tr><td>Text</td><td>1 byte per character</td><td>User-defined max length</td></tr>
+                    <tr><td>Date</td><td>Special format</td><td>Stores date and time values</td></tr>
+                </table>
+                <div class="highlight"><p>Match the field type to the data: don't use Double when Short Integer will do (wastes storage). Don't store a number in a Text field if you need to do math on it (many tools won't work). Field type CANNOT be changed after creation — plan ahead. Field naming rules: max 13 characters, letters and numbers only, must start with a letter.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="fields">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Fields, Schema & Geometry Fields</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The <strong>schema</strong> is the complete structure of a table — its fields, their definitions, domains, and defaults. A schema can be saved as a template to create empty tables with identical structure.</p>
+                <p><strong>Geometry fields</strong> — special fields in geodatabase attribute tables:</p>
+                <ul>
+                    <li><strong>Shape_Length</strong> and <strong>Shape_Area</strong> — automatically updated when feature shape changes (generalize, dissolve operations)</li>
+                    <li>User-defined geometry fields must be updated manually with the Calculate Attribute Geometry tool</li>
+                    <li>Shapefiles have NO automatic geometry fields — all must be updated manually</li>
+                </ul>
+                <p><strong>Fields view</strong> — used to view and modify table structure:</p>
+                <div class="grid">
+                    <div class="card"><h3>Layer Mode (Cosmetic Changes)</h3><p>Changes affect only the TABLE VIEW — the underlying data is unchanged. Can modify: display on/off, read-only, display width, number formatting, field highlighting, alias (one table view).</p></div>
+                    <div class="card"><h3>Data Source Mode (Permanent Changes)</h3><p>Changes affect the SOURCE TABLE permanently. Can modify: add/delete fields, rename fields, change storage width, create domains/subtypes, change alias (all maps and projects). Be careful — cannot be undone!</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="domains">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Domains</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Domains are rules about what values can be placed in a field. They enforce data integrity and speed data entry.</p>
+                <div class="grid">
+                    <div class="card"><h3>Coded Value Domains</h3><p>Provide a pick list of allowed values. Store a short code but display a readable description. Examples: Conifer/Deciduous, Solid/Dashed, True/False, Good/Fair/Poor. Reduces typing errors.</p></div>
+                    <div class="card"><h3>Range Domains</h3><p>Specify the minimum and maximum numeric values allowed. Example: a Percent field constrained to 0–100. Prevents invalid data entry.</p></div>
+                </div>
+                <p style="margin-top:16px">Domains are created at the <strong>geodatabase level</strong> (not the feature class level) so they can be reused across many fields. The domain's field type must match the field it's assigned to. Split and merge policies control domain behavior during feature editing operations.</p>
+                <div class="highlight"><p>Domains are especially valuable for field data collection on GPS devices and mobile apps where users must choose from a list rather than type freehand. Once a domain is assigned, the field will only accept values in the domain — this protects data quality at the point of entry.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="views">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Table Views, Calculating Fields & Table View Properties</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Table views display and manipulate attribute data. Right-click a field name for field-level actions. Table Options button provides additional table functions. Status bar shows selection counts.</p>
+                <p><strong>Table view properties</strong> (cosmetic — do not affect source table):</p>
+                <ul>
+                    <li>Field aliases — display a friendly name instead of the actual field name</li>
+                    <li>Numeric formatting — consistent decimal places or significant figures</li>
+                    <li>Show/hide fields — display only relevant fields</li>
+                    <li>Field order — reorder columns for easier reading</li>
+                </ul>
+                <p><strong>Calculate Field tool</strong> — populate or update field values using expressions:</p>
+                <ul>
+                    <li>Reference existing fields in the expression</li>
+                    <li>Use built-in numeric and string functions</li>
+                    <li>Python code snippets for complex calculations</li>
+                    <li>Use List By Editing panel in Contents pane to lock layers against accidental editing</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="importing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Importing Excel & Text Data</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Excel import requirements:</strong></p>
+                <ul>
+                    <li>First row must contain legal field names</li>
+                    <li>Every column must contain one consistent data type</li>
+                    <li>Do NOT use n/a or x to indicate missing values in numeric columns</li>
+                    <li>No formulas, blank lines, or merged cells</li>
+                    <li>A "dummy row" with example data types (ddd=text, 999=integer, 9.9=float) helps ArcGIS determine field types correctly</li>
+                </ul>
+                <pre>Example dummy row format:
+NAME, NUM, STREET, CITY, STATE, ZIP, PERCENT
+ddd, 999, 999, ddd, ddd, 99, 99.99       ← dummy row
+Smith, 527, W. Main St., Peoria, IL, 45098, 38.3</pre>
+                <p><strong>Text file formats:</strong></p>
+                <ul>
+                    <li>Tab-delimited — fields separated by tab characters</li>
+                    <li>CSV (comma-delimited) — fields separated by commas. Often most reliable format.</li>
+                    <li>Fixed-column — fields at fixed character positions. ArcGIS Pro CANNOT read this format directly — use Excel to convert to CSV first.</li>
+                </ul>
+                <p>Use the <strong>Excel to Table tool</strong> to load spreadsheets into a geodatabase table. A CSV file may work better than Excel in some cases. The <strong>XY Table to Point tool</strong> converts coordinate tables to point feature classes.</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

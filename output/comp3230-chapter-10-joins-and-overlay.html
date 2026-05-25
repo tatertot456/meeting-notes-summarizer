@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 10: Joins and Overlay</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a1f2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #075985; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #075985; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #075985; color: white; border-color: #075985; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #075985; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a1f2e; border-left: 3px solid #075985; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #075985; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #075985; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #075985; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #075985; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #075985; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 10</div>
+        <h1>Joins and Overlay</h1>
+        <p class="subtitle">Spatial joins, cardinality, merge rules, overlay types, data quality, slivers, and worked examples</p>
+    </header>
+    <nav>
+        <a href="#intro">Joins vs. Overlay</a>
+        <a href="#spatial-join">Spatial Joins</a>
+        <a href="#cardinality">Cardinality & Merge Rules</a>
+        <a href="#overlay">Classic Overlay</a>
+        <a href="#quality">Data Quality Issues</a>
+        <a href="#setup">Setting Up a Join</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Joins vs. Overlay — Key Difference</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Both joins and overlay combine data tables from two sources, but they differ critically in how they handle overlapping features:</p>
+                <div class="grid">
+                    <div class="card"><h3>Joins (Table Join & Spatial Join)</h3><p>Features remain WHOLE — geometry is not split. Attribute data from one table is appended to another based on a key or spatial relationship. Features keep their original shape.</p></div>
+                    <div class="card"><h3>Overlay (Intersect & Union)</h3><p>Features are SPLIT where they overlap — new features are created from the intersection of input geometries. Each new feature gets a unique combination of attributes from both inputs. More complex but avoids one-to-many problems.</p></div>
+                </div>
+                <div class="highlight"><p>Use a JOIN when you want to attach attribute information to existing features. Use OVERLAY when you need to analyze the geographic combination of two datasets — where both sets of conditions exist simultaneously in the same place (e.g., landslide hazard = steep slope AND weak rock).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="spatial-join">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Spatial Joins</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A spatial join matches records using a <strong>spatial relationship</strong> instead of a common key field. The target feature class is copied to a new dataset containing both tables combined. The same spatial operators as spatial queries apply.</p>
+                <table>
+                    <tr><th>Operator</th><th>How Records Are Matched</th><th>Example</th></tr>
+                    <tr><td>Intersect</td><td>Join record touches or overlaps target feature</td><td>Attach the zoning record that intersects each parcel → every parcel gets its zoning info</td></tr>
+                    <tr><td>Within / Containment</td><td>Target feature falls inside join feature</td><td>Each septic system gets the geology unit it falls within</td></tr>
+                    <tr><td>Proximity (Closest)</td><td>Nearest join feature to each target feature</td><td>Each city gets info from its closest airport + a distance field is added</td></tr>
+                </table>
+                <div class="highlight"><p>Intersect vs. Within difference: If a septic system lands exactly ON a geology boundary, Within yields a Null (it's not completely inside either polygon), while Intersect finds two matches (it touches both). Null values in output alert you to these edge cases — they signal exceptions or logical consistency errors in the data.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="cardinality">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Cardinality, Join Types & Merge Rules</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Cardinality describes how many join features match each target feature. Always anticipate the expected cardinality before setting up a join.</p>
+                <table>
+                    <tr><th>Scenario</th><th>Expected Cardinality</th><th>Best Join Type</th><th>Why</th></tr>
+                    <tr><td>Parcels + Zoning</td><td>Many-to-one (most parcels in one zone)</td><td>One-to-one</td><td>One zone per parcel expected. Two matches = data error → Null alerts you.</td></tr>
+                    <tr><td>Cities + Airports</td><td>One-to-one (one closest airport)</td><td>One-to-one</td><td>Only one airport can be closest. Two equidistant = rare exception → Null alerts you.</td></tr>
+                    <tr><td>Septics + Geology</td><td>Many-to-one (septic in one polygon)</td><td>One-to-one</td><td>One geology unit per septic. On-boundary = exception → Null alerts you.</td></tr>
+                    <tr><td>Highways + Soils</td><td>One-to-many (highway crosses many soils)</td><td>One-to-one with merge rules</td><td>Multiple copies of each highway is not useful. Summarize soils per highway with merge rules instead.</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Join types:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>One-to-One Join Type</h3><p>Each target feature produces ONE output copy. Multiple matching join records are summarized using merge rules. Most common choice — cleaner output.</p></div>
+                    <div class="card"><h3>One-to-Many Join Type</h3><p>Each target feature is DUPLICATED — one copy per matching join record. Used when you need every individual match preserved. Can create unwieldy output for many matches.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Merge rules</strong> — how to summarize multiple join records into one (used with one-to-one join on one-to-many cardinality):</p>
+                <ul>
+                    <li><strong>Mean, Sum, Min, Max, Std Dev</strong> — statistical rules for numeric fields (e.g., mean clay content across all soils a highway crosses)</li>
+                    <li><strong>First</strong> — uses the first matching record's value. Default for text/categorical fields. Often not meaningful.</li>
+                    <li><strong>Concatenate</strong> — combines all matching values into a list in a single field (e.g., list all hydrologic groups for soils a highway crosses)</li>
+                    <li><strong>Join_Count field</strong> — automatically added to show how many join records matched each target feature</li>
+                </ul>
+                <div class="highlight"><p>Do NOT confuse join TYPE with cardinality. A one-to-one JOIN TYPE is commonly used on tables with a one-to-MANY cardinality — you use merge rules to summarize the many join records into one result per target feature. The join type describes the OUTPUT structure, not the input relationship.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="overlay">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Classic Overlay — Intersect & Union</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Overlay splits input features where they overlap, creating new features with unique combinations of attributes from all inputs. Each output polygon is a "child" of its "parent" input polygons and inherits all their attributes.</p>
+                <div class="grid">
+                    <div class="card"><h3>Intersect</h3><p>Keeps ONLY the areas where both inputs overlap. Output = the geographic intersection of all inputs. Use for: suitability analysis (find areas meeting ALL conditions), combining data where overlap is the area of interest.</p></div>
+                    <div class="card"><h3>Union</h3><p>Keeps ALL areas from BOTH inputs, whether they overlap or not. Output = full extent of all inputs combined. Use for: combining datasets where you need the complete picture, querying all possible combinations of values.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Geometry rules for overlay:</strong></p>
+                <ul>
+                    <li>Union: polygon inputs ONLY — requires two polygon layers</li>
+                    <li>Intersect: all geometry types supported — polygon, line, or point with polygon</li>
+                    <li>Output geometry cannot be HIGHER than the highest input type (line + polygon → line or point, never polygon)</li>
+                    <li>Line-in-polygon: assigns geology attributes to streams</li>
+                    <li>Point-in-polygon: assigns school district to houses for sale</li>
+                </ul>
+                <p><strong>Intersect vs. Clip comparison:</strong></p>
+                <table>
+                    <tr><th>Operation</th><th>Boundary Used</th><th>Features Split?</th><th>New Attribute Fields?</th></tr>
+                    <tr><td>Clip (Extraction)</td><td>Only the outer boundary of clip polygon</td><td>Yes — cut at boundary</td><td>NO — only target table fields</td></tr>
+                    <tr><td>Intersect (Overlay)</td><td>All polygon boundaries from both inputs</td><td>Yes — split at all boundaries</td><td>YES — fields from BOTH input tables</td></tr>
+                </table>
+                <div class="highlight"><p>Overlay practical workflow — Snail Habitat example: (1) Query elevation layer → select suitable elevation range. (2) Query geology layer → select limestone areas. (3) Query vegetation layer → select dense conifer areas. (4) Intersect the three selected feature classes → output = only areas meeting ALL three conditions simultaneously. This is the core of GIS suitability analysis.</p></div>
+                <p>After overlay, Shape_Length and Shape_Area geodatabase fields update automatically. User-defined area/length fields (e.g., ACRES) must be updated manually using <strong>Calculate Geometry Attributes tool</strong>.</p>
+            </div>
+        </div>
+
+        <div class="section" id="quality">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Quality Issues — Slivers & XY Tolerance</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Slivers</strong> — tiny artifact polygons created when overlaying two datasets whose boundaries should match but don't due to poor logical consistency:</p>
+                <ul>
+                    <li>Census tract boundaries that don't align with county boundaries produce slivers along the boundary when intersected</li>
+                    <li>Slivers are NOT real geographic features — they're errors</li>
+                    <li>They inflate feature counts and create meaningless attribute combinations</li>
+                </ul>
+                <div class="grid">
+                    <div class="card"><h3>XY Tolerance Solution</h3><p>Vertices separated by less than the XY tolerance are collapsed into a single vertex during overlay. Can reduce or eliminate slivers. Set in the geoprocessing environment settings.</p></div>
+                    <div class="card"><h3>XY Tolerance Tradeoff</h3><p>ALL close vertices get collapsed — not just sliver-causing ones. This degrades accuracy and precision of the entire dataset. Use the smallest tolerance that fixes the problem.</p></div>
+                </div>
+                <div class="highlight"><p>The best solution to slivers is fixing the source data so boundaries are logically consistent before overlaying. XY tolerance is a workaround that sacrifices data quality. Prevention (proper topology in the source data) is always better than correction after the fact.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="setup">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Setting Up a Spatial Join — Decision Framework</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Work through these questions in order to configure a spatial join correctly:</p>
+                <pre>1. What should the final output look like?
+   → Defines the target layer (output matches the target's geometry)
+
+2. Which is the target layer?
+   → The layer that gets the new attributes appended to it
+
+3. Which spatial operator is appropriate?
+   → Intersect? Within? Proximity (closest)?
+
+4. Which fields do I want in the output table?
+   → Can limit output to needed fields only
+
+5. Could a target feature match MULTIPLE join features?
+   → If YES: choose one-to-many join type (duplicate targets)
+              OR one-to-one with merge rules (summarize matches)
+   → If NO: one-to-one join type, no merge rules needed</pre>
+                <p><strong>Worked example — Congressional districts & earthquake deaths:</strong></p>
+                <ul>
+                    <li>Goal: list of districts with representative names and total earthquake deaths</li>
+                    <li>Target: congressional districts (cd114) — output must be a districts layer</li>
+                    <li>Join: earthquakes (quakehis)</li>
+                    <li>Operator: Intersect — match quakes that touch a district</li>
+                    <li>Fields needed: district ID, party, representative name, sum of deaths</li>
+                    <li>Cardinality: one district can match MANY quakes (one-to-many)</li>
+                    <li>Solution: one-to-one join type with Sum merge rule on deaths field</li>
+                    <li>Output: one row per district with total deaths; districts with no quakes show Null</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 3: Presenting GIS Data</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b91c1c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #dc2626; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b91c1c; color: white; border-color: #b91c1c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #dc2626; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a0a; border-left: 3px solid #b91c1c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #dc2626; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #dc2626; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b91c1c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #dc2626; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 3</div>
+        <h1>Presenting GIS Data</h1>
+        <p class="subtitle">Map design process, objective, audience, visual hierarchy, layout elements, and cartographic principles</p>
+    </header>
+    <nav>
+        <a href="#process">Design Process</a>
+        <a href="#objective">Map Objective</a>
+        <a href="#data">Selecting Data</a>
+        <a href="#design">Design Principles</a>
+        <a href="#elements">Map Elements</a>
+        <a href="#layouts">Layouts & Text</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="process">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Map Design Process</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Map design is an <strong>iterative five-step process</strong>. Every step refers back to the map's objective — the objective is the anchor for all decisions.</p>
+                <div class="grid">
+                    <div class="card"><h3>1. Select</h3><p>Choose which data layers tell the story. Identify lead players, supporting layers, and distracting layers to omit.</p></div>
+                    <div class="card"><h3>2. Arrange</h3><p>Position the map and all supporting elements (title, legend, scale bar) on the layout. Apply visual hierarchy principles.</p></div>
+                    <div class="card"><h3>3. Symbolize</h3><p>Choose symbols, colors, and classification methods appropriate for the data type and audience. Match visual variables to data meaning.</p></div>
+                    <div class="card"><h3>4. Review</h3><p>Evaluate the map against the objective. Does it tell the story clearly? Is anything missing, misleading, or distracting?</p></div>
+                    <div class="card"><h3>5. Edit</h3><p>Make refinements based on review. Repeat as needed — map design is iterative, not linear.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="objective">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Map Objective — Four Key Questions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Determining the objective is the most important first step. Answer these four questions before touching ArcGIS:</p>
+                <table>
+                    <tr><th>Question</th><th>Considerations</th></tr>
+                    <tr><td>What is the purpose?</td><td>Locate points of interest? Navigate? Compile collected data? Convince/persuade? Compare data? Analyze to learn new information?</td></tr>
+                    <tr><td>Who is the audience?</td><td>Expected subject knowledge? Map literacy? Special requirements (color blindness, large print, Section 508 accessibility)?</td></tr>
+                    <tr><td>What is the medium?</td><td>Paper (report, wall map, poster)? Electronic file (PDF, GIF — format, file size, delivery)? Computer screen (size, types)? Projection? Mobile devices?</td></tr>
+                    <tr><td>Under what conditions will it be viewed?</td><td>Indoor/outdoor? Screen glare on mobile? Viewer attention span? Competing with other information?</td></tr>
+                </table>
+                <div class="highlight"><p>Paper maps vs. web maps require fundamentally different design approaches. Paper maps are static, fixed-size, high-resolution, and can be complex — the viewer is committed. Web maps are interactive, variable-size, viewed in poor lighting, compete for attention, and should do ONE THING really well with short viewer attention span.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="data">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Selecting Data & Cartographic Generalization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A good map tells a story. Not every available layer should be included.</p>
+                <div class="grid">
+                    <div class="card"><h3>Lead Players</h3><p>The main subject of the map. Symbolized prominently to draw the eye first. Example: volcanoes on a volcanic hazard map.</p></div>
+                    <div class="card"><h3>Supporting Layers</h3><p>Context that helps the reader interpret the story without distracting from it. Example: county boundaries, highways.</p></div>
+                    <div class="card"><h3>Distracting Layers</h3><p>Data that competes with the story without adding value. Remove or de-emphasize. Example: rivers on a volcanic hazard map.</p></div>
+                    <div class="card"><h3>Privacy & Sensitive Data</h3><p>Consider: parcel owner names, private well tests, fossil/archaeological sites (poaching), pipelines (vandalism), fault lines near parcels (property value implications).</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Cartographic Generalization</strong> — simplifying data for map display. Techniques include:</p>
+                <ul>
+                    <li><strong>Exaggerate</strong> — make small features larger so they're visible</li>
+                    <li><strong>Displace</strong> — move features slightly so they don't overlap</li>
+                    <li><strong>Typify</strong> — represent a pattern with fewer symbols</li>
+                    <li><strong>Reclassify</strong> — merge categories for simpler display</li>
+                    <li><strong>Collapse</strong> — replace a polygon with a point at small scales</li>
+                    <li><strong>Aggregate</strong> — combine multiple features into one</li>
+                    <li><strong>Simplify</strong> — reduce vertices in a line or polygon</li>
+                    <li><strong>Refine</strong> — improve overall appearance and readability</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="design">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Visual Hierarchy & Design Principles</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Visual hierarchy is the order in which a reader perceives map elements. The cartographer controls this through design choices.</p>
+                <div class="grid">
+                    <div class="card"><h3>Visual Center</h3><p>The visual center of a page is ~5% ABOVE the geometric center. Maps centered on the geometric center feel slightly "heavy" at the bottom.</p></div>
+                    <div class="card"><h3>Rule of Thirds</h3><p>Divide the page into thirds horizontally and vertically. Place important elements at the intersections of those dividing lines. Borrowed from photography composition.</p></div>
+                    <div class="card"><h3>Alignment</h3><p>Place elements in ordered columns. Align edges of boxes and frames exactly using guides and snapping. Haphazard arrangement looks unprofessional and confuses the reader's eye.</p></div>
+                    <div class="card"><h3>Balance</h3><p>Avoid crowded or open areas. Use negative space (empty area) as a design tool — more subtle than neatlines for separating or combining elements.</p></div>
+                    <div class="card"><h3>Foreground & Background</h3><p>Dark colors and high contrast bring features to the foreground. Light, low-contrast symbols recede to the background. Important features = bold, prominent. Supporting features = subtle, light.</p></div>
+                    <div class="card"><h3>Pattern & Perception</h3><p>The brain seeks patterns. Color is more effective than shape for highlighting categories. Changes in size communicate changes in quantity. Experiment with different portrayals.</p></div>
+                </div>
+                <div class="highlight"><p>Study basemaps (Esri, Google, OpenStreetMap) to learn from professional cartographers. Notice how they use light, low-contrast backgrounds to support overlaid data without competing with it. The background should be present but invisible — the user shouldn't notice it, just benefit from it.</p></div>
+                <p><strong>Common bad map issues to avoid:</strong></p>
+                <ul>
+                    <li>Haphazard arrangement of elements</li>
+                    <li>Uneven negative space</li>
+                    <li>Scale bar unnecessarily large</li>
+                    <li>Decorative boxes/shadows that add no information</li>
+                    <li>Symbols that don't clearly show quantities</li>
+                    <li>Unrelated layers that distract from the objective</li>
+                    <li>Cryptic file names or field names instead of real words</li>
+                    <li>Too many significant figures (or too few)</li>
+                    <li>Neatlines crowding the elements</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="elements">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Map Elements & Grids</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Map elements support the reader's understanding. Include only what serves the objective — unnecessary elements clutter and distract.</p>
+                <div class="grid">
+                    <div class="card"><h3>Required Elements</h3><p>Title, legend, citations/data sources. These are almost always needed to make the map understandable and credible.</p></div>
+                    <div class="card"><h3>Often Needed</h3><p>Scale bar, north arrow, location map (inset showing where the map area is in a broader context).</p></div>
+                    <div class="card"><h3>Sometimes Needed</h3><p>Neatlines (border frames), graphics or photos, graticule or measurement grids.</p></div>
+                    <div class="card"><h3>When to Omit</h3><p>North arrow if north is obvious. Scale bar if the map is for general reference only. If removing an element makes the map cleaner without losing information — remove it.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Map Grids:</strong></p>
+                <ul>
+                    <li><strong>Graticule grids</strong> — longitude/latitude marks around the map frame. Show geographic coordinates.</li>
+                    <li><strong>Measurement grids</strong> — show x-y projected coordinates (UTM, State Plane, etc.)</li>
+                    <li><strong>Index grids</strong> — lettered/numbered squares for locating features (like a street atlas grid reference)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="layouts">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Layouts, Text & Scale Bars</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>layout</strong> is the print/export page that contains one or more map frames plus supporting elements. The map frame is independent of the layout — its extent and scale can be set separately.</p>
+                <div class="grid">
+                    <div class="card"><h3>Map Frame</h3><p>A map placed inside a layout. Activated by double-clicking to set its extent and scale. Scaling options: fixed center, fixed extent, or fixed scale.</p></div>
+                    <div class="card"><h3>Scale Bars</h3><p>Sectioned into user-defined divisions. When the map zooms, behavior options: adjust bar width (keep division value), keep bar constant (change division size), or add/remove whole divisions.</p></div>
+                    <div class="card"><h3>Reference Scale</h3><p>Without reference scale: symbols always appear at the assigned size. With reference scale: symbols and labels grow/shrink as map scale changes — useful for layouts at specific print scales.</p></div>
+                    <div class="card"><h3>Legends</h3><p>Inserted for the active map frame. Edited via the ribbon or formatting pane. Should include only layers relevant to the map objective. Label with real words, not field names.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Types of text in ArcGIS Pro:</strong></p>
+                <ul>
+                    <li><strong>Graphic text</strong> — manually placed on a layout: straight, curved, or multiline in rectangle/polygon/circle/ellipse shapes</li>
+                    <li><strong>Dynamic labels</strong> — set as properties of a layer; automatically placed and updated when data or extent changes</li>
+                    <li><strong>Annotation</strong> — created and stored as features in a geodatabase; fully editable position, style, and content; most flexible but most work to create and maintain</li>
+                </ul>
+                <div class="highlight"><p>When the layout is active, the Contents pane shows all layout elements (map frames, titles, legends, scale bars, etc.). Select elements there to edit their properties in the ribbon or formatting panes. This is separate from the map view — switching between layout and map view changes what the Contents pane shows.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

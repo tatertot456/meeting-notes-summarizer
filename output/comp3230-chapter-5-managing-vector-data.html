@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 5: Managing Vector Data</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b45309; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #d97706; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b45309; color: white; border-color: #b45309; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #d97706; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #b45309; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #d97706; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #d97706; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b45309; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #d97706; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 5</div>
+        <h1>Managing Vector Data</h1>
+        <p class="subtitle">Storage models, file management, data operations, geocoding, metadata, geodatabases, and pathnames</p>
+    </header>
+    <nav>
+        <a href="#storage">Storage Models</a>
+        <a href="#filemanage">File Management</a>
+        <a href="#operations">Data Operations</a>
+        <a href="#geocoding">Geocoding</a>
+        <a href="#metadata">Metadata</a>
+        <a href="#formats">File Formats</a>
+        <a href="#pathnames">Pathnames & Environments</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="storage">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Vector Storage Models</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Vector data stores geographic features as x-y coordinate pairs. Each pair is a <strong>vertex</strong> (plural: vertices). Line endpoints are called <strong>nodes</strong>. A <strong>multipart feature</strong> contains several separate pieces — Hawaii is one state feature composed of multiple island polygons.</p>
+                <p>Features are linked to <strong>attribute tables</strong> by a unique integer (Feature ID / Object ID). A <strong>feature class</strong> is a collection of similar features stored as a dataset — it contains both the spatial geometry and the table, and can only hold one geometry type (point, line, OR polygon).</p>
+                <div class="grid">
+                    <div class="card"><h3>Spaghetti Model</h3><p>Simple format — each feature is stored as a separate unrelated object. Adjacent boundaries stored twice (redundant). Very robust due to simplicity. Commonly used for data transfer between GIS systems. Shapefiles use this model.</p></div>
+                    <div class="card"><h3>Topological Model</h3><p>Also stores spatial relationships between features — which states are adjacent, what connects or overlaps. Can test adjacency, connectivity, overlap, intersection. Can detect errors like overlapping polygons or county boundaries outside their state.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="filemanage">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>File Management Best Practices</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="highlight"><p>NEVER use spaces in folder or file names. Not ever. Anywhere. Nix. No. Nein. Nyet. Non. Use letters, numbers, and underscores only. Keep folder names 8–15 characters. Spaces break GIS functions and are extremely difficult to fix without breaking maps and projects.</p></div>
+                <ul>
+                    <li>Use well-organized folder structures — NOT the Desktop or Documents folders</li>
+                    <li>The project geodatabase is the default save location but not always the best choice</li>
+                    <li>Name files descriptively: <code>SnailHabitat</code>, not <code>rastercalc1</code></li>
+                    <li>Separate permanent data libraries from in-progress work</li>
+                    <li>Put downloads in separate folders for easy archival or deletion</li>
+                    <li>Make file extensions visible in Windows Explorer (uncheck "Hide extensions for known file types")</li>
+                </ul>
+                <p><strong>Data access considerations:</strong></p>
+                <ul>
+                    <li>GIS data is often shared by multiple users — file locks prevent simultaneous corruption</li>
+                    <li>Editing functions won't be available if someone else has an exclusive lock on a file</li>
+                    <li>Read-write permissions are controlled at the folder level by the OS</li>
+                    <li>Downloaded data is often zipped — must extract before ArcGIS can use it (use 7zip or similar)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="operations">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Operations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Operation</th><th>What It Does</th><th>Key Notes</th></tr>
+                    <tr><td>Import / Export</td><td>Copies a dataset into or out of a database/folder. May change format or data model.</td><td>Use Feature Class to Feature Class tool. Import and export are the same function — just different directions.</td></tr>
+                    <tr><td>Query Extract</td><td>Extracts a subset of features based on attribute values.</td><td>Uses SQL expressions on attribute fields.</td></tr>
+                    <tr><td>Clip</td><td>Extracts features WITHIN a bounding polygon from another feature class.</td><td>Like a cookie cutter — keeps what's inside.</td></tr>
+                    <tr><td>Erase</td><td>Extracts features OUTSIDE a bounding polygon.</td><td>Opposite of clip — keeps what's outside.</td></tr>
+                    <tr><td>Merge</td><td>Combines all features from two or more datasets into one new feature class.</td><td>Works best when attribute tables have same fields. Use Field Map / merge rules when fields differ. Typically for adjacent datasets.</td></tr>
+                    <tr><td>Append</td><td>Like merge, but adds features to an EXISTING target dataset.</td><td>No field mapping — fields that don't match target are dropped. Target must already exist.</td></tr>
+                    <tr><td>Generalize</td><td>Removes vertices to simplify geometry.</td><td>Reduces file size. Affects both precision and accuracy. Useful for reducing large-scale data for small-scale display.</td></tr>
+                    <tr><td>Dissolve</td><td>Removes boundaries between features with the same value in a specified attribute field.</td><td>Attribute information from dissolved fields is lost. Example: dissolve forest stands on species → loses age/size data.</td></tr>
+                    <tr><td>XY Table to Point</td><td>Displays or saves coordinate table as point feature class.</td><td>Must specify the coordinate system of the input coordinates.</td></tr>
+                </table>
+                <div class="highlight"><p>Source scale matters when compiling data. Data from different source scales may not align properly — check metadata to confirm source scale is appropriate for your project's objective. Small-scale data is easier to find but may be inadequate for detailed analysis.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="geocoding">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Geocoding</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Geocoding converts postal addresses into map locations by matching address fields against a <strong>reference database</strong> (street network with address ranges). Requires a <strong>locator</strong> — the packaged rules and street data for matching.</p>
+                <p><strong>Three phases of address matching:</strong></p>
+                <ul>
+                    <li><strong>Preprocessing</strong> — parsing and standardizing the address format</li>
+                    <li><strong>Matching</strong> — the geocoding engine matches the address to the reference database using a scoring system. Matching conditions can be relaxed to improve hit rates.</li>
+                    <li><strong>Plotting</strong> — the matched address is plotted as a point using linear interpolation within the address range of the matched street segment</li>
+                </ul>
+                <div class="grid">
+                    <div class="card"><h3>Linear Interpolation</h3><p>Estimates where an address falls within a street segment's address range. 150 Main St is plotted halfway along a segment with range 100–200. An alternative uses actual building centroid coordinates from a location database.</p></div>
+                    <div class="card"><h3>Offset Options</h3><p>Side offset: places point to the left or right of the street centerline. End offset: moves point away from the end of a street segment. Both improve point placement for visualization.</p></div>
+                    <div class="card"><h3>Hit Rate</h3><p>Percentage of addresses successfully matched. 60% is considered unacceptable. 85% is a statistical minimum. 95%+ required for competitive location services. Improve with current, accurate reference data.</p></div>
+                    <div class="card"><h3>Reference Database</h3><p>Street name, address ranges, ZIP codes per segment. Historically from TIGER/Line files (Census). Now commonly from commercial providers. ArcGIS Online has a World Locator (credits required for batch geocoding).</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Geocoding variations:</strong></p>
+                <ul>
+                    <li><strong>Intersection matching</strong> — matches to street intersections rather than address ranges</li>
+                    <li><strong>ZIP code geocoding</strong> — matches ZIP code to its centroid</li>
+                    <li><strong>Parcel-level geocoding</strong> — matches parcel number to parcel centroid or boundary</li>
+                    <li><strong>Reverse geocoding</strong> — converts lat/lon coordinates to descriptive addresses</li>
+                    <li><strong>Place name alias geocoding</strong> — matches place names (restaurant, museum) to a street address</li>
+                    <li><strong>Photo geocoding (geotagging)</strong> — attaches location information to photographs</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="metadata">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Metadata</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Metadata is <em>data about a dataset</em> — it describes the dataset's purpose, content, source, and quality. It travels with the data as a separate file or embedded in the feature class. Always create metadata for every dataset you produce.</p>
+                <table>
+                    <tr><th>Section</th><th>Content</th></tr>
+                    <tr><td>Tags</td><td>Search terms used to discover the data in catalogs</td></tr>
+                    <tr><td>Summary</td><td>Brief description of the purpose of the data</td></tr>
+                    <tr><td>Description</td><td>Longer description: contents, data sources, processing steps performed</td></tr>
+                    <tr><td>Credits</td><td>Citation of data creator and original source information</td></tr>
+                    <tr><td>Use Limitation</td><td>Restrictions on use or redistribution; disclaimers</td></tr>
+                    <tr><td>Appropriate Scale Range</td><td>Source scale or intended display scale of the data</td></tr>
+                    <tr><td>Bounding Box</td><td>Coordinate extent of the data in geographic degrees</td></tr>
+                </table>
+                <div class="highlight"><p>Standards-based metadata (FGDC, ISO 19115) is often required when publishing data for clients or organizations. At minimum, always record: source citation, data processing steps, coordinate system used, and scale. Metadata is your professional record of provenance — without it, data becomes untrustworthy over time.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="formats">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>File Formats</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Format</th><th>Description</th><th>Notes</th></tr>
+                    <tr><td>File Geodatabase (.gdb)</td><td>Native ArcGIS Pro format. Stored as files in a folder. Supports feature classes, rasters, tables, and more.</td><td>Recommended for ArcGIS work. Platform independent. For single users or small workgroups. Do NOT put other files in the .gdb folder.</td></tr>
+                    <tr><td>Enterprise Geodatabase</td><td>Stored in commercial RDBMS (Oracle, SQL Server). Designed for large workgroups.</td><td>Supports multi-user editing, versioned editing. Requires RDBMS license. For organizations with many simultaneous editors.</td></tr>
+                    <tr><td>Shapefile (.shp)</td><td>Spaghetti model. Simple structure readable by many programs. Used for data transfer.</td><td>Actually MANY files (.shp, .dbf, .shx, .prj, etc.). ALWAYS copy/rename inside ArcGIS — NEVER in Windows Explorer. Field names limited to 10 characters.</td></tr>
+                    <tr><td>Coverage</td><td>Old Esri vector format with topology. No longer recognized by ArcGIS Pro.</td><td>Must be converted in ArcMap first. Contains topology fields (# fields, area/perimeter) not needed in output.</td></tr>
+                    <tr><td>CAD files (.dwg, .dxf)</td><td>Computer-aided design files.</td><td>ArcGIS Pro can READ and DISPLAY but cannot edit. Convert to geodatabase format for editing.</td></tr>
+                    <tr><td>Personal Geodatabase (.mdb)</td><td>Microsoft Access format. 2 GB size limit.</td><td>Not recognized by ArcGIS Pro. Legacy format only.</td></tr>
+                </table>
+                <div class="highlight"><p>The TIN (Triangulated Irregular Network) is a vector-based surface model representing terrain using triangles of varying size — smaller triangles where terrain is complex, larger where it is flat. TINs are precise at data points but interpolated between them. Used for 3D analysis and visualization of terrain.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="pathnames">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pathnames, Environments & Sharing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Pathnames locate source data files. ArcGIS Pro assigns path types automatically.</p>
+                <div class="grid">
+                    <div class="card"><h3>Relative Paths</h3><p>Start from the project file location. Used for data on the local hard drive. Move with the project folder if the entire project is copied correctly.</p></div>
+                    <div class="card"><h3>Absolute Paths</h3><p>Start from the drive letter. C:\gisclass\mgisdata\Oregon\counties</p></div>
+                    <div class="card"><h3>UNC Paths</h3><p>\\server\share\folder — for data on a network file server. Used automatically by ArcGIS Pro for network locations.</p></div>
+                    <div class="card"><h3>URL Paths</h3><p>For Internet data services (ArcGIS Online, WMS, WFS). Data remains on the server; only display/query data is transferred.</p></div>
+                </div>
+                <div class="highlight"><p>When copying a project, copy the ENTIRE project folder — not just the .aprx file or the geodatabase. If data is deleted, moved, or renamed, projects lose track and show a red exclamation point. Projects cannot be renamed because renaming disrupts internal pathname references. "Save As" only copies the .aprx file, not the project data.</p></div>
+                <p><strong>Environment Settings</strong> — affect tool operation globally or per-run:</p>
+                <ul>
+                    <li><strong>Environments tab</strong> on a tool — settings affect only that single tool run</li>
+                    <li><strong>Environments button</strong> on the Analysis ribbon — settings affect ALL tools all the time</li>
+                    <li>Common settings: output location, output coordinate system, processing extent</li>
+                </ul>
+                <p><strong>Coordinate system reminders when compiling data:</strong></p>
+                <ul>
+                    <li>Pick one suitable coordinate system and convert all data to it</li>
+                    <li>Use NAD83 as the standard datum unless specifically directed otherwise</li>
+                    <li>Check Map Properties window to verify all layers share the same coordinate system</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 5b: GIS Data Acquisition</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1e0a3c, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #7c3aed; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #7c3aed; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #7c3aed; color: white; border-color: #7c3aed; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #7c3aed; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e0a3c; border-left: 3px solid #7c3aed; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #7c3aed; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #7c3aed; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #7c3aed; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #7c3aed; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 5b</div>
+        <h1>GIS Data Acquisition</h1>
+        <p class="subtitle">Existing data sources, SDI, USGS, Census, metadata, data conversion, GPS, digitizing, scanning, and on-screen methods</p>
+    </header>
+    <nav>
+        <a href="#existing">Existing Data Sources</a>
+        <a href="#usgs">USGS & Census</a>
+        <a href="#metadata">Metadata</a>
+        <a href="#conversion">Data Conversion</a>
+        <a href="#new">Creating New Data</a>
+        <a href="#gps">GPS & GNSS</a>
+        <a href="#digitizing">Digitizing Methods</a>
+        <a href="#resources">Key Resources</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="existing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Existing GIS Data — The Mash-Up Approach</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The most efficient data acquisition strategy is the <strong>mash-up</strong> approach — combine existing data from different sources rather than recreating what already exists. A mash-up is a web page or application combining data from multiple sources.</p>
+                <p>Since the early 1990s, U.S. government agencies at all levels have established websites for sharing public data. All non-classified federal data must be made publicly available (Freedom of Information Act).</p>
+                <div class="grid">
+                    <div class="card"><h3>Spatial Data Infrastructure (SDI)</h3><p>A distributed system for acquiring, processing, distributing, using, maintaining, and preserving spatial data. The framework that makes geospatial data sharing possible across organizations.</p></div>
+                    <div class="card"><h3>Clearinghouse</h3><p>Provides access to geospatial data and related online services for data access, visualization, and ordering. Data-centric — focused on making data available.</p></div>
+                    <div class="card"><h3>Geoportal</h3><p>Offers multiple services: data links, news, references, community forum, and often an interactive data viewer. Service-centric. Examples: Data.gov, Geospatial Platform (US), INSPIRE (EU), GEOSS (global).</p></div>
+                    <div class="card"><h3>Idaho Resources</h3><p>Inside Idaho (insideidaho.org) — Idaho's official geospatial data portal. Idaho Enterprise Open Data Portal (gis.Idaho.gov). Formats: Shapefile, ESRI Map Service, ESRI Layer File, KML.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="usgs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Key Federal Data Sources</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>U.S. Geological Survey (USGS):</strong></p>
+                <table>
+                    <tr><th>Dataset</th><th>Description</th></tr>
+                    <tr><td>National Elevation Dataset (NED)</td><td>Nationwide DEM coverage at multiple resolutions (1/3 arc-second ≈10m, 1 arc-second ≈30m, 2 arc-second ≈60m). Produced by traditional and LiDAR methods.</td></tr>
+                    <tr><td>GMTED2010</td><td>Global Multi-resolution Terrain Elevation Data. Resolutions of ~1000m, 500m, and 250m worldwide.</td></tr>
+                    <tr><td>Digital Line Graphs (DLGs)</td><td>Digital representations of point, line, and area features from USGS quad maps at 1:24,000, 1:100,000, and 1:2,000,000.</td></tr>
+                    <tr><td>National Hydrography Dataset (NHD)</td><td>Comprehensive geospatial data about surface water. Building new High Resolution Hydrography Framework at 10m.</td></tr>
+                    <tr><td>NAIP Imagery</td><td>National Agriculture Imagery Program. Aerial color and near-infrared orthomosaics. Available within one year of acquisition.</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>U.S. Census Bureau — TIGER/Line Files:</strong></p>
+                <ul>
+                    <li>Legal and statistical area boundaries (Census Block → Block Group → Census Tract → County → State)</li>
+                    <li>Roads, railroads, streams, water bodies, power lines, pipelines</li>
+                    <li>KML files available for cartographic boundaries</li>
+                    <li>Free to download at census.gov</li>
+                </ul>
+                <p><strong>Natural Resources Conservation Service (NRCS) — Soils Data:</strong></p>
+                <ul>
+                    <li><strong>STATSGO2</strong> — Digital General Soil Map of the US (vector, smaller scale)</li>
+                    <li><strong>SSURGO</strong> — Soil Survey Geographic Database (vector, larger scale, more detail)</li>
+                    <li><strong>gSSURGO</strong> — Raster version of SSURGO at 10m resolution (released 2014)</li>
+                </ul>
+                <p><strong>Earth Observing Satellite Systems:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Landsat / Sentinel</h3><p>Long-running free satellite imagery programs. Landsat (NASA/USGS) — 7+ spectral bands, 30m resolution. Sentinel (ESA) — free European imagery.</p></div>
+                    <div class="card"><h3>Commercial Imagery</h3><p>Planet Labs (PlanetScope, Tanager hyperspectral). Maxar (WorldView — very high resolution). Sub-meter imagery available commercially.</p></div>
+                    <div class="card"><h3>NASA Missions</h3><p>GEDI (forest canopy LiDAR), ECOSTRESS (thermal), EMIT (mineral dust aerosols), OCO-3 (carbon). Specialized science products.</p></div>
+                    <div class="card"><h3>OpenStreetMap</h3><p>Collaborative, crowd-sourced global vector dataset. Free to use. Constantly updated by volunteers. Good global road and building coverage.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="metadata">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Metadata</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Metadata is information <em>about</em> geospatial data. It is an integral part of any GIS dataset and should be prepared during the data production process.</p>
+                <p><strong>Essential metadata questions:</strong></p>
+                <ul>
+                    <li>What is the data? (content, coverage, data type)</li>
+                    <li>Where did it come from? (source, producer, citation)</li>
+                    <li>How was it created? (methods, processing steps)</li>
+                    <li>When was it created? (date of collection, publication)</li>
+                    <li>What coordinate system is used?</li>
+                    <li>What is the source scale and intended use scale?</li>
+                    <li>What are the use limitations or restrictions?</li>
+                </ul>
+                <div class="highlight"><p>Metadata is critical for anyone reusing public data. Without metadata, it's impossible to know whether a dataset is appropriate for your purpose, what its accuracy limitations are, or how to properly cite it. The FGDC (Federal Geographic Data Committee) sets metadata standards for US federal data. Always create metadata for data you produce.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="conversion">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Conversion</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Data conversion translates GIS data from one format to another. Two main approaches:</p>
+                <div class="grid">
+                    <div class="card"><h3>Direct Translation</h3><p>Uses a translator built into the GIS package to directly convert from one proprietary format to another. Example: ArcGIS MIF to Shapefile tool converts MapInfo format directly to shapefile. Fast and simple when supported.</p></div>
+                    <div class="card"><h3>Neutral Format</h3><p>Government agencies translate data into a neutral/public exchange format (e.g., SDTS — Spatial Data Transfer Standard). The user then converts the neutral format to their GIS format. Works when direct translation isn't available. Like a universal adapter.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="new">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Creating New Data — Methods Overview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Method</th><th>Description</th><th>Key Points</th></tr>
+                    <tr><td>Remotely Sensed Data</td><td>Satellite and aerial imagery from sensors above the earth's surface.</td><td>DOQ (Digital Orthophoto Quadrangle) used as background for digitizing. USGS NAIP provides color and NIR orthomosaics.</td></tr>
+                    <tr><td>Survey Data</td><td>Traditional field surveying — bearing + distance between stations.</td><td>High precision but labor intensive. Defines legal property boundaries.</td></tr>
+                    <tr><td>GPS/GNSS Field Data</td><td>Collecting x,y,z coordinates in the field using satellite positioning.</td><td>Must record datum and coordinate system. Accuracy varies (consumer vs. survey grade). GPS elevation measured from geoid, not spheroid.</td></tr>
+                    <tr><td>Text Files with X,Y Coordinates</td><td>Tabular data with coordinate columns loaded into GIS as point features.</td><td>Must specify coordinate system. Geotagged photos use this method. Event layers or saved point feature classes.</td></tr>
+                    <tr><td>Digitizing Table (Heads-Down)</td><td>Tracing paper maps on a digitizing tablet using a cursor/puck.</td><td>Large digitizing table with 16-button cursor. Snapping used to connect features precisely.</td></tr>
+                    <tr><td>Scanning</td><td>Converting paper maps to raster files, then tracing to vector.</td><td>Automated or semi-automatic tracing. Skeletonization reduces lines to single-pixel width. Problems: intersections, broken lines, adjacent lines.</td></tr>
+                    <tr><td>On-Screen Digitizing (Heads-Up)</td><td>Manually tracing features on screen using georeferenced imagery as background.</td><td>Most common modern method. Uses DOQ or other orthoimage as base. Snapping ensures topological connectivity.</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="gps">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>GPS & GNSS Systems</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Global Navigation Satellite Systems use four or more satellites to determine the x, y, z coordinates of a receiving station. Multiple nations operate independent GNSS constellations:</p>
+                <table>
+                    <tr><th>System</th><th>Operator</th></tr>
+                    <tr><td>GPS (Global Positioning System)</td><td>USA — the original and most widely used</td></tr>
+                    <tr><td>GLONASS</td><td>Russia</td></tr>
+                    <tr><td>Galileo</td><td>European Union</td></tr>
+                    <tr><td>BeiDou</td><td>China</td></tr>
+                    <tr><td>NavIC</td><td>India (regional)</td></tr>
+                    <tr><td>QZSS</td><td>Japan (regional)</td></tr>
+                </table>
+                <div class="highlight"><p>GPS elevation is measured relative to the geoid (sea level surface accounting for gravity differences), NOT the spheroid. This matters for precise elevation work. Also critical: GPS units can collect data in multiple datums (NAD83, NAD27, WGS84) and projections (UTM, lat-lon). YOU MUST KNOW AND RECORD THE DATUM AND PROJECTION SETTINGS before collecting data — the default may not be what you want.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="digitizing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Digitizing — Scanning & On-Screen Details</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Snapping</strong> — automatic alignment to nearby features within a specified tolerance:</p>
+                <ul>
+                    <li>A new line's end can automatically snap to an existing arc if the gap is smaller than the snapping tolerance</li>
+                    <li>A point (node/vertex) can snap to another point within the snapping tolerance</li>
+                    <li>Snapping is essential for topologically correct digitizing — ensures features connect properly</li>
+                </ul>
+                <p><strong>Scanning challenges for automated vector conversion:</strong></p>
+                <ul>
+                    <li>Tracing intersections — line width doubles or triples where lines meet</li>
+                    <li>Broken lines — tracing must bridge gaps</li>
+                    <li>Adjacent lines — distinguishing two nearby lines vs. one wide line</li>
+                    <li>Separating lines from polygons</li>
+                    <li><strong>Skeletonization</strong> — reduces raster lines from multi-pixel width to single-pixel centerline (morphological erosion)</li>
+                </ul>
+                <p><strong>On-screen digitizing workflow in ArcGIS:</strong></p>
+                <ul>
+                    <li>Create shapefile (in ArcCatalog/Catalog pane)</li>
+                    <li>Load shapefile into map</li>
+                    <li>Open for editing (Editor toolbar / Edit tab)</li>
+                    <li>Add vector features (points, polylines, or polygons)</li>
+                    <li>Save and close editing session</li>
+                </ul>
+                <div class="highlight"><p>Source map quality is critical for digitizing accuracy. Errors in the source document are faithfully reproduced in the digitized output. Unstable paper maps can shrink or stretch unevenly. Always use the highest quality source material available, and record its source scale, date, and origin in the metadata of the digitized product.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="resources">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Key Data Resources</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Resource</th><th>URL / Notes</th></tr>
+                    <tr><td>Data.gov</td><td>data.gov — U.S. Federal Executive Branch datasets</td></tr>
+                    <tr><td>USGS National Map</td><td>viewer.nationalmap.gov — DEM, NHD, topo maps, imagery</td></tr>
+                    <tr><td>Inside Idaho (INSIDE Idaho)</td><td>insideidaho.org — Idaho geospatial clearinghouse</td></tr>
+                    <tr><td>U.S. Census TIGER/Line</td><td>census.gov — boundaries, roads, hydrography, KML files</td></tr>
+                    <tr><td>NRCS Soils</td><td>soils.usda.gov — SSURGO, STATSGO2, gSSURGO</td></tr>
+                    <tr><td>OpenStreetMap</td><td>openstreetmap.org — free global crowd-sourced vector data</td></tr>
+                    <tr><td>DIVA-GIS</td><td>diva-gis.org — global administrative boundaries, climate data</td></tr>
+                    <tr><td>INSPIRE (Europe)</td><td>European spatial data infrastructure</td></tr>
+                    <tr><td>GEOSS (Global)</td><td>geoportal.org — Global Earth Observation System</td></tr>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

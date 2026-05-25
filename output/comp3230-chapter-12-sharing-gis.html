@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 12: Sharing GIS</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #92400e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #b45309; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #92400e; color: white; border-color: #92400e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #b45309; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #92400e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #b45309; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #b45309; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #92400e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #b45309; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 12</div>
+        <h1>Sharing GIS</h1>
+        <p class="subtitle">Web GIS, metadata standards, ArcGIS Online, tiling, services, mobile collection, and workflow sharing</p>
+    </header>
+    <nav>
+        <a href="#webgis">Web GIS</a>
+        <a href="#metadata">Metadata & Standards</a>
+        <a href="#agol">ArcGIS Online</a>
+        <a href="#tiling">Tiling & Services</a>
+        <a href="#sharing">Sharing Data</a>
+        <a href="#mobile">Mobile Collection</a>
+        <a href="#workflows">Sharing Workflows</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="webgis">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Web GIS</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>GIS multiplies in value when shared. Web GIS content is delivered over the Internet from powerful <strong>GIS Servers</strong> working through a Web Server configured to communicate with users (clients). Clients can be desktop computers, laptops, tablets, or smartphones.</p>
+                <div class="grid">
+                    <div class="card"><h3>Data Downloads</h3><p>Datasets downloaded and stored locally on desktop or laptop computers. Traditional model — user has a local copy.</p></div>
+                    <div class="card"><h3>Web Maps & Services</h3><p>Map services, image services, and feature layers consumed on demand. Work on desktop AND mobile devices. Data stays on server.</p></div>
+                    <div class="card"><h3>Geoprocessing Services</h3><p>Analysis runs ON the server — client doesn't need analysis tools installed. Results returned to the client. Good for complex or data-heavy processing.</p></div>
+                    <div class="card"><h3>Workflows</h3><p>Stored sequences of analysis steps that can be shared, repeated with new inputs, and executed automatically. Reduces errors and speeds work.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="metadata">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Metadata & Standards</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Metadata (data about data) is essential when sharing resources. It lets users determine whether a dataset is suitable for their purpose. Good metadata is a sign of quality data. The thoroughness of metadata is a clue to the professionalism of the provider.</p>
+                <p><strong>Six basic data quality issues metadata must address:</strong></p>
+                <ul>
+                    <li><strong>Lineage</strong> — where did it come from and how was it processed?</li>
+                    <li><strong>Positional accuracy</strong> — are features in the right location?</li>
+                    <li><strong>Attribute accuracy</strong> — are the table attributes correct?</li>
+                    <li><strong>Logical consistency</strong> — how well are real-world relationships represented?</li>
+                    <li><strong>Completeness</strong> — was every instance recorded or measurement taken?</li>
+                    <li><strong>Temporal accuracy</strong> — how long will the data remain valid? Are updates planned?</li>
+                </ul>
+                <p><strong>Metadata standards</strong> define required format and content so any GIS can read it. Most stored as text, HTML, or XML.</p>
+                <table>
+                    <tr><th>Standard</th><th>Scope</th><th>Notes</th></tr>
+                    <tr><td>CSDGM (FGDC)</td><td>US Federal Standard</td><td>Content Standard for Digital Geospatial Metadata. Required for US government data. If all required fields filled = FGDC-compliant.</td></tr>
+                    <tr><td>ISO 19115</td><td>International (geospatial)</td><td>Broad international geospatial metadata standard.</td></tr>
+                    <tr><td>ISO 19139</td><td>International (general)</td><td>XML implementation of metadata standards.</td></tr>
+                    <tr><td>North American Profile (NAP)</td><td>US & Canada</td><td>Customization of ISO 19115 for North America. Managed by FGDC.</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>CSDGM major sections:</strong> Identification, Data Quality, Data Organization, Spatial Reference, Entity and Attribute Info, Distribution Information, Metadata Reference.</p>
+                <div class="highlight"><p>ArcGIS Pro stores metadata in an internal format and lets you view/edit it in any style (FGDC, ISO, ArcGIS Item Description). Export to any required standard. If you plan to distribute data professionally or fulfill a contract, aim for at minimum FGDC-compliant metadata. Data contracts typically require it.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="agol">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>ArcGIS Online (AGOL)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>ArcGIS Online is Esri's cloud-based platform for sharing GIS resources. Accessed through the Portal tab in the Catalog pane in ArcGIS Pro.</p>
+                <table>
+                    <tr><th>Content Type</th><th>Account Required</th><th>Credits Used?</th></tr>
+                    <tr><td>Open / Public Content</td><td>Free public account or none</td><td>No</td></tr>
+                    <tr><td>Subscription Content</td><td>Organizational account</td><td>Minimal — most daily activities</td></tr>
+                    <tr><td>Premium Content</td><td>Organizational account</td><td>YES — warned before access. Examples: geocoding many addresses, downloading large datasets.</td></tr>
+                </table>
+                <div class="highlight"><p>Organizational accounts are not free — the organization pays for user accounts AND service credits. Credits are consumed by data storage, premium content access, geocoding, and tile caching. Monitor credit use carefully, especially when caching tiles at many scale levels. If your estimated cache exceeds 100MB, consult your AGOL administrator first.</p></div>
+                <p><strong>Service quality warning:</strong> Some AGOL services are professionally created and curated. Others are shared by inexperienced users and may have errors, poor metadata, or little value. Always check metadata thoroughness as a quality indicator. Some services provide actual data (analyzable); others provide display-only representations.</p>
+            </div>
+        </div>
+
+        <div class="section" id="tiling">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Tiling, Services & Optimization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Optimization strategies</strong> for delivering large volumes of content efficiently:</p>
+                <ul>
+                    <li>Restrict geographic extent — only transmit features in the current map view</li>
+                    <li>Use scale ranges — deliver only content appropriate to the current zoom level</li>
+                    <li>Tile complex vector maps as JPG/PNG image snapshots for fast transmission</li>
+                    <li>Tiles can be rendered dynamically (on demand) or pre-cached at standard scales</li>
+                </ul>
+                <p><strong>Tiling</strong> divides the map into squares — only the squares in the current view are transmitted. AGOL, Google Earth, and Bing share a common global tiling scheme with 19 scale levels. Only cache the scale levels you actually need.</p>
+                <p><strong>Primary GIS service types:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Feature Layer</h3><p>Serves actual vector features. Can be symbolized, queried, and analyzed. Can be configured for editing and mobile collection. Often downloadable.</p></div>
+                    <div class="card"><h3>Map Image Layer</h3><p>Server-rendered map image. Complex map rendered on server, sent as image. Fast delivery but display-only — cannot analyze individual features.</p></div>
+                    <div class="card"><h3>Imagery Layer</h3><p>Serves raster/image data. Provides actual data values for analysis (unlike map image layers). Used for satellite imagery, aerial photos, DEMs.</p></div>
+                    <div class="card"><h3>Vector Tile Layer</h3><p>Tiles that retain vector format. Faster rendering than feature layers, more flexible styling than raster tiles. Display-only — not for analysis.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="sharing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Ways to Share Data</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Hosted Services</h3><p>User publishes feature layers, imagery, tiles, or geoprocessing to AGOL. Requires organizational account with publishing privileges. Can be configured for feature editing, syncing, and mobile access. Tile caching can consume many credits — configure carefully.</p></div>
+                    <div class="card"><h3>Packages</h3><p>Compact all data for a layer, map, project, or workflow into a single file. Can use public OR organizational account — no publishing privileges needed. Easy to share. Downloading includes all linked data. Desktop use only — NOT compatible with mobile devices.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Sharing best practices:</strong></p>
+                <ul>
+                    <li>Do NOT include basemaps in shared maps — consumers add their own</li>
+                    <li>Set a default map extent (Full Extent) so the map opens to the right location</li>
+                    <li>Keep feature layers as small as possible — large/complex datasets work better as tiles</li>
+                    <li>Set appropriate visible scale ranges for all layers</li>
+                    <li>Configure viewing, sharing, and editing permissions explicitly</li>
+                    <li>Provide quality metadata and good search tags</li>
+                    <li>Use the Analyze button before publishing — it identifies issues to fix first</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="mobile">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Mobile Data Collection</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Mobile devices can only use <strong>published hosted feature layers</strong> configured for editing. Multiple field workers can collect and edit simultaneously and see each other's edits in real time.</p>
+                <p><strong>Esri mobile apps:</strong></p>
+                <ul>
+                    <li><strong>Explorer for ArcGIS</strong> — free, view-only</li>
+                    <li><strong>Collector for ArcGIS</strong> — free to download, requires organizational account. Field data collection with GPS.</li>
+                    <li><strong>Survey123</strong> — free to download, requires organizational account. Form-based data collection.</li>
+                </ul>
+                <p><strong>Setup workflow for mobile collection:</strong></p>
+                <ul>
+                    <li>Create/configure feature classes with appropriate geometry and fields</li>
+                    <li>Set up coded domains for attribute fields to aid data entry and reduce errors</li>
+                    <li>Publish feature classes to AGOL as hosted layers configured for editing</li>
+                    <li>Enable Sync if disconnected collection is needed (live updates disabled when syncing)</li>
+                    <li>Create a web map containing the hosted layers and publish to AGOL</li>
+                    <li>Install app on mobile device, log in with AGOL account, open web map, collect data</li>
+                </ul>
+                <div class="highlight"><p>Mobile device location accuracy is generally less than a dedicated GPS but adequate for many purposes. Use large, high-contrast symbols in web maps for mobile collection — small screens and bright sunlight make small symbols hard to see. Coded domains are essential for field collection: faster entry, fewer typos, consistent values. Always create domains before publishing.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="workflows">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Sharing Workflows — ModelBuilder, Scripts & Tasks</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A workflow is a stored sequence of data management or analysis steps. Sharing workflows makes analysis faster, more reliable, and reproducible.</p>
+                <div class="grid">
+                    <div class="card"><h3>ModelBuilder</h3><p>Graphical canvas to link inputs (blue ovals) and tools (yellow squares) into a sequence. Green ovals = outputs. Stores parameters for automatic execution. Supports iteration, conditions, and variables. Can be configured as a tool with user-specified parameters. Models can be saved as Python scripts for further customization.</p></div>
+                    <div class="card"><h3>Python Scripts</h3><p>Computer programs that call GIS functions and tools directly. More flexible than ModelBuilder for complex logic. Models can be exported as starting-point scripts. Best for automation, batch processing, and custom tools.</p></div>
+                    <div class="card"><h3>Tasks</h3><p>Interactive step-by-step workflows where users make decisions. Each step auto-launches the next tool. Provides instructions guiding the user. Good for training, standardizing complex multi-step processes, or workflows requiring human judgment at each step.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Why use ModelBuilder?</strong></p>
+                <ul>
+                    <li>Build and visualize complex analysis sequences graphically</li>
+                    <li>Store processing steps for documentation and future reference</li>
+                    <li>Execute the same workflow repeatedly with different inputs</li>
+                    <li>Share workflows with colleagues so they can replicate your analysis</li>
+                    <li>Set parameters so users can customize inputs without editing the model</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

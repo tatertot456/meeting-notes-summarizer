@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 4: Coordinate Systems</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #15803d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #15803d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #15803d; color: white; border-color: #15803d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #15803d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a0a; border-left: 3px solid #15803d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #15803d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #15803d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #15803d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #15803d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #15803d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 4</div>
+        <h1>Coordinate Systems</h1>
+        <p class="subtitle">Geographic vs. projected systems, datums, projections, distortion, UTM, State Plane, and coordinate problems</p>
+    </header>
+    <nav>
+        <a href="#intro">CS Overview</a>
+        <a href="#gcs">Geographic CS</a>
+        <a href="#datums">Datums</a>
+        <a href="#projections">Projections</a>
+        <a href="#distortion">Distortion & Selection</a>
+        <a href="#systems">UTM & State Plane</a>
+        <a href="#custom">Custom Projections</a>
+        <a href="#problems">CS Problems & Tools</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Coordinate Systems Overview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every GIS dataset uses x, y, and sometimes z values to locate geographic data. The choice of values defines the <strong>coordinate system</strong>. A dataset using a coordinate system is said to be <strong>georeferenced</strong>.</p>
+                <div class="grid">
+                    <div class="card"><h3>Unprojected (Geographic)</h3><p>Based on spherical coordinates. Measured in degrees of latitude and longitude. The earth is treated as a 3D sphere/ellipsoid. Data stored as decimal degrees.</p></div>
+                    <div class="card"><h3>Projected</h3><p>Converts spherical coordinates to flat (planar) 2D coordinates. Uses mathematical equations to project 3D coordinates onto a 2D map. Stored in linear units (meters, feet).</p></div>
+                </div>
+                <p style="margin-top:16px">Standard coordinate systems allow different datasets to be aligned and overlaid. A USGS topo map may contain three coordinate systems simultaneously: latitude-longitude, UTM, and State Plane — each gives different x-y values for the same point.</p>
+                <div class="highlight"><p>On-the-fly projection: ArcGIS automatically converts data stored in any coordinate system to the map's coordinate system for display. This does NOT change the stored coordinates and does NOT fix analysis errors. Always store data in the appropriate coordinate system for your analysis — don't rely on on-the-fly display.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="gcs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Geographic Coordinate System (GCS)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A GCS stores locations as longitude-latitude values measured in degrees:</p>
+                <ul>
+                    <li><strong>Longitude</strong> — east-west angle measured from the Prime Meridian (Greenwich, England). Range: -180° to +180°.</li>
+                    <li><strong>Latitude</strong> — north-south angle measured from the equator. Range: -90° to +90°.</li>
+                </ul>
+                <p><strong>Precision requirements:</strong></p>
+                <pre>1 degree at equator ≈ 110 km
+0.001°             ≈ 110 meters
+0.000001°          ≈ 0.1 meter
+
+→ Keep at least 5-6 decimal places for accurate locations
+→ Degrees-Minutes-Seconds (DMS) must be converted to
+  Decimal Degrees (DD) before storing in GIS</pre>
+                <div class="highlight"><p>The earth's shape must be approximated for mapping. A <strong>spheroid (ellipsoid)</strong> is a smooth mathematical shape with a slightly flattened north-south axis — used for most mapping. A <strong>geoid</strong> is modeled from gravity differences and most closely matches the true earth shape, but is too complex for mapping calculations. The GCS is based on the spheroid.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="datums">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Datums</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>datum</strong> is the reference framework that approximates the earth's shape for mapping. It shifts the ellipsoid relative to the geoid to achieve the best fit. Different datums place the same point at different coordinates.</p>
+                <div class="grid">
+                    <div class="card"><h3>Local Datum</h3><p>Optimizes fit for a particular region. May use surveyed control points for additional adjustments. Best accuracy locally but poor accuracy globally.</p></div>
+                    <div class="card"><h3>Geocentric (World) Datum</h3><p>Optimizes fit for the entire earth. Used by GPS. May be slightly less accurate locally than a regional datum.</p></div>
+                </div>
+                <table style="margin-top:16px">
+                    <tr><th>Datum</th><th>Spheroid</th><th>Notes</th></tr>
+                    <tr><td>NAD27</td><td>Clarke 1866</td><td>Common until 1980s. Still used in some legacy datasets. Local datum centered on Kansas.</td></tr>
+                    <tr><td>NAD83</td><td>GRS80</td><td>Current standard for most North American mapping. First choice when datum is unknown.</td></tr>
+                    <tr><td>NAD83 HARN</td><td>GRS80</td><td>Updates NAD83 with High Accuracy Reference Network. More precise for survey-grade work.</td></tr>
+                    <tr><td>WGS84</td><td>WGS84</td><td>Geocentric. Default for GPS units. Essentially identical to NAD83 for most practical purposes.</td></tr>
+                </table>
+                <div class="highlight"><p>Datum transformations are NOT exact mathematical formulas — they introduce errors of up to several meters. Errors accumulate with repeated transformations. Convert datums only when necessary, and choose the best transformation method for your region. Always turn on the datum transformation warning in Project options. For GPS users: YOU MUST KNOW AND RECORD THE DATUM used to collect data!</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="projections">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Map Projections</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A projection mathematically converts points on the earth's curved surface to a flat 2D plane. Every projection has an underlying GCS — projections based on different datums will be offset from each other.</p>
+                <div class="grid">
+                    <div class="card"><h3>Cylindrical</h3><p>Projection surface is a cylinder wrapped around the earth. Usually preserves direction and shape (conformal). Mercator is the most famous example. Creates extreme distortion near poles.</p></div>
+                    <div class="card"><h3>Conic</h3><p>Projection surface is a cone placed over the earth. Usually preserves area and/or distance. Best for mid-latitude regions (like the continental US). Lambert Conformal Conic, Albers Equal Area.</p></div>
+                    <div class="card"><h3>Azimuthal (Planar)</h3><p>Projection surface is a flat plane touching the earth. Usually preserves area and/or distance from the center point. Good for polar regions.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Key projection parameters:</strong></p>
+                <ul>
+                    <li><strong>Central meridian</strong> — longitude at center of map where x = 0</li>
+                    <li><strong>Standard parallels</strong> — where projection surface touches the ellipsoid (lines of zero distortion). Tangent = 1 standard parallel. Secant = 2 standard parallels.</li>
+                    <li><strong>Latitude of origin</strong> — latitude where y = 0</li>
+                    <li><strong>False easting / False northing</strong> — offsets added to ensure all coordinates are positive</li>
+                    <li><strong>Principal scale</strong> — the base scale of the projection</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="distortion">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Distortion & Projection Selection</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>ALL map projections distort one or more properties. No flat map can perfectly represent the curved earth. The distortion type varies by projection family.</p>
+                <table>
+                    <tr><th>Property</th><th>Preserved By</th><th>When to Choose</th></tr>
+                    <tr><td>Direction (Conformal)</td><td>Cylindrical (Mercator, Transverse Mercator)</td><td>Navigation, preserving shape of small areas</td></tr>
+                    <tr><td>Shape</td><td>Conformal projections</td><td>General reference maps, navigation</td></tr>
+                    <tr><td>Area (Equal Area)</td><td>Conic (Albers), Azimuthal</td><td>Comparing sizes, density calculations, statistics</td></tr>
+                    <tr><td>Distance (Equidistant)</td><td>Conic, Azimuthal equidistant</td><td>Distance measurements from a point or along lines</td></tr>
+                </table>
+                <div class="highlight"><p>Maps displayed in a Geographic Coordinate System appear distorted — especially at high latitudes. Always project your data for analysis and for final presentation. The coordinate system used to STORE data directly affects area and distance calculations. Data stored in GCS (degrees) will produce incorrect distance and area results — always project to an appropriate system before running spatial analysis.</p></div>
+                <p><strong>Small-scale (continent/country) maps:</strong> Distortion is inevitable — choose based on purpose. Cylindrical for direction/shape, conic for distances/areas, compromise projections for general reference.</p>
+            </div>
+        </div>
+
+        <div class="section" id="systems">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>UTM & State Plane Systems</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Universal Transverse Mercator (UTM)</strong> — standard for local to regional mapping:</p>
+                <ul>
+                    <li>60 N-S oriented zones around the world, each 6° of longitude wide</li>
+                    <li>Extends from 84°N to 80°S latitude</li>
+                    <li>Secant case Transverse Mercator — standard meridians 180 km east and west of the central meridian</li>
+                    <li>No distortion along the central meridian</li>
+                    <li>Preserves all four map properties well within a single zone</li>
+                    <li>Ideal for local, county, or small state maps within a single zone</li>
+                    <li>Default datum: NAD83 (North America) or WGS84 (global)</li>
+                </ul>
+                <p><strong>State Plane Coordinate System (SPCS)</strong> — designed for individual US states:</p>
+                <ul>
+                    <li>Small zones designed for each state — minimal distortion within a zone</li>
+                    <li>N-S oriented zones use Transverse Mercator</li>
+                    <li>E-W oriented zones use Lambert Conformal Conic</li>
+                    <li>Alaska uses Oblique Mercator</li>
+                    <li>Other countries have similar national systems</li>
+                </ul>
+                <div class="highlight"><p>Oregon spans two UTM zones AND two State Plane zones — neither standard system is ideal. This is a case where a custom projection may be warranted. Custom projections give better accuracy but require careful metadata documentation and coordinate system conversions for all data.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="custom">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Custom & Adapted Projections</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>When no standard projection fits well, adapt an existing one by modifying its parameters:</p>
+                <pre>Example: Custom projection for Turkey (east-west oriented country)
+Base: Lambert Conformal Conic (conic best for mid-latitude E-W regions)
+Datum: Same as all other data in the collection
+Central meridian: 35° (center of Turkey)
+Standard parallels: 37° and 41° (upper/lower sixths of Turkey's extent)
+False easting/northing: set if all-positive coordinates needed
+
+Example: Adapted UTM for Oregon
+Base: UTM Zone 10
+Change: Shift central meridian to center of Oregon
+Keep: All other parameters identical to UTM Zone 10
+Rename: Give it a distinct name in metadata
+
+Example: Adapted State Plane for Kansas
+Base: Kansas State Plane South
+Change: Shift standard parallels to upper/lower sixths of the state
+Keep: All other parameters identical</pre>
+                <div class="highlight"><p>Custom projections produce the best accuracy for maps but require careful management: all data must be converted to the custom CS; GPS units likely can't collect data directly in the custom CS; metadata must clearly document the custom parameters so other users can work with the data correctly.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="problems">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Coordinate Problems, Spatial Reference & Tools</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Coordinate problems occur when two datasets should align but don't. The cause is almost always a missing or incorrect coordinate system label.</p>
+                <table>
+                    <tr><th>Discrepancy Size</th><th>Likely Cause</th></tr>
+                    <tr><td>100s–1000s of kilometers</td><td>Projection is mislabeled — the data is actually in a different projection than what's recorded</td></tr>
+                    <tr><td>10s–100s of meters</td><td>Datum is mislabeled — data collected in NAD27 but labeled as NAD83 (or vice versa)</td></tr>
+                    <tr><td>1–10 meters</td><td>Data accuracy/quality issue — not a coordinate system problem</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Spatial Reference</strong> — the complete coordinate system label stored with each dataset:</p>
+                <ul>
+                    <li>Projection name and all parameters (for projected data)</li>
+                    <li>Geographic coordinate system and datum (all data have this)</li>
+                    <li>Storage units (meters, feet, degrees)</li>
+                    <li>Domain (maximum allowable x-y values)</li>
+                    <li>Resolution (x-y precision)</li>
+                </ul>
+                <div class="highlight"><p><strong>CRITICAL: Define Projection vs. Project tool — DO NOT CONFUSE THESE!</strong></p></div>
+                <div class="grid">
+                    <div class="card"><h3>Define Projection Tool</h3><p>Changes ONLY the CS label (metadata). Does NOT change any coordinates in the file. Keeps the original dataset. Use ONLY when the label is missing or incorrect. Most CS problems are caused by misuse of this tool.</p></div>
+                    <div class="card"><h3>Project Tool</h3><p>Changes the actual coordinate values in the file. Updates the CS label to match. Creates a NEW dataset (original is preserved). Use to permanently convert between coordinate systems. Use when assembling data collections with consistent stored CS.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Diagnosing coordinate problems:</strong></p>
+                <ul>
+                    <li>Check the layer properties → Source tab to see current coordinate system and extent values</li>
+                    <li>Check if the units in the extent match the expected coordinate system (degrees vs. meters)</li>
+                    <li>Review metadata/documentation for the original data source</li>
+                    <li>If all else fails: guess and test — assign a coordinate system and see if the data aligns</li>
+                    <li>Use Map Properties to review all coordinate systems in the current map</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

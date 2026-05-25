@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 1: GIS Data Concepts</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #92400e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #92400e; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #92400e; color: white; border-color: #92400e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #92400e; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #92400e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #92400e; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #92400e; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #92400e; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #92400e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #92400e; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 1</div>
+        <h1>GIS Data Concepts</h1>
+        <p class="subtitle">History of GIS, data models, scale, data quality, ArcGIS Pro interface, and layers</p>
+    </header>
+    <nav>
+        <a href="#history">History of GIS</a>
+        <a href="#models">Data Models</a>
+        <a href="#scale">Scale & Generalization</a>
+        <a href="#quality">Data Quality</a>
+        <a href="#acquisition">Data Acquisition</a>
+        <a href="#arcgis">ArcGIS Pro</a>
+        <a href="#layers">Layers & Symbols</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="history">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>A Brief History of GIS</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>GIS evolved from manual map-making to powerful digital spatial analysis platforms over roughly 150 years.</p>
+                <table>
+                    <tr><th>Year</th><th>Milestone</th></tr>
+                    <tr><td>1854</td><td>John Snow maps cholera outbreak in London — removes pump handle to stop spread. First spatial disease analysis.</td></tr>
+                    <tr><td>Early 1960s</td><td>Canada Land Inventory → Canada Geographic Information System (CGIS) — first true digital GIS.</td></tr>
+                    <tr><td>1969</td><td>Ian McHarg's Design with Nature introduces map overlay for suitability analysis.</td></tr>
+                    <tr><td>1970s</td><td>U.S. Census Bureau's DIME (Dual Independent Map Encoding) introduces urban street network topology.</td></tr>
+                    <tr><td>1990s</td><td>Mainstream desktop GIS — affordable hardware brings GIS to organizations of all sizes.</td></tr>
+                    <tr><td>Today</td><td>Integration with satellite imagery, GPS, web mapping, social media, and cloud computing.</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="models">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Types of Map Data & GIS Data Models</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Discrete Data</h3><p>Objects exist in defined locations. Examples: lookout tower (point), stream (line), snail habitat (polygon). Best represented with the vector model.</p></div>
+                    <div class="card"><h3>Continuous Data</h3><p>Data exists everywhere — no hard boundaries. Examples: elevation, temperature, precipitation. Best represented with the raster model.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Vector Data Model</strong> — stores geographic features as points, lines, and polygons:</p>
+                <ul>
+                    <li>Features are stored as map objects with precise coordinates</li>
+                    <li>A <strong>feature class</strong> is a collection of similar features stored together (e.g., all rivers, all state boundaries)</li>
+                    <li>Each feature is linked to an <strong>attribute table</strong> by a unique integer ID</li>
+                    <li>Best for discrete features: boundaries, roads, buildings</li>
+                </ul>
+                <p><strong>Raster Data Model</strong> — divides the map into a grid of cells (pixels):</p>
+                <ul>
+                    <li>Each cell stores a single numeric value (elevation, pixel color, temperature)</li>
+                    <li>Best for continuous data: elevation models, aerial/satellite photography</li>
+                    <li>Resolution = cell size — smaller cells = more detail but larger file size</li>
+                </ul>
+                <div class="highlight"><p>Choose your model based on your data type. Vector is precise for discrete objects and has small file sizes for complex boundaries. Raster handles continuous surfaces naturally but can be large. Many GIS workflows combine both — a vector road network overlaid on a raster elevation model, for example.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="scale">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Map Scale & Generalization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Map scale</strong> is the ratio of distance on the map to the corresponding distance on the ground. It is dimensionless — works in any unit (cm, inches, mm).</p>
+                <pre">1:100,000 means 1 cm on map = 100,000 cm (1 km) on the ground
+
+Large scale  = zoomed in, high detail  (1:1,000 — 1 cm = 10 m)
+Small scale  = zoomed out, low detail  (1:1,000,000 — 1 cm = 10 km)
+
+Estimating precision from scale:
+  A 1-point line is ~0.001 feet thick on paper
+  Map scale ÷ 1,000 ≈ precision in feet
+  Example: 1:24,000 scale → precision ≈ 24 feet</pre>
+                <p><strong>Generalization</strong> simplifies features for display at smaller scales. Small-scale maps show less detail; large-scale maps show more.</p>
+                <p><strong>Source scale</strong> is the scale at which data were originally captured — it determines the inherent detail and accuracy of the dataset:</p>
+                <ul>
+                    <li>Data should not be displayed at scales much different from the source scale</li>
+                    <li>Two datasets of the same features may not align if captured at different source scales</li>
+                    <li>Larger source scale = finer sampling resolution = more accurate for large-scale display</li>
+                </ul>
+                <div class="highlight"><p>Source scale mismatch is a real problem. Oregon county boundaries from two different data sources may not align at all. Always check the source scale metadata before combining datasets. Displaying data at a scale far finer than the source scale creates a false impression of precision that doesn't exist in the data.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="quality">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Quality</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>No dataset is perfect. Quality is defined as <strong>fitness for a particular purpose</strong> — the same dataset may be inadequate for one use but perfectly acceptable for another. Users have an ethical and legal responsibility to assess fitness.</p>
+                <table>
+                    <tr><th>Quality Dimension</th><th>Question</th><th>Example Issue</th></tr>
+                    <tr><td>Geometric Accuracy</td><td>Is it where it says it is?</td><td>Road mapped from satellite may be off by 10m from GPS survey. Both have errors.</td></tr>
+                    <tr><td>Thematic Accuracy</td><td>Are the attribute values correct?</td><td>How was canopy cover measured? What are the error sources in the measurements?</td></tr>
+                    <tr><td>Logical (Topological) Consistency</td><td>Do relationships make sense?</td><td>Do roads actually connect at intersections? Do shared county/district boundaries align exactly?</td></tr>
+                    <tr><td>Resolution</td><td>How finely was data sampled?</td><td>Spatial: GPS point spacing. Temporal: daily vs. decadal. Thematic: measuring in meters vs. km.</td></tr>
+                    <tr><td>Precision</td><td>How repeatable is the measurement?</td><td>20 GPS readings at same spot have 5m std dev → precision ≈ ±10m. Not the same as accuracy!</td></tr>
+                </table>
+                <div class="highlight"><p>Precision ≠ Accuracy. A GPS that always reports the same wrong location is precise but inaccurate. A measurement that averages to the right value but varies widely is accurate but imprecise. GIS data can be highly precise (many decimal places) but geometrically inaccurate. Always evaluate both independently.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="acquisition">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Acquisition & Citation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Sources for GIS data:</strong></p>
+                <ul>
+                    <li>Government agency websites (USGS, Census Bureau, state agencies)</li>
+                    <li>Digitizing from paper maps or orthophotos</li>
+                    <li>Creating from satellite imagery or drone flights</li>
+                    <li>Converting GPS tracks, survey data, street addresses, or coordinate text files</li>
+                </ul>
+                <p>Map images and satellite photos must undergo <strong>georeferencing</strong> (geometric transformation) before use in GIS. All new and existing data must be edited to correct digitizing and topological errors.</p>
+                <p><strong>Citing GIS data</strong> — professional and ethical responsibility:</p>
+                <pre>Format:
+Data set name (Year published) [source type]. Producer name,
+producer contact information. Resource URL: [Date accessed].
+
+Examples:
+National Hydrography Dataset (2015) [downloaded file].
+  United States Geological Survey on the National Map Viewer.
+  URL: http://viewer.nationalmap.gov/viewer/ [July 23, 2015].
+
+USA Topo Maps (2009) [map service]. Esri on ArcGIS Online.
+  URL: http://server.arcgisonline.com/arcgis/services/
+  USA_Topo_Maps/MapServer [January 1, 2012].</pre>
+                <div class="highlight"><p>Use Zotero to manage GIS data citations! A good citation enables anyone to find and obtain the original source. This matters because datasets get updated, moved, or deprecated — documenting exactly what you used and when protects the reproducibility of your analysis.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="arcgis">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>ArcGIS Pro Interface</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>ArcGIS has evolved from Arc/Info → ArcMap → ArcGIS Pro. It is available at three license levels: Basic, Standard, and Advanced (increasing cost and functionality).</p>
+                <div class="grid">
+                    <div class="card"><h3>Projects</h3><p>ArcGIS Pro organizes work into projects containing: maps, tools, databases, layouts, styles, folders, models, tasks, and locators.</p></div>
+                    <div class="card"><h3>Panes</h3><p>Contain commands and settings. Movable and stackable. May have tabs and panels. Key panes: Contents, Catalog, Geoprocessing, Symbology.</p></div>
+                    <div class="card"><h3>Ribbon</h3><p>Buttons and functions organized into logical groups. Some ribbons always visible; others appear contextually (when a layer is selected, etc.).</p></div>
+                    <div class="card"><h3>Contents Pane Panels</h3><p>List by Drawing Order, Source, Selection, Editing, Snapping, Labeling, Charts — different views of the layer stack.</p></div>
+                    <div class="card"><h3>Geoprocessing Pane</h3><p>Access toolboxes and tools for advanced analysis and processing. Extends capabilities far beyond the GUI menus.</p></div>
+                    <div class="card"><h3>Catalog Pane</h3><p>Four tabs: Project (local resources), Portal (ArcGIS Online), Favorites (saved locations), Notifications (software updates, etc.).</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Key tools:</strong></p>
+                <ul>
+                    <li><strong>Summary Statistics</strong> — calculates statistics from table attributes; user chooses fields and statistic types; creates new output table</li>
+                    <li><strong>Select Layer By Attribute</strong> — selects features based on table values; highlights selection in both table and map</li>
+                    <li><strong>Scale Ranges</strong> — layer property that shows/hides a layer at specific scales (detailed symbols at large scale, generalized at small)</li>
+                    <li><strong>Full Extent</strong> — customizable; can be set to a layer, current display, or world default</li>
+                </ul>
+                <div class="highlight"><p>Warnings vs. Errors: Warnings indicate potential issues but allow the tool to run. Errors prevent the tool from running at all. Always read both — warnings may indicate your output is technically produced but meaningless. The Help system is web-based: breadcrumb trail + search box + tabbed sections.</p></div>
+                <p><strong>GIS Services & Web Maps:</strong> GIS servers provide data over the Internet to multiple platforms. Clients consume only what they need. Enables real-time updates. Portal tab in Catalog pane accesses web maps, feature layers, imagery layers, and map image layers from ArcGIS Online or other servers.</p>
+            </div>
+        </div>
+
+        <div class="section" id="layers">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Layers, Groups & Symbology</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Source data becomes a <strong>layer</strong> when added to a map. Layers store display properties and settings — the same source file can appear very differently in different maps.</p>
+                <div class="grid">
+                    <div class="card"><h3>Layers</h3><p>Store properties and settings for display. Each layer's symbols and settings can be independently customized. Layer properties do NOT change the source data.</p></div>
+                    <div class="card"><h3>Group Layers</h3><p>Multiple layers combined together. Layers can be toggled on/off individually or as a group. Can be saved as layer files to quickly transfer display settings to new data.</p></div>
+                    <div class="card"><h3>Symbology Pane</h3><p>Gallery tab: choose a symbol from available styles. Properties tab: fine-tune the chosen symbol's settings (color, size, outline, fill, etc.).</p></div>
+                    <div class="card"><h3>Pane Management</h3><p>Panes and views can be positioned: Adjacent, Stacked, or Floating. Use the docking icon to drag and reposition. Views (maps, layouts) are separate from panes.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

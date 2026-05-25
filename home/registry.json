@@ -736,5 +736,131 @@
     "accent": "#15803d",
     "glow": "#0a2010",
     "badge": "#166534"
+  },
+  {
+    "title": "COMP3230 Chapter 1 GIS Data Concepts",
+    "filename": "comp3230-chapter-1-gis-data-concepts.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-24 02:50 PM",
+    "accent": "#b45309",
+    "glow": "#1f1200",
+    "badge": "#92400e"
+  },
+  {
+    "title": "COMP3230 Chapter 2 Geospatial Data Visualization",
+    "filename": "comp3230-chapter-2-geospatial-data-visualization.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-24 02:52 PM",
+    "accent": "#be185d",
+    "glow": "#2a0a1a",
+    "badge": "#9d174d"
+  },
+  {
+    "title": "COMP3230 Chapter 3 Presenting GIS Data",
+    "filename": "comp3230-chapter-3-presenting-gis-data.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-24 02:54 PM",
+    "accent": "#dc2626",
+    "glow": "#2a0a0a",
+    "badge": "#b91c1c"
+  },
+  {
+    "title": "COMP3230 Chapter 4 Coordinate Systems",
+    "filename": "comp3230-chapter-4-coordinate-systems.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-24 02:57 PM",
+    "accent": "#16a34a",
+    "glow": "#0a2a0a",
+    "badge": "#15803d"
+  },
+  {
+    "title": "COMP3230 Chapter 5 Managing Vector Data",
+    "filename": "comp3230-chapter-5-managing-vector-data.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-24 02:59 PM",
+    "accent": "#d97706",
+    "glow": "#1f1200",
+    "badge": "#b45309"
+  },
+  {
+    "title": "COMP3230 Chapter 6 Managing Raster Data",
+    "filename": "comp3230-chapter-6-managing-raster-data.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-24 03:02 PM",
+    "accent": "#2563eb",
+    "glow": "#0a0a2e",
+    "badge": "#1d4ed8"
+  },
+  {
+    "title": "COMP3230 Chapter 5b GIS Data Acquisition",
+    "filename": "comp3230-chapter-5b-gis-data-acquisition.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-24 03:08 PM",
+    "accent": "#7c3aed",
+    "glow": "#1e0a3c",
+    "badge": "#6d28d9"
+  },
+  {
+    "title": "COMP3230 Chapter 7 Attribute Data",
+    "filename": "comp3230-chapter-7-attribute-data.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-24 03:11 PM",
+    "accent": "#0d9488",
+    "glow": "#0a2a28",
+    "badge": "#0f766e"
+  },
+  {
+    "title": "COMP3230 Chapter 8 Editing",
+    "filename": "comp3230-chapter-8-editing.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-24 03:13 PM",
+    "accent": "#ea580c",
+    "glow": "#1f0a00",
+    "badge": "#c2410c"
+  },
+  {
+    "title": "COMP3230 Chapter 9 Queries",
+    "filename": "comp3230-chapter-9-queries.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-24 03:16 PM",
+    "accent": "#6d28d9",
+    "glow": "#1a0f3d",
+    "badge": "#5b21b6"
+  },
+  {
+    "title": "COMP3230 Chapter 10 Joins and Overlay",
+    "filename": "comp3230-chapter-10-joins-and-overlay.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-25 02:19 AM",
+    "accent": "#0369a1",
+    "glow": "#0a1f2e",
+    "badge": "#075985"
+  },
+  {
+    "title": "COMP3230 Chapter 11 Raster Analysis",
+    "filename": "comp3230-chapter-11-raster-analysis.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-25 02:21 AM",
+    "accent": "#15803d",
+    "glow": "#0a2010",
+    "badge": "#166534"
+  },
+  {
+    "title": "COMP3230 Chapter 12 Sharing GIS",
+    "filename": "comp3230-chapter-12-sharing-gis.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-25 02:24 AM",
+    "accent": "#b45309",
+    "glow": "#1f1200",
+    "badge": "#92400e"
+  },
+  {
+    "title": "COMP3230 Chapter 16 Geocoding and Dynamic Segmentation",
+    "filename": "comp3230-chapter-16-geocoding-and-dynamic-segmentation.html",
+    "category": "Spatial Analysis",
+    "date": "2026-05-25 02:28 AM",
+    "accent": "#be185d",
+    "glow": "#2a0a1a",
+    "badge": "#9d174d"
   }
 ]

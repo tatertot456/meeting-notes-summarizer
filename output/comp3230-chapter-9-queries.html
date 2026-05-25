@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 9: Queries</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1a0f3d, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #5b21b6; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #5b21b6; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #5b21b6; color: white; border-color: #5b21b6; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #5b21b6; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1a0f3d; border-left: 3px solid #5b21b6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #5b21b6; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #5b21b6; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #5b21b6; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #5b21b6; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #5b21b6; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 9</div>
+        <h1>Queries</h1>
+        <p class="subtitle">Attribute queries, SQL, Boolean logic, spatial queries, buffers, extraction, selection methods, and managing results</p>
+    </header>
+    <nav>
+        <a href="#intro">Query Types</a>
+        <a href="#attribute">Attribute Queries & SQL</a>
+        <a href="#boolean">Boolean Logic</a>
+        <a href="#spatial">Spatial Queries</a>
+        <a href="#buffers">Buffers & Extraction</a>
+        <a href="#selection">Selection Methods</a>
+        <a href="#results">Managing Results</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is a Query?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Queries are fundamental GIS analysis techniques that extract a subset of features or records based on a condition. Three types:</p>
+                <div class="grid">
+                    <div class="card"><h3>Interactive (Manual) Query</h3><p>User visually identifies desired features by clicking or drawing a selection shape on the map. Best when you know where the feature is. Fastest for simple, visual selection.</p></div>
+                    <div class="card"><h3>Attribute Query</h3><p>Expression tests table values: counties with population &gt; 100,000. Uses SQL (Structured Query Language). Finds records meeting specified numeric or text conditions.</p></div>
+                    <div class="card"><h3>Spatial Query</h3><p>Tests spatial relationships between two layers: cities within 50 miles of a volcano. Uses spatial operators (intersect, contains, proximity). Evaluates geometry, not attribute values.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Operator types used in GIS queries:</strong></p>
+                <ul>
+                    <li><strong>Relational operators</strong>: =, &gt;, &lt;, ≥, ≤ — test conditions, return True or False</li>
+                    <li><strong>Logical operators</strong>: AND, OR, XOR, NOT — combine True/False conditions</li>
+                    <li><strong>Spatial operators</strong>: intersect, contains, within, proximity — test geometric relationships</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="attribute">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Attribute Queries & SQL</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Attribute queries use expressions applied to a table to find records meeting one or more conditions. Executed using <strong>SQL (Structured Query Language)</strong>. ArcGIS Pro provides the <strong>Clause Builder</strong> — an intuitive interface that converts simple input into SQL automatically.</p>
+                <pre>-- Simple attribute query examples:
+STATE = 'NJ'            -- text values in single quotes
+Population > 100000     -- numeric values without quotes
+GPA >= 3.0 AND MAJOR = 'Geography'
+RockType LIKE '%stone%' -- partial match: limestone, sandstone, etc.
+
+-- Clause Builder intuitive input:
+"RockType" contains the text "stone"
+↓ converts to SQL:
+RockType LIKE '%stone%'
+-- The % wildcard means "any characters can appear here"</pre>
+                <div class="highlight"><p>The % wildcard in LIKE queries matches any characters on either side of the search term. '%stone%' finds limestone, sandstone, brownstone, and any other value containing "stone" anywhere. Use the SQL button in the query builder to see and directly edit the underlying SQL expression.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="boolean">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Boolean Logic & Order of Precedence</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Operator</th><th>Returns True When</th><th>Example</th></tr>
+                    <tr><td>AND</td><td>BOTH conditions are true</td><td>MAJOR = 'Geography' AND STATE = 'NY' → Geography majors from NY only</td></tr>
+                    <tr><td>OR</td><td>EITHER or BOTH conditions are true</td><td>STATE = 'NY' OR STATE = 'NJ' → students from either state</td></tr>
+                    <tr><td>XOR</td><td>ONE condition is true but NOT both</td><td>True for NY-only OR NJ-only, but NOT both simultaneously</td></tr>
+                    <tr><td>NOT</td><td>First condition true AND second condition false</td><td>STATE = 'NJ' NOT MAJOR = 'Geography' → NJ students who aren't Geography majors</td></tr>
+                </table>
+                <div class="highlight"><p>STATE = 'NJ' AND STATE = 'NY' returns NOTHING — a field cannot hold two values simultaneously. Use OR when testing the same field for different values. AND, OR, and XOR are commutative (A AND B = B AND A). NOT is NOT commutative — order matters.</p></div>
+                <p><strong>Order of precedence</strong> — evaluated left to right unless parentheses override:</p>
+                <pre>Example 1: ZONE = 5 OR ZONE = 6 AND OWNER = 'Public'
+Evaluates as: ZONE = 5 OR (ZONE = 6 AND OWNER = 'Public')
+→ Selects parcels 5,6,7,8
+
+Example 2: (ZONE = 5 OR ZONE = 6) AND OWNER = 'Public'
+→ Selects parcels 1,2,5,6,7,8
+
+Use parentheses to control evaluation order and make intent explicit!</pre>
+                <p><strong>Venn diagrams</strong> help visualize Boolean logic. The whole table T is the outer rectangle. Circle A = records meeting condition A. Circle B = records meeting condition B. Overlap = records meeting both. Shaded region = what the expression selects.</p>
+            </div>
+        </div>
+
+        <div class="section" id="spatial">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Spatial Queries</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Spatial queries test geometric relationships between two layers using the <strong>Select Layer By Location</strong> tool. The <strong>target layer</strong> is what gets selected; the <strong>source layer</strong> is what you compare against.</p>
+                <table>
+                    <tr><th>Spatial Operator</th><th>Tests For</th><th>Example</th></tr>
+                    <tr><td>Intersect</td><td>Features touch or overlap</td><td>Counties that touch (intersect) rivers</td></tr>
+                    <tr><td>Contains</td><td>Feature is fully inside another (boundary counts)</td><td>Counties contained by Oregon (can share state boundary)</td></tr>
+                    <tr><td>Completely Contains</td><td>Feature is fully inside, no shared boundary</td><td>Counties completely within Oregon (no boundary sharing)</td></tr>
+                    <tr><td>Within</td><td>Feature is inside the source feature</td><td>Cities within a county</td></tr>
+                    <tr><td>Proximity (Within Distance)</td><td>Feature is within a specified distance</td><td>Cities within 50 miles of a volcano</td></tr>
+                </table>
+                <div class="highlight"><p>Spatial queries select ENTIRE features — you cannot select only the part of a river inside Texas. "Select rivers that intersect Texas" returns the full length of each river, including sections outside Texas. "Select rivers within Texas" returns nothing because no river is entirely within Texas. To isolate the portions inside a boundary, use Clip or Intersect geoprocessing tools instead.</p></div>
+                <p><strong>Data quality affects spatial queries:</strong></p>
+                <ul>
+                    <li>Poor <strong>logical consistency</strong> — Congressional district boundaries that don't align with county boundaries cause contains/within queries to fail unexpectedly</li>
+                    <li>Poor <strong>accuracy/precision</strong> — generalized points and lines for Minneapolis and the Mississippi River may not intersect in the data even though they do in reality. Use a search distance to compensate.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="buffers">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Buffers & Extraction Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Buffers</strong> delineate the area within a specified distance of features. They are a type of spatial query result stored as a new polygon layer.</p>
+                <ul>
+                    <li>Drug-free zones: 100m ring buffers around schools</li>
+                    <li>Logging restrictions: buffers around streams</li>
+                    <li>Hazard zones: 50-mile buffers around active volcanoes</li>
+                </ul>
+                <div class="highlight"><p>By default, each input feature gets its own buffer — overlapping buffers produce inflated area calculations. Use the DISSOLVE option when creating buffers to merge overlapping buffers into a single, clean region. Always check whether dissolved or individual buffers are appropriate for your analysis.</p></div>
+                <p><strong>Extraction functions</strong> — create new datasets by spatially cutting:</p>
+                <div class="grid">
+                    <div class="card"><h3>Clip</h3><p>Cookie cutter — keeps features INSIDE the boundary polygon. Roads clipped to city limits = only roads inside the city. Creates a new dataset.</p></div>
+                    <div class="card"><h3>Erase</h3><p>Keeps features OUTSIDE the boundary polygon. Opposite of clip. Roads erased by city limits = only roads outside the city. Creates a new dataset.</p></div>
+                </div>
+                <p style="margin-top:12px">After clipping or erasing, features that crossed the boundary now have different lengths or areas. Update any user-defined length or area fields using the <strong>Calculate Geometry Attributes tool</strong>.</p>
+            </div>
+        </div>
+
+        <div class="section" id="selection">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Selection Methods & The Logical Two-Step</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Most geoprocessing tools <strong>honor the selected set</strong> — they operate only on selected features, not the whole layer. This allows queries to be chained and combined. Use <strong>List By Selection</strong> in Contents pane to control which layers are selectable and see counts of selected features.</p>
+                <table>
+                    <tr><th>Selection Type</th><th>Equivalent To</th><th>Effect</th></tr>
+                    <tr><td>New Selection</td><td>(replaces)</td><td>Drops existing selection, creates new one</td></tr>
+                    <tr><td>Add to Selection</td><td>OR</td><td>Adds newly found features to existing selection</td></tr>
+                    <tr><td>Remove from Selection</td><td>NOT</td><td>Removes newly found features from existing selection</td></tr>
+                    <tr><td>Select Subset from Selection</td><td>AND</td><td>Keeps only features in BOTH old and new selections</td></tr>
+                    <tr><td>Switch Selection</td><td>(invert)</td><td>Trades selected for unselected — selects everything NOT currently selected</td></tr>
+                    <tr><td>Clear Selection</td><td>(deselect all)</td><td>Removes all selections</td></tr>
+                </table>
+                <div class="highlight"><p>The Logical Two-Step — combining attribute and spatial queries using selection types. Example: Find earthquakes in Mineral County, Nevada with magnitude &gt; 5.0:</p></div>
+                <pre>Step 1: Select Layer By Location (Spatial Query)
+→ New Selection: Select earthquakes that INTERSECT Mineral County
+→ Result: All earthquakes in the county selected (green)
+
+Step 2: Select Layer By Attribute (Attribute Query)
+→ Change selection type to: "Select Subset from Current Selection" (= AND)
+→ Expression: Magnitude > 5.0
+→ Result: Only earthquakes in the county WITH magnitude > 5.0 selected
+
+This is equivalent to: (IN Mineral County) AND (Magnitude > 5.0)
+Can mix spatial and attribute queries using selection types!</pre>
+            </div>
+        </div>
+
+        <div class="section" id="results">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Managing Query Results</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Several ways to preserve selected features for future use:</p>
+                <div class="grid">
+                    <div class="card"><h3>Make Feature Layer Tool</h3><p>Creates a new temporary layer based on an attribute query. Optionally change which fields are shown. The new layer can be symbolized differently and used as input to other tools.</p></div>
+                    <div class="card"><h3>Make Layer from Selected Features</h3><p>Menu option: right-click layer → Selection → Make Layer from Selected Features. Works for both attribute and spatial selections. Creates a temporary in-memory layer.</p></div>
+                    <div class="card"><h3>Definition Query</h3><p>Set a persistent attribute filter on a layer in its properties. The layer only displays and participates in analysis with the filtered records. Survives project saves.</p></div>
+                    <div class="card"><h3>Export Selected Features</h3><p>Saves selected features as a new permanent dataset. Most permanent option. Useful when you need a standalone copy of the subset for sharing or further analysis.</p></div>
+                </div>
+                <div class="highlight"><p>Interactive selection (clicking on features) is fastest when you know where something is. For reproducible, documented analysis, use attribute queries (Select Layer By Attribute) or spatial queries (Select Layer By Location) — these can be saved as tools, automated, or repeated consistently. Export to a new dataset when you need a permanent, shareable result.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

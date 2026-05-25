@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 11: Raster Analysis</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2010, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #166534; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #166534; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #166534; color: white; border-color: #166534; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #166534; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2010; border-left: 3px solid #166534; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #166534; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #166534; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #166534; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #166534; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #166534; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 11</div>
+        <h1>Raster Analysis</h1>
+        <p class="subtitle">Map algebra, Boolean overlay, weighted overlay, distance functions, surface analysis, neighborhood statistics, and environment settings</p>
+    </header>
+    <nav>
+        <a href="#algebra">Map Algebra & Queries</a>
+        <a href="#boolean">Boolean Overlay</a>
+        <a href="#weighted">Weighted Overlay</a>
+        <a href="#distance">Distance Functions</a>
+        <a href="#surface">Surface Analysis</a>
+        <a href="#neighborhood">Neighborhood & Zonal</a>
+        <a href="#reclassify">Reclassify & Density</a>
+        <a href="#environment">Environment Settings</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="algebra">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Map Algebra & Raster Queries</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Rasters are matrices of numbers georeferenced to earth locations. Because they share the same spatial grid, rasters with the same extent and resolution can be analyzed using <strong>cell-by-cell operations called map algebra</strong>. A new raster is created to store the result.</p>
+                <pre>// Map algebra examples:
+precip_cm = precip_inches * 2.54      // multiply raster by constant
+combined  = raster_A + raster_B       // add two rasters cell by cell
+diff      = raster_A - raster_B       // find difference between rasters
+
+// Raster query (Boolean raster):
+result = DEM > 1400                   // 1 where elevation > 1400m, 0 elsewhere
+
+// Boolean operators in map algebra:
+AND result  = (condition_A == 1) * (condition_B == 1)  // same as multiply
+OR  result  = (condition_A == 1) + (condition_B == 1) > 0
+NOT result  = 1 - condition_A</pre>
+                <p>A <strong>Boolean raster</strong> contains only 0 (False) and 1 (True). Raster queries produce Boolean rasters. These are the building blocks of raster overlay analysis.</p>
+                <div class="highlight"><p>Always store rasters in a PROJECTED coordinate system before analysis. Distance and area calculations are meaningless in geographic coordinates (degrees). Raster analysis is performed using the <strong>Raster Calculator</strong> tool (requires Spatial Analyst extension — additional license required).</p></div>
+                <p><strong>Boolean operator equivalents to vector operations:</strong></p>
+                <ul>
+                    <li>AND → vector Intersect (areas meeting ALL conditions)</li>
+                    <li>OR → vector Union (areas meeting ANY condition)</li>
+                    <li>NOT → vector Erase (areas NOT meeting a condition)</li>
+                    <li>XOR → no simple vector equivalent (Intersect then Erase)</li>
+                    <li>AND is equivalent to MULTIPLYING two Boolean rasters (0×0=0, 1×0=0, 1×1=1)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="boolean">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Boolean Overlay & Additive Overlay</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Raster overlay uses Boolean rasters and map algebra to find areas where multiple conditions hold simultaneously.</p>
+                <pre>// Snail habitat example:
+ElevRange    = (DEM > 800) * (DEM < 1200)   // suitable elevation
+LimestoneBoo = (geology == "limestone")      // limestone areas
+DenseTrees   = (canopy > 40)                 // dense canopy
+
+// AND overlay (multiply = all conditions must be met):
+SnailHabitat = ElevRange * LimestoneBoo * DenseTrees
+// Result: 1 only where ALL three conditions are 1
+
+// Additive overlay (ranking instead of strict yes/no):
+HabitatRank = ElevRange + LimestoneBoo + DenseTrees
+// Result: 0 = no conditions, 1 = one condition, 2 = two, 3 = ideal</pre>
+                <div class="grid">
+                    <div class="card"><h3>Boolean Overlay</h3><p>Strict yes/no result. AND operator (multiply). Output = 1 where ALL conditions met, 0 elsewhere. Simple but treats all conditions as equal and abrupt boundaries as meaningful.</p></div>
+                    <div class="card"><h3>Additive Boolean Overlay</h3><p>Sum the Boolean rasters instead of multiplying. Output = count of how many conditions are present. Provides ranking (0, 1, 2, 3...) instead of binary yes/no. Better for showing gradations.</p></div>
+                </div>
+                <div class="highlight"><p>Boolean overlay drawback: the boundary is completely abrupt — elevation 1500m is unsuitable, 1501m is ideal. This rarely reflects reality. Use WEIGHTED OVERLAY for more realistic, graduated suitability analysis.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="weighted">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Weighted Overlay</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Weighted overlay ranks conditions on a graduated scale (not just 0/1) and assigns weights based on relative importance — producing a more realistic suitability index.</p>
+                <pre>// General formula:
+Output = W1 * Rank1 + W2 * Rank2 + ... + Wk * Rankk
+// Where: W1 + W2 + ... + Wk = 1.0 (weights must sum to 1)
+// Ranks: 1 to N (1 = worst, N = best)
+
+// Landfill suitability example (K=4 conditions, N=3 ranks):
+// Condition ranks (1=worst, 3=best):
+//   Slope:      high=1, medium=2, low=3
+//   Infiltration: high=1, medium=2, low=3  (most important!)
+//   Road distance: far=1, medium=2, close=3
+//   Stream distance: close=1, medium=2, far=3
+
+// Weights (must sum to 1.0):
+//   Slope: 0.10 (least important)
+//   Infiltration: 0.40 (most important — prevents groundwater contamination)
+//   Road distance: 0.25
+//   Stream distance: 0.25
+
+LSI = 0.10*slope_rank + 0.40*infilt_rank + 0.25*road_rank + 0.25*stream_rank
+// Output range: 1.0 to 3.0 (Landfill Suitability Index)</pre>
+                <p>Each condition raster must be <strong>reclassified</strong> into ranked values (1 to N) before weighted overlay. The reclassification maps original data values to suitability ranks — this is where gradations can be specified (e.g., 0-1000m=1, 1000-1500m=2, >1500m=3).</p>
+            </div>
+        </div>
+
+        <div class="section" id="distance">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Distance Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Euclidean Distance</h3><p>Creates a raster where each cell value = straight-line distance to the nearest input feature (e.g., nearest stream). Units match the raster coordinate system (meters/feet). Used for: buffers, proximity analysis, suitability.</p></div>
+                    <div class="card"><h3>Euclidean Direction</h3><p>Optional output from the distance tool. Each cell value = direction (0–360°) you would travel to reach the nearest feature. N=0°/360°, E=90°, S=180°, W=270°.</p></div>
+                    <div class="card"><h3>Raster Buffers</h3><p>Apply a logical query to a distance raster: [streamdistance] &lt; 500. Cells within 500m = 1, outside = 0. Creates a Boolean raster buffer usable in overlay analysis.</p></div>
+                    <div class="card"><h3>Least Cost Path</h3><p>Finds the easiest route between two points using a COST raster (e.g., slope). Combines cost with distance to determine the path of least resistance — not necessarily straight-line shortest.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="surface">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Surface Analysis (DEM-Based)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Function</th><th>Output</th><th>Values / Notes</th></tr>
+                    <tr><td>Slope</td><td>Steepness of terrain surface</td><td>Expressed in degrees (0–90°) or percent. Percent = (rise/run) × 100. Derived from the rate of change between adjacent cells in the DEM.</td></tr>
+                    <tr><td>Aspect</td><td>Direction of steepest downslope</td><td>0–360° from north. Flat areas = -1. N=0/360, E=90, S=180, W=270. Useful for solar radiation, snow melt, vegetation modeling.</td></tr>
+                    <tr><td>Hillshade</td><td>Simulated shaded relief</td><td>Mimics appearance of terrain under an illumination source at a specified azimuth and zenith angle. Excellent for visualizing topographic detail. Common base map component.</td></tr>
+                    <tr><td>Viewshed</td><td>Areas visible from a designated point</td><td>1 = visible, 0 = not visible. Can factor in observer height and obstructions (trees, buildings). Used for: cell tower placement, trail shelter siting, military line of sight.</td></tr>
+                    <tr><td>Interpolation (IDW)</td><td>Continuous surface from point measurements</td><td>Inverse Distance Weighted — closer points get more influence. Estimates values between climate stations, well heads, or other point measurements. Complex — requires specialized study.</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="neighborhood">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Neighborhood Statistics & Zonal Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Neighborhood functions calculate statistics for a window of cells around each target cell and assign the result to that cell.</p>
+                <div class="grid">
+                    <div class="card"><h3>Focal (Moving Window)</h3><p>Window moves ONE CELL at a time — neighborhoods overlap. Each cell is evaluated in multiple windows. Produces a smoother result. Common use: majority filter to simplify complex rasters before converting to vector.</p></div>
+                    <div class="card"><h3>Block</h3><p>Window moves to a COMPLETELY NEW set of cells — no overlap. Each cell evaluated in exactly one block. Produces a blocky, generalized result.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Common neighborhood statistics:</strong> mean, majority, minority, sum, max, min, range, std dev. Window shapes: square (most common), circle, wedge, annulus.</p>
+                <p><strong>Focal majority use case</strong> — simplifying a complex land cover raster before converting to polygons: run 2 passes of focal majority with a 4×4 window → eliminates small isolated patches → cleaner polygon output.</p>
+                <p><strong>Zonal Functions</strong> — neighborhood defined by geographic zones (features or raster regions with unique values):</p>
+                <ul>
+                    <li>Zones = areas with a unique value (e.g., each watershed has a unique ID)</li>
+                    <li>Zones need NOT be contiguous — all cells with value 3 are zone 3 regardless of location</li>
+                    <li>Zonal Statistics calculates statistics for each zone applied to another raster</li>
+                    <li>Example: average slope for each watershed — watersheds are zones, slope raster is input</li>
+                    <li>Use a unique ID field (like Feature ID) to ensure each zone is distinct</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="reclassify">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Reclassify & Density Functions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Reclassify</strong> — changes raster cell values to a new set of values based on specified rules:</p>
+                <ul>
+                    <li>Convert continuous elevation values to suitability ranks (1/2/3)</li>
+                    <li>Convert continuous values to Boolean (suitable = 1, unsuitable = 0) for overlay</li>
+                    <li>Generalize a dataset by collapsing many categories into fewer</li>
+                    <li>Required step before weighted overlay — all input rasters must be on the same scale</li>
+                </ul>
+                <div class="grid">
+                    <div class="card"><h3>Simple Density</h3><p>Counts features within a circle of specified radius, divides by circle area. Each feature can be weighted by an attribute (e.g., population). Assumes all weight is concentrated at the point location.</p></div>
+                    <div class="card"><h3>Kernel Density</h3><p>Spreads each feature's value over an area using a Gaussian (bell curve) distribution before summing. More realistic for phenomena like population (not truly concentrated at one point). Produces smoother surfaces.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="environment">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Environment Settings for Raster Analysis</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Setting environment settings BEFORE analysis ensures consistent, correct output. Set these in the Environments tab of each tool or globally via the Analysis ribbon → Environments button.</p>
+                <table>
+                    <tr><th>Setting</th><th>Controls</th><th>Best Practice</th></tr>
+                    <tr><td>Workspace</td><td>Where permanent output is saved (defaults to project geodatabase)</td><td>Create a "junk" geodatabase for temporary intermediate rasters — easier cleanup. Scratch workspace holds truly temporary rasters during tool execution.</td></tr>
+                    <tr><td>Output Coordinate System</td><td>CS of output rasters</td><td>LEAVE BLANK for raster analysis. Changing CS during processing requires resampling, which degrades data quality. Project rasters BEFORE analysis, not during.</td></tr>
+                    <tr><td>Processing Extent</td><td>Output raster extent when inputs don't match</td><td>Set to a specific input raster/layer to force all outputs to match it. Default (intersection) is safe but may miss data. Avoids unnecessary resampling.</td></tr>
+                    <tr><td>Cell Size</td><td>Output cell size when inputs have different resolutions</td><td>Explicitly set to match your input rasters. Default (maximum/coarsest cell size) is appropriate since the largest cell size limits overall accuracy. Avoid automatic resampling.</td></tr>
+                    <tr><td>Mask</td><td>Clips all outputs to an area of interest</td><td>Use a watershed polygon or study area raster to limit outputs to the region of interest. Cells outside mask = NoData. More efficient than clipping after analysis.</td></tr>
+                </table>
+                <div class="highlight"><p>AUTOMATIC RESAMPLING WARNING: If input rasters have mismatched cell sizes or extents, ArcGIS resamples them automatically — silently degrading your data without warning you. Always use consistent cell sizes and extents. Set environment settings explicitly to prevent invisible data quality loss. The analysis result may appear correct but be less accurate than it should be.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

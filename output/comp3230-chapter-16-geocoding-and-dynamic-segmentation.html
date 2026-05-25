@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 16: Geocoding and Dynamic Segmentation</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a1a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #9d174d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #be185d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #9d174d; color: white; border-color: #9d174d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #be185d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a1a; border-left: 3px solid #9d174d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #be185d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #be185d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #9d174d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #be185d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 16</div>
+        <h1>Geocoding and Dynamic Segmentation</h1>
+        <p class="subtitle">Address matching, hit rates, geocoding variations, routes, events, and linear referencing applications</p>
+    </header>
+    <nav>
+        <a href="#geocoding">Geocoding</a>
+        <a href="#process">Matching Process</a>
+        <a href="#quality">Quality & Offsets</a>
+        <a href="#variations">Variations</a>
+        <a href="#applications">Applications</a>
+        <a href="#dynseg">Dynamic Segmentation</a>
+        <a href="#routes">Routes & Events</a>
+        <a href="#dynapps">DS Applications</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="geocoding">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Geocoding & Reference Databases</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Geocoding</strong> converts text-based postal address data into geographic coordinates (longitude/latitude pairs). Address geocoding — plotting street addresses as point features — is the most common type. Locations are determined by <strong>linear interpolation</strong> within the address range of a matched street segment.</p>
+                <p><strong>Geocoding reference database</strong> — required for address matching. Contains:</p>
+                <ul>
+                    <li>Street name for each segment</li>
+                    <li>Address ranges (left and right side, low and high numbers)</li>
+                    <li>ZIP codes</li>
+                </ul>
+                <p>Historically derived from TIGER/Line files (US Census Bureau). Now also available from commercial providers (TomTom, HERE/NAVTEQ, Sanborn CitySets). Commercial databases typically have better positional accuracy than TIGER/Line files.</p>
+                <div class="highlight"><p>Linear interpolation assumes addresses are evenly distributed within a segment's address range. If a segment runs from 100–200, address 150 is placed at the midpoint. An alternative is a "location of address" database where actual x,y coordinates of building centroids or footprints are stored — far more accurate but requires more data collection effort.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="process">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Address Matching Process</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Address matching consists of three phases:</p>
+                <div class="grid">
+                    <div class="card"><h3>1. Preprocessing</h3><p>Parsing the input address into components (number, street name, type, directional, ZIP). Address standardization — normalize abbreviations, spelling variations, and formatting to match the reference database format.</p></div>
+                    <div class="card"><h3>2. Matching</h3><p>The geocoding engine compares the parsed address against the reference database. A scoring system quantifies match quality. Matching conditions can be relaxed to improve hit rate — expect to run the process more than once.</p></div>
+                    <div class="card"><h3>3. Plotting</h3><p>Matched addresses are plotted as point features using linear interpolation within the matched street segment's address range. Side offset and end offset options refine point placement.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="quality">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Quality, Scoring & Offset Options</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Hit rate</strong> — percentage of input addresses successfully matched. The primary quality metric for geocoding:</p>
+                <table>
+                    <tr><th>Hit Rate</th><th>Assessment</th></tr>
+                    <tr><td>60%</td><td>Unacceptable for crime mapping and analysis</td></tr>
+                    <tr><td>85%</td><td>Statistically derived minimum acceptable rate</td></tr>
+                    <tr><td>95%+</td><td>Required for competitive location-based services</td></tr>
+                </table>
+                <p style="margin-top:16px">To achieve high hit rates: use a current, accurate reference database AND validate/standardize input addresses before geocoding. Positional accuracy (how close geocoded points are to the true location) is a secondary quality measure beyond hit rate.</p>
+                <p><strong>Offset plotting options</strong> — refine point placement to avoid all points stacking on the street centerline:</p>
+                <div class="grid">
+                    <div class="card"><h3>Side Offset</h3><p>Moves the geocoded point left or right away from the street centerline — places points on the correct side of the street. Improves visual clarity.</p></div>
+                    <div class="card"><h3>End Offset</h3><p>Moves the geocoded point away from the endpoint of a street segment — prevents points from stacking at intersections.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="variations">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Variations of Geocoding</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Type</th><th>What It Does</th><th>Example Use</th></tr>
+                    <tr><td>Address Geocoding</td><td>Matches street address to a point on a street segment via linear interpolation</td><td>Plotting customer locations, crime incidents, service calls</td></tr>
+                    <tr><td>Intersection Matching</td><td>Matches address data to street intersections rather than address ranges</td><td>"Main St & Oak Ave" plotted at the intersection point</td></tr>
+                    <tr><td>ZIP Code Geocoding</td><td>Matches ZIP code to its centroid location</td><td>Approximate location for marketing analysis, rough mapping</td></tr>
+                    <tr><td>Parcel-Level Geocoding</td><td>Matches parcel number to parcel centroid. If parcel DB available, can plot actual boundary.</td><td>Property tax records, assessor data, zoning analysis</td></tr>
+                    <tr><td>Reverse Geocoding</td><td>Converts lat/lon coordinates into descriptive addresses</td><td>GPS apps showing current street address, geotagged photo location labels</td></tr>
+                    <tr><td>Place Name Alias</td><td>Matches a place name to a street address, then geocodes the address</td><td>"Starbucks downtown" → street address → map point</td></tr>
+                    <tr><td>Photo Geocoding (Geotagging)</td><td>Attaches location coordinates to photographs</td><td>Smartphone photos with GPS coordinates embedded in EXIF data</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="applications">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Applications of Geocoding</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Location-Based Services (LBS)</h3><p>Mobile apps using your current location to find nearby services, navigate, or deliver location-targeted content. Requires 95%+ accuracy for competitive applications.</p></div>
+                    <div class="card"><h3>Business Applications</h3><p>Customer mapping, market analysis, service territory design, site selection, delivery routing. Geocoding customer databases enables spatial analysis of customer distribution.</p></div>
+                    <div class="card"><h3>Wireless Emergency Services (E911)</h3><p>Automatically locating mobile callers during emergencies. Accuracy is life-critical. Requires precise reference databases and real-time positioning.</p></div>
+                    <div class="card"><h3>Crime Mapping & Analysis</h3><p>Plotting crime incidents to analyze spatial patterns, identify hotspots, allocate resources. Minimum 85% hit rate required; 60% is considered unacceptable.</p></div>
+                    <div class="card"><h3>Public Health</h3><p>Mapping disease cases, environmental health hazards, healthcare access. Spatial clustering analysis requires accurate geocoding to identify true patterns vs. geocoding artifacts.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="dynseg">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Dynamic Segmentation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Dynamic segmentation</strong> computes the location of events along a route dynamically using a linear measurement system — without physically splitting the underlying line features.</p>
+                <div class="grid">
+                    <div class="card"><h3>Route</h3><p>A linear feature with a linear measurement system (measure values — "m" values) stored with its geometry. A route links a series of line segments together and has a unique Route ID. Measure values increase continuously along the route.</p></div>
+                    <div class="card"><h3>Events</h3><p>Linearly referenced data that occur along routes. Stored in event tables referencing Route ID and measure values. Do NOT require physical splitting of the route geometry.</p></div>
+                    <div class="card"><h3>Point Events</h3><p>Occur at a single measure value (one location). Examples: accidents, stop signs, bridges, mile markers. Stored with one measure value per event.</p></div>
+                    <div class="card"><h3>Line Events</h3><p>Cover a portion of a route between two measure values. Examples: pavement condition, speed limit zones, road surface type. Stored with from-measure and to-measure values.</p></div>
+                </div>
+                <div class="highlight"><p>The power of dynamic segmentation: the SAME route geometry can have many different event tables overlaid simultaneously — speed limits, pavement conditions, accident history, rest area locations — without creating separate copies of the road network for each attribute. Attributes reference the route by measure value, not by splitting the geometry.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="routes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Creating Routes & Events</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Creating routes — two methods:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Interactive Method</h3><p>Digitize or select existing line segments to build the route. User manually chooses which segments constitute each route. Good for custom or non-standard routes.</p></div>
+                    <div class="card"><h3>Conversion Method</h3><p>Create routes from all linear features or from features selected by a query. Efficient for converting existing road networks (e.g., all Interstate highway features → route feature class).</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Types of routes:</strong></p>
+                <ul>
+                    <li><strong>Simple route</strong> — follows one direction, no complications</li>
+                    <li><strong>Combined route</strong> — joined with another route (e.g., two highways share a segment)</li>
+                    <li><strong>Split route</strong> — subdivides into two routes (e.g., I-84 splitting at Emigrant Hill)</li>
+                    <li><strong>Looping route</strong> — intersects itself (a circuit in graph theory). Must be divided into parts for proper measure assignment — a loop cannot have unique measure values without subdivision.</li>
+                </ul>
+                <p><strong>Creating event tables — two methods:</strong></p>
+                <ul>
+                    <li>Create from an existing table that already has Route ID and measure values</li>
+                    <li>Create by locating point or polygon features along a route (e.g., overlay a polygon layer with a route layer → linear event table with from/to measures for each polygon segment)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="dynapps">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Applications of Dynamic Segmentation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Data Management</h3><p>Transportation departments manage speed limits, rest areas, bridges, pavement conditions along highway routes — all referencing the same route geometry without duplication.</p></div>
+                    <div class="card"><h3>Data Display</h3><p>Once an event table is linked to a route it is georeferenced and can be used as a feature layer. Example: display highway segments with speed limit 70 mph in a distinct symbol.</p></div>
+                    <div class="card"><h3>Data Query</h3><p>Attribute AND spatial queries on event tables and their layers. Point query on a route returns Route ID, x,y coordinates, and the measure (m) value at that location plus route beginning and ending measures.</p></div>
+                    <div class="card"><h3>Data Analysis</h3><p>Routes and events can be used as inputs for analysis such as overlay. Example: overlay a slope raster with a stream route to analyze slope conditions along the route. Combine accident events with pavement condition events to study relationships.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

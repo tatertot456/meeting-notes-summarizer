@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 2: Geospatial Data Visualization</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a1a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #9d174d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #9d174d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #9d174d; color: white; border-color: #9d174d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #9d174d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a1a; border-left: 3px solid #9d174d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #9d174d; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #9d174d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #9d174d; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #9d174d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #9d174d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 2</div>
+        <h1>Geospatial Data Visualization</h1>
+        <p class="subtitle">Color models, data types, map types, MAUP, raster display, and classification methods</p>
+    </header>
+    <nav>
+        <a href="#symbols">Symbols & Color</a>
+        <a href="#datatypes">Data Types</a>
+        <a href="#maptypes">Map Types</a>
+        <a href="#maup">MAUP</a>
+        <a href="#raster">Raster Display</a>
+        <a href="#classification">Classification Methods</a>
+        <a href="#layers">Layers & Styles</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="symbols">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Symbols, Color Models & Visual Variables</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Map symbols communicate two types of information through visual variables:</p>
+                <div class="grid">
+                    <div class="card"><h3>Categorical Differences</h3><p>Expressed by varying symbol SHAPE, line type, pattern, color hue, or font. Use distinct colors (red, blue, orange) — not shades of the same color.</p></div>
+                    <div class="card"><h3>Quantity Differences</h3><p>Expressed by varying symbol SIZE, line thickness, or color shade/saturation. Use shades of one color for ordered quantities.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Color Guidelines:</strong></p>
+                <ul>
+                    <li>Different hues (colors) → categories</li>
+                    <li>Different shades of the same hue → quantities (low to high)</li>
+                    <li>Two-color diverging scheme → data with a meaningful center (negative/positive, cold/warm)</li>
+                    <li>Avoid rainbow color schemes for quantities — too many hues make maps harder to interpret</li>
+                </ul>
+                <p><strong>RGB Color Model:</strong> Based on mixtures of Red, Green, Blue light. Each primary ranges 0 (black) to 255 (bright). Over 16 million possible combinations (256³).</p>
+                <p><strong>HSV Color Model:</strong></p>
+                <ul>
+                    <li>Hue: the color itself on a 0–360° color wheel</li>
+                    <li>Saturation: intensity/purity of the color (0–100%)</li>
+                    <li>Value: brightness (0–100%)</li>
+                </ul>
+                <div class="highlight"><p>HSV is more intuitive for cartographic decisions than RGB. To make a quantity map, keep Hue fixed and vary Saturation or Value. To make a category map, vary Hue while keeping Saturation and Value similar so no one category appears more important than another.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="datatypes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Type</th><th>Description</th><th>Examples</th><th>Map Type</th></tr>
+                    <tr><td>Nominal</td><td>Names or unique identifiers. Each feature likely has its own unique value.</td><td>County names, airport codes, parcel IDs, tax IDs</td><td>Single symbol map with labels</td></tr>
+                    <tr><td>Categorical</td><td>Features belong to named groups. Text or numeric category labels.</td><td>Rock type, volcano type, highway class, land cover</td><td>Unique values map</td></tr>
+                    <tr><td>Ordinal</td><td>Categorical data with a meaningful rank order along an arbitrary scale.</td><td>Snail habitat: 0=Unsuitable, 1=Marginal, 2=Acceptable, 3=Ideal</td><td>Unique values map with single-hue scheme</td></tr>
+                    <tr><td>Interval</td><td>Regular numeric scale. Supports addition/subtraction. Can be negative.</td><td>Elevation (can be below sea level), temperature in °F</td><td>Graduated color, graduated symbol</td></tr>
+                    <tr><td>Ratio</td><td>Regular numeric scale with a meaningful absolute zero. Fully supports math operations. Cannot be negative.</td><td>Population, distance, area, income</td><td>Graduated color, graduated symbol, dot density, chart</td></tr>
+                </table>
+                <div class="highlight"><p>The distinction between interval and ratio matters for normalization. You can say "twice as many farms" (ratio) but not "twice as hot" in Fahrenheit (interval — because 0°F isn't true absence of heat). Both are mapped similarly in GIS but the choice of normalization and interpretation differs.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="maptypes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Map Types for Different Data</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Single Symbol Map</h3><p>All features shown with the same symbol. Used for nominal data where each feature is unique. Labels added to identify individual features.</p></div>
+                    <div class="card"><h3>Unique Values Map</h3><p>Each category gets a distinct symbol/color. Used for categorical and ordinal data. Don't use for quantities — implies categories not magnitudes.</p></div>
+                    <div class="card"><h3>Graduated Color (Choropleth)</h3><p>Colors vary by data class — darker = more. Used for interval/ratio data. AVOID rainbow schemes; use sequential single-hue or diverging two-hue.</p></div>
+                    <div class="card"><h3>Graduated Symbol</h3><p>Symbol SIZE varies by data value. Better than graduated color for avoiding visual MAUP — large polygons don't dominate. Used for quantities.</p></div>
+                    <div class="card"><h3>Proportional Symbol</h3><p>Unclassed — symbol size increases in exact proportion to value. No artificial grouping into classes.</p></div>
+                    <div class="card"><h3>Dot Density Map</h3><p>Random dots placed within polygons based on a ratio (e.g., 1 dot = 1,000 farms). Unclassed — avoids artificial grouping. Shows distribution within polygons.</p></div>
+                </div>
+                <div class="highlight"><p>Classed maps (choropleth, graduated symbol) place features into ranges. The classification method significantly impacts map appearance and interpretation — the same data can tell very different stories depending on how classes are defined. Unclassed maps (proportional symbol, dot density) avoid this subjectivity but can be harder to read for precise values.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="maup">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Modifiable Areal Unit Problem (MAUP)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The <strong>MAUP</strong> occurs when arbitrary aggregation units (states, counties, census tracts) distort the patterns being mapped. The map reflects the units more than the underlying data.</p>
+                <div class="grid">
+                    <div class="card"><h3>Statistical MAUP</h3><p>Number of farms in a state is influenced by the STATE'S SIZE — large states look like they have more farms even if farm density is low. Number of vacant houses influenced by state population.</p></div>
+                    <div class="card"><h3>Visual MAUP</h3><p>Large polygons dominate the map visually and attract more attention, even when their values are low. Mountain states stand out in farm density maps. Maine's high vacancy rate goes unnoticed nationally.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Solutions:</strong></p>
+                <ul>
+                    <li><strong>Normalize (divide) by a suitable field</strong> — farms per sq mile instead of total farms; fraction of vacant housing instead of count</li>
+                    <li><strong>Normalize by percentage</strong> — divide each value by the total (e.g., % of Congress from each state)</li>
+                    <li><strong>Use graduated symbol instead of graduated color</strong> — symbol size isn't tied to polygon size, so large polygons don't visually dominate</li>
+                    <li><strong>Use dot density maps</strong> — dots distributed within polygons show where density actually is</li>
+                </ul>
+                <div class="highlight"><p>Always normalize ratio data before mapping counts in polygons of varying size. "Farms per square mile" tells a different (and more honest) story than "total farms." This is one of the most common mistakes in GIS mapping. When in doubt: normalize!</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="raster">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Raster Data Types & Display</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Discrete Rasters</h3><p>Represent objects (roads, land use). Few distinct values. Adjacent cells often share values. Abrupt boundaries. Displayed with unique values or discrete color.</p></div>
+                    <div class="card"><h3>Continuous Rasters</h3><p>Represent measurements everywhere (elevation, temperature). Millions of potential values. Gradual transitions. Displayed with classified or stretched methods.</p></div>
+                    <div class="card"><h3>Thematic Rasters</h3><p>Contain map data quantities (geology, elevation). Can be discrete or continuous. Examples: classified elevation, continuous DEM.</p></div>
+                    <div class="card"><h3>Image Rasters</h3><p>Satellite/aerial photo data — represents brightness. Single band: stretched display. Multi-band: RGB composite (bands assigned to R, G, B channels).</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Display Methods:</strong></p>
+                <table>
+                    <tr><th>Method</th><th>Used For</th><th>How It Works</th></tr>
+                    <tr><td>Unique Values</td><td>Categorical/ordinal rasters</td><td>Each distinct value gets its own color. Like a unique values vector map.</td></tr>
+                    <tr><td>Classified</td><td>Interval/ratio rasters</td><td>Values grouped into classes, each with a color. Same classification methods as vector.</td></tr>
+                    <tr><td>Stretched</td><td>Continuous rasters, single-band images</td><td>Reallocates a portion of raster values to the 256 available display shades. Improves contrast. Types: min-max, standard deviation.</td></tr>
+                    <tr><td>RGB Composite</td><td>Multi-band image rasters</td><td>Three bands assigned to Red, Green, Blue display channels. Natural color or false color composites.</td></tr>
+                    <tr><td>Indexed Color</td><td>Single integer band with colormap</td><td>Each integer value maps to a specific RGB color. Simple, consistent, storage-efficient. Used in USGS Digital Raster Graphics.</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="classification">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Classification Methods</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Classification divides continuous data into class ranges, each with its own symbol. The method significantly affects map appearance — the same data can look very different. Choice depends on the data distribution and map objective.</p>
+                <table>
+                    <tr><th>Method</th><th>How It Works</th><th>Best For</th></tr>
+                    <tr><td>Jenks Natural Breaks</td><td>Exploits natural gaps in the data distribution. Minimizes variance within classes, maximizes between classes.</td><td>Unevenly distributed or skewed data. ArcGIS default — works well for most datasets.</td></tr>
+                    <tr><td>Equal Interval</td><td>Divides the data range into equal-sized classes. User specifies number of classes.</td><td>Uniformly distributed data. Easy to understand class ranges.</td></tr>
+                    <tr><td>Defined Interval</td><td>User specifies the class size (range). Number of classes determined automatically.</td><td>When the interval has a meaningful value (e.g., every 10 years, every 100 people).</td></tr>
+                    <tr><td>Quantile</td><td>Equal NUMBER of features in each class (not equal range). Different features per class.</td><td>Comparing relative rank. Produces visually balanced maps.</td></tr>
+                    <tr><td>Standard Deviation</td><td>Classes based on standard deviations above and below the mean.</td><td>Showing how values compare to average. Diverging data around a mean.</td></tr>
+                    <tr><td>Geometrical Interval</td><td>Multiplies each class range by a constant factor. Creates geometrically increasing intervals.</td><td>Strongly skewed or logarithmically increasing data (population density, income).</td></tr>
+                </table>
+                <div class="highlight"><p>Classification is a form of data exploration. Try multiple methods on the same dataset to see which best reveals the pattern you're trying to communicate — or to reveal what patterns exist. Quantile always produces a visually balanced map but can mislead: all classes appear equally important even if most data clusters at one end. Natural Breaks is the safest default for unknown distributions.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="layers">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Layers, Layer Files & Styles</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Layers</h3><p>Source data become layers when added to a map. Layers store display and label properties. The same source data can be visualized many different ways across different layers/maps — the source data is never modified.</p></div>
+                    <div class="card"><h3>Layer Files (.lyrx)</h3><p>Save a layer's symbology settings to a file. Easy way to transfer identical symbology to multiple maps or projects. Useful for enforcing consistent symbols across an organization (e.g., arsenic monitoring sites always use the same symbol).</p></div>
+                    <div class="card"><h3>Styles</h3><p>A collection of symbols stored together, often with a specific theme or purpose. Viewed and applied in the Symbology pane → Gallery tab. Organizations can create custom styles for consistent branding.</p></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

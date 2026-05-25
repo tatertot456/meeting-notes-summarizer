@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3230 — Chapter 8: Editing</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f0a00, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #c2410c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #ea580c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #c2410c; color: white; border-color: #c2410c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #ea580c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f0a00; border-left: 3px solid #c2410c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #ea580c; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #ea580c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #c2410c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #ea580c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Spatial Analysis · Chapter 8</div>
+        <h1>Editing</h1>
+        <p class="subtitle">Topology, snapping, editing interface, creating and modifying features, topology tools, and annotation</p>
+    </header>
+    <nav>
+        <a href="#intro">Editing & Topology</a>
+        <a href="#snapping">Snapping</a>
+        <a href="#interface">Edit Interface</a>
+        <a href="#creating">Creating Features</a>
+        <a href="#modifying">Modifying Features</a>
+        <a href="#polygons">Polygon Topology</a>
+        <a href="#annotation">Annotation</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="intro">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Editing & Topology Fundamentals</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Editing refers to updating existing feature classes or creating new ones — creating new features, modifying spatial geometry, or editing attribute values.</p>
+                <p><strong>Topology</strong> refers to the spatial relationships between features. Ideal topology matches the real world:</p>
+                <ul>
+                    <li>Roads actually connect at intersections</li>
+                    <li>Adjacent polygons share identical boundaries without gaps or overlaps</li>
+                    <li>Features within features are contained properly</li>
+                </ul>
+                <div class="highlight"><p>Schema changes (adding/deleting fields, modifying domains) and editing changes (modifying coordinates or attributes) BOTH place a file lock on the feature class until saved. You CANNOT edit features when there are unsaved schema changes, and vice versa. Always save schema changes before beginning a feature editing session.</p></div>
+                <p><strong>Essential editing tips:</strong></p>
+                <ul>
+                    <li>Always keep a backup copy of your data before editing</li>
+                    <li>Use simple maps with only the layers you need — reduces accidental changes and improves performance</li>
+                    <li>Save edits often — you cannot Undo actions that occurred before the most recent save</li>
+                    <li>Enable time-dependent auto-saving (every X minutes) as an extra safety net</li>
+                    <li>If the map CS differs from the data CS, edited coordinates are converted on the fly and stored in the DATA coordinate system</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="snapping">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Snapping</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Snapping ensures the ends of roads or vertices of polygons connect exactly. When a cursor moves within the <strong>snap tolerance</strong> of an existing feature, the new feature snaps to it precisely. Without snapping, roads and polygon boundaries may appear connected visually but have gaps that break topology.</p>
+                <table>
+                    <tr><th>Snap Type</th><th>Snaps To</th><th>Use When</th></tr>
+                    <tr><td>End Snapping</td><td>Node (endpoint) of an existing line only</td><td>Connecting road endpoints — ensures roads meet at their ends</td></tr>
+                    <tr><td>Edge Snapping</td><td>Anywhere along an existing line</td><td>When a line needs to connect at any point along another line</td></tr>
+                    <tr><td>Vertex Snapping</td><td>Only to vertices (shape points) of an existing line</td><td>Connecting at existing shape points, not arbitrary positions</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Snapping controls in ArcGIS Pro:</strong></p>
+                <ul>
+                    <li>Snapping group on the Edit ribbon — turn on/off, set type and options</li>
+                    <li>Popup button below the map for quick access</li>
+                    <li>Contents pane → List By Snapping — enable/disable snapping per layer and set priority order</li>
+                    <li>Snap tolerance = the distance at which snapping activates (set in snapping options)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="interface">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Editing Interface</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Edit ribbon groups:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Clipboard Group</h3><p>Cut, copy, and paste features.</p></div>
+                    <div class="card"><h3>Manage Edits Group</h3><p>Save edits and work with topology.</p></div>
+                    <div class="card"><h3>Snapping Group</h3><p>Control snap type and options.</p></div>
+                    <div class="card"><h3>Features Group</h3><p>Opens Create Features and Modify Features panes.</p></div>
+                    <div class="card"><h3>Selection Group</h3><p>Make selections and work with selected attributes.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Contents pane panels for editing:</strong></p>
+                <ul>
+                    <li><strong>List By Selection</strong> — see what is currently selected</li>
+                    <li><strong>List By Editing</strong> — enable or disable editing for each layer (prevents accidental changes)</li>
+                    <li><strong>List By Snapping</strong> — enable/disable snapping per layer and control snap priority</li>
+                </ul>
+                <p><strong>Context menus during editing:</strong></p>
+                <table>
+                    <tr><th>Menu</th><th>Appears When</th><th>Contains</th></tr>
+                    <tr><td>General Editing Menu</td><td>Select button active, right-click map</td><td>Copy/delete features, manage selections, move/scale/rotate, edit vertices, open Attributes pane</td></tr>
+                    <tr><td>Sketch Menu</td><td>Sketch active, right-click AWAY from sketch</td><td>Constraints for next segment: specific x-y, perpendicular/parallel, length, direction</td></tr>
+                    <tr><td>Vertex Menu</td><td>Sketch active, right-click ON sketch</td><td>Add/delete/move vertices. Right-click vertex = delete. Right-click segment = add vertex.</td></tr>
+                    <tr><td>Dynamic Constraints</td><td>Toggle at bottom of map view</td><td>Shows direction and distance for next segment at all times — useful for survey data entry</td></tr>
+                </table>
+                <div class="highlight"><p>Dock the Create Features pane, Modify Features pane, and Attributes pane in the same window as tabs — this makes switching between creating, modifying, and editing attributes seamless without hunting for floating windows.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="creating">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Creating Features</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The first step is often creating a new feature class with the <strong>Create Feature Class tool</strong> — specify name, location, geometry type (point/line/polygon), and coordinate system. Type cannot be changed later.</p>
+                <p><strong>Create Features pane</strong> — used to create new features:</p>
+                <ul>
+                    <li>Contains <strong>templates</strong> that specify basic settings and construction tools</li>
+                    <li>A layer can have multiple templates (e.g., Commercial Buildings and Residential Buildings) that automatically assign appropriate default attributes</li>
+                    <li>Select a template and construction tool to begin creating</li>
+                    <li>Active Template mode shows the settings and attributes for the current template</li>
+                </ul>
+                <p><strong>Sketches</strong> — provisional features used during creation or modification:</p>
+                <ul>
+                    <li>Show vertices and segments between them before they are finalized</li>
+                    <li>Construction toolbar: modify segment type, create corners or curves, trace existing features, finish or cancel the sketch</li>
+                    <li>A sketch is finalized (committed) when you double-click or press F2</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="modifying">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Modifying Features & Attributes</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Modify Features pane</strong> — tools for changing existing features:</p>
+                <ul>
+                    <li>Edit individual vertices of a feature</li>
+                    <li>Move, scale, rotate, or align features</li>
+                    <li>Reshape a feature by re-digitizing a section (not the whole feature)</li>
+                    <li>Many tools have an <strong>Edges tab</strong> for topology-aware editing</li>
+                </ul>
+                <p><strong>Attributes pane</strong> — aids editing attribute values:</p>
+                <ul>
+                    <li>Shows currently selected features and their attributes</li>
+                    <li>Click a feature to edit its attributes individually</li>
+                    <li>Right-click a feature for a context menu with useful functions</li>
+                    <li>Click the layer name to change a value in ALL selected features simultaneously</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="polygons">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Polygon Topology & Map Topology</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Adjacent polygons (parcels, land cover) should share identical boundaries with no gaps or overlaps. Three techniques for maintaining topologically correct adjacent polygons:</p>
+                <div class="grid">
+                    <div class="card"><h3>Autocomplete Polygon Tool</h3><p>Start a new polygon by clicking INSIDE an existing polygon, digitize the new boundary, end INSIDE the existing polygon. Creates two polygons with perfectly coincident shared boundaries. The new section must completely enclose an area.</p></div>
+                    <div class="card"><h3>Split Tool</h3><p>Draw a line across an existing polygon to split it into two polygons with coincident shared boundaries. If multiple polygons are selected, the split applies to all of them simultaneously.</p></div>
+                    <div class="card"><h3>Map Topology</h3><p>Tracks shared boundaries (edges) and connected points (nodes). Edit ribbon → Manage Edits. When editing with the Edges tab, both adjacent polygons update together — no gap is created. Essential for maintaining correct topology during edits.</p></div>
+                    <div class="card"><h3>Topology-Aware Line Editing</h3><p>Lines connect at nodes. When using Edges tab in Modify tools, moving a node keeps all connected lines attached. "Stretch Geometry Proportionally" option moves connected lines smoothly instead of creating abrupt bends.</p></div>
+                </div>
+                <div class="highlight"><p>If you edit one polygon without using map topology, the adjacent polygon does NOT update — creating a gap or overlap. Always use the Autocomplete Polygon tool, Split tool, or map topology (Edges tab) when editing adjacent polygons. Regular editing of individual polygons will break topological relationships.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="annotation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Annotation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Annotation</strong> is a set of labels stored as features in a geodatabase feature class. Unlike dynamic labels (which regenerate automatically), annotation is persistent and individually editable. Each label has attributes for font, size, style, position, and angle.</p>
+                <div class="grid">
+                    <div class="card"><h3>Advantages over Dynamic Labels</h3><p>Each label can be moved, rotated, or reformatted individually. Can be used across many maps and projects. Unplaced annotation can be created for labels that don't fit and edited later.</p></div>
+                    <div class="card"><h3>Reference Scale</h3><p>Annotation is given a reference scale so labels maintain consistent size relative to map features. At reference scale: labels appear at assigned size. Zoom out: labels shrink. Zoom in: labels grow.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Creating annotation:</strong></p>
+                <ul>
+                    <li>Set up dynamic labels to appear as desired at the reference (conversion) scale</li>
+                    <li>Convert dynamic labels to annotation stored in a geodatabase feature class</li>
+                    <li>Labels that don't fit become unplaced annotation — edit their position manually</li>
+                    <li>Use the Create Features pane to create individual annotation features from scratch</li>
+                    <li>Construction tools: horizontal, straight, or curved annotation following existing features</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
