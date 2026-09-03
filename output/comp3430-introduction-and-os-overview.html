@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3430 — Introduction and OS Overview</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a2a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #15803d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #16a34a; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #15803d; color: white; border-color: #15803d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #16a34a; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0a2a0a; border-left: 3px solid #15803d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #16a34a; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #16a34a; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #16a34a; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #15803d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #16a34a; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Operating Systems · Introduction</div>
+        <h1>Introduction and OS Overview</h1>
+        <p class="subtitle">What an OS is, how hardware works, CPU & memory virtualization, xv6, and the three easy pieces</p>
+    </header>
+    <nav>
+        <a href="#hardware">Hardware Basics</a>
+        <a href="#whatis">What Is an OS?</a>
+        <a href="#syscalls">System Calls</a>
+        <a href="#history">Unix & xv6 History</a>
+        <a href="#xv6">Meet xv6</a>
+        <a href="#cpuvirt">CPU Virtualization</a>
+        <a href="#memvirt">Memory Virtualization</a>
+        <a href="#map">Course Map</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="hardware">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Hardware Underneath</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Before understanding what an OS does, you need a mental model of the hardware it manages.</p>
+                <p><strong>What a running program is, to hardware — the CPU:</strong></p>
+                <ul>
+                    <li>A <strong>program counter (PC)</strong> — the address of the next instruction to execute</li>
+                    <li>~32 <strong>registers</strong> holding the values actively in use right now</li>
+                    <li>That's nearly all the visible state of a running program</li>
+                    <li>Save those registers, load another program's, and you have switched programs — this is the essence of context switching</li>
+                </ul>
+                <p><strong>Memory is a hierarchy</strong> — everything is slow except registers:</p>
+                <table>
+                    <tr><th>Level</th><th>Approximate Latency</th></tr>
+                    <tr><td>Registers</td><td>~0.3 ns</td></tr>
+                    <tr><td>L1 / L2 Cache</td><td>1 to 10 ns</td></tr>
+                    <tr><td>DRAM (main memory)</td><td>~100 ns</td></tr>
+                    <tr><td>SSD</td><td>~100 µs</td></tr>
+                    <tr><td>Hard Disk</td><td>~10 ms</td></tr>
+                </table>
+                <p style="margin-top:12px">Registers to disk is a factor of roughly <strong>30 million</strong>. This gap drives nearly every OS design decision about caching and I/O.</p>
+                <p><strong>Two privilege modes</strong> — the one bit that makes an OS possible:</p>
+                <div class="grid">
+                    <div class="card"><h3>User Mode</h3><p>Cannot touch hardware devices or access another program's memory. All normal application code runs here. The OS enforces this boundary.</p></div>
+                    <div class="card"><h3>Kernel Mode</h3><p>Can do anything — access all hardware, all memory. The difference is one bit in a CPU control register. A <strong>trap instruction</strong> is the only door between modes.</p></div>
+                </div>
+                <div class="highlight"><p>Even the hardware lies. Modern CPUs overlap and reorder instructions internally, then preserve the illusion that they ran one at a time, in order. The OS is about to do the same thing, one level up — creating the illusion of multiple CPUs and private memory spaces.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="whatis">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is an Operating System?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A program starts simply — the processor fetches an instruction, decodes it, and executes it, millions or billions of times per second (the Von Neumann model). But while it runs, a whole body of software works to make the system easy to use. That body of software is the <strong>operating system</strong>.</p>
+                <p>The OS can be understood from three angles — all three are the same software seen differently:</p>
+                <div class="grid">
+                    <div class="card"><h3>Virtual Machine — The Illusionist</h3><p>Takes physical resources (CPU, memory, disk) and transforms them into more general, powerful, easy-to-use virtual forms. This technique is <strong>virtualization</strong> — the book's central word.</p></div>
+                    <div class="card"><h3>Standard Library — The API Provider</h3><p>Programs ask for OS features via <strong>system calls</strong>. Run programs, allocate memory, read/write files. A typical OS exports a few hundred such calls.</p></div>
+                    <div class="card"><h3>Resource Manager — The Referee</h3><p>CPU, memory, and disk are shared. The OS decides who gets what and when — efficiently and fairly. Many programs, one machine: someone must manage the sharing.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Where the OS sits:</strong></p>
+                <pre>your programs (shell, editor, browser)
+        ↕  system call / return
+operating system (kernel)
+ virtualizes CPU + memory · manages resources
+        ↕
+hardware — CPU · DRAM · disk · network</pre>
+                <p>A process asks the kernel for service by making a system call; the kernel does the work with full hardware privilege and returns. Programs alternate between user space and kernel space — this boundary IS the OS interface.</p>
+            </div>
+        </div>
+
+        <div class="section" id="syscalls">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>System Calls — The OS Interface</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>xv6 has just 22 system calls. That's the ENTIRE interface between every program and the kernel. Linux has ~350 — same idea, more of them.</p>
+                <pre>// xv6-riscv/kernel/syscall.h (first 10 of 22)
+#define SYS_fork    1   // create a new process
+#define SYS_exit    2   // terminate this process
+#define SYS_wait    3   // wait for a child to finish
+#define SYS_pipe    4   // create a pipe
+#define SYS_read    5   // read from a file descriptor
+#define SYS_kill    6   // send a signal to a process
+#define SYS_exec    7   // replace this process with a program
+#define SYS_fstat   8   // get file metadata
+#define SYS_chdir   9   // change working directory
+#define SYS_dup    10   // duplicate a file descriptor</pre>
+                <p>Three functional groups:</p>
+                <ul>
+                    <li><strong>fork / exec / wait</strong> — run programs (processes)</li>
+                    <li><strong>read / write / open / close</strong> — file I/O</li>
+                    <li><strong>pipe</strong> — plumbing between programs</li>
+                </ul>
+                <div class="highlight"><p>A system call is different from a normal function call. A normal call stays in user space — just a jump to another address. A system call crosses the privilege boundary via a trap instruction, switches to kernel mode, does privileged work, then returns to user mode. The crossing has cost — it's not free like a function call.</p></div>
+                <p><strong>Mechanism vs. Policy</strong> — the split to remember throughout this course:</p>
+                <ul>
+                    <li><strong>Mechanism</strong> = HOW something is done (context switch, page table lookup)</li>
+                    <li><strong>Policy</strong> = WHICH and WHEN (which process runs next, which page to evict)</li>
+                    <li>You can swap the policy without rebuilding the mechanism — this is why they're kept separate</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="history">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Unix & xv6 — A Short History</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Production Line</h3><p>1969: UNIX at Bell Labs (Thompson & Ritchie). 1975: Sixth Edition spreads to universities (antitrust bars AT&T from selling it). 1977: BSD → lives on in macOS. 1983: System V (commercial). 1991: Linux — written from scratch, Unix-like, wanted a free Unix for PCs.</p></div>
+                    <div class="card"><h3>Teaching Line — Where xv6 Lives</h3><p>1976: Lions' Commentary — full v6 source annotated line by line. 1979: AT&T bans classroom use of Unix source. 1987: MINIX (Tanenbaum) — small Unix-like OS, no AT&T code, legal to teach. 2006: xv6 — MIT re-implements v6 in modern C for x86. 2019: xv6-riscv — multi-core, runs on RISC-V.</p></div>
+                </div>
+                <div class="highlight"><p>Reading xv6 = reading the 1975 Unix design, in code written to be read. Same architecture and philosophy as v6; rewritten in ANSI C for modern hardware, with real multiprocessor support. MINIX inspired Linux — Linus Torvalds was frustrated by MINIX's limitations and wrote Linux from scratch in 1991.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="xv6">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Meet xv6 — The Kernel We Read All Semester</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>What It Is</h3><p>A small, complete, real Unix from MIT. ~6,600 lines of kernel source in C. It boots, runs a shell, runs programs, and has real processes, page tables, and a file system. Small enough to read completely, real enough to be worth reading.</p></div>
+                    <div class="card"><h3>Why Not Just Read Linux?</h3><p>The Linux kernel is over 30 million lines — nobody learns the core ideas by reading it. xv6 makes the same design choices in a form that fits in your head. Every core concept (processes, memory, files) is visible and traceable.</p></div>
+                    <div class="card"><h3>Two Repos</h3><p><strong>mit-pdos/xv6-riscv</strong> — the clean kernel read in lecture. <strong>xv6-labs-2025</strong> — same kernel plus your lab exercises. You boot it in Friday's lab and can change, rebuild, and run it.</p></div>
+                    <div class="card"><h3>The struct proc</h3><p>Every process in xv6 is one C struct. Fields: state (RUNNING/RUNNABLE/SLEEPING), context (saved registers for switching), pagetable (private memory view), ofile (open files), pid, name. Switching processes = save one context, restore another.</p></div>
+                </div>
+                <pre>// xv6-riscv/kernel/proc.h — the WHOLE process struct
+struct proc {
+  struct spinlock lock;
+  enum procstate state;    // RUNNING, RUNNABLE, SLEEPING…
+  int pid;                 // process ID
+  struct proc *parent;     // parent process
+  uint64 kstack;           // kernel stack address
+  uint64 sz;               // size of process memory (bytes)
+  pagetable_t pagetable;   // its private page table
+  struct trapframe *trapframe; // saved user registers
+  struct context context;  // swtch() here to run process
+  struct file *ofile[NOFILE]; // open files
+  struct inode *cwd;       // current directory
+  char name[16];           // process name (debugging)
+};</pre>
+            </div>
+        </div>
+
+        <div class="section" id="cpuvirt">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>CPU Virtualization — The Illusion of Many CPUs</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Consider a program that simply loops and prints:</p>
+                <pre>// cpu.c — OSTEP Fig. 2.1
+int main(int argc, char *argv[]) {
+    char *str = argv[1];
+    while (1) {
+        Spin(1);         // burn CPU for 1 second
+        printf("%s\n", str);
+    }
+}
+
+// One copy running: prints "A" once per second. No surprises.
+prompt> ./cpu A
+A
+A
+A  ^C</pre>
+                <p>Now run four copies simultaneously on ONE processor:</p>
+                <pre>prompt> ./cpu A & ./cpu B & ./cpu C & ./cpu D &
+A
+B
+D
+C
+A
+B
+D
+C
+...</pre>
+                <p>All four appear to run at the same time. The hardware can only fetch-decode-execute ONE instruction stream — yet A, B, C, and D all make progress. The OS creates this illusion.</p>
+                <div class="grid">
+                    <div class="card"><h3>Illusion</h3><p>Each program believes it has the CPU entirely to itself. Reality: the OS rapidly switches between them.</p></div>
+                    <div class="card"><h3>Mechanism</h3><p>HOW the switch is done: save this program's registers (its context), restore another program's. (Covered in detail — processes & scheduling weeks.)</p></div>
+                    <div class="card"><h3>Policy</h3><p>WHICH program runs next and for how long: the scheduler's decision. (MLFQ, proportional share — scheduling weeks.)</p></div>
+                    <div class="card"><h3>Process</h3><p>A running program — the OS object that owns one of those virtual CPUs. The unit of execution the OS manages.</p></div>
+                </div>
+                <div class="highlight"><p>The order (A B D C instead of A B C D) and the interleaving vary from run to run. On a multi-core machine the pattern changes again. Any interleaving is the correct result — that's the point. The OS gives no guarantees about order, only about progress.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="memvirt">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Memory Virtualization — Private Address Spaces</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// mem.c — OSTEP Fig. 2.3
+int main(int argc, char *argv[]) {
+    int *p = malloc(sizeof(int));  // allocate one int
+    printf("(%d) address of p: %p\n", getpid(), p);
+    *p = 0;
+    while (1) {
+        Spin(1);
+        *p = *p + 1;
+        printf("(%d) p: %d\n", getpid(), *p);
+    }
+}
+
+prompt> ./mem & ./mem &
+(24113) address of p: 0x200000
+(24114) address of p: 0x200000    // SAME address!
+(24113) p: 1
+(24114) p: 1                       // independent counters!
+(24113) p: 2
+(24114) p: 2</pre>
+                <p>Both processes claim address <code>0x200000</code> — yet their counters never interfere. How?</p>
+                <p>The OS gives each process a <strong>private virtual address space</strong>. The OS maps each virtual address to a different physical location in DRAM — programs never see the mapping:</p>
+                <pre>Process A (pid 24113):   virtual 0x200000 → physical 0x51a000
+Process B (pid 24114):   virtual 0x200000 → physical 0x77c000</pre>
+                <div class="highlight"><p>Virtual memory means every process thinks it has the machine's full address space to itself. The OS (with hardware help via the MMU and page tables) silently translates every memory access. Process A reading address 0x200000 and process B reading 0x200000 hit completely different physical RAM. Neither knows the other exists. This is virtualizing memory — covered in depth during the memory weeks.</p></div>
+                <p>On modern Linux, the two addresses will likely differ due to ASLR (Address Space Layout Randomization) — address randomization is itself built on this same virtual memory illusion, adding a random offset to every process's layout for security.</p>
+            </div>
+        </div>
+
+        <div class="section" id="map">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Three Easy Pieces — Course Map</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The course follows OSTEP's three-part structure. Each piece answers one core crux: <em>share the machine · coordinate the sharing · make data survive.</em></p>
+                <div class="grid">
+                    <div class="card"><h3>Virtualization</h3><p>CPU: processes, limited direct execution, scheduling (MLFQ, proportional share). Memory: address spaces, paging, TLBs, swapping. The OS as illusionist — making one machine look like many.</p></div>
+                    <div class="card"><h3>Concurrency</h3><p>Threads and the perils of sharing. Locks, condition variables, semaphores. Concurrency bugs, deadlock, Banker's algorithm. The OS as coordinator — managing threads that share resources.</p></div>
+                    <div class="card"><h3>Persistence</h3><p>I/O devices and disks. File systems: implementation, FFS, crash consistency, LFS. Distributed systems, NFS, and security. The OS as archivist — making data survive reboots and failures.</p></div>
+                </div>
+                <div class="highlight"><p>The title is a nod to Feynman's Six Easy Pieces — the authors joke that operating systems are about half as hard as physics. The three-part structure isn't arbitrary: virtualization lets us share hardware, concurrency lets shared hardware be used simultaneously, and persistence lets the results of that use survive. Remove any one piece and the OS doesn't work.</p></div>
+                <p><strong>Key resources:</strong></p>
+                <ul>
+                    <li>OSTEP (free): <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/" style="color:#16a34a">pages.cs.wisc.edu/~remzi/OSTEP/</a></li>
+                    <li>xv6 book (free): <a href="https://xv6-guide.github.io/xv6-riscv-book/index.html" style="color:#16a34a">xv6-guide.github.io/xv6-riscv-book/</a></li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

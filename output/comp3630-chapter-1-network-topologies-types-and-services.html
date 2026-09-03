@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 1: Network Topologies, Types, and Services</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #2a0a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b91c1c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #dc2626; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b91c1c; color: white; border-color: #b91c1c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #dc2626; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0a0a; border-left: 3px solid #b91c1c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #dc2626; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #dc2626; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b91c1c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #dc2626; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 1</div>
+        <h1>Network Topologies, Types, and Services</h1>
+        <p class="subtitle">Network architecture, physical vs. logical topology, media types, network scales, service providers, and overlay technologies</p>
+    </header>
+    <nav>
+        <a href="#topology">Topology vs. Media</a>
+        <a href="#physical">Physical Topologies</a>
+        <a href="#planes">Network Planes</a>
+        <a href="#media">Network Media</a>
+        <a href="#equipment">Equipment</a>
+        <a href="#models">Network Models</a>
+        <a href="#scales">Network Scales</a>
+        <a href="#overlay">Overlay & WAN</a>
+        <a href="#demarc">Service Providers</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="topology">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Two Pillars: Topology vs. Media</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every network design rests on two foundational concepts that are distinct but work together:</p>
+                <div class="grid">
+                    <div class="card"><h3>Network Topology</h3><p>How devices are arranged and communicate. <strong>Physical topology</strong> = the structural blueprint (cable locations, switch positions, endpoints). <strong>Logical topology</strong> = actual data traffic flow and access control rules. Think of it as: physical = empty streets, logical = traffic regulations.</p></div>
+                    <div class="card"><h3>Network Media</h3><p>What physically carries the signal. <strong>Bounded (wired)</strong>: copper (electrical signals) or fiber (light pulses). <strong>Unbounded (wireless)</strong>: electromagnetic waves (Wi-Fi, Bluetooth, Cellular, Satellite). Think of it as: the physical highway asphalt that vehicles travel on.</p></div>
+                </div>
+                <div class="highlight"><p>Topology and media are independent choices. A star physical topology can run on twisted pair copper OR fiber. A wireless network has a star logical topology but uses unbounded media. Always evaluate both separately when designing a network.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="physical">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Physical Topologies</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Topology</th><th>Structure</th><th>Pros</th><th>Cons</th><th>Use Today</th></tr>
+                    <tr><td>Star</td><td>Every device connects to a central switch</td><td>Fast, reliable, easy to troubleshoot and expand</td><td>Central switch = single point of failure; more cabling</td><td>Dominant LAN design — modern standard</td></tr>
+                    <tr><td>Mesh</td><td>Each device connects to multiple other devices</td><td>Extremely redundant, multiple paths available</td><td>Very expensive and complex; many connections required</td><td>Internet backbone, military, wireless mesh</td></tr>
+                    <tr><td>Bus</td><td>All devices share one backbone cable</td><td>Very cheap, minimal cabling</td><td>Any cable break kills the whole network; hard to troubleshoot</td><td>Legacy / obsolete</td></tr>
+                    <tr><td>Ring</td><td>Devices form a closed loop; data travels one direction</td><td>Predictable performance, no collisions</td><td>Single break disrupts communication (unless dual-ring)</td><td>Rare — IBM Token Ring, FDDI (legacy)</td></tr>
+                </table>
+                <div class="highlight"><p>Modern LANs almost universally use star topology because it isolates failures (one cable break affects only one device) and scales easily. Mesh is reserved for high-availability environments where redundancy justifies cost — the internet backbone is essentially a massive mesh.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="planes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Network Planes — Control, Data & Management</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Packet-switched networks (PSN)</strong> break data into packets transmitted via any available link — unlike legacy circuit-switched networks that reserve a dedicated physical path. To manage dynamic packet delivery, network nodes split operations into three planes:</p>
+                <div class="grid">
+                    <div class="card"><h3>Control Plane — The Brain</h3><p>Calculates and decides HOW packets are routed. Builds and maintains routing tables. Runs protocols: OSPF, BGP, STP. Analogy: the city planner mapping optimal routes.</p></div>
+                    <div class="card"><h3>Data Plane — The Muscle</h3><p>Actually FORWARDS packets based on control plane decisions. Handled in hardware (ASICs) by inspecting MAC addresses and routing headers. High-speed, low-level operation. Analogy: the vehicles driving freight along planned routes.</p></div>
+                    <div class="card"><h3>Management Plane — Administration</h3><p>Monitors, configures, and manages network devices. Accessed by admins via SSH, SNMP, HTTPS portals, REST APIs, or local console. Analogy: the transit authority regulating and monitoring conditions.</p></div>
+                </div>
+                <div class="highlight"><p>The separation of planes is fundamental to modern networking — and to Software-Defined Networking (SDN), which physically separates the control plane from the data plane so a central controller manages routing decisions for many devices simultaneously. Understanding these three planes explains why network devices have separate management interfaces (not the same port you use for data traffic).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="media">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Network Media</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Media</th><th>Signal Type</th><th>Pros</th><th>Cons</th><th>Typical Uses</th></tr>
+                    <tr><td>Twisted Pair (Copper)</td><td>Electrical</td><td>Inexpensive, flexible, easy to install and terminate</td><td>Limited to ~100m per run, susceptible to EMI</td><td>Office workstations, wall outlets, LAN access layer</td></tr>
+                    <tr><td>Coaxial Cable</td><td>Electrical</td><td>Excellent EMI shielding, longer runs than twisted pair</td><td>Bulky, stiff, harder to route through tight spaces</td><td>Cable internet, CCTV, legacy LAN backbone</td></tr>
+                    <tr><td>Fiber Optic</td><td>Light pulses</td><td>Blazing speed, extreme distance, 100% EMI immune</td><td>High equipment cost, fragile glass core</td><td>WAN backbones, campus core links, data centers</td></tr>
+                    <tr><td>Wireless</td><td>Electromagnetic waves</td><td>True mobility, fast deployment, no cabling</td><td>Susceptible to radio interference and obstacles</td><td>Wi-Fi (LAN), Bluetooth (PAN), 5G (WAN/mobile), Satellite</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="equipment">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Hubs vs. Switches</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Ethernet Hub (Legacy)</h3><p>Physical star, but LOGICAL BUS. Broadcasts every frame out of every port. All devices must inspect and discard frames not addressed to them. Heavy collision potential, serious security risk (easy to sniff all traffic), bandwidth shared across all devices.</p></div>
+                    <div class="card"><h3>Ethernet Switch (Modern)</h3><p>Physical star AND logical point-to-point. Learns MAC addresses of connected devices dynamically. Forwards frames ONLY to the port where the destination MAC resides. Drastically fewer collisions, higher bandwidth, much better security.</p></div>
+                </div>
+                <div class="highlight"><p>Switches replaced hubs entirely in modern networks. The switch's MAC address table (CAM table) is the key — it maps each MAC address to a specific port. When a frame arrives, the switch looks up the destination MAC, finds the port, and sends it only there. Unknown MACs get flooded (like a hub) until learned. This single change from hub to switch transformed Ethernet from a collision-prone shared medium to a high-speed, secure, point-to-point network.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="models">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Network Models — P2P vs. Client-Server</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Peer-to-Peer (P2P)</h3><p>Every host can be both client and server. No specialized central server OS required. Low hardware cost, simple setup. Poor scalability, difficult security enforcement. Best for: homes, small offices, fewer than 10 devices.</p></div>
+                    <div class="card"><h3>Client-Server</h3><p>Dedicated central servers handle all requests. Centralized backups, authentication, and security policies. Highly scalable for large organizations. High cost and complex administration. Best for: modern enterprises, any organization needing centralized control.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="scales">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Network Scales — PAN to WAN</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Type</th><th>Scope</th><th>Range</th><th>Technologies</th><th>Example</th></tr>
+                    <tr><td>PAN (Personal Area)</td><td>Single individual's devices</td><td>&lt;10 meters</td><td>Bluetooth, NFC, USB, Infrared</td><td>Phone ↔ earbuds, smartwatch ↔ laptop</td></tr>
+                    <tr><td>LAN (Local Area)</td><td>Single building or room</td><td>Building/floor</td><td>Ethernet (1–100 Gbps), Wi-Fi (WLAN)</td><td>Office, home, school lab</td></tr>
+                    <tr><td>CAN (Campus Area)</td><td>Multiple buildings, one property</td><td>Campus grounds</td><td>High-speed fiber optic backbone</td><td>University, hospital complex, industrial park</td></tr>
+                    <tr><td>MAN (Metropolitan Area)</td><td>Entire city or region</td><td>Several to dozens of miles</td><td>Metro Ethernet, Carrier Ethernet, optical rings</td><td>City government network, school district, hospital chain</td></tr>
+                    <tr><td>WAN (Wide Area)</td><td>Regional, national, or global</td><td>Hundreds to thousands of miles</td><td>MPLS, VPN, leased lines, undersea fiber, satellite</td><td>Corporate multi-site network, the Internet itself</td></tr>
+                </table>
+                <div class="highlight"><p>WAN links are characterized by higher latency, lower throughput relative to cost, and shared infrastructure leased from carriers. LAN links are extremely fast (1–100 Gbps), low latency, and privately owned. The transition from LAN to WAN is where cost, complexity, and latency jump dramatically — this is where VPNs and SD-WAN become critical.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="overlay">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Overlay Technologies — VPN, SD-WAN, VLAN</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Overlay networks are logical networks built on top of physical infrastructure, adding encryption, routing intelligence, and segmentation that the physical underlay doesn't provide natively.</p>
+                <div class="grid">
+                    <div class="card"><h3>Physical WAN Underlay</h3><p>Infrastructure spanning large distances — leased from telco carriers. Can use MPLS (label-based switching), dark fiber, microwave, or satellite. No native encryption or logical isolation.</p></div>
+                    <div class="card"><h3>VPN (Virtual Private Network)</h3><p>Builds encrypted tunnels over public internet routes. Makes remote sites appear connected to the same private network. Low cost compared to dedicated leased lines.</p></div>
+                    <div class="card"><h3>SD-WAN</h3><p>Software-Defined WAN. Secure overlays that automatically load-balance and route traffic across multiple connections (broadband, MPLS, LTE). Intelligent path selection based on application needs.</p></div>
+                    <div class="card"><h3>VLAN / VXLAN</h3><p>VLAN: Logically segments a physical switch into multiple isolated networks. VXLAN: Extends layer 2 paths across cloud hypervisors and data center fabrics — scales to 16 million segments vs. VLAN's 4,096.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="demarc">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Service Providers & The Demarcation Point</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The <strong>demarcation point (demarc)</strong> is the precise boundary separating carrier-owned infrastructure from customer-owned equipment. It defines liability: the carrier owns everything up to the demarc, the customer owns everything after it.</p>
+                <div class="grid">
+                    <div class="card"><h3>Service Provider Side</h3><p>High-capacity fiber/copper. Carrier Central Office (CO). Provider Edge (PE) routers. Carrier is responsible for all maintenance and uptime up to the demarc.</p></div>
+                    <div class="card"><h3>Demarc / Smartjack (NID)</h3><p>The Network Interface Device at the customer premises. Acts as a smart interface and test point. Carrier can remotely perform loopback tests WITHOUT sending a technician on-site — isolates whether problems are on the carrier side or customer side.</p></div>
+                    <div class="card"><h3>Customer Premises (CPE)</h3><p>Customer owns and is 100% responsible for: modems, ONTs (fiber termination), firewalls, routers, internal switches, and all internal cabling. Customer Premises Equipment = CPE.</p></div>
+                </div>
+                <div class="highlight"><p>Understanding the demarc is critical for troubleshooting. When a connection fails: test at the demarc first. If the carrier's loopback test passes, the problem is on the customer side (CPE). If it fails, the carrier must fix it. This clean division of responsibility prevents billing disputes and speeds up fault isolation.</p></div>
+                <p><strong>Three architectural decisions that shape any network design:</strong></p>
+                <ul>
+                    <li><strong>Topology</strong> — star for LAN reliability, mesh/hybrid for high-availability backbones</li>
+                    <li><strong>Scale & Model</strong> — client-server for centralized control; VPN/SD-WAN to connect distributed sites</li>
+                    <li><strong>Media</strong> — twisted pair for workstation access, coaxial for broadband, fiber for backbones, wireless for mobility</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

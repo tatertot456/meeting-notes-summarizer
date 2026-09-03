@@ -862,5 +862,23 @@
     "accent": "#be185d",
     "glow": "#2a0a1a",
     "badge": "#9d174d"
+  },
+  {
+    "title": "COMP3630 Chapter 1 Network Topologies Types and Services",
+    "filename": "comp3630-chapter-1-network-topologies-types-and-services.html",
+    "category": "Networks",
+    "date": "2026-09-02 01:17 PM",
+    "accent": "#dc2626",
+    "glow": "#2a0a0a",
+    "badge": "#b91c1c"
+  },
+  {
+    "title": "COMP3430 Introduction and OS Overview",
+    "filename": "comp3430-introduction-and-os-overview.html",
+    "category": "Operating Systems",
+    "date": "2026-09-02 07:16 PM",
+    "accent": "#16a34a",
+    "glow": "#0a2a0a",
+    "badge": "#15803d"
   }
 ]
