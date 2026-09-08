@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 2: Network Models and Device Architectures</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b45309; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #b45309; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #b45309; color: white; border-color: #b45309; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #b45309; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1f1200; border-left: 3px solid #b45309; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #b45309; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #b45309; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #b45309; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b45309; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #b45309; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 2</div>
+        <h1>Network Models and Device Architectures</h1>
+        <p class="subtitle">OSI model, DoD TCP/IP model, encapsulation, PDUs, troubleshooting, device roles, BYOD, IoT, and ICS security</p>
+    </header>
+    <nav>
+        <a href="#layering">Why Layering?</a>
+        <a href="#upper">OSI Layers 5–7</a>
+        <a href="#transport">OSI Layer 4</a>
+        <a href="#lower">OSI Layers 1–3</a>
+        <a href="#encap">Encapsulation</a>
+        <a href="#tcpip">DoD TCP/IP Model</a>
+        <a href="#troubleshoot">Troubleshooting</a>
+        <a href="#devices">Devices & BYOD</a>
+        <a href="#iot">IoT & ICS</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="layering">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why Layering? The Core Advantage</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>conceptual model</strong> is a logical framework that describes the different functions required for computers to communicate. Rather than treating networking as one massive monolithic process, it breaks communication into individual layers with distinct responsibilities — each communicating only with layers directly above and below it.</p>
+                <p><strong>Crucial distinction:</strong> A conceptual model is NOT itself a protocol. It's an organizational blueprint of where protocols and technologies operate.</p>
+                <div class="grid">
+                    <div class="card"><h3>Technology Isolation</h3><p>One technology can change at a specific layer without requiring a redesign of the entire stack. HTTP doesn't care if it runs over Ethernet, Wi-Fi, fiber, or 5G.</p></div>
+                    <div class="card"><h3>Independent Design</h3><p>Software engineers build browsers and electrical engineers build transceivers completely independently while maintaining compatibility — because each stays in its layer.</p></div>
+                    <div class="card"><h3>Application Autonomy</h3><p>A web application transmits over any physical medium without the application protocol ever needing to understand the transmission technology below it.</p></div>
+                    <div class="card"><h3>Systematic Troubleshooting</h3><p>Engineers dissect outages by working layer-by-layer up or down the stack — isolating exactly which function has failed instead of guessing randomly.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="upper">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>OSI Upper Layers — 7, 6, 5</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Layer 7 — Application</h3><p>Provides network services directly to client and server applications. NOT the application itself (Chrome/Outlook) — it represents the underlying protocols those apps use. Examples: HTTP/HTTPS, SMTP, DNS, DHCP, SSH.</p></div>
+                    <div class="card"><h3>Layer 6 — Presentation</h3><p>Governs how information is formatted, represented, and translated. Handles: data formatting/syntax, character encoding (ASCII, UTF-8), serialization, compression, and encryption/decryption (TLS/SSL). Often consolidated into the application software stack rather than acting as a standalone OS component.</p></div>
+                    <div class="card"><h3>Layer 5 — Session</h3><p>Establishes, maintains, and terminates communication sessions between applications. Lifecycle: Establish (coordinate connection params) → Maintain (manage active dialog state) → Terminate (safely close). Like Layer 6, typically handled by application-level protocols or system libraries in TCP/IP practice.</p></div>
+                </div>
+                <div class="highlight"><p>In the real TCP/IP world, Layers 5, 6, and 7 are effectively merged — the application handles all three. The distinction matters for understanding what FUNCTIONS exist, even if they're not separate OS components. When an engineer says "Layer 7 problem," they mean an application-level issue — not a cable.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="transport">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>OSI Layer 4 — Transport (TCP vs. UDP)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>TCP — Transmission Control Protocol</h3><p>Guaranteed end-to-end delivery. Connection-oriented (three-way handshake). Reliable tracking, packet sequencing, acknowledgments, retransmission of lost segments, flow control. PDU = <strong>Segment</strong>. Header: 10 fields, 20 bytes — complex connection state.</p></div>
+                    <div class="card"><h3>UDP — User Datagram Protocol</h3><p>Lightweight, high-speed, minimal overhead. Connectionless, low latency, best-effort delivery. No retransmissions, no receipt verification. PDU = <strong>Datagram</strong>. Header: 4 fields, 8 bytes — zero connection state. Good for streaming, DNS, gaming.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Layer 4 Addressing — 16-bit Port Numbers:</strong></p>
+                <table>
+                    <tr><th>Port</th><th>Protocol</th><th>Transport</th><th>Service</th></tr>
+                    <tr><td>22</td><td>SSH</td><td>TCP</td><td>Secure remote shell</td></tr>
+                    <tr><td>53</td><td>DNS</td><td>UDP / TCP</td><td>Domain name resolution</td></tr>
+                    <tr><td>443</td><td>HTTPS</td><td>TCP</td><td>Encrypted web traffic</td></tr>
+                </table>
+                <div class="highlight"><p>IP addresses identify the HOST (the computer). Port numbers identify the specific APPLICATION or SERVICE on that host. Without ports, the OS wouldn't know whether incoming data belongs to your browser, SSH client, or email app — even if the IP address is correct. Think of IP as the building address and port as the apartment number.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="lower">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>OSI Lower Layers — 3, 2, 1</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Layer</th><th>Name</th><th>Job</th><th>Addressing</th><th>Key Device</th></tr>
+                    <tr><td>3</td><td>Network</td><td>Deliver packets BETWEEN networks. Select the best route across multiple hops.</td><td>IP addresses (logical): 32-bit IPv4, 128-bit IPv6</td><td>Router — examines destination IP to route packets across networks</td></tr>
+                    <tr><td>2</td><td>Data Link</td><td>Handle frame delivery across a SINGLE local physical link.</td><td>MAC addresses (physical, 48-bit, burned into NIC)</td><td>Switch — builds MAC table, forwards frames to specific ports only</td></tr>
+                    <tr><td>1</td><td>Physical</td><td>Transmit raw bits on the physical medium as electrical, optical, or radio signals.</td><td>None — no addressing at this layer</td><td>All devices/media that pass bits (cables, NICs, transceivers)</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Critical boundary — Local vs. Inter-network:</strong></p>
+                <ul>
+                    <li><strong>Layer 2</strong> — local delivery within a single LAN segment (same network)</li>
+                    <li><strong>Layer 3</strong> — global routing between distinct, separate networks</li>
+                </ul>
+                <p><strong>Layer 2 sublayers:</strong></p>
+                <ul>
+                    <li><strong>LLC (Logical Link Control)</strong> — flow control, error detection, error correction</li>
+                    <li><strong>MAC (Media Access Control)</strong> — physical addressing and frame synchronization</li>
+                </ul>
+                <div class="highlight"><p>A router strips the Layer 2 frame, examines the Layer 3 IP packet inside, makes a routing decision, wraps the packet in a NEW Layer 2 frame (for the next hop's link), and sends it on. The IP packet survives the journey; the frame is rebuilt at every hop. This is why MAC addresses are only meaningful locally — they change at every router hop, while the IP address stays the same end-to-end.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="encap">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Encapsulation & PDUs</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>As data travels from the application DOWN to the physical medium, each layer appends a header containing control information. The receiver reverses this (decapsulation), stripping headers as data travels back up.</p>
+                <pre>SENDER (down the stack):           RECEIVER (up the stack):
+
+Application data (L7/6/5)          BITS received on wire
+        ↓ TCP/UDP header added             ↓ convert to frame
+    SEGMENT (L4)                       FRAME (L2)
+        ↓ IP header added                  ↓ strip MAC header
+    PACKET (L3)                        PACKET (L3)
+        ↓ MAC header + CRC trailer         ↓ strip IP header
+    FRAME (L2)                         SEGMENT (L4)
+        ↓ convert to signals               ↓ strip TCP/UDP header
+    BITS (L1)                          DATA delivered to app</pre>
+                <p><strong>PDU names to memorize by layer:</strong></p>
+                <table>
+                    <tr><th>Layer(s)</th><th>PDU Name</th><th>Header Added By</th></tr>
+                    <tr><td>7 / 6 / 5</td><td>Data</td><td>Application protocol (HTTP, DNS, SSH…)</td></tr>
+                    <tr><td>4</td><td>Segment (TCP) / Datagram (UDP)</td><td>TCP or UDP</td></tr>
+                    <tr><td>3</td><td>Packet</td><td>IP protocol</td></tr>
+                    <tr><td>2</td><td>Frame</td><td>Ethernet / Wi-Fi (adds CRC trailer too)</td></tr>
+                    <tr><td>1</td><td>Bits</td><td>Physical medium (electrical, optical, radio)</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="tcpip">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>DoD TCP/IP Model vs. OSI</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The DoD/TCP-IP model collapses the 7 abstract OSI layers into 4 functional zones:</p>
+                <table>
+                    <tr><th>TCP/IP Layer</th><th>OSI Equivalent</th><th>What It Handles</th></tr>
+                    <tr><td>Application</td><td>Layers 7, 6, 5</td><td>All user-facing data: HTTP, DNS, SMTP, SSH. No distinction between application, presentation, and session.</td></tr>
+                    <tr><td>Transport</td><td>Layer 4</td><td>TCP (reliable) and UDP (fast). Port-based multiplexing.</td></tr>
+                    <tr><td>Internet</td><td>Layer 3</td><td>IP addressing and routing between networks.</td></tr>
+                    <tr><td>Network Access</td><td>Layers 2, 1</td><td>Physical bits and local frame delivery (Ethernet, Wi-Fi).</td></tr>
+                </table>
+                <div class="grid" style="margin-top:16px">
+                    <div class="card"><h3>OSI Model</h3><p>7-layer theoretical reference framework. Used for teaching, network design, and troubleshooting conversations. Not an actual implementation — a conceptual map.</p></div>
+                    <div class="card"><h3>TCP/IP Model</h3><p>4-layer practical architecture. Actually runs the global Internet. Every real protocol (HTTP, IP, TCP, Ethernet) lives in one of these four layers. This is what's implemented in real systems.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="troubleshoot">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>OSI Troubleshooting — Bottom Up</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Technicians avoid random guessing by working systematically upward from the physical layer. If Layer 1 works, check Layer 2. If Layer 2 works, check Layer 3, and so on.</p>
+                <table>
+                    <tr><th>Layer</th><th>Symptom</th><th>Likely Cause</th></tr>
+                    <tr><td>L1 — Physical</td><td>No link light, no connectivity at all</td><td>Broken/unplugged Ethernet cable, damaged transceivers, bad connectors</td></tr>
+                    <tr><td>L2 — Data Link</td><td>Can't reach devices on local network</td><td>Incorrect VLAN assignment, port security blocking the MAC address</td></tr>
+                    <tr><td>L3 — Network</td><td>Can reach local devices but not outside network; ping fails to remote hosts</td><td>Wrong IP address, incorrect subnet mask, wrong default gateway configured</td></tr>
+                    <tr><td>L4 — Transport</td><td>Network works (ping succeeds) but specific service unreachable</td><td>Firewall blocking port 443 (HTTPS) or port 22 (SSH) — "connection refused"</td></tr>
+                    <tr><td>L7 — Application</td><td>Network fine, but web/app service unavailable</td><td>Web server down, DNS failure, application misconfiguration</td></tr>
+                </table>
+                <div class="highlight"><p>"That's a Layer 1 issue" is shorthand that means: the problem is physical — check the cable before touching any software. Working bottom-up prevents wasted time. Many technicians waste hours reconfiguring IP addresses when the real problem is an unplugged cable (L1) or a misconfigured VLAN (L2).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="devices">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Network Devices, Clients & BYOD</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Device layer roles:</strong></p>
+                <table>
+                    <tr><th>Device</th><th>OSI Layer</th><th>Function</th><th>Domain Separated</th></tr>
+                    <tr><td>Hub</td><td>Layer 1</td><td>Repeats all signals out every port — logical bus behavior</td><td>None — shares collision domain with all ports</td></tr>
+                    <tr><td>Switch</td><td>Layer 2</td><td>Builds MAC address table, forwards frames only to correct port</td><td>Separates collision domains per port</td></tr>
+                    <tr><td>Router</td><td>Layer 3</td><td>Routes packets between networks using IP routing table</td><td>Separates broadcast domains between networks</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Client device requirements</strong> — to participate in a network, every client must configure:</p>
+                <ul>
+                    <li><strong>Physical NIC</strong> — MAC address (hardware identifier)</li>
+                    <li><strong>Logical IP address</strong> — network identity</li>
+                    <li><strong>Subnet mask</strong> — defines local vs. remote</li>
+                    <li><strong>Default gateway</strong> — the router's IP for reaching other networks</li>
+                    <li><strong>DNS server</strong> — resolves hostnames to IP addresses</li>
+                </ul>
+                <p><strong>BYOD (Bring Your Own Device) Policy:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>NAC (Network Access Control)</h3><p>Evaluates device posture (OS version, encryption status) and user credentials BEFORE granting network access. Unhealthy devices get quarantined or denied.</p></div>
+                    <div class="card"><h3>VLAN Segmentation</h3><p>BYOD devices placed in isolated VLAN — cannot reach corporate servers directly. Corporate devices in separate VLAN. Limits blast radius if a personal device is compromised.</p></div>
+                    <div class="card"><h3>MDM (Mobile Device Management)</h3><p>Enforces security parameters: PIN lock, data encryption. Enables remote wipe of company data from personal devices if lost or stolen.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="iot">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>IoT, IIoT & ICS Security</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Category</th><th>Description</th><th>Examples</th><th>Failure Impact</th></tr>
+                    <tr><td>Consumer IoT</td><td>Connected smart devices for home/personal use</td><td>Smart thermostats, security cameras, smart lighting, wearables</td><td>Inconvenient — low safety risk</td></tr>
+                    <tr><td>Industrial IoT (IIoT)</td><td>IoT applied to gather high-density monitoring data in industrial settings</td><td>Vibration sensors, temperature sensors, predictive maintenance gateways</td><td>Maintenance gaps, failed predictions — operational impact</td></tr>
+                    <tr><td>ICS (Industrial Control Systems)</td><td>Control-oriented systems that monitor and regulate real physical processes in real time</td><td>PLCs (Programmable Logic Controllers), HMIs (Human-Machine Interfaces), SCADA systems</td><td>HIGH — production halt, environmental disaster, safety hazard</td></tr>
+                </table>
+                <div class="highlight"><p>ICS systems are the most dangerous category. Industrial controllers remain in service for 10–20 years. They run outdated firmware, use proprietary protocols, and are rarely patched. A compromised PLC controlling a water treatment plant or power grid is a physical-world catastrophe, not just a data breach.</p></div>
+                <p><strong>Defensive Solution — Dual-Firewall Purdue Architecture:</strong></p>
+                <ul>
+                    <li>Place an <strong>Industrial DMZ</strong> between the corporate network and industrial control systems</li>
+                    <li>Two firewalls bracket the DMZ — one facing the corporate network, one facing the ICS network</li>
+                    <li>ICS/SCADA/PLC systems are completely isolated from standard corporate traffic and the public Internet</li>
+                    <li>Any data that must cross (historian data, monitoring feeds) passes through the DMZ — never direct connection</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

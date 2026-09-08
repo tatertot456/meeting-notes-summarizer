@@ -880,5 +880,14 @@
     "accent": "#16a34a",
     "glow": "#0a2a0a",
     "badge": "#15803d"
+  },
+  {
+    "title": "COMP3630 Chapter 2 Network Models and Device Architectures",
+    "filename": "comp3630-chapter-2-network-models-and-device-architectures.html",
+    "category": "Networks",
+    "date": "2026-09-08 12:07 PM",
+    "accent": "#d97706",
+    "glow": "#1f1200",
+    "badge": "#b45309"
   }
 ]
