@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP4340 — Databases Refresher</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #1e0a3c, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #6d28d9; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #7c3aed; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #6d28d9; color: white; border-color: #6d28d9; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #7c3aed; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e0a3c; border-left: 3px solid #6d28d9; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #7c3aed; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #7c3aed; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #7c3aed; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #6d28d9; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #7c3aed; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Advanced Database · Refresher</div>
+        <h1>Databases Refresher</h1>
+        <p class="subtitle">Database engine, storage manager, relational algebra, joins, indices, and transactions</p>
+    </header>
+    <nav>
+        <a href="#why">Why Advanced DBs?</a>
+        <a href="#engine">DB Engine</a>
+        <a href="#acid">ACID</a>
+        <a href="#relalgebra">Relational Algebra</a>
+        <a href="#joins">Joins</a>
+        <a href="#indices">Indices</a>
+        <a href="#transactions">Transactions</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="why">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why Advanced Databases?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A single-disk database works when the DB fits in RAM and one machine handles all queries. As data grows, those assumptions break:</p>
+                <table>
+                    <tr><th>Scale</th><th>Situation</th><th>Problem</th></tr>
+                    <tr><td>Single disk (1–10 TB)</td><td>DB larger than RAM</td><td>Access management and query performance become critical</td></tr>
+                    <tr><td>Multiple disks (10–100 TB)</td><td>DB doesn't fit on one disk</td><td>Need an OS dedicated to storage ops; must still feel like a single disk</td></tr>
+                    <tr><td>Distributed (1+ TB/PB/EB)</td><td>Global locations, not all holding all data</td><td>Global location matters; consistency and latency become architectural problems</td></tr>
+                </table>
+                <div class="highlight"><p>The goal at every scale: it should feel the same as a single disk to the application. The complexity of distribution, replication, and partitioning is hidden below the query interface. That's the engineering challenge this course is about.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="engine">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Database Engine</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The database engine has two major subsystems: the <strong>Storage Manager</strong> and the <strong>Query Processor</strong>.</p>
+                <p><strong>Storage Manager</strong> — the interface between low-level data on disk and the queries above it:</p>
+                <div class="grid">
+                    <div class="card"><h3>Authorization & Integrity Manager</h3><p>Checks constraints and user access rights before any data is touched.</p></div>
+                    <div class="card"><h3>Transaction Manager</h3><p>Keeps the DB consistent despite failures and concurrent access. Implements ACID properties.</p></div>
+                    <div class="card"><h3>File Manager</h3><p>Allocates disk space and manages on-disk data structures (pages, extents, segments).</p></div>
+                    <div class="card"><h3>Buffer Manager</h3><p>Caches disk pages in RAM — allows the DB to exceed RAM size by managing which pages stay in memory and which are evicted.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Storage Manager Data Structures:</strong></p>
+                <ul>
+                    <li><strong>Data files</strong> — store the actual database content</li>
+                    <li><strong>Data dictionary</strong> — metadata about the schema (table definitions, column types, constraints)</li>
+                    <li><strong>Indices</strong> — pointers giving fast access to data items without scanning all rows</li>
+                </ul>
+                <p><strong>Query Processor</strong> — takes SQL and turns it into execution:</p>
+                <ul>
+                    <li><strong>DDL Interpreter</strong> — interprets DDL (CREATE, ALTER, DROP, TRUNCATE) and updates the data dictionary</li>
+                    <li><strong>DML Compiler</strong> — translates queries (SELECT, INSERT, DELETE) into evaluation plans; picks the lowest-cost plan (query optimization)</li>
+                    <li><strong>Query Evaluation Engine</strong> — executes the low-level instructions produced by the DML compiler</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="acid">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Transaction Manager — ACID</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Atomicity</h3><p>A transaction is all-or-nothing. Either every statement in the transaction commits, or none of them do. A crash mid-transaction rolls back all changes already made.</p></div>
+                    <div class="card"><h3>Consistency</h3><p>A transaction takes the database from one valid state to another valid state. All constraints, rules, and integrity conditions are satisfied after commit.</p></div>
+                    <div class="card"><h3>Isolation</h3><p>Concurrent transactions execute as if they were serial — each transaction sees a consistent snapshot and doesn't see another transaction's uncommitted intermediate state.</p></div>
+                    <div class="card"><h3>Durability</h3><p>Once a transaction commits, its effects are permanent — they survive system crashes, power failures, and restarts. Committed data is written to durable storage.</p></div>
+                </div>
+                <div class="highlight"><p>ACID is a promise the database makes to the application. The application can write code assuming these four properties hold, without worrying about concurrent users or hardware failures. The database engine is responsible for keeping that promise — which is most of what chapters 17–19 cover.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="relalgebra">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Relational Algebra</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Relational algebra is the formal language underlying SQL. Every operation takes relations as input and produces a relation as output — so operations can be nested and chained.</p>
+                <pre>Unary:  σ (select)   π (project)   ρ (rename)
+Binary: × (product)  ∪ (union)     ∩ (intersect)  − (difference)  ⋈ (join)</pre>
+
+                <p><strong>σ — Select (keeps rows):</strong></p>
+                <pre>σ dept_name = "Physics" (instructor)
+→ returns only rows where dept_name = 'Physics'
+
+Predicates combine with: ∧ (AND)  ∨ (OR)  ¬ (NOT)
+σ dept_name = "Physics" ∧ salary > 90000 (instructor)
+→ Einstein (95000) survives; Gold (87000) fails the salary test</pre>
+
+                <p><strong>π — Project (keeps columns):</strong></p>
+                <pre>π ID, name, salary (instructor)
+→ drops dept_name column; keeps only the three listed
+
+⚠ Project drops duplicates — a relation is a SET.
+π dept_name (instructor) returns 4 rows, not 5,
+even if two instructors are in Physics.
+SQL tables ARE NOT sets — duplicates survive there.</pre>
+
+                <p><strong>Composition — operations nest:</strong></p>
+                <pre>π name ( σ dept_name = "Physics" ( instructor ) )
+→ σ first: keeps 2 Physics rows
+→ π second: extracts just the names
+Same as nesting arithmetic — the inner result feeds the outer.</pre>
+
+                <p><strong>× — Cartesian Product (pairs everything):</strong></p>
+                <pre>instructor × teaches
+12 rows × 20 rows = 240 rows
+Only 12 of those pairs are meaningful. 228 are noise.
+This is why you don't use × directly — use ⋈ instead.</pre>
+
+                <p><strong>⋈ — Join (NOT a primitive):</strong></p>
+                <pre>r ⋈θ s   =   σθ ( r × s )
+Join = build the product, then filter with condition θ.
+The product is the expensive part — DBs approach joins differently (hash join, merge join, nested loop join).
+⋈ is shorthand that hides this cost.</pre>
+
+                <p><strong>∪ ∩ − — Set operations:</strong></p>
+                <table>
+                    <tr><th>Operation</th><th>Returns</th><th>Compatibility Requirement</th></tr>
+                    <tr><td>∪ Union</td><td>Tuples in either or both relations</td><td>Same arity + matching attribute types</td></tr>
+                    <tr><td>∩ Intersection</td><td>Tuples in BOTH relations</td><td>Same arity + matching attribute types</td></tr>
+                    <tr><td>− Difference</td><td>Tuples in first but NOT in second</td><td>Same arity + matching attribute types. Order matters: r−s ≠ s−r</td></tr>
+                </table>
+
+                <p style="margin-top:16px"><strong>← Assignment and ρ Rename:</strong></p>
+                <pre>← Assignment: stores a result in a temp variable to reuse
+phys ← σ dept_name = "Physics" (instructor)
+
+ρ Rename: renames a relation just long enough to finish a query
+instructor ⋈ (ρi (instructor))   -- self-join needs two different names</pre>
+
+                <div class="highlight"><p><strong>Selection Pushdown — query optimization on day 2:</strong> σθ(πL(r)) ≡ πL(σθ(r)) whenever θ only mentions attributes in L. Filter EARLY, carry fewer rows through the rest of the query. This is the central move of query optimization. A select that reduces 10,000 rows to 200 before projecting is vastly cheaper than projecting all 10,000 first.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="joins">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Joins</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A join is a Cartesian product plus a matching condition, said once. These all return the same rows for an inner join:</p>
+                <pre>-- Cartesian product + WHERE (old style):
+SELECT name, course_id FROM student, takes
+WHERE student.ID = takes.ID;
+
+-- JOIN ... ON (explicit condition):
+SELECT name, course_id FROM student
+JOIN takes ON student.ID = takes.ID;
+
+-- NATURAL JOIN (matches all shared column names):
+SELECT name, course_id FROM student NATURAL JOIN takes;</pre>
+
+                <p><strong>Natural Join — match on every shared column name:</strong></p>
+                <ul>
+                    <li>Shared columns appear ONCE in the result (not duplicated)</li>
+                    <li>Dangerous: if two tables share more column names than intended, natural join silently over-matches</li>
+                    <li>Example: student and course both have <code>dept_name</code> — natural join drops students taking courses outside their own department</li>
+                    <li><strong>Fix:</strong> use <code>JOIN ... USING (course_id)</code> to name exactly which columns to match on</li>
+                </ul>
+
+                <p><strong>JOIN ... ON vs. WHERE:</strong></p>
+                <pre>-- ON: matching condition (how rows pair up)
+FROM student JOIN takes ON student.ID = takes.ID
+
+-- WHERE: filtering condition (which rows to keep after joining)
+-- For inner joins they're equivalent — but for outer joins they differ!</pre>
+
+                <p><strong>Outer Joins — keep rows with no partner:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>LEFT OUTER JOIN</h3><p>Every row of the LEFT table survives, padded with NULL for unmatched right-side columns. A student with no courses still appears, with NULL course columns.</p></div>
+                    <div class="card"><h3>RIGHT OUTER JOIN</h3><p>Every row of the RIGHT table survives, padded with NULL for unmatched left-side columns.</p></div>
+                    <div class="card"><h3>FULL OUTER JOIN</h3><p>Both sides survive. Equivalent to left outer UNION right outer. Unmatched rows from both sides appear with NULLs.</p></div>
+                    <div class="card"><h3>Finding Unmatched Rows</h3><p>After a left outer join: WHERE course_id IS NULL finds students with no courses — the rows that had no partner on the right side.</p></div>
+                </div>
+                <div class="highlight"><p>Any join TYPE pairs with any join CONDITION. The words "inner" and "outer" are optional — omit them and you get an inner join by default. Matching logic goes in ON; additional filtering goes in WHERE. This separation matters on outer joins where ON and WHERE give different answers.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="indices">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Indices</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Without an index: a query like <code>WHERE dept_name = 'Physics'</code> reads ALL 8 rows and tests each one. With an index on <code>dept_name</code>: read 1 index entry → jump directly to the 2 matching rows. Same answer, 4× fewer reads.</p>
+                <pre>-- Create an index:
+CREATE INDEX dept_index ON instructor (dept_name);
+
+-- Search key can be multiple columns:
+CREATE INDEX name_dept_index ON instructor (name, dept_name);
+
+-- Unique index (declares the key a candidate key):
+CREATE UNIQUE INDEX dept_index ON instructor (dept_name);
+-- Fails if duplicates already exist; blocks them going forward.
+
+-- Drop an index:
+DROP INDEX dept_index;
+-- Name it deliberately — the name is the only handle you have.</pre>
+
+                <div class="highlight"><p>Indices are NOT in the SQL standard — the standard covers logical schema only. Indices are physical schema. Widely supported but syntax varies by system. Adding or dropping an index NEVER changes the text of a query — the optimizer decides whether to use it. A wrong answer is never an index problem. A slow answer might be.</p></div>
+
+                <p><strong>What an index costs vs. what it buys:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>What You Get</h3><p>Selective lookups skip the full scan. Primary-key and foreign-key constraint checks get cheap. Updates that find rows by key get cheap too.</p></div>
+                    <div class="card"><h3>What You Pay</h3><p>Disk space for a second copy of the key data. Every INSERT, DELETE, and UPDATE must also maintain the index. The optimizer may choose not to use it anyway (small table, low-selectivity value → full scan is cheaper).</p></div>
+                </div>
+                <p>An index is a <strong>speed decision, not a correctness one</strong>. Drop every index and every query still returns the right answer — just slowly. Chapter 14 covers B+-tree and hash indices, clustered indices, and how to decide which ones to build.</p>
+            </div>
+        </div>
+
+        <div class="section" id="transactions">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Transactions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Consider a $100 transfer between accounts — two UPDATE statements that must both succeed or both fail:</p>
+                <pre>UPDATE account SET balance = balance - 100 WHERE number = 'A-101';
+-- ← system crashes HERE
+UPDATE account SET balance = balance + 100 WHERE number = 'A-215';
+
+-- Without a transaction: A-101 loses $100, A-215 gains nothing.
+-- $100 disappears from the total. Neither statement is wrong alone.
+-- The PAIR must be all-or-nothing.</pre>
+
+                <p>A <strong>transaction</strong> is the unit the database promises to finish completely or not at all.</p>
+                <pre>-- End a transaction:
+COMMIT WORK;      -- makes every update permanent; starts a new transaction
+ROLLBACK WORK;    -- undoes every update; DB returns to pre-transaction state</pre>
+
+                <div class="grid">
+                    <div class="card"><h3>COMMIT</h3><p>All updates become permanent. Survive crashes. Cannot be undone by a rollback. Like saving a document.</p></div>
+                    <div class="card"><h3>ROLLBACK</h3><p>All updates are erased. DB returns to state before the first statement. Use immediately when a statement reports an error. Like quitting without saving.</p></div>
+                </div>
+
+                <p style="margin-top:16px"><strong>Autocommit — the hidden danger:</strong></p>
+                <table>
+                    <tr><th>System</th><th>Autocommit Default</th><th>How to Group Statements</th></tr>
+                    <tr><td>MySQL</td><td>ON</td><td>SET autocommit = 0, then COMMIT</td></tr>
+                    <tr><td>PostgreSQL</td><td>ON</td><td>BEGIN, then COMMIT or ROLLBACK</td></tr>
+                    <tr><td>SQL Server</td><td>ON</td><td>BEGIN, then COMMIT or ROLLBACK</td></tr>
+                    <tr><td>Oracle</td><td>OFF for DML</td><td>COMMIT before you disconnect</td></tr>
+                </table>
+
+                <div class="highlight"><p>With autocommit ON, each statement is its own transaction. Two UPDATE statements run as TWO transactions — a crash between them leaves the halfway state committed and permanent. To get atomicity across multiple statements, you must group them yourself with BEGIN / COMMIT. Exit without committing on Oracle and your changes are thrown away. Know your system's default.</p></div>
+
+                <p><strong>Atomicity in practice:</strong></p>
+                <ul>
+                    <li>If the transaction reaches COMMIT → every effect is kept and survives a crash</li>
+                    <li>If it did NOT commit (error, crash, explicit ROLLBACK) → every effect is erased; the DB rolls back on restart</li>
+                    <li>Related updates that must stay in sync (e.g., a grade in <code>takes</code> AND the credits in <code>student.tot_cred</code>) belong in one transaction</li>
+                </ul>
+                <p>Chapters 17–19 cover what else transactions guarantee and how rollback is implemented (write-ahead logging, undo/redo).</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
