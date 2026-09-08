@@ -889,5 +889,14 @@
     "accent": "#d97706",
     "glow": "#1f1200",
     "badge": "#b45309"
+  },
+  {
+    "title": "COMP3430 Concurrency and Persistence",
+    "filename": "comp3430-concurrency-and-persistence.html",
+    "category": "Operating Systems",
+    "date": "2026-09-08 12:31 PM",
+    "accent": "#2563eb",
+    "glow": "#0a0a2e",
+    "badge": "#1d4ed8"
   }
 ]

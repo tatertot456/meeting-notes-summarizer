@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3430 — Concurrency and Persistence</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        header { background: linear-gradient(135deg, #0a0a2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #1d4ed8; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #2563eb; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #2563eb; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0f1a0f; border-left: 3px solid #1d4ed8; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #2563eb; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #2563eb; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #2563eb; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #1d4ed8; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #2563eb; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Operating Systems · Concurrency & Persistence</div>
+        <h1>Concurrency and Persistence</h1>
+        <p class="subtitle">Race conditions, threads, locks, file system I/O, the page cache, fsync, and OS design goals</p>
+    </header>
+    <nav>
+        <a href="#race">Race Conditions</a>
+        <a href="#threads">Threads & Memory</a>
+        <a href="#why">Why It Fails</a>
+        <a href="#lock">The Lock Fix</a>
+        <a href="#persist">Persistence & Files</a>
+        <a href="#pagecache">The Page Cache</a>
+        <a href="#fsync">fsync Cost</a>
+        <a href="#design">OS Design Goals</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="race">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Concurrency Crux — Two Workers, One Counter</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Last time: the OS virtualizes the CPU (four loops, one processor) and memory (same address, different contents). Now: what happens when two virtual CPUs touch the <em>same</em> data at the same time?</p>
+                <pre>// threads.v0.c — OSTEP Fig. 2.5
+volatile int counter = 0;   // shared between both threads
+int loops;
+
+void *worker(void *arg) {
+    for (int i = 0; i < loops; i++) {
+        counter++;           // looks like one operation — it isn't
+    }
+    pthread_exit(NULL);
+}
+
+int main(int argc, char *argv[]) {
+    loops = atoi(argv[1]);
+    pthread_t p1, p2;
+    printf("Initial value : %d\n", counter);
+    Pthread_create(&p1, NULL, worker, NULL);  // thread 1
+    Pthread_create(&p2, NULL, worker, NULL);  // thread 2
+    Pthread_join(p1, NULL);   // wait for both
+    Pthread_join(p2, NULL);
+    printf("Final value   : %d\n", counter);
+}</pre>
+                <p>Each thread adds 1 to <code>counter</code> for <code>loops</code> iterations. Two threads × 1000 loops = expected final value of 2000. What actually happens:</p>
+                <table>
+                    <tr><th>loops value</th><th>Result</th><th>Why</th></tr>
+                    <tr><td>1,000</td><td>Always 2000 ✓</td><td>Thread 1 finishes before thread 2 is even created — no overlap</td></tr>
+                    <tr><td>10,000</td><td>Sometimes right, usually wrong</td><td>Occasional overlap — race shows up intermittently</td></tr>
+                    <tr><td>100,000+</td><td>Always wrong, different each run</td><td>Heavy overlap — lost updates almost every iteration</td></tr>
+                </table>
+                <div class="highlight"><p>There is not a single random number in this program. Same binary, same input — different wrong answers every run. The wrong answers sit between one thread's total and two threads' total, and get closer to one thread's total as loop count grows. That's the clue.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="threads">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Pthread_create Builds — Process vs. Thread</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Process</h3><p>An address space plus at least one thread. Owns: code, globals, heap, open files, pid. All threads inside a process SHARE these.</p></div>
+                    <div class="card"><h3>Thread</h3><p>A program counter, registers, and a stack. Nothing else. Everything else is shared with sibling threads inside the same process.</p></div>
+                    <div class="card"><h3>Pthread_create</h3><p>Creates one more thread in the current process, starting at the given function. The new thread shares all memory — including <code>counter</code>.</p></div>
+                    <div class="card"><h3>Pthread_join</h3><p>main waits until the specified thread finishes before continuing. Without join, main might print before workers are done.</p></div>
+                </div>
+                <pre>one process = one address space, shared by all threads:
+  code:   worker(), main()
+  globals: counter = 0, loops
+  heap:   (malloc'd memory)
+  open files, pid, ...
+
+private to each thread:
+  main thread:   PC · registers · stack  (waiting in join)
+  thread p1:     own PC · own registers · own stack  → worker()
+  thread p2:     own PC · own registers · own stack  → worker()
+
+both p1 and p2 point at the SAME counter in the shared globals</pre>
+                <div class="highlight"><p>On a multi-core machine, p1 and p2 literally run at the same instant on different cores — both reading and writing the same memory word. This is not a hypothetical. Creating the second thread takes tens of microseconds — that's why 1000 loops is fine (thread 1 finishes in that time) but 100,000 loops causes heavy overlap.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="why">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why It Fails — counter++ Is Three Instructions</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>One C statement compiles to three machine instructions. Nothing ties them together:</p>
+                <pre>// counter++ as compiled (ARM64):
+ldr  w0, [x0]       // 1. LOAD counter from memory into a register
+add  w1, w0, #1     // 2. ADD one, staying in the register
+str  w1, [x0]       // 3. STORE it back to memory
+
+// Between ANY two of these instructions,
+// the other core can do anything to the same memory word.</pre>
+                <p>The lost update scenario — two cores, one counter starting at 50:</p>
+                <pre>time →
+core 0 · thread A    core 1 · thread B    memory · counter
+ldr → 50                                  50
+add → 51             ldr → 50             50    // B loads BEFORE A stored!
+str  51              add → 51             51
+                     str  51              51    ✗ lost one increment
+
+// A and B both read 50, both compute 51, both store 51.
+// Two increments happened. Counter grew by ONE.</pre>
+                <div class="highlight"><p>On a single core, the same bug exists — a timer interrupt can land between the load and the store, switching to another thread. On two cores, no interrupt is needed: the collision happens on almost every iteration. That's why the wrong answers approach "one thread's total" — the second thread's work is almost entirely lost.</p></div>
+                <p>This is called a <strong>race condition</strong>. The three instructions form a <strong>critical section</strong> — code that must execute atomically (as if it were one indivisible operation) to be correct. The goal of concurrency primitives (locks, atomics) is to enforce atomicity over critical sections.</p>
+            </div>
+        </div>
+
+        <div class="section" id="lock">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Fix — Mutex Lock</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// threads.v1.c — the locked version (changed lines marked)
+pthread_mutex_t m;                    // ONE lock, guarding counter
+
+void *worker(void *arg) {
+    for (int i = 0; i < loops; i++) {
+        Pthread_mutex_lock(&m);       // acquire lock — or WAIT
+        counter++;                    // critical section: one thread at a time
+        Pthread_mutex_unlock(&m);     // release lock — wake a waiter
+    }
+    pthread_exit(NULL);
+}
+
+int main(...) {
+    Pthread_mutex_init(&m, NULL);     // initialize before any thread uses it
+    // ... same as before ...
+}</pre>
+                <p>A <strong>mutex</strong> (mutual exclusion) has two states: free, or held by exactly one thread. If thread B arrives at <code>lock()</code> while A holds it, B waits until A calls <code>unlock()</code>. The three load-add-store instructions can no longer be split by another thread.</p>
+                <pre>// threads_locked — correct at every size, every run:
+prompt> ./threads_locked 100000
+Final value   : 200000
+prompt> ./threads_locked 1000000
+Final value   : 2000000  ✓ every single time</pre>
+                <p><strong>What it costs:</strong></p>
+                <table>
+                    <tr><th>Version</th><th>100M loops</th><th>Result</th></tr>
+                    <tr><td>No lock (broken)</td><td>0.25 s · 195% CPU</td><td>Wrong (~101M)</td></tr>
+                    <tr><td>With lock (correct)</td><td>1.96 s · 175% CPU</td><td>200,000,000 ✓</td></tr>
+                </table>
+                <div class="highlight"><p>8× slower. 0.65s of that is kernel time — the waiting thread is put to sleep and woken at unlock. 175% CPU (not 195%) means one core was partly idle while its thread waited. Correctness has a price. Weeks 8–10 ask: how to pay less. (Hint: atomic instructions — LOCK XADD on x86 — do the whole read-modify-write as one hardware operation, no kernel involved.)</p></div>
+                <p>The lock didn't stop the two threads from running simultaneously — it only moved the boundary to <em>between</em> increments rather than <em>inside</em> one. A trace of 200,000 increments showed 86,581 thread switches — heavy interleaving, but always correct.</p>
+            </div>
+        </div>
+
+        <div class="section" id="persist">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Persistence — Memory Forgets, Disks Don't</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>DRAM is volatile — power off, everything gone. Files must outlive the process, the crash, and the power cut. Three system calls hand that job to the <strong>file system</strong>:</p>
+                <pre>// io.c — OSTEP Fig. 2.6
+int main(int argc, char *argv[]) {
+    // 1. open: a name becomes a file descriptor (small integer)
+    int fd = open("/tmp/file", O_WRONLY|O_CREAT|O_TRUNC, S_IRWXU);
+    assert(fd >= 0);
+
+    // 2. write: 13 bytes from RAM into the file
+    int rc = write(fd, "hello world\n", 13);  // 11 + space + \n + \0 = 13
+    assert(rc == 13);
+
+    // 3. close: kernel forgets the descriptor; file persists
+    close(fd);
+    return 0;
+}</pre>
+                <p><strong>What write() sets in motion:</strong></p>
+                <ul>
+                    <li><code>write()</code> copies bytes into the kernel's <strong>page cache</strong> (RAM) and returns immediately — no disk involved yet</li>
+                    <li>The page is marked <strong>dirty</strong> — written but not yet on disk</li>
+                    <li>Linux writes dirty pages to disk within ~30 seconds on its own schedule</li>
+                    <li>Power cut inside that 30-second window = bytes are gone, even though <code>write()</code> returned success</li>
+                </ul>
+                <p><strong>What the file system stores (inode structure):</strong></p>
+                <pre>directory /tmp
+  "file" → inode 372
+
+inode 372:
+  size: 13 bytes · owner · permissions · timestamps
+  block pointer → data block (4096 bytes on disk)
+    [h][e][l][l][o][ ][w][o][r][l][d][\n][\0][...unused...]
+
+// A name → a number → the bytes.
+// Name and bytes are kept in DIFFERENT places on disk.</pre>
+                <div class="highlight"><p>13 bytes cost one 4 KB disk block. Small files waste most of it — disk space is handed out in 4 KB chunks. The inode is the file's identity: size, owner, permissions, times, and where the bytes are. The directory just maps the name to the inode number. Weeks 12–13 open up the full inode and block map.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="pagecache">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Page Cache — The 30-Second Window</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// Ubuntu: measure how much written data sits in RAM, not yet on disk
+$ grep Dirty /proc/meminfo
+Dirty:        144 kB                    // baseline
+
+// Write 200 MB:
+$ dd if=/dev/zero of=big.bin bs=1M count=200
+
+$ grep Dirty /proc/meminfo
+Dirty:     204828 kB                    // 200 MB waiting in RAM!
+
+// Force it to disk:
+$ time sync
+real    0m0.082s
+
+$ grep Dirty /proc/meminfo
+Dirty:          0 kB                    // all flushed
+
+$ cat /proc/sys/vm/dirty_expire_centisecs
+3000                                    // 30 seconds (3000 centiseconds)</pre>
+                <div class="grid">
+                    <div class="card"><h3>Why the Cache Exists</h3><p>RAM absorbs writes instantly. Disk writes are batched for efficiency. dd finished in 0.03s — 200 MB written at memory speed, not disk speed.</p></div>
+                    <div class="card"><h3>The Risk</h3><p>Power cut inside the 30-second window = bytes the program was told were written are gone. write() returned 13, success — but the disk had nothing yet.</p></div>
+                </div>
+                <p>The page cache is the same pattern as the SSD's own DRAM cache — "complete" means "in my RAM" at every level. The question "where are the bytes?" is the key question for anyone building storage-sensitive systems.</p>
+            </div>
+        </div>
+
+        <div class="section" id="fsync">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>fsync — Closing the Window</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><code>fsync(fd)</code> blocks until the disk has the data — it closes the 30-second window, but at a price:</p>
+                <pre>// Ubuntu, ext4 on SSD:
+$ ./fsync_test 1000 0         // no fsync
+1000 writes, fsync=0 : 0.000 s  (0.2 µs per write)
+
+$ ./fsync_test 1000 1         // fsync after every write
+1000 writes, fsync=1 : 1.638 s  (1638 µs per write)
+
+// 0.2 µs vs 1,638 µs — about 4,000× slower per write</pre>
+                <div class="highlight"><p>Every database pays this on every commit. The gap between 0.2 µs and 1,638 µs is why database performance is so hard — and why techniques like write-ahead logging (WAL) and group commit exist: batch many writes into one fsync call instead of one per transaction. macOS note: fsync() only reaches the drive's own cache; use F_FULLFSYNC for the real guarantee.</p></div>
+                <table>
+                    <tr><th>Approach</th><th>Speed</th><th>Durability</th><th>Use When</th></tr>
+                    <tr><td>write() alone</td><td>~0.2 µs</td><td>Maybe — 30s window</td><td>Data you can afford to lose (logs, caches)</td></tr>
+                    <tr><td>write() + fsync()</td><td>~1,638 µs</td><td>Yes — disk has it</td><td>Financial records, database commits</td></tr>
+                    <tr><td>WAL + group commit</td><td>Middle ground</td><td>Yes — batched</td><td>Real databases — one fsync per batch of transactions</td></tr>
+                    <tr><td>Replication before ack</td><td>Network latency</td><td>Yes — survives single failure</td><td>Distributed systems (Kafka acks=all, Raft majority)</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="design">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>OS Design Goals & The Full Picture</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Abstraction</h3><p>Find the right ideas (process, address space, file) so programs are easy to write on top. The right abstraction hides complexity without hiding what matters.</p></div>
+                    <div class="card"><h3>Performance</h3><p>Virtualization must cost little — minimize overhead in time and space. Every mechanism has a cost; every week's designs are measured against it.</p></div>
+                    <div class="card"><h3>Protection & Isolation</h3><p>A buggy or malicious program must not harm others — or the OS itself. Process A writing past its array cannot touch process B. Ever.</p></div>
+                    <div class="card"><h3>Reliability</h3><p>The OS must run non-stop. When the kernel fails, everything fails. This is why kernel code is held to a higher standard than application code.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Vocabulary you now own:</strong></p>
+                <ul>
+                    <li><strong>Race condition</strong> — outcome depends on the timing of events (bad)</li>
+                    <li><strong>Critical section</strong> — code that must execute atomically</li>
+                    <li><strong>Atomicity</strong> — appears to happen as one indivisible operation</li>
+                    <li><strong>Mutex</strong> — mutual exclusion lock: only one thread inside the critical section at a time</li>
+                    <li><strong>File descriptor</strong> — small integer the kernel uses to track an open file</li>
+                    <li><strong>Page cache</strong> — kernel's RAM buffer for disk writes; dirty = written but not yet on disk</li>
+                    <li><strong>fsync</strong> — forces dirty pages to disk before returning</li>
+                </ul>
+                <p><strong>The three pieces, complete:</strong></p>
+                <table>
+                    <tr><th>Piece</th><th>Crux</th><th>The Problem Demonstrated</th></tr>
+                    <tr><td>Virtualization</td><td>Share the machine</td><td>4 loops, 1 CPU — all make progress; 2 processes, 1 address — no interference</td></tr>
+                    <tr><td>Concurrency</td><td>Coordinate the sharing</td><td>counter++ is 3 instructions — uncoordinated sharing loses updates</td></tr>
+                    <tr><td>Persistence</td><td>Make data survive</td><td>write() returns 13 — bytes are in RAM; power dies — bytes are gone</td></tr>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
