@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 3: Physical Layer and Transmission Media</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #0a2a28, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0f766e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0d9488; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0f766e; color: white; border-color: #0f766e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0f766e; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #c8c8c8; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #c8c8c8; line-height: 1.8; margin-bottom: 4px; }
+        strong { color: #2dd4bf; }
+        .highlight { background: #0f2a28; border-left: 3px solid #0f766e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0f766e; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; color: #c8c8c8; }
+        pre { background: #0a1a18; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #0f766e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #c8c8c8; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0d9488; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 3</div>
+        <h1>Physical Layer and Transmission Media</h1>
+        <p class="subtitle">Copper cabling, fiber optics, real-world impairments, connectors, and structured cabling architecture</p>
+    </header>
+    <nav>
+        <a href="#bounded">Bounded Media</a>
+        <a href="#twistedpair">Twisted Pair</a>
+        <a href="#shielding">UTP vs STP</a>
+        <a href="#impairments">Impairments</a>
+        <a href="#coaxial">Coaxial</a>
+        <a href="#fiber">Fiber Optics</a>
+        <a href="#connectors">Connectors</a>
+        <a href="#throughput">Throughput</a>
+        <a href="#structured">Structured Cabling</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="bounded">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Bounded Media — Copper vs. Fiber</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Bounded media confines signals to a physical pathway — unlike wireless (unbounded), which radiates through open air. Two fundamental categories:</p>
+                <div class="grid">
+                    <div class="card"><h3>Copper Media (Electrical)</h3><p>Propagates data as electrical voltage shifts through copper conductors. Types: twisted-pair (Ethernet LAN) and coaxial (broadband/RF). Vulnerable to EMI, RFI, crosstalk, and corrosion.</p></div>
+                    <div class="card"><h3>Optical Media (Light)</h3><p>Transmits data as light pulses through glass or plastic cores. Types: multimode fiber (MMF, short range) and single-mode fiber (SMF, long range). 100% immune to EMI/RFI, zero crosstalk, electrically isolated, highly secure.</p></div>
+                </div>
+                <div class="highlight"><p>The fundamental tradeoff: copper is cheap and easy to terminate but degrades over distance and picks up interference. Fiber is expensive and requires specialized tools but spans continents and ignores all electromagnetic noise.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="twistedpair">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Twisted Pair Cabling</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Four pairs of insulated copper wires twisted together. Twisting neutralizes external EMI and internal crosstalk between pairs — the tighter the twist, the better the noise rejection.</p>
+                <p><strong>Connectors:</strong></p>
+                <ul>
+                    <li><strong>8P8C (RJ-45)</strong> — 8-position, 8-contact modular plug. Standard for Ethernet LAN.</li>
+                    <li><strong>RJ-11</strong> — 6-position, 4-contact (6P4C). Standard for analog telephony.</li>
+                </ul>
+                <p><strong>Cable wiring configurations:</strong></p>
+                <table>
+                    <tr><th>Type</th><th>Pin Mapping</th><th>Use Case</th></tr>
+                    <tr><td>Straight-Through</td><td>Same standard both ends (T568A↔T568A or T568B↔T568B)</td><td>PC/printer to switch — connecting UNLIKE devices</td></tr>
+                    <tr><td>Crossover</td><td>Pins 1/2 swapped with 3/6 — TX and RX crossed</td><td>Switch-to-switch, PC-to-PC — connecting LIKE devices</td></tr>
+                    <tr><td>Rollover / Console</td><td>Pin 1 connects to pin 8, fully reversed</td><td>Host terminal to router/switch management console port</td></tr>
+                </table>
+                <div class="highlight"><p>Modern switches with Auto-MDI/MDIX detect the cable type automatically and adjust internally — so crossover cables are rarely needed today. But you still need to know the distinction for exams and legacy equipment.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="shielding">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>UTP vs. STP — Shielding</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>UTP — Unshielded Twisted Pair</h3><p>Outer PVC/LSZH jacket only — no metal shielding. Highly flexible, narrow, cheap, fast to terminate. Default choice for office drops, desktop workstations, IP phones, and indoor cameras. The dominant enterprise LAN cable.</p></div>
+                    <div class="card"><h3>STP — Shielded Twisted Pair</h3><p>Adds metallic foil and/or braided copper shields around pairs or the whole bundle. ISO/IEC naming: F/UTP (foil around bundle), S/FTP (shielded bundle + foiled pairs). Required near generators, elevator motors, factory floors, and industrial machinery. Must be properly grounded — ungrounded shields act as antennas and make interference WORSE.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>The 100-Meter Horizontal Channel Rule (TIA/EIA):</strong></p>
+                <pre>90m  Permanent horizontal link (solid core, inside walls/conduits)
++10m  Patch cords (stranded, PC-to-outlet + patch panel-to-switch)
+─────────────────────────────────────────────────────────────────
+100m  Total channel limit — exceeding this causes signal degradation</pre>
+            </div>
+        </div>
+
+        <div class="section" id="impairments">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Physical Impairments — Attenuation, Crosstalk & EMI</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Impairment</th><th>Definition</th><th>Cause</th><th>Mitigation</th></tr>
+                    <tr><td>Attenuation</td><td>Gradual weakening of signal amplitude over distance</td><td>Natural resistance in copper. Lower AWG (thicker wire) = less resistance.</td><td>Stay within 100m channel limit. Use repeaters/switches for longer runs.</td></tr>
+                    <tr><td>NEXT (Near-End Crosstalk)</td><td>Signal bleeds from one pair to adjacent pair, measured near transmitter</td><td>Electromagnetic leakage between pairs</td><td>Maintain tight twist rates. Don't untwist pairs more than allowed during termination.</td></tr>
+                    <tr><td>FEXT (Far-End Crosstalk)</td><td>Same as NEXT but measured at the receiver end</td><td>Same electromagnetic leakage</td><td>Same — proper termination technique</td></tr>
+                    <tr><td>EMI / RFI</td><td>External noise injected by electromagnetic or radio-frequency sources</td><td>Fluorescent lights, motors, transformers, power cables, radio transmitters</td><td>Use STP in noisy environments. Proper cable routing away from power lines.</td></tr>
+                </table>
+                <div class="highlight"><p>Proper installation technique matters almost as much as the cable category chosen. A Cat6A cable terminated sloppily — pairs untwisted too far, too close to power conduit — will perform worse than a well-installed Cat6 run. Certification testing after installation catches these problems before users do.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="coaxial">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Coaxial Cable</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Four concentric layers from inside out:</p>
+                <pre>1. Center Conductor  — inner copper wire carrying RF signals
+2. Dielectric        — solid plastic/teflon spacing layer
+3. Outer Shield      — braided metal mesh/foil blocking EMI
+4. Outer Jacket      — physical and weather protection</pre>
+                <p><strong>Common types and uses:</strong></p>
+                <table>
+                    <tr><th>Type</th><th>Use</th></tr>
+                    <tr><td>RG-6</td><td>Residential broadband internet, satellite drops, digital TV — modern standard</td></tr>
+                    <tr><td>RG-11</td><td>Long-distance carrier links and utility service entries — thick/heavy</td></tr>
+                    <tr><td>RG-59</td><td>Legacy analog CCTV security surveillance loops</td></tr>
+                </table>
+                <div class="highlight"><p><strong>DOCSIS</strong> (Data Over Cable Service Interface Specification) allows cable ISPs to deliver gigabit-class speeds over existing coax infrastructure using frequency-division multiplexing — multiple distinct RF channels coexist on a single cable simultaneously. This is why your cable internet uses the same physical wire as cable TV.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="fiber">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Fiber Optic Cable — MMF vs. SMF</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Five structural layers from inside out:</p>
+                <pre>1. Glass Core     — silica glass tube carrying light
+2. Cladding       — glass shield reflecting light back (total internal reflection)
+3. Buffer         — plastic cushioning protecting the glass
+4. Strength       — aramid (Kevlar) fibers preventing stretching
+5. Jacket         — heavy-duty PVC outer protection</pre>
+                <p><strong>Total internal reflection</strong> — the physics that makes fiber work: light injected into the core cannot escape because the refractive index mismatch between core and cladding acts as an absolute mirror, bouncing light pulses forward.</p>
+                <div class="grid">
+                    <div class="card"><h3>Multimode Fiber (MMF)</h3><p>Core diameter: 50–62.5 µm. Multiple light paths (modes) travel simultaneously. Modal dispersion limits distance — paths arrive at different times, pulses spread and overlap. Categories: OM1/OM2 (legacy), OM3/OM4/OM5 (laser-optimized, up to 100 Gbps). Use: under 500m, data centers, campus backbones.</p></div>
+                    <div class="card"><h3>Single-Mode Fiber (SMF)</h3><p>Core diameter: ~9 µm. Core so narrow only one light path exists — no modal dispersion. Supports near-limitless distances and extreme bandwidth. Categories: OS1 (indoor), OS2 (long-haul carrier). Use: MAN/WAN, transoceanic cables, ISP trunks, multi-building campuses.</p></div>
+                </div>
+                <div class="highlight"><p>Modal dispersion is the core performance limiter of MMF. As the core gets larger, more light paths exist with more arrival time variance. SMF eliminates this entirely by making the core so small only one path is physically possible. This is why SMF spans continents while MMF tops out at ~500m.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="connectors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Fiber Connectors & Polish Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Connector</th><th>Style</th><th>Use</th></tr>
+                    <tr><td>ST</td><td>Round metal bayonet (twist-on/off)</td><td>Legacy systems</td></tr>
+                    <tr><td>SC</td><td>Square push-on/pull-off</td><td>Backbone standard</td></tr>
+                    <tr><td>LC</td><td>Small Form Factor tab-latch</td><td>Modern switches and patch panels</td></tr>
+                    <tr><td>MTRJ</td><td>SFF dual-fiber tab-latch (TX+RX combined)</td><td>Compact dual-fiber applications</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Contact polishes — UPC vs APC:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>UPC — Ultra Physical Contact (Blue)</h3><p>Curved dome polish for direct physical contact. Standard for most LAN environments. Some reflected light returns down the core — acceptable for short distances.</p></div>
+                    <div class="card"><h3>APC — Angled Physical Contact (Green)</h3><p>8-degree angled polish. Reflected light bounces into the cladding, not back down the core — maximizes return loss. Required for long-haul WAN, ISP, and carrier links where reflections cause serious signal degradation.</p></div>
+                </div>
+                <div class="highlight"><p><strong>Never mate blue UPC with green APC connectors.</strong> The 8-degree angle mismatch physically damages both glass endfaces and causes catastrophic signal loss. Color coding exists precisely to prevent this mistake.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="throughput">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Bandwidth, Throughput & Goodput</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Concept</th><th>Definition</th><th>Example</th></tr>
+                    <tr><td>Nominal Capacity (Bandwidth)</td><td>Theoretical maximum signaling rate under ideal conditions</td><td>10G Ethernet link = 10,000 Mbps</td></tr>
+                    <tr><td>Throughput</td><td>Actual total data successfully crossing the medium — affected by congestion, errors, retransmissions</td><td>iperf3 reports 9.4 Gbps on a 10G link</td></tr>
+                    <tr><td>Goodput</td><td>Useful application-level data actually delivered after subtracting all protocol overhead</td><td>What the user experiences downloading a file</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Testing tools:</strong></p>
+                <ul>
+                    <li><strong>Copper certifier</strong> — measures wire map, length, attenuation, NEXT, return loss, delay. Confirms Cat6A compliance for 10GBASE-T.</li>
+                    <li><strong>iperf / iperf3</strong> — active software tool measuring real TCP throughput between two endpoints.</li>
+                    <li><strong>Optical power meter</strong> — measures received optical power at fiber link endpoint.</li>
+                    <li><strong>Optical loss test set</strong> — measures total insertion loss over a fiber run.</li>
+                    <li><strong>OTDR (Optical Time Domain Reflectometer)</strong> — locates fiber breaks, splices, connector faults, tight bends, and maps distances graphically.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="structured">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Structured Cabling — MDF, IDF & Distribution</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>MDF — Main Distribution Frame</h3><p>Central wiring rack near the carrier demarc. Houses core switches, primary routers, servers, and ISP equipment. Origin point for all inter-building backbone cabling.</p></div>
+                    <div class="card"><h3>IDF — Intermediate Distribution Frame</h3><p>Distributed floor-level telecom closets. Links local endpoints back to MDF via high-speed backbone. Houses edge access switches, patch panels, and PoE switches.</p></div>
+                    <div class="card"><h3>Wall Drops & Patch Panels</h3><p>Wall outlets connect endpoint clients to IDF patch panels. Patch panels link horizontal drop cabling to access switches. Punchdown blocks terminate copper; fiber panels terminate optical backbones.</p></div>
+                    <div class="card"><h3>Hierarchy Flow</h3><p>Endpoint device → wall outlet → horizontal cable → IDF patch panel → access switch → backbone fiber → MDF core switch → router → ISP demarc.</p></div>
+                </div>
+                <div class="highlight"><p>Cable management in racks matters operationally. A well-organized rack (labeled cables, proper bend radius, velcro ties, consistent routing) can be traced and repaired in minutes. A rat's nest rack costs hours of downtime per incident and makes mistakes during maintenance far more likely.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
