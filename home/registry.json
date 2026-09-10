@@ -6,7 +6,10 @@
     "category": "Machine Learning",
     "accent": "#dc2626",
     "glow": "#2a0a0a",
-    "badge": "#b91c1c"
+    "badge": "#b91c1c",
+    "code_bg": "#1a0a0a",
+    "highlight_bg": "#2a0f0f",
+    "bold": "#f87171"
   },
   {
     "title": "COMP4330 Getting to Know Your Data",
@@ -15,7 +18,10 @@
     "category": "Machine Learning",
     "accent": "#16a34a",
     "glow": "#0a2a0a",
-    "badge": "#15803d"
+    "badge": "#15803d",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a1a",
+    "bold": "#4ade80"
   },
   {
     "title": "COMP4330 Feature Engineering and Data Wrangling",
@@ -24,7 +30,10 @@
     "category": "Machine Learning",
     "accent": "#d97706",
     "glow": "#1f1200",
-    "badge": "#b45309"
+    "badge": "#b45309",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fbbf24"
   },
   {
     "title": "COMP4330 Classification Basic Concepts",
@@ -33,7 +42,10 @@
     "category": "Machine Learning",
     "accent": "#2563eb",
     "glow": "#0a0a2e",
-    "badge": "#1d4ed8"
+    "badge": "#1d4ed8",
+    "code_bg": "#0a0f1a",
+    "highlight_bg": "#0f1a2e",
+    "bold": "#60a5fa"
   },
   {
     "title": "COMP4330 Classification Advanced Methods",
@@ -42,7 +54,10 @@
     "category": "Machine Learning",
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
-    "badge": "#6d28d9"
+    "badge": "#6d28d9",
+    "code_bg": "#130a1a",
+    "highlight_bg": "#1e0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "COMP4330 Unsupervised Classification",
@@ -51,7 +66,10 @@
     "category": "Machine Learning",
     "accent": "#0d9488",
     "glow": "#0a2a28",
-    "badge": "#0f766e"
+    "badge": "#0f766e",
+    "code_bg": "#0a1a18",
+    "highlight_bg": "#0f2a28",
+    "bold": "#2dd4bf"
   },
   {
     "title": "Algorithm Analysis Chapter 1 Introduction",
@@ -60,7 +78,10 @@
     "date": "2026-05-19 06:41 PM",
     "accent": "#ea580c",
     "glow": "#1f0a00",
-    "badge": "#c2410c"
+    "badge": "#c2410c",
+    "code_bg": "#1a0f0a",
+    "highlight_bg": "#2a180a",
+    "bold": "#fb923c"
   },
   {
     "title": "Algorithm Analysis Chapter 3 Asymptotic Notation",
@@ -69,7 +90,10 @@
     "date": "2026-05-19 06:45 PM",
     "accent": "#6d28d9",
     "glow": "#1a0f3d",
-    "badge": "#5b21b6"
+    "badge": "#5b21b6",
+    "code_bg": "#100a1a",
+    "highlight_bg": "#1a0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "Algorithm Analysis Chapter 5 Probabilistic Analysis",
@@ -78,7 +102,10 @@
     "date": "2026-05-19 06:48 PM",
     "accent": "#0369a1",
     "glow": "#0a1f2e",
-    "badge": "#075985"
+    "badge": "#075985",
+    "code_bg": "#0a141a",
+    "highlight_bg": "#0f1f2e",
+    "bold": "#38bdf8"
   },
   {
     "title": "Algorithm Analysis Chapter 6 Heapsort",
@@ -87,7 +114,10 @@
     "date": "2026-05-19 06:48 PM",
     "accent": "#15803d",
     "glow": "#0a2010",
-    "badge": "#166534"
+    "badge": "#166534",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a18",
+    "bold": "#34d399"
   },
   {
     "title": "Algorithm Analysis Chapter 7 Quicksort",
@@ -96,7 +126,10 @@
     "date": "2026-05-19 06:49 PM",
     "accent": "#b45309",
     "glow": "#1f1200",
-    "badge": "#92400e"
+    "badge": "#92400e",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fcd34d"
   },
   {
     "title": "Algorithm Analysis Chapter 8 Linear Time Sorting",
@@ -105,7 +138,10 @@
     "date": "2026-05-19 06:51 PM",
     "accent": "#be185d",
     "glow": "#2a0a1a",
-    "badge": "#9d174d"
+    "badge": "#9d174d",
+    "code_bg": "#1a0a12",
+    "highlight_bg": "#2a0f1c",
+    "bold": "#f472b6"
   },
   {
     "title": "Algorithm Analysis Chapter 14 Dynamic Programming",
@@ -114,7 +150,10 @@
     "date": "2026-05-19 06:54 PM",
     "accent": "#dc2626",
     "glow": "#2a0a0a",
-    "badge": "#b91c1c"
+    "badge": "#b91c1c",
+    "code_bg": "#1a0a0a",
+    "highlight_bg": "#2a0f0f",
+    "bold": "#f87171"
   },
   {
     "title": "Algorithm Analysis Chapter 15 Greedy Algorithms",
@@ -123,7 +162,10 @@
     "date": "2026-05-19 06:55 PM",
     "accent": "#16a34a",
     "glow": "#0a2a0a",
-    "badge": "#15803d"
+    "badge": "#15803d",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a1a",
+    "bold": "#4ade80"
   },
   {
     "title": "Algorithm Analysis Hashtables",
@@ -132,7 +174,10 @@
     "date": "2026-05-19 06:56 PM",
     "accent": "#d97706",
     "glow": "#1f1200",
-    "badge": "#b45309"
+    "badge": "#b45309",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fbbf24"
   },
   {
     "title": "Algorithm Analysis Chapter 4 Recurrences and Master Theorem",
@@ -141,7 +186,10 @@
     "date": "2026-05-19 07:03 PM",
     "accent": "#2563eb",
     "glow": "#0a0a2e",
-    "badge": "#1d4ed8"
+    "badge": "#1d4ed8",
+    "code_bg": "#0a0f1a",
+    "highlight_bg": "#0f1a2e",
+    "bold": "#60a5fa"
   },
   {
     "title": "Algorithm Analysis Chapter 2 Insertion Sort and Merge Sort",
@@ -150,7 +198,10 @@
     "date": "2026-05-19 07:13 PM",
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
-    "badge": "#6d28d9"
+    "badge": "#6d28d9",
+    "code_bg": "#130a1a",
+    "highlight_bg": "#1e0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "Computer Architecture Chapter 1 Abstractions and Technology",
@@ -159,7 +210,10 @@
     "date": "2026-05-19 10:05 PM",
     "accent": "#0d9488",
     "glow": "#0a2a28",
-    "badge": "#0f766e"
+    "badge": "#0f766e",
+    "code_bg": "#0a1a18",
+    "highlight_bg": "#0f2a28",
+    "bold": "#2dd4bf"
   },
   {
     "title": "Computer Architecture Chapter 2 Instructions Language of the Computer",
@@ -168,7 +222,10 @@
     "date": "2026-05-19 10:12 PM",
     "accent": "#ea580c",
     "glow": "#1f0a00",
-    "badge": "#c2410c"
+    "badge": "#c2410c",
+    "code_bg": "#1a0f0a",
+    "highlight_bg": "#2a180a",
+    "bold": "#fb923c"
   },
   {
     "title": "Computer Architecture Chapter 3 Arithmetic for Computers",
@@ -177,7 +234,10 @@
     "date": "2026-05-19 10:27 PM",
     "accent": "#6d28d9",
     "glow": "#1a0f3d",
-    "badge": "#5b21b6"
+    "badge": "#5b21b6",
+    "code_bg": "#100a1a",
+    "highlight_bg": "#1a0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "Computer Architecture Chapter 4 The Processor",
@@ -186,7 +246,10 @@
     "date": "2026-05-19 10:33 PM",
     "accent": "#0369a1",
     "glow": "#0a1f2e",
-    "badge": "#075985"
+    "badge": "#075985",
+    "code_bg": "#0a141a",
+    "highlight_bg": "#0f1f2e",
+    "bold": "#38bdf8"
   },
   {
     "title": "Computer Architecture ARM Assembly Raspberry Pi",
@@ -195,7 +258,10 @@
     "date": "2026-05-19 10:42 PM",
     "accent": "#15803d",
     "glow": "#0a2010",
-    "badge": "#166534"
+    "badge": "#166534",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a18",
+    "bold": "#34d399"
   },
   {
     "title": "Database Section 0 Backend Foundations",
@@ -204,7 +270,10 @@
     "date": "2026-05-20 02:34 PM",
     "accent": "#b45309",
     "glow": "#1f1200",
-    "badge": "#92400e"
+    "badge": "#92400e",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fcd34d"
   },
   {
     "title": "Database Chapter 7 Introduction to SQL",
@@ -213,7 +282,10 @@
     "date": "2026-05-20 02:39 PM",
     "accent": "#be185d",
     "glow": "#2a0a1a",
-    "badge": "#9d174d"
+    "badge": "#9d174d",
+    "code_bg": "#1a0a12",
+    "highlight_bg": "#2a0f1c",
+    "bold": "#f472b6"
   },
   {
     "title": "Database Module 2 Designing and Implementing Tables",
@@ -222,7 +294,10 @@
     "date": "2026-05-20 02:52 PM",
     "accent": "#dc2626",
     "glow": "#2a0a0a",
-    "badge": "#b91c1c"
+    "badge": "#b91c1c",
+    "code_bg": "#1a0a0a",
+    "highlight_bg": "#2a0f0f",
+    "bold": "#f87171"
   },
   {
     "title": "Database Module 13 Window Functions",
@@ -231,7 +306,10 @@
     "date": "2026-05-20 02:56 PM",
     "accent": "#16a34a",
     "glow": "#0a2a0a",
-    "badge": "#15803d"
+    "badge": "#15803d",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a1a",
+    "bold": "#4ade80"
   },
   {
     "title": "Database Module 8 Designing and Implementing Views",
@@ -240,7 +318,10 @@
     "date": "2026-05-20 03:00 PM",
     "accent": "#d97706",
     "glow": "#1f1200",
-    "badge": "#b45309"
+    "badge": "#b45309",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fbbf24"
   },
   {
     "title": "Database Module 9 Stored Procedures",
@@ -249,7 +330,10 @@
     "date": "2026-05-20 03:05 PM",
     "accent": "#2563eb",
     "glow": "#0a0a2e",
-    "badge": "#1d4ed8"
+    "badge": "#1d4ed8",
+    "code_bg": "#0a0f1a",
+    "highlight_bg": "#0f1a2e",
+    "bold": "#60a5fa"
   },
   {
     "title": "Database Chapter 6 Normalization and Table Design",
@@ -258,7 +342,10 @@
     "date": "2026-05-20 03:09 PM",
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
-    "badge": "#6d28d9"
+    "badge": "#6d28d9",
+    "code_bg": "#130a1a",
+    "highlight_bg": "#1e0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "Database Chapters 9 and 10 Database Design and Transactions",
@@ -267,7 +354,10 @@
     "date": "2026-05-20 03:12 PM",
     "accent": "#0d9488",
     "glow": "#0a2a28",
-    "badge": "#0f766e"
+    "badge": "#0f766e",
+    "code_bg": "#0a1a18",
+    "highlight_bg": "#0f2a28",
+    "bold": "#2dd4bf"
   },
   {
     "title": "Database More Windowing Functions",
@@ -276,7 +366,10 @@
     "date": "2026-05-20 03:15 PM",
     "accent": "#ea580c",
     "glow": "#1f0a00",
-    "badge": "#c2410c"
+    "badge": "#c2410c",
+    "code_bg": "#1a0f0a",
+    "highlight_bg": "#2a180a",
+    "bold": "#fb923c"
   },
   {
     "title": "Database Module 10 Subqueries",
@@ -285,7 +378,10 @@
     "date": "2026-05-20 03:20 PM",
     "accent": "#6d28d9",
     "glow": "#1a0f3d",
-    "badge": "#5b21b6"
+    "badge": "#5b21b6",
+    "code_bg": "#100a1a",
+    "highlight_bg": "#1a0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "Database Module 11 Table Expressions",
@@ -294,7 +390,10 @@
     "date": "2026-05-20 03:23 PM",
     "accent": "#0369a1",
     "glow": "#0a1f2e",
-    "badge": "#075985"
+    "badge": "#075985",
+    "code_bg": "#0a141a",
+    "highlight_bg": "#0f1f2e",
+    "bold": "#38bdf8"
   },
   {
     "title": "Database Module 3 Writing SELECT Queries",
@@ -303,7 +402,10 @@
     "date": "2026-05-20 03:25 PM",
     "accent": "#15803d",
     "glow": "#0a2010",
-    "badge": "#166534"
+    "badge": "#166534",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a18",
+    "bold": "#34d399"
   },
   {
     "title": "Database Module 4 Querying Multiple Tables",
@@ -312,7 +414,10 @@
     "date": "2026-05-20 03:28 PM",
     "accent": "#b45309",
     "glow": "#1f1200",
-    "badge": "#92400e"
+    "badge": "#92400e",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fcd34d"
   },
   {
     "title": "Database Module 2 Introduction to T-SQL Querying",
@@ -321,7 +426,10 @@
     "date": "2026-05-20 03:32 PM",
     "accent": "#be185d",
     "glow": "#2a0a1a",
-    "badge": "#9d174d"
+    "badge": "#9d174d",
+    "code_bg": "#1a0a12",
+    "highlight_bg": "#2a0f1c",
+    "bold": "#f472b6"
   },
   {
     "title": "COMP2220 Chapter 1 Introduction to Computers and Programming",
@@ -330,7 +438,10 @@
     "date": "2026-05-21 08:07 PM",
     "accent": "#dc2626",
     "glow": "#2a0a0a",
-    "badge": "#b91c1c"
+    "badge": "#b91c1c",
+    "code_bg": "#1a0a0a",
+    "highlight_bg": "#2a0f0f",
+    "bold": "#f87171"
   },
   {
     "title": "COMP2220 Chapter 2 Introduction to C++",
@@ -339,7 +450,10 @@
     "date": "2026-05-21 08:13 PM",
     "accent": "#16a34a",
     "glow": "#0a2a0a",
-    "badge": "#15803d"
+    "badge": "#15803d",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a1a",
+    "bold": "#4ade80"
   },
   {
     "title": "COMP2220 Chapter 3 Expressions and Interactivity",
@@ -348,7 +462,10 @@
     "date": "2026-05-21 08:48 PM",
     "accent": "#d97706",
     "glow": "#1f1200",
-    "badge": "#b45309"
+    "badge": "#b45309",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fbbf24"
   },
   {
     "title": "COMP2220 Chapter 4 Making Decisions",
@@ -357,7 +474,10 @@
     "date": "2026-05-21 09:59 PM",
     "accent": "#2563eb",
     "glow": "#0a0a2e",
-    "badge": "#1d4ed8"
+    "badge": "#1d4ed8",
+    "code_bg": "#0a0f1a",
+    "highlight_bg": "#0f1a2e",
+    "bold": "#60a5fa"
   },
   {
     "title": "COMP2220 Chapter 5 Loops and Files",
@@ -366,7 +486,10 @@
     "date": "2026-05-21 10:03 PM",
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
-    "badge": "#6d28d9"
+    "badge": "#6d28d9",
+    "code_bg": "#130a1a",
+    "highlight_bg": "#1e0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "COMP2220 Chapter 6 Functions",
@@ -375,7 +498,10 @@
     "date": "2026-05-21 10:08 PM",
     "accent": "#0d9488",
     "glow": "#0a2a28",
-    "badge": "#0f766e"
+    "badge": "#0f766e",
+    "code_bg": "#0a1a18",
+    "highlight_bg": "#0f2a28",
+    "bold": "#2dd4bf"
   },
   {
     "title": "COMP2220 Chapter 7 Arrays and Vectors",
@@ -384,7 +510,10 @@
     "date": "2026-05-21 10:12 PM",
     "accent": "#ea580c",
     "glow": "#1f0a00",
-    "badge": "#c2410c"
+    "badge": "#c2410c",
+    "code_bg": "#1a0f0a",
+    "highlight_bg": "#2a180a",
+    "bold": "#fb923c"
   },
   {
     "title": "COMP2220 Chapter 8 Searching and Sorting Arrays",
@@ -393,7 +522,10 @@
     "date": "2026-05-21 10:15 PM",
     "accent": "#6d28d9",
     "glow": "#1a0f3d",
-    "badge": "#5b21b6"
+    "badge": "#5b21b6",
+    "code_bg": "#100a1a",
+    "highlight_bg": "#1a0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "COMP2220 Chapter 9 Pointers",
@@ -402,7 +534,10 @@
     "date": "2026-05-21 10:19 PM",
     "accent": "#0369a1",
     "glow": "#0a1f2e",
-    "badge": "#075985"
+    "badge": "#075985",
+    "code_bg": "#0a141a",
+    "highlight_bg": "#0f1f2e",
+    "bold": "#38bdf8"
   },
   {
     "title": "COMP2220 Chapter 10 Characters",
@@ -411,7 +546,10 @@
     "date": "2026-05-21 10:22 PM",
     "accent": "#15803d",
     "glow": "#0a2010",
-    "badge": "#166534"
+    "badge": "#166534",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a18",
+    "bold": "#34d399"
   },
   {
     "title": "COMP2220 Chapter 11 Structs and Enumerated Types",
@@ -420,7 +558,10 @@
     "date": "2026-05-21 10:26 PM",
     "accent": "#b45309",
     "glow": "#1f1200",
-    "badge": "#92400e"
+    "badge": "#92400e",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fcd34d"
   },
   {
     "title": "COMP2220 Chapter 12 Advanced File Operations",
@@ -429,7 +570,10 @@
     "date": "2026-05-21 10:29 PM",
     "accent": "#be185d",
     "glow": "#2a0a1a",
-    "badge": "#9d174d"
+    "badge": "#9d174d",
+    "code_bg": "#1a0a12",
+    "highlight_bg": "#2a0f1c",
+    "bold": "#f472b6"
   },
   {
     "title": "COMP2220 Chapter 13 Introduction to Classes",
@@ -438,7 +582,10 @@
     "date": "2026-05-21 10:32 PM",
     "accent": "#dc2626",
     "glow": "#2a0a0a",
-    "badge": "#b91c1c"
+    "badge": "#b91c1c",
+    "code_bg": "#1a0a0a",
+    "highlight_bg": "#2a0f0f",
+    "bold": "#f87171"
   },
   {
     "title": "COMP2220 Chapter 14 More About Classes",
@@ -447,7 +594,10 @@
     "date": "2026-05-21 10:47 PM",
     "accent": "#16a34a",
     "glow": "#0a2a0a",
-    "badge": "#15803d"
+    "badge": "#15803d",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a1a",
+    "bold": "#4ade80"
   },
   {
     "title": "COMP2220 Chapter 15 Inheritance Polymorphism and Virtual Functions",
@@ -456,7 +606,10 @@
     "date": "2026-05-22 09:35 AM",
     "accent": "#d97706",
     "glow": "#1f1200",
-    "badge": "#b45309"
+    "badge": "#b45309",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fbbf24"
   },
   {
     "title": "COMP2220 Chapter 16 Exceptions Templates and STL",
@@ -465,7 +618,10 @@
     "date": "2026-05-22 09:39 AM",
     "accent": "#2563eb",
     "glow": "#0a0a2e",
-    "badge": "#1d4ed8"
+    "badge": "#1d4ed8",
+    "code_bg": "#0a0f1a",
+    "highlight_bg": "#0f1a2e",
+    "bold": "#60a5fa"
   },
   {
     "title": "COMP2220 Chapter 16b Introduction to Threads",
@@ -474,7 +630,10 @@
     "date": "2026-05-22 09:48 AM",
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
-    "badge": "#6d28d9"
+    "badge": "#6d28d9",
+    "code_bg": "#130a1a",
+    "highlight_bg": "#1e0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "Web Dev Section 1 Getting Started",
@@ -483,7 +642,10 @@
     "date": "2026-05-22 10:15 AM",
     "accent": "#0d9488",
     "glow": "#0a2a28",
-    "badge": "#0f766e"
+    "badge": "#0f766e",
+    "code_bg": "#0a1a18",
+    "highlight_bg": "#0f2a28",
+    "bold": "#2dd4bf"
   },
   {
     "title": "Web Dev Section 2 Your First HelloWorld Project",
@@ -492,7 +654,10 @@
     "date": "2026-05-22 10:18 AM",
     "accent": "#ea580c",
     "glow": "#1f0a00",
-    "badge": "#c2410c"
+    "badge": "#c2410c",
+    "code_bg": "#1a0f0a",
+    "highlight_bg": "#2a180a",
+    "bold": "#fb923c"
   },
   {
     "title": "Web Dev Section 3 Introduction to HTML",
@@ -501,7 +666,10 @@
     "date": "2026-05-22 10:21 AM",
     "accent": "#6d28d9",
     "glow": "#1a0f3d",
-    "badge": "#5b21b6"
+    "badge": "#5b21b6",
+    "code_bg": "#100a1a",
+    "highlight_bg": "#1a0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "Web Dev Section 4 Introduction to CSS",
@@ -510,7 +678,10 @@
     "date": "2026-05-22 10:25 AM",
     "accent": "#0369a1",
     "glow": "#0a1f2e",
-    "badge": "#075985"
+    "badge": "#075985",
+    "code_bg": "#0a141a",
+    "highlight_bg": "#0f1f2e",
+    "bold": "#38bdf8"
   },
   {
     "title": "Web Dev Section 5 Web Content",
@@ -519,7 +690,10 @@
     "date": "2026-05-22 07:10 PM",
     "accent": "#15803d",
     "glow": "#0a2010",
-    "badge": "#166534"
+    "badge": "#166534",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a18",
+    "bold": "#34d399"
   },
   {
     "title": "Python Section 1 About Python",
@@ -528,7 +702,10 @@
     "date": "2026-05-23 03:52 AM",
     "accent": "#b45309",
     "glow": "#1f1200",
-    "badge": "#92400e"
+    "badge": "#92400e",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fcd34d"
   },
   {
     "title": "Python Section 2 Basics",
@@ -537,7 +714,10 @@
     "date": "2026-05-23 04:04 PM",
     "accent": "#be185d",
     "glow": "#2a0a1a",
-    "badge": "#9d174d"
+    "badge": "#9d174d",
+    "code_bg": "#1a0a12",
+    "highlight_bg": "#2a0f1c",
+    "bold": "#f472b6"
   },
   {
     "title": "Python Section 3 Control Flow",
@@ -546,7 +726,10 @@
     "date": "2026-05-23 04:18 PM",
     "accent": "#dc2626",
     "glow": "#2a0a0a",
-    "badge": "#b91c1c"
+    "badge": "#b91c1c",
+    "code_bg": "#1a0a0a",
+    "highlight_bg": "#2a0f0f",
+    "bold": "#f87171"
   },
   {
     "title": "Python Section 4 Functions and Methods",
@@ -555,7 +738,10 @@
     "date": "2026-05-23 04:21 PM",
     "accent": "#16a34a",
     "glow": "#0a2a0a",
-    "badge": "#15803d"
+    "badge": "#15803d",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a1a",
+    "bold": "#4ade80"
   },
   {
     "title": "Python Section 5 Advanced Variables",
@@ -564,7 +750,10 @@
     "date": "2026-05-23 04:29 PM",
     "accent": "#d97706",
     "glow": "#1f1200",
-    "badge": "#b45309"
+    "badge": "#b45309",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fbbf24"
   },
   {
     "title": "Python Section 6 Logging and Exception Handling",
@@ -573,7 +762,10 @@
     "date": "2026-05-23 04:31 PM",
     "accent": "#2563eb",
     "glow": "#0a0a2e",
-    "badge": "#1d4ed8"
+    "badge": "#1d4ed8",
+    "code_bg": "#0a0f1a",
+    "highlight_bg": "#0f1a2e",
+    "bold": "#60a5fa"
   },
   {
     "title": "Python Section 7 Modules and Packages",
@@ -582,7 +774,10 @@
     "date": "2026-05-23 04:34 PM",
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
-    "badge": "#6d28d9"
+    "badge": "#6d28d9",
+    "code_bg": "#130a1a",
+    "highlight_bg": "#1e0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "Python Section 9 Object Oriented Programming Part 1",
@@ -591,7 +786,10 @@
     "date": "2026-05-23 04:39 PM",
     "accent": "#0d9488",
     "glow": "#0a2a28",
-    "badge": "#0f766e"
+    "badge": "#0f766e",
+    "code_bg": "#0a1a18",
+    "highlight_bg": "#0f2a28",
+    "bold": "#2dd4bf"
   },
   {
     "title": "Python Section 9 Object Oriented Programming Part 2",
@@ -600,7 +798,10 @@
     "date": "2026-05-23 04:42 PM",
     "accent": "#ea580c",
     "glow": "#1f0a00",
-    "badge": "#c2410c"
+    "badge": "#c2410c",
+    "code_bg": "#1a0f0a",
+    "highlight_bg": "#2a180a",
+    "bold": "#fb923c"
   },
   {
     "title": "Python Section 10 GUI Programming with Tkinter",
@@ -609,7 +810,10 @@
     "date": "2026-05-23 05:09 PM",
     "accent": "#6d28d9",
     "glow": "#1a0f3d",
-    "badge": "#5b21b6"
+    "badge": "#5b21b6",
+    "code_bg": "#100a1a",
+    "highlight_bg": "#1a0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "Python Secton 11 Advanced Tkinter Widgets",
@@ -618,7 +822,10 @@
     "date": "2026-05-23 05:12 PM",
     "accent": "#0369a1",
     "glow": "#0a1f2e",
-    "badge": "#075985"
+    "badge": "#075985",
+    "code_bg": "#0a141a",
+    "highlight_bg": "#0f1f2e",
+    "bold": "#38bdf8"
   },
   {
     "title": "COMP2750 Chapter 1 Object Oriented Programming Using C++",
@@ -627,7 +834,10 @@
     "date": "2026-05-23 09:53 PM",
     "accent": "#15803d",
     "glow": "#0a2010",
-    "badge": "#166534"
+    "badge": "#166534",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a18",
+    "bold": "#34d399"
   },
   {
     "title": "COMP2750 Chapter 2 Complexity Analysis",
@@ -636,7 +846,10 @@
     "date": "2026-05-23 09:57 PM",
     "accent": "#b45309",
     "glow": "#1f1200",
-    "badge": "#92400e"
+    "badge": "#92400e",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fcd34d"
   },
   {
     "title": "COMP2750 Chapter 3 Linked Lists",
@@ -645,7 +858,10 @@
     "date": "2026-05-23 09:59 PM",
     "accent": "#be185d",
     "glow": "#2a0a1a",
-    "badge": "#9d174d"
+    "badge": "#9d174d",
+    "code_bg": "#1a0a12",
+    "highlight_bg": "#2a0f1c",
+    "bold": "#f472b6"
   },
   {
     "title": "COMP2750 Chapter 4 Stacks and Queues",
@@ -654,7 +870,10 @@
     "date": "2026-05-23 10:02 PM",
     "accent": "#dc2626",
     "glow": "#2a0a0a",
-    "badge": "#b91c1c"
+    "badge": "#b91c1c",
+    "code_bg": "#1a0a0a",
+    "highlight_bg": "#2a0f0f",
+    "bold": "#f87171"
   },
   {
     "title": "COMP2750 Chapter 5 Recursion",
@@ -663,7 +882,10 @@
     "date": "2026-05-23 10:05 PM",
     "accent": "#16a34a",
     "glow": "#0a2a0a",
-    "badge": "#15803d"
+    "badge": "#15803d",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a1a",
+    "bold": "#4ade80"
   },
   {
     "title": "COMP2750 Chapter 6 Binary Trees",
@@ -672,7 +894,10 @@
     "date": "2026-05-23 10:13 PM",
     "accent": "#d97706",
     "glow": "#1f1200",
-    "badge": "#b45309"
+    "badge": "#b45309",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fbbf24"
   },
   {
     "title": "COMP2750 Chapter 7 Multiway Trees",
@@ -681,7 +906,10 @@
     "date": "2026-05-23 10:19 PM",
     "accent": "#2563eb",
     "glow": "#0a0a2e",
-    "badge": "#1d4ed8"
+    "badge": "#1d4ed8",
+    "code_bg": "#0a0f1a",
+    "highlight_bg": "#0f1a2e",
+    "bold": "#60a5fa"
   },
   {
     "title": "COMP2750 Chapter 8 Graphs",
@@ -690,7 +918,10 @@
     "date": "2026-05-23 10:25 PM",
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
-    "badge": "#6d28d9"
+    "badge": "#6d28d9",
+    "code_bg": "#130a1a",
+    "highlight_bg": "#1e0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "COMP2750 Chapter 9 Sorting",
@@ -699,7 +930,10 @@
     "date": "2026-05-24 02:24 PM",
     "accent": "#0d9488",
     "glow": "#0a2a28",
-    "badge": "#0f766e"
+    "badge": "#0f766e",
+    "code_bg": "#0a1a18",
+    "highlight_bg": "#0f2a28",
+    "bold": "#2dd4bf"
   },
   {
     "title": "COMP2750 Chapter 10 Hashing",
@@ -708,7 +942,10 @@
     "date": "2026-05-24 02:28 PM",
     "accent": "#ea580c",
     "glow": "#1f0a00",
-    "badge": "#c2410c"
+    "badge": "#c2410c",
+    "code_bg": "#1a0f0a",
+    "highlight_bg": "#2a180a",
+    "bold": "#fb923c"
   },
   {
     "title": "COMP2750 Chapter 11 Data Compression",
@@ -717,7 +954,10 @@
     "date": "2026-05-24 02:32 PM",
     "accent": "#6d28d9",
     "glow": "#1a0f3d",
-    "badge": "#5b21b6"
+    "badge": "#5b21b6",
+    "code_bg": "#100a1a",
+    "highlight_bg": "#1a0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "COMP2750 Chapter 12 Memory Management",
@@ -726,7 +966,10 @@
     "date": "2026-05-24 02:35 PM",
     "accent": "#0369a1",
     "glow": "#0a1f2e",
-    "badge": "#075985"
+    "badge": "#075985",
+    "code_bg": "#0a141a",
+    "highlight_bg": "#0f1f2e",
+    "bold": "#38bdf8"
   },
   {
     "title": "COMP2750 Chapter 13 String Matching",
@@ -735,7 +978,10 @@
     "date": "2026-05-24 02:39 PM",
     "accent": "#15803d",
     "glow": "#0a2010",
-    "badge": "#166534"
+    "badge": "#166534",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a18",
+    "bold": "#34d399"
   },
   {
     "title": "COMP3230 Chapter 1 GIS Data Concepts",
@@ -744,7 +990,10 @@
     "date": "2026-05-24 02:50 PM",
     "accent": "#b45309",
     "glow": "#1f1200",
-    "badge": "#92400e"
+    "badge": "#92400e",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fcd34d"
   },
   {
     "title": "COMP3230 Chapter 2 Geospatial Data Visualization",
@@ -753,7 +1002,10 @@
     "date": "2026-05-24 02:52 PM",
     "accent": "#be185d",
     "glow": "#2a0a1a",
-    "badge": "#9d174d"
+    "badge": "#9d174d",
+    "code_bg": "#1a0a12",
+    "highlight_bg": "#2a0f1c",
+    "bold": "#f472b6"
   },
   {
     "title": "COMP3230 Chapter 3 Presenting GIS Data",
@@ -762,7 +1014,10 @@
     "date": "2026-05-24 02:54 PM",
     "accent": "#dc2626",
     "glow": "#2a0a0a",
-    "badge": "#b91c1c"
+    "badge": "#b91c1c",
+    "code_bg": "#1a0a0a",
+    "highlight_bg": "#2a0f0f",
+    "bold": "#f87171"
   },
   {
     "title": "COMP3230 Chapter 4 Coordinate Systems",
@@ -771,7 +1026,10 @@
     "date": "2026-05-24 02:57 PM",
     "accent": "#16a34a",
     "glow": "#0a2a0a",
-    "badge": "#15803d"
+    "badge": "#15803d",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a1a",
+    "bold": "#4ade80"
   },
   {
     "title": "COMP3230 Chapter 5 Managing Vector Data",
@@ -780,7 +1038,10 @@
     "date": "2026-05-24 02:59 PM",
     "accent": "#d97706",
     "glow": "#1f1200",
-    "badge": "#b45309"
+    "badge": "#b45309",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fbbf24"
   },
   {
     "title": "COMP3230 Chapter 6 Managing Raster Data",
@@ -789,7 +1050,10 @@
     "date": "2026-05-24 03:02 PM",
     "accent": "#2563eb",
     "glow": "#0a0a2e",
-    "badge": "#1d4ed8"
+    "badge": "#1d4ed8",
+    "code_bg": "#0a0f1a",
+    "highlight_bg": "#0f1a2e",
+    "bold": "#60a5fa"
   },
   {
     "title": "COMP3230 Chapter 5b GIS Data Acquisition",
@@ -798,7 +1062,10 @@
     "date": "2026-05-24 03:08 PM",
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
-    "badge": "#6d28d9"
+    "badge": "#6d28d9",
+    "code_bg": "#130a1a",
+    "highlight_bg": "#1e0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "COMP3230 Chapter 7 Attribute Data",
@@ -807,7 +1074,10 @@
     "date": "2026-05-24 03:11 PM",
     "accent": "#0d9488",
     "glow": "#0a2a28",
-    "badge": "#0f766e"
+    "badge": "#0f766e",
+    "code_bg": "#0a1a18",
+    "highlight_bg": "#0f2a28",
+    "bold": "#2dd4bf"
   },
   {
     "title": "COMP3230 Chapter 8 Editing",
@@ -816,7 +1086,10 @@
     "date": "2026-05-24 03:13 PM",
     "accent": "#ea580c",
     "glow": "#1f0a00",
-    "badge": "#c2410c"
+    "badge": "#c2410c",
+    "code_bg": "#1a0f0a",
+    "highlight_bg": "#2a180a",
+    "bold": "#fb923c"
   },
   {
     "title": "COMP3230 Chapter 9 Queries",
@@ -825,7 +1098,10 @@
     "date": "2026-05-24 03:16 PM",
     "accent": "#6d28d9",
     "glow": "#1a0f3d",
-    "badge": "#5b21b6"
+    "badge": "#5b21b6",
+    "code_bg": "#100a1a",
+    "highlight_bg": "#1a0f2e",
+    "bold": "#a78bfa"
   },
   {
     "title": "COMP3230 Chapter 10 Joins and Overlay",
@@ -834,7 +1110,10 @@
     "date": "2026-05-25 02:19 AM",
     "accent": "#0369a1",
     "glow": "#0a1f2e",
-    "badge": "#075985"
+    "badge": "#075985",
+    "code_bg": "#0a141a",
+    "highlight_bg": "#0f1f2e",
+    "bold": "#38bdf8"
   },
   {
     "title": "COMP3230 Chapter 11 Raster Analysis",
@@ -843,7 +1122,10 @@
     "date": "2026-05-25 02:21 AM",
     "accent": "#15803d",
     "glow": "#0a2010",
-    "badge": "#166534"
+    "badge": "#166534",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a18",
+    "bold": "#34d399"
   },
   {
     "title": "COMP3230 Chapter 12 Sharing GIS",
@@ -852,7 +1134,10 @@
     "date": "2026-05-25 02:24 AM",
     "accent": "#b45309",
     "glow": "#1f1200",
-    "badge": "#92400e"
+    "badge": "#92400e",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fcd34d"
   },
   {
     "title": "COMP3230 Chapter 16 Geocoding and Dynamic Segmentation",
@@ -861,7 +1146,10 @@
     "date": "2026-05-25 02:28 AM",
     "accent": "#be185d",
     "glow": "#2a0a1a",
-    "badge": "#9d174d"
+    "badge": "#9d174d",
+    "code_bg": "#1a0a12",
+    "highlight_bg": "#2a0f1c",
+    "bold": "#f472b6"
   },
   {
     "title": "COMP3630 Chapter 1 Network Topologies Types and Services",
@@ -870,7 +1158,10 @@
     "date": "2026-09-02 01:17 PM",
     "accent": "#dc2626",
     "glow": "#2a0a0a",
-    "badge": "#b91c1c"
+    "badge": "#b91c1c",
+    "code_bg": "#1a0a0a",
+    "highlight_bg": "#2a0f0f",
+    "bold": "#f87171"
   },
   {
     "title": "COMP3430 Introduction and OS Overview",
@@ -879,7 +1170,10 @@
     "date": "2026-09-02 07:16 PM",
     "accent": "#16a34a",
     "glow": "#0a2a0a",
-    "badge": "#15803d"
+    "badge": "#15803d",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a1a",
+    "bold": "#4ade80"
   },
   {
     "title": "COMP3630 Chapter 2 Network Models and Device Architectures",
@@ -888,7 +1182,10 @@
     "date": "2026-09-08 12:07 PM",
     "accent": "#d97706",
     "glow": "#1f1200",
-    "badge": "#b45309"
+    "badge": "#b45309",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fbbf24"
   },
   {
     "title": "COMP3430 Concurrency and Persistence",
@@ -897,7 +1194,10 @@
     "date": "2026-09-08 12:31 PM",
     "accent": "#2563eb",
     "glow": "#0a0a2e",
-    "badge": "#1d4ed8"
+    "badge": "#1d4ed8",
+    "code_bg": "#0a0f1a",
+    "highlight_bg": "#0f1a2e",
+    "bold": "#60a5fa"
   },
   {
     "title": "COMP4340 Databases Refresher",
@@ -906,6 +1206,9 @@
     "date": "2026-09-08 12:40 PM",
     "accent": "#7c3aed",
     "glow": "#1e0a3c",
-    "badge": "#6d28d9"
+    "badge": "#6d28d9",
+    "code_bg": "#130a1a",
+    "highlight_bg": "#1e0f2e",
+    "bold": "#a78bfa"
   }
 ]

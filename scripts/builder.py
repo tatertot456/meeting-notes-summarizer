@@ -7,18 +7,18 @@ HOME_FOLDER = Path(__file__).parent.parent / "home"
 REGISTRY_FILE = HOME_FOLDER / "registry.json"
 
 PAGE_COLORS = [
-    {"accent": "#dc2626", "glow": "#2a0a0a", "badge": "#b91c1c"},  # red
-    {"accent": "#16a34a", "glow": "#0a2a0a", "badge": "#15803d"},  # green
-    {"accent": "#d97706", "glow": "#1f1200", "badge": "#b45309"},  # amber
-    {"accent": "#2563eb", "glow": "#0a0a2e", "badge": "#1d4ed8"},  # blue
-    {"accent": "#7c3aed", "glow": "#1e0a3c", "badge": "#6d28d9"},  # purple
-    {"accent": "#0d9488", "glow": "#0a2a28", "badge": "#0f766e"},  # teal
-    {"accent": "#ea580c", "glow": "#1f0a00", "badge": "#c2410c"},  # orange
-    {"accent": "#6d28d9", "glow": "#1a0f3d", "badge": "#5b21b6"},  # violet
-    {"accent": "#0369a1", "glow": "#0a1f2e", "badge": "#075985"},  # sky
-    {"accent": "#15803d", "glow": "#0a2010", "badge": "#166534"},  # emerald
-    {"accent": "#b45309", "glow": "#1f1200", "badge": "#92400e"},  # yellow
-    {"accent": "#be185d", "glow": "#2a0a1a", "badge": "#9d174d"},  # pink
+    {"accent": "#dc2626", "glow": "#2a0a0a", "badge": "#b91c1c", "code_bg": "#1a0a0a", "highlight_bg": "#2a0f0f", "bold": "#f87171"},   # red
+    {"accent": "#16a34a", "glow": "#0a2a0a", "badge": "#15803d", "code_bg": "#0a1a0f", "highlight_bg": "#0f2a1a", "bold": "#4ade80"},   # green
+    {"accent": "#d97706", "glow": "#1f1200",  "badge": "#b45309", "code_bg": "#1a1200", "highlight_bg": "#2a1c00", "bold": "#fbbf24"},   # amber
+    {"accent": "#2563eb", "glow": "#0a0a2e", "badge": "#1d4ed8", "code_bg": "#0a0f1a", "highlight_bg": "#0f1a2e", "bold": "#60a5fa"},   # blue
+    {"accent": "#7c3aed", "glow": "#1e0a3c", "badge": "#6d28d9", "code_bg": "#130a1a", "highlight_bg": "#1e0f2e", "bold": "#a78bfa"},   # purple
+    {"accent": "#0d9488", "glow": "#0a2a28", "badge": "#0f766e", "code_bg": "#0a1a18", "highlight_bg": "#0f2a28", "bold": "#2dd4bf"},   # teal
+    {"accent": "#ea580c", "glow": "#1f0a00", "badge": "#c2410c", "code_bg": "#1a0f0a", "highlight_bg": "#2a180a", "bold": "#fb923c"},   # orange
+    {"accent": "#6d28d9", "glow": "#1a0f3d", "badge": "#5b21b6", "code_bg": "#100a1a", "highlight_bg": "#1a0f2e", "bold": "#a78bfa"},   # violet
+    {"accent": "#0369a1", "glow": "#0a1f2e", "badge": "#075985", "code_bg": "#0a141a", "highlight_bg": "#0f1f2e", "bold": "#38bdf8"},   # sky
+    {"accent": "#15803d", "glow": "#0a2010", "badge": "#166534", "code_bg": "#0a1a0f", "highlight_bg": "#0f2a18", "bold": "#34d399"},   # emerald
+    {"accent": "#b45309", "glow": "#1f1200",  "badge": "#92400e", "code_bg": "#1a1200", "highlight_bg": "#2a1c00", "bold": "#fcd34d"},  # yellow
+    {"accent": "#be185d", "glow": "#2a0a1a", "badge": "#9d174d", "code_bg": "#1a0a12", "highlight_bg": "#2a0f1c", "bold": "#f472b6"},   # pink
 ]
 
 
@@ -58,6 +58,9 @@ def register_page(title: str, filename: str, category: str):
             "accent": color["accent"],
             "glow": color["glow"],
             "badge": color["badge"],
+            "code_bg": color["code_bg"],
+            "highlight_bg": color["highlight_bg"],
+            "bold": color["bold"],
         })
         REGISTRY_FILE.write_text(json.dumps(registry, indent=2), encoding="utf-8")
         print(f"Registered: {title} under '{category}'")
