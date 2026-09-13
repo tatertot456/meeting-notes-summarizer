@@ -1222,5 +1222,17 @@
     "code_bg": "#0a1a18",
     "highlight_bg": "#0f2a28",
     "bold": "#2dd4bf"
+  },
+  {
+    "title": "COMP3430 Processes fork exec wait and Limited Direct Execution",
+    "filename": "comp3430-processes-fork-exec-wait-and-limited-direct-execution.html",
+    "category": "Operating Systems",
+    "date": "2026-09-13 05:09 PM",
+    "accent": "#ea580c",
+    "glow": "#1f0a00",
+    "badge": "#c2410c",
+    "code_bg": "#1a0f0a",
+    "highlight_bg": "#2a180a",
+    "bold": "#fb923c"
   }
 ]

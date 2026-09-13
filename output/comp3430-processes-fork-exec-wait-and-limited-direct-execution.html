@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3430 — Processes: fork, exec, wait, and Limited Direct Execution</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #1f0a00, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #c2410c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #ea580c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #15803d; color: white; border-color: #15803d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #15803d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #c8c8c8; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #c8c8c8; line-height: 1.8; margin-bottom: 4px; }
+        strong { color: #fb923c; }
+        .highlight { background: #2a180a; border-left: 3px solid #15803d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #15803d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; color: #c8c8c8; }
+        pre { background: #1a0f0a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #c2410c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #c8c8c8; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #ea580c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Operating Systems · Week 2</div>
+        <h1>Processes: fork, exec, wait, and Limited Direct Execution</h1>
+        <p class="subtitle">Process anatomy, address spaces, fork/exec/wait, zombies, shells, timer interrupts, and context switches</p>
+    </header>
+    <nav>
+        <a href="#process">What Is a Process?</a>
+        <a href="#states">Process States</a>
+        <a href="#fork">fork()</a>
+        <a href="#wait">wait() & Zombies</a>
+        <a href="#exec">exec()</a>
+        <a href="#shell">The Shell</a>
+        <a href="#lde">Limited Direct Execution</a>
+        <a href="#timer">Timer & Context Switch</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="process">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What Is a Process?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>program</strong> is a file on disk. A <strong>process</strong> is that program running. To fully describe a process, list everything it can touch while it runs:</p>
+                <div class="grid">
+                    <div class="card"><h3>1. Address Space (Memory)</h3><p>Stack (locals, argv), heap (malloc), static data (globals), code (text). Each region sits at a different virtual address. One program can be many processes — four copies of cpu.c are four processes with four separate address spaces.</p></div>
+                    <div class="card"><h3>2. Registers</h3><p>Program counter (PC), stack pointer (SP), ~30 general-purpose registers. Save these 32 numbers and the process is frozen. Load them back and it continues as if nothing happened. This is the whole mechanism of context switching.</p></div>
+                    <div class="card"><h3>3. Open Files (I/O State)</h3><p>Per-process file descriptor table. Every process is born with 0 (stdin), 1 (stdout), 2 (stderr) already open. Redirection is just swapping entries in this table.</p></div>
+                    <div class="card"><h3>struct proc in xv6</h3><p>Every process is one C struct. Key fields: state, pid, parent, pagetable (memory map), trapframe (saved user registers), context (saved kernel registers), ofile[] (open files), cwd (current directory). xv6 keeps 64 of these in a global array proc[NPROC].</p></div>
+                </div>
+                <div class="highlight"><p>To pause a process the OS only needs to keep these three things. To run many processes it only needs to keep them separate. One program can be many processes at once — last week's four copies of cpu.c were four processes, four separate copies of this picture.</p></div>
+                <p><strong>The address space is not one contiguous block:</strong></p>
+                <pre>0x7fffffffffff   top of user space (128 TiB)
+[stack]  ~144 KB
+  local variables, argv, envp live here
+
+      gap: ~42 TB of nothing (libc mapped near stack)
+
+[heap]  ~132 KB
+  malloc'd memory grows upward from here
+
+      gap: ~917 MB of nothing
+
+data  rw-p   4 KB   (globals)
+code  r-xp   4 KB   (program text — readable + executable, NOT writable)
+ELF header   4 KB
+0x0   nothing — NULL pointer faults here</pre>
+                <p>Every boundary ends in 000 — the unit is 4 KB pages. The gaps are real and enormous. The "strip" diagram is right about ORDER, not spacing. This is /proc/PID/maps on Ubuntu.</p>
+                <p><strong>Birth of a process (exec path):</strong></p>
+                <ul>
+                    <li>Load code and static data from the ELF file into memory (lazily — pages brought in on first touch)</li>
+                    <li>Allocate the stack, fill in argc and argv</li>
+                    <li>Allocate a small heap for malloc</li>
+                    <li>File descriptors 0, 1, 2 are inherited — printf works from line one</li>
+                    <li>Jump to main() — set PC, switch to user mode</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="states">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Process States</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>xv6 State</th><th>Meaning</th><th>Linux ps</th></tr>
+                    <tr><td>RUNNING</td><td>Instructions executing on a CPU right now</td><td>R</td></tr>
+                    <tr><td>RUNNABLE</td><td>Could run, waiting for a CPU — OS chose someone else</td><td>R (same letter)</td></tr>
+                    <tr><td>SLEEPING</td><td>Waiting for an event (I/O, wait, sleep) — cannot use CPU even if offered</td><td>S (interruptible) / D (disk, uninterruptible)</td></tr>
+                    <tr><td>ZOMBIE</td><td>Exited but parent hasn't called wait() — slot held for exit status</td><td>Z</td></tr>
+                    <tr><td>UNUSED</td><td>Free slot in proc[NPROC] array</td><td>(not shown)</td></tr>
+                </table>
+                <div class="highlight"><p>Linux merges RUNNING and RUNNABLE into one letter R — only /proc/PID/stat plus a CPU column can distinguish them. Linux also adds T (stopped by signal, Ctrl-Z) which xv6 lacks. ZOMBIE means the same thing on both.</p></div>
+                <p><strong>Time sharing</strong> — the answer to the first crux: run one process for a while, then another. The cost is honest — each runs slower than alone. The alternative is space sharing (disk blocks, memory pages). This week is entirely mechanism. Policy (which process, how long) is weeks 6–7.</p>
+            </div>
+        </div>
+
+        <div class="section" id="fork">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>fork() — One Call, Two Returns</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// p1.c — the complete fork pattern
+int main(int argc, char *argv[]) {
+    printf("hello world (pid:%d)\n", getpid());
+    int rc = fork();
+    if (rc < 0) {
+        fprintf(stderr, "fork failed\n");  // always check
+        exit(1);
+    } else if (rc == 0) {
+        // I am the child — fork() returned 0
+        printf("hello, I am child (pid:%d)\n", getpid());
+    } else {
+        // I am the parent — rc is my child's pid
+        printf("hello, I am parent of %d (pid:%d)\n", rc, getpid());
+    }
+    return 0;
+}</pre>
+                <p><strong>What fork() does:</strong> asks the kernel to copy the calling process. The child does NOT start at main() — it wakes up INSIDE fork(), at the same instruction as the parent, and continues from there. That's why "hello world" prints once.</p>
+                <div class="grid">
+                    <div class="card"><h3>Child gets rc = 0</h3><p>"You are the copy." The child needs no pid — it has getpid() for itself and getppid() for its parent.</p></div>
+                    <div class="card"><h3>Parent gets rc = child's pid</h3><p>The only handle the parent has on the child. Used by wait(), kill(), and restart loops.</p></div>
+                    <div class="card"><h3>What's copied</h3><p>Memory (every page), registers, open file table. Shared open files (not copied) — both child and parent write to the same terminal. This is why redirection and pipes work.</p></div>
+                    <div class="card"><h3>What differs</h3><p>pid, parent pointer, and one register: a0 (the return value). The kernel sets a0=0 in the child's trapframe. That one line in proc.c is why fork() returns 0 in the child.</p></div>
+                </div>
+                <div class="highlight"><p><strong>Who runs first after fork() is nondeterministic.</strong> The scheduler picks. In 19/20 runs the parent went first; once the child did. Same program, two different outputs. This is the same nondeterminism as last week's threads bug — but with processes. To force an order, use wait().</p></div>
+                <p><strong>Surprise — fork copies printf's buffer:</strong> send output to a file with > and "hello world" appears twice. printf buffers output in memory; when output is a file it flushes at exit, not at newlines. fork() copied the buffer. Two processes, two flushes.</p>
+                <p><strong>Why two calls (fork + exec) instead of one?</strong> The gap between fork() and exec() lets the child rearrange its world — close a file descriptor, open a file, set up a pipe — BEFORE the new program starts. Windows CreateProcess() does it in one call but needs 10 parameters to pass all that context.</p>
+                <p><strong>xv6 fork() in 8 moves (kfork in proc.c):</strong></p>
+                <ul>
+                    <li>allocproc() — find first UNUSED slot in proc[64]</li>
+                    <li>uvmcopy() — copy every page of parent's memory</li>
+                    <li>Copy the trapframe (all 31 saved user registers + PC)</li>
+                    <li>Set a0 = 0 in the child's trapframe (the return value)</li>
+                    <li>filedup() — increment refcount on shared open files</li>
+                    <li>Set child.parent = parent (the family tree)</li>
+                    <li>Set child.state = RUNNABLE</li>
+                    <li>Return child's pid to the parent</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="wait">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>wait() and Zombies</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// p2.c — wait() guarantees the child prints first
+int rc = fork();
+if (rc == 0) {
+    printf("hello, I am child (pid:%d)\n", getpid());
+} else {
+    int rc_wait = wait(NULL);  // block until a child exits
+    printf("hello, I am parent of %d (rc_wait:%d)\n", rc, rc_wait);
+}</pre>
+                <p><strong>wait(NULL)</strong> blocks the parent until one child has exited. Returns that child's pid. Through its argument it can also return the child's exit status. While blocked the parent is in SLEEPING state — costs zero CPU.</p>
+                <p><strong>Why the order is now certain:</strong> either the child ran first anyway, or the parent ran first and immediately blocked in wait() until the child finished. Both roads lead to the child printing first.</p>
+                <p><strong>The Zombie:</strong></p>
+                <ul>
+                    <li>Child calls exit() → closes files, parks exit status in struct proc, state becomes ZOMBIE, never runs again</li>
+                    <li>Kernel cannot free the slot — it holds a status nobody has collected yet. A dying process also can't free itself because it's still running on its own kernel stack.</li>
+                    <li>Parent calls wait() → finds the ZOMBIE child, copies exit status out, frees everything, returns child's pid. Z disappears from ps.</li>
+                </ul>
+                <div class="highlight"><p><strong>Orphans go to init (pid 1)</strong> when a parent dies first. init's whole job is to call wait() in a loop. That's why killing a zombie's parent makes the zombie vanish instantly. Rule for your own code: every fork() needs a matching wait() somewhere — or a SIGCHLD handler that does it. A server that forks per request and never waits leaks one process slot per request. xv6 has 64; Linux has 32,768 pids by default. Eventually fork() returns -1 while the machine does nothing.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="exec">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>exec() — Become a Different Program</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// p3.c — fork a child, exec wc inside it
+if (fork() == 0) {
+    char *myargs[] = {"wc", "p3.c", NULL};
+    execvp(myargs[0], myargs);   // replace me with wc
+    printf("never printed");     // only runs if exec FAILED
+}
+wait(NULL);
+
+// Output:
+// hello world (pid:1467)
+// hello, I am child (pid:1468)
+// 27 122 911 p3.c              ← wc ran here, same pid 1468
+// hello, I am parent of 1468</pre>
+                <p><strong>What exec() does NOT change:</strong> pid, parent, open file descriptors</p>
+                <p><strong>What exec() DOES change:</strong> memory (new code, data, stack, heap), program counter (set to new program's entry point)</p>
+                <p><strong>A successful exec() never returns</strong> — the code it would return to is gone. The line after execvp() only runs if exec failed.</p>
+                <p><strong>exec() in 8 kernel moves:</strong></p>
+                <ul>
+                    <li>namei(path) — find the file</li>
+                    <li>Read ELF header</li>
+                    <li>Build a new empty page table</li>
+                    <li>Load code and data segments</li>
+                    <li>Allocate a fresh user stack</li>
+                    <li>Copy argv strings onto the new stack</li>
+                    <li>Switch to the new page table, set PC to entry point</li>
+                    <li>Free the OLD memory last — so a failed exec can still return -1</li>
+                </ul>
+                <div class="highlight"><p><strong>fork() creates a new process with the same program. exec() gives the same process a new program. Neither alone can start a program — it takes both.</strong> The gap between them is the entire reason Unix has two calls: close a file, open another, rearrange the world, THEN become the new program.</p></div>
+                <p><strong>Redirection — the gap in action:</strong></p>
+                <pre>// The shell running: wc p4.c > out.txt
+if (fork() == 0) {
+    close(1);                                          // free slot 1
+    open("out.txt", O_CREAT|O_WRONLY|O_TRUNC, 0644); // lands in slot 1
+    execvp("wc", args);                                // wc inherits the table
+}
+// open() always returns the LOWEST free descriptor.
+// Close 1, next open() gets 1. exec() keeps the table.
+// wc writes to fd 1 as it always does — never knows it's a file.</pre>
+            </div>
+        </div>
+
+        <div class="section" id="shell">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Shell — A Loop of fork, exec, wait</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// The shell's inner loop (simplified):
+while (read_line(buf)) {
+    if (is_cd(buf)) {
+        chdir(buf+3);      // cd MUST run in the parent
+    } else {
+        if (fork() == 0)
+            exec(cmd, args);   // child becomes the program
+        wait(NULL);            // parent blocks until done
+    }
+}  // print next prompt</pre>
+                <p><strong>Why cd is special:</strong> if the shell forked a child to run chdir(), the child's directory would change and then the child would exit — the shell itself would be where it was. cd must run in the parent process.</p>
+                <p><strong>Why the prompt returns only when the command is done:</strong> the parent is blocked in wait() the entire time the child runs.</p>
+                <p><strong>A pipe is redirection done twice:</strong></p>
+                <pre>// ls -l | wc -l implemented by hand (p5.c):
+int p[2];
+pipe(p);              // p[0]=read end, p[1]=write end
+
+if (fork() == 0) {    // child 1: ls -l
+    close(1); dup(p[1]);          // stdout → pipe write end
+    close(p[0]); close(p[1]);
+    execlp("ls", "ls", "-l", NULL);
+}
+if (fork() == 0) {    // child 2: wc -l
+    close(0); dup(p[0]);          // stdin → pipe read end
+    close(p[0]); close(p[1]);
+    execlp("wc", "wc", "-l", NULL);
+}
+close(p[0]); close(p[1]);         // parent closes both ends
+wait(NULL); wait(NULL);
+
+// ls writes to fd 1 — doesn't know it's a pipe
+// wc reads from fd 0 — doesn't know either
+// wc sees EOF when every write end is closed</pre>
+                <div class="highlight"><p>The kernel pipe is a 64 KB byte queue in memory — no file on disk, no temporary storage. If the queue fills the writer blocks; if it empties the reader blocks. Neither ls nor wc changed a single line. The shell rearranged the children's worlds, then became the programs.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="lde">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Limited Direct Execution — Staying in Control</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The OS wants two things simultaneously that fight each other: <strong>run the program directly on the CPU (fast)</strong> and <strong>never lose the ability to stop it or forbid dangerous actions (control)</strong>. The answer is limited direct execution.</p>
+                <p><strong>Problem 1 — Restricted Operations: Two CPU Modes</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>User Mode</h3><p>Restricted — no device access, no other process's memory, no privileged instructions. All application code runs here. A privileged instruction in user mode raises a hardware exception — the CPU refuses it.</p></div>
+                    <div class="card"><h3>Kernel Mode</h3><p>Unrestricted — touch any device, any memory, any register. The difference is one bit in a CPU control register, checked by hardware on EVERY instruction.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>The trap (ecall on RISC-V)</strong> — the one legal way up:</p>
+                <ul>
+                    <li>A system call is a trap: one instruction that (1) switches to kernel mode and (2) jumps to a fixed address the KERNEL chose in advance</li>
+                    <li>The program cannot pick where it lands — only says "I want service number N"</li>
+                    <li>The kernel installs the trap handler address at boot using a privileged instruction (w_stvec). User code cannot change this.</li>
+                    <li>A program cannot name a kernel address to jump to — impossible by construction</li>
+                </ul>
+                <p><strong>A system call — 6 stations:</strong></p>
+                <pre>1. Program:  put call number in a7 register, execute ecall
+2. Hardware: save user PC, switch to kernel mode, jump to handler
+3. Kernel:   save all 31 user registers into trapframe, switch to kernel stack
+4. Kernel:   look up number in syscall table, call handler, result → saved a0
+5. Kernel:   restore user registers from trapframe (a0 = result)
+6. Hardware: sret — drop to user mode, jump to saved PC (instruction after ecall)
+
+Cost on Ubuntu: ~100 ns per crossing — about 85× a plain function call.
+This is why programs buffer output instead of calling write() per byte.</pre>
+                <div class="highlight"><p>Protection is enforced by silicon, not by the OS asking nicely. What could you do if you could install your own trap table? You could point "system call" at your own code running in kernel mode — you'd own the machine. That's exactly why setting the trap address is itself a privileged operation.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="timer">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Timer Interrupts and Context Switches</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Problem 2 — Taking the CPU back:</strong></p>
+                <p>Cooperative approach: trust programs to yield via system calls. Fatal flaw:</p>
+                <pre>while(1);   // no system call, no illegal instruction, ever
+            // In a cooperative world the OS never runs again</pre>
+                <p><strong>The only answer — the hardware timer:</strong></p>
+                <ul>
+                    <li>At boot (privileged): install a timer handler + start hardware timer: "interrupt me every few milliseconds"</li>
+                    <li>Starting/stopping the timer is privileged — a user program cannot turn it off</li>
+                    <li>Every tick: hardware saves the running program's state and jumps into the kernel handler — exactly like a trap, but nobody asked</li>
+                    <li>Now the OS is running and can decide: keep this process or switch</li>
+                </ul>
+                <p><strong>Trap vs. Interrupt:</strong> a trap is the program calling the kernel. An interrupt is the hardware calling the kernel. Same machinery, opposite direction. The infinite loop is now powerless — the clock ticks, the interrupt fires, the OS runs. Control is guaranteed by physics, not politeness.</p>
+                <p><strong>The context switch — saving A, loading B:</strong></p>
+                <pre>// swtch.S in xv6 — the ENTIRE context switch (29 instructions):
+swtch(old, new):
+    // Save 14 callee-saved registers into old->context
+    sd ra, 0(a0); sd sp, 8(a0); sd s0, 16(a0) ... sd s11, 104(a0)
+    // Load 14 registers from new->context
+    ld ra, 0(a1); ld sp, 8(a1); ld s0, 16(a1) ... ld s11, 104(a1)
+    ret  // follows new's saved return address — returns into B's code
+
+// Loading new's stack pointer is the point of no return.
+// After it we are on B's kernel stack. ret lands in B's kernel code.
+// swtch was called by A and returns into B.</pre>
+                <p><strong>Two saves per hand-off, not one:</strong></p>
+                <ul>
+                    <li>On the timer interrupt: hardware saves A's user registers to A's kernel stack (trapframe)</li>
+                    <li>OS saves A's kernel registers to A's struct context</li>
+                    <li>OS loads B's context, switches to B's kernel stack</li>
+                    <li>When B returns to user mode its trapframe is restored</li>
+                </ul>
+                <p><strong>xv6 always switches through a per-CPU scheduler thread</strong> — A → scheduler → B. Never A directly to B. Two swtch() calls per hand-off. This keeps all switching logic in one place.</p>
+                <table>
+                    <tr><th>Operation</th><th>Cost (Ubuntu)</th><th>Ratio</th></tr>
+                    <tr><td>Function call</td><td>~1.2 ns</td><td>1×</td></tr>
+                    <tr><td>System call (getppid)</td><td>~100 ns</td><td>~85×</td></tr>
+                    <tr><td>Context switch</td><td>~1,000 ns (1 µs)</td><td>~800×</td></tr>
+                </table>
+                <div class="highlight"><p>These three numbers explain a huge amount of systems design. Why programs buffer output: syscalls cost 100 ns each. Why servers use thread pools instead of fork-per-request: context switches cost 1 µs. Why Linux added io_uring: submit many I/Os per trap instead of one syscall each. Every crossing costs — and these costs are why.</p></div>
+                <p><strong>Loose end — interrupts during traps:</strong> a timer interrupt can fire while the kernel is mid-system-call. Now two activities are inside the kernel touching the same data — the same race as last week's counter bug, one level down. xv6's solution: disable interrupts during certain operations, protect kernel data with spinlocks (acquire() turns interrupts off on that CPU until release()). This is weeks 8–10. struct proc has a spinlock on its very first line — now you know why.</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
