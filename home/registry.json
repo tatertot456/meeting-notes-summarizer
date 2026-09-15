@@ -1234,5 +1234,17 @@
     "code_bg": "#1a0f0a",
     "highlight_bg": "#2a180a",
     "bold": "#fb923c"
+  },
+  {
+    "title": "COMP3630 Chapter 4 Network Addressing MAC IPv4 IPv6 and Ports",
+    "filename": "comp3630-chapter-4-network-addressing-mac-ipv4-ipv6-and-ports.html",
+    "category": "Networks",
+    "date": "2026-09-15 10:04 AM",
+    "accent": "#6d28d9",
+    "glow": "#1a0f3d",
+    "badge": "#5b21b6",
+    "code_bg": "#100a1a",
+    "highlight_bg": "#1a0f2e",
+    "bold": "#a78bfa"
   }
 ]

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 4: Network Addressing: MAC, IPv4, IPv6, and Ports</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #1e0a3c, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #6d28d9; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #6d28d9; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #6d28d9; color: white; border-color: #6d28d9; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #6d28d9; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        strong { color: #a78bfa; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e0f2e; border-left: 3px solid #6d28d9; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #6d28d9; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        .back { display: inline-block; margin-bottom: 32px; color: #6d28d9; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 4</div>
+        <h1>Network Addressing: MAC, IPv4, IPv6, and Ports</h1>
+        <p class="subtitle">MAC addressing, switch tables, IPv4 subnetting, NAT, IPv6, sockets, and port security</p>
+    </header>
+    <nav>
+        <a href="#layers">Address Layers</a>
+        <a href="#mac">MAC Addresses</a>
+        <a href="#switches">Switch Tables</a>
+        <a href="#ipv4">IPv4 & Subnetting</a>
+        <a href="#nat">NAT & Private IPs</a>
+        <a href="#ipv6">IPv6</a>
+        <a href="#delivery">Traffic Delivery</a>
+        <a href="#ports">Ports & Sockets</a>
+        <a href="#security">Port Security</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="layers">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Four Addressing Layers</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Network addressing is a structured, layered system where each layer answers a different question about delivery:</p>
+                <table>
+                    <tr><th>Layer</th><th>Address Type</th><th>Example</th><th>Question Answered</th></tr>
+                    <tr><td>L2 — Data Link</td><td>MAC Address</td><td>00:1A:2B:3C:4D:5E</td><td>Which specific NIC on this local link gets this frame?</td></tr>
+                    <tr><td>L3 — Network</td><td>IP Address</td><td>192.168.10.25</td><td>Which host on which network receives this packet?</td></tr>
+                    <tr><td>L4 — Transport</td><td>Port Number</td><td>TCP 443</td><td>Which application process on that host receives this segment?</td></tr>
+                    <tr><td>Application</td><td>DNS Name</td><td>www.example.com</td><td>What human-readable label represents the target host?</td></tr>
+                </table>
+                <div class="highlight"><p>All four address types operate in concert simultaneously for every network connection. When you load a website: DNS resolves the name to an IP, the IP routes the packet to the right host, the port delivers it to the right application, and MAC addresses handle every local hop along the way.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="mac">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>MAC Addresses — Layer 2 Identification</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A MAC (Media Access Control) address is a 48-bit identifier assigned to a network interface card (NIC). It uniquely identifies a device on a local network segment.</p>
+                <pre>MAC Address Structure:
+|--- 24 bits OUI ---|--- 24 bits Device ID ---|
+  00  :  1A  :  2B  :  3C  :  4D  :  5E
+
+OUI = Organizationally Unique Identifier
+      Assigned by IEEE to manufacturers (e.g., 00:1A:2B = specific vendor)
+Device ID = Unique serial assigned by manufacturer per NIC</pre>
+                <p><strong>Representation formats (all equivalent):</strong></p>
+                <ul>
+                    <li><strong>Linux/Unix (colon-separated):</strong> 00:1A:2B:3C:4D:5E</li>
+                    <li><strong>Windows (hyphen-separated):</strong> 00-1A-2B-3C-4D-5E</li>
+                    <li><strong>Cisco IOS (dotted pairs):</strong> 001a.2b3c.4d5e</li>
+                </ul>
+                <div class="highlight"><p>MAC addresses are NOT permanent physical identities. Modern operating systems frequently use MAC randomization (privacy feature on smartphones/laptops), locally administered addresses, virtual machine addresses, and spoofed values. The OUI lookup only tells you the original manufacturer — it cannot identify a specific device on your network today.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="switches">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Switch MAC Tables — Dynamic Learning</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Switches dynamically build a MAC address table (CAM table) by examining incoming frame source addresses:</p>
+                <ul>
+                    <li><strong>Source inspection:</strong> When a frame arrives, the switch reads the source MAC and records MAC → Port with an aging timer</li>
+                    <li><strong>Destination lookup:</strong> When forwarding, switch checks destination MAC against the table — if found, sends ONLY out that port</li>
+                    <li><strong>Unicast flood (unknown destination):</strong> If the destination MAC is not in the table, the switch floods the frame out ALL other ports — once the target replies, its MAC is learned</li>
+                </ul>
+                <pre>Example MAC Table:
+┌─────────────────────┬──────────┬──────────────┐
+│ MAC Address         │ Port     │ Age (seconds)│
+├─────────────────────┼──────────┼──────────────┤
+│ AA:AA:AA:AA:AA:01   │ Gi0/1    │ 45           │
+│ BB:BB:BB:BB:BB:02   │ Gi0/2    │ 120          │
+│ CC:CC:CC:CC:CC:03   │ Gi0/3    │ 10           │
+└─────────────────────┴──────────┴──────────────┘
+
+PC1 sends frame to CC:CC:CC:CC:CC:03
+→ Switch looks up CC:CC:CC:CC:CC:03 → Gi0/3
+→ Frame sent ONLY out Gi0/3 — PC2 never sees it</pre>
+                <div class="highlight"><p>This is why switches replaced hubs. A hub floods every frame to every port — any device can sniff all traffic. A switch isolates each port into its own collision domain, sending frames only to the intended recipient. Security and performance both improve dramatically.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ipv4">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>IPv4, Subnetting & CIDR</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>IPv4 is a 32-bit logical address divided into four 8-bit octets in dotted-decimal notation. The subnet mask splits the 32 bits into a network portion and a host portion.</p>
+                <pre>192.168.10.25 / 24
+
+Binary: 11000000.10101000.00001010.00011001
+Mask:   11111111.11111111.11111111.00000000
+        |-------- Network (24 bits) --------|-- Host (8 bits) --|
+
+Network address: 192.168.10.0
+Host range:      192.168.10.1 – 192.168.10.254
+Broadcast:       192.168.10.255
+Usable hosts:    254</pre>
+                <p><strong>CIDR /26 conversion example:</strong></p>
+                <pre>26 binary 1s: 11111111.11111111.11111111.11000000
+Final octet:  128 + 64 = 192
+Subnet mask:  255.255.255.192
+
+/26 network: 64 addresses total, 62 usable hosts</pre>
+                <p><strong>Historical IP classes (now replaced by CIDR):</strong></p>
+                <table>
+                    <tr><th>Class</th><th>First Octet</th><th>Default Mask</th><th>Max Hosts</th><th>Use</th></tr>
+                    <tr><td>A</td><td>1–126</td><td>/8 (255.0.0.0)</td><td>16.7 million</td><td>Large organizations</td></tr>
+                    <tr><td>B</td><td>128–191</td><td>/16 (255.255.0.0)</td><td>65,534</td><td>Medium organizations</td></tr>
+                    <tr><td>C</td><td>192–223</td><td>/24 (255.255.255.0)</td><td>254</td><td>Small networks</td></tr>
+                    <tr><td>D</td><td>224–239</td><td>N/A</td><td>N/A</td><td>Multicast</td></tr>
+                    <tr><td>E</td><td>240–255</td><td>N/A</td><td>N/A</td><td>Experimental/reserved</td></tr>
+                </table>
+                <div class="highlight"><p>CIDR replaced classful addressing because classful wasted massive IP blocks. A company needing 300 hosts had to take a Class B (/16 = 65,534 hosts) — wasting 65,234 addresses. CIDR allows /23 (510 hosts) — a near-perfect fit. Modern routers bypass class boundaries entirely and use variable prefix lengths (/20, /23, /27, etc.).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="nat">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Private IPv4 Ranges & NAT</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Three private IPv4 ranges are reserved for internal networks and are non-routable on the public internet:</p>
+                <table>
+                    <tr><th>Range</th><th>CIDR</th><th>Addresses</th><th>Typical Use</th></tr>
+                    <tr><td>10.0.0.0 – 10.255.255.255</td><td>/8</td><td>16.7 million</td><td>Large enterprises, data centers</td></tr>
+                    <tr><td>172.16.0.0 – 172.31.255.255</td><td>/12</td><td>1 million</td><td>Medium networks</td></tr>
+                    <tr><td>192.168.0.0 – 192.168.255.255</td><td>/16</td><td>65,536</td><td>Home networks, small offices</td></tr>
+                </table>
+                <p><strong>How NAT bridges private to public:</strong></p>
+                <ul>
+                    <li>ISPs drop packets with private source IPs — private addresses cannot reach the internet directly</li>
+                    <li>An edge router or firewall with NAT translates the private source IP to the router's public IP when packets leave</li>
+                    <li>The NAT router tracks source ports to route incoming replies back to the correct internal host</li>
+                </ul>
+                <pre>Internal: 192.168.1.25:51234  →  NAT Router  →  Public: 203.0.113.1:51234
+                                    ↑
+                          Tracks this mapping in state table
+                          Reply arrives at public IP → forwarded to 192.168.1.25</pre>
+                <div class="highlight"><p>The same private IP range (192.168.1.x) can exist in millions of separate organizations worldwide without conflicts — because private addresses never appear on the public internet. This is how IPv4 lasted decades longer than its designers expected. IPv6 eliminates the need for NAT by giving every device a globally unique address.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ipv6">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>IPv6 — 128-Bit Addressing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>IPv6 is a 128-bit address represented as eight groups of 16-bit hexadecimal values separated by colons. 2^128 addresses — effectively unlimited.</p>
+                <pre>Full address:  2001:0db8:1234:5678:abcd:ef01:2345:6789
+
+Standard /64 split:
+┌────────────────────────────────┬─────────────────────────────────┐
+│    Network Prefix (64 bits)    │     Interface ID (64 bits)      │
+│  2001 : 0db8 : 1234 : 5678    │  abcd : ef01 : 2345 : 6789      │
+│  [48 bits public] [16 subnet]  │  [NIC identifier]               │
+└────────────────────────────────┴─────────────────────────────────┘</pre>
+                <p><strong>Compression rules:</strong></p>
+                <ul>
+                    <li><strong>Leading zero suppression:</strong> 0db8 → db8, 0042 → 42, 0000 → 0</li>
+                    <li><strong>Double colon (::):</strong> replaces ONE continuous sequence of all-zero groups</li>
+                    <li><strong>Single-use rule:</strong> :: can only appear ONCE — multiple :: would be mathematically ambiguous to expand</li>
+                </ul>
+                <pre>Compression example:
+Raw:        2001:0db8:0000:0000:0008:0000:0000:4122
+Step 1:     2001:db8:0:0:8:0:0:4122  (leading zeros removed)
+Step 2:     2001:db8::8:0:0:4122     (longest zero run compressed)
+Note: Two separate zero sequences — only the longest gets ::
+
+Expansion example:
+Compressed: fe80::1
+Groups:     fe80 and 1 = 2 groups; need 8 total
+Expanded:   fe80:0000:0000:0000:0000:0000:0000:0001</pre>
+                <div class="highlight"><p>IPv6 eliminates broadcast entirely — replaced by multicast. It also includes SLAAC (Stateless Address Autoconfiguration) allowing devices to configure their own addresses without DHCP, and NDP (Neighbor Discovery Protocol) replacing ARP. Global IPv6 adoption sits around 48.8% of Google traffic as of recent data, with India, France, and the US leading adoption above 50–60%.</p></div>
+                <p><strong>IPv6 advantages over IPv4:</strong> simplified 40-byte fixed header (faster hardware routing), no NAT required, native neighbor discovery, hierarchical /48 prefix allocation giving organizations 65,536 /64 subnets.</p>
+            </div>
+        </div>
+
+        <div class="section" id="delivery">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Traffic Delivery Types</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Type</th><th>Pattern</th><th>Description</th><th>Example</th></tr>
+                    <tr><td>Unicast</td><td>One-to-One</td><td>Single source to single destination</td><td>Standard web browsing, SSH, file transfer</td></tr>
+                    <tr><td>Multicast</td><td>One-to-Group</td><td>Delivers only to hosts that have joined the multicast group</td><td>Video streaming, routing protocol updates (OSPF), IPTV</td></tr>
+                    <tr><td>Broadcast</td><td>One-to-All (LAN)</td><td>Sends to all devices in a Layer 2 broadcast domain — IPv4 only</td><td>ARP requests, DHCP discovery</td></tr>
+                    <tr><td>Anycast</td><td>One-to-Nearest</td><td>Same IP assigned to multiple servers; routing sends to the topologically closest</td><td>DNS root servers, CDNs, IPv6 default gateways</td></tr>
+                </table>
+                <div class="highlight"><p>IPv6 eliminates broadcast entirely — it was replaced by multicast. This is a significant efficiency improvement. IPv4 broadcast frames are sent to every device on the LAN segment regardless of interest; multicast only delivers to subscribed recipients. Anycast is used by every major CDN and DNS provider — the same IP address (like 8.8.8.8) can be served from hundreds of global locations, with routing automatically selecting the nearest one.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ports">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Ports, Sockets & Well-Known Services</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A port number is a 16-bit identifier (0–65,535) that associates a packet payload with a specific application or service on a host. IP addresses identify the HOST; ports identify the SERVICE on that host.</p>
+                <table>
+                    <tr><th>Range</th><th>Name</th><th>Purpose</th></tr>
+                    <tr><td>0–1023</td><td>Well-Known Ports</td><td>Reserved by IANA for standard services (HTTP, HTTPS, SSH, DNS, SMTP)</td></tr>
+                    <tr><td>1024–49151</td><td>Registered Ports</td><td>Assigned to specific application products and vendor services</td></tr>
+                    <tr><td>49152–65535</td><td>Dynamic / Ephemeral</td><td>Assigned temporarily by OS as source ports for outbound client connections</td></tr>
+                </table>
+                <p><strong>Common well-known ports:</strong></p>
+                <pre>TCP 22   — SSH (Secure Shell)
+TCP 23   — Telnet (insecure, legacy)
+TCP 25   — SMTP (email sending)
+TCP 80   — HTTP
+TCP 443  — HTTPS
+UDP 53   — DNS queries
+UDP 67/68 — DHCP
+TCP 3389 — RDP (Remote Desktop)</pre>
+                <p><strong>The socket pair:</strong> combining IP + port creates a unique communication endpoint:</p>
+                <pre>Client:  192.168.1.50:53122  (ephemeral source port)
+Server:  93.184.216.34:443   (destination HTTPS)
+
+Socket pair uniquely identifies this specific session.
+Multiple browser tabs = multiple ephemeral ports = multiple simultaneous sessions.</pre>
+            </div>
+        </div>
+
+        <div class="section" id="security">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Port Security & Attack Surface</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every open port and listening service is a potential attack vector. Minimizing open ports directly reduces the attack surface.</p>
+                <div class="grid">
+                    <div class="card"><h3>Port States</h3><p><strong>Open:</strong> active service listening — reachable and responding. <strong>Closed:</strong> host reachable but no daemon listening. <strong>Filtered:</strong> firewall or security gateway is dropping probe packets — state unknown to scanner.</p></div>
+                    <div class="card"><h3>Principle of Least Privilege</h3><p>A secure web server needs ONLY TCP 443. Running FTP (21), Telnet (23), or RDP (3389) unnecessarily expands the attack vector. Every unnecessary open port is a vulnerability waiting to be exploited.</p></div>
+                    <div class="card"><h3>Firewall ACL Policy</h3><p>Explicit deny-all with selective allow: "ALLOW TCP 443; DENY ALL OTHER INBOUND." Drop unrequested inbound connections. Never rely on security through obscurity.</p></div>
+                    <div class="card"><h3>Hardening Practices</h3><p>Regular port audits (nmap), host-level firewalls, disabling inactive services/daemons, monitoring for unexpected open ports, and patching listening services promptly.</p></div>
+                </div>
+                <div class="highlight"><p>The encapsulation chain ties all four address layers together: Application data → TCP header (ports) → IP header (addresses) → Ethernet frame (MACs) → physical bits. Every layer's address operates independently but in concert. A failure at any layer breaks delivery — understanding which layer failed is the key to troubleshooting.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
