@@ -1246,5 +1246,17 @@
     "code_bg": "#100a1a",
     "highlight_bg": "#1a0f2e",
     "bold": "#a78bfa"
+  },
+  {
+    "title": "COMP3430 Memory the Address Space and Memory API",
+    "filename": "comp3430-memory-the-address-space-and-memory-api.html",
+    "category": "Operating Systems",
+    "date": "2026-09-21 12:30 PM",
+    "accent": "#0369a1",
+    "glow": "#0a1f2e",
+    "badge": "#075985",
+    "code_bg": "#0a141a",
+    "highlight_bg": "#0f1f2e",
+    "bold": "#38bdf8"
   }
 ]

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3430 — Memory: The Address Space and Memory API</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #0a1f2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #075985; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0369a1; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0369a1; color: white; border-color: #0369a1; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0369a1; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #c8c8c8; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #c8c8c8; line-height: 1.8; margin-bottom: 4px; }
+        strong { color: #38bdf8; }
+        .highlight { background: #0f1f2e; border-left: 3px solid #0369a1; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0369a1; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; color: #c8c8c8; }
+        pre { background: #0a141a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #075985; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #c8c8c8; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0369a1; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Operating Systems · Memory</div>
+        <h1>Memory: The Address Space and Memory API</h1>
+        <p class="subtitle">Address spaces, virtual memory, ASLR, malloc/free, memory bugs, and xv6 kalloc</p>
+    </header>
+    <nav>
+        <a href="#history">History</a>
+        <a href="#address-space">Address Space</a>
+        <a href="#virtual">Every Pointer Is Virtual</a>
+        <a href="#aslr">ASLR</a>
+        <a href="#api">Memory API</a>
+        <a href="#bugs">Memory Bugs</a>
+        <a href="#malloc-internals">malloc Internals</a>
+        <a href="#kalloc">xv6 kalloc</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="history">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>How Memory Got Complicated</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Early systems ran one program at a time — no abstraction needed because there was nothing to protect. Multiprogramming changed that.</p>
+                <div class="grid">
+                    <div class="card"><h3>The Early Days</h3><p>One program at a time. OS sits at physical 0, the program gets the rest. No protection needed — no one else is in memory.</p></div>
+                    <div class="card"><h3>Multiprogramming</h3><p>Several programs resident at once so the CPU is never idle. Machines cost millions and had to be shared. Now a bad pointer in process A can corrupt process B or the OS itself.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>The obvious fix, and why it fails:</strong> save the entire program's memory to disk on each context switch, load the next program in. This is correct but catastrophically slow — copying gigabytes of memory to disk many times per second is not feasible. So processes must stay in memory together, which forces three requirements:</p>
+                <ul>
+                    <li><strong>Efficiency</strong> — processes must share memory simultaneously</li>
+                    <li><strong>Protection</strong> — sharing makes isolation mandatory, checked on every access</li>
+                    <li><strong>Abstraction</strong> — protection must stay invisible to the programmer</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="address-space">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Address Space</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The OS gives each process the illusion of a private address space. Three regions, three purposes:</p>
+                <div class="grid">
+                    <div class="card"><h3>Code (Text)</h3><p>Static — doesn't grow. Placed at the lowest addresses where nothing needs to expand into it.</p></div>
+                    <div class="card"><h3>Heap</h3><p>Holds malloc'd memory. Grows toward higher addresses (downward in the diagram). Lives just above the code segment.</p></div>
+                    <div class="card"><h3>Stack</h3><p>Holds locals, function arguments, and return addresses. Grows toward lower addresses (upward in the diagram). Lives at the top of the address space.</p></div>
+                    <div class="card"><h3>Why Opposite Ends?</h3><p>Heap and stack sit at opposite ends of the address space so both can grow into the free region between them without immediately colliding.</p></div>
+                </div>
+                <div class="highlight"><p>This layout is a convention, not a law. In week 8, when one process has multiple threads, each thread needs its own stack — and the single-stack picture completely breaks down.</p></div>
+                <p><strong>The crux of memory virtualization:</strong> how can the OS give many running processes each a private, potentially large address space while they all share one physical memory? The answer is that every address a program ever sees is <em>virtual</em>. When the process loads address 0, the hardware quietly redirects that load to somewhere else in physical RAM — and the process cannot tell.</p>
+            </div>
+        </div>
+
+        <div class="section" id="virtual">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Every Pointer Is Virtual — The va.c Demo</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>// va.c — prints addresses from all three regions
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+int main(int argc, char *argv[]) {
+    printf("location of code : %p\n", main);        // code region
+    printf("location of heap : %p\n", malloc(100e6)); // 100 MB on heap
+    int x = 3;
+    printf("location of stack: %p\n", &x);          // stack
+    return x;
+}
+
+// Ubuntu 24.04 output:
+location of code : 0x55c5b5585189
+location of heap : 0x7f9e470a1010
+location of stack: 0x7ffcfb971f04</pre>
+                <p><strong>Three surprises in the output:</strong></p>
+                <ul>
+                    <li><strong>Order matches the picture</strong> — code lowest, heap middle, stack highest</li>
+                    <li><strong>Stack address is ~140 TB</strong> — the machine has 8 GB of RAM. Virtual addresses are not RAM locations.</li>
+                    <li><strong>100 MB returned instantly</strong> — the OS promised the memory, it didn't deliver it. Pages arrive only when touched (demand paging, week 7).</li>
+                </ul>
+                <div class="highlight"><p>The heap address (0x7f9e...) appears near the stack rather than just above the code. A 100 MB request is too large for the ordinary heap — the kernel fulfills it with mmap, creating a fresh region near the top of the address space. strace catches this happening in real time.</p></div>
+                <pre>// strace reveals what malloc actually does:
+$ strace -e trace=brk,mmap ./va
+brk(NULL)                    = 0x55c356dff000  // where does heap end?
+brk(0x55c356e20000)          = 0x55c356e20000  // expand heap ~132 KB
+mmap(NULL, 100003840, ...)   = 0x7f547f4a1000  // 100 MB via mmap, not brk
+location of heap : 0x7f547f4a1010              // 16 bytes inside mmap region</pre>
+                <p>The two brk calls show the allocator buying a pool of ~132 KB to retail in small pieces. The 100 MB request bypasses that entirely and gets its own mmap region. Most small mallocs never reach the kernel at all.</p>
+            </div>
+        </div>
+
+        <div class="section" id="aslr">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>ASLR — Address Space Layout Randomization</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Run the same binary three times without recompiling — every address changes:</p>
+                <pre>$ ./va
+code: 0x55c5b5585189   heap: 0x7f9e470a1010   stack: 0x7ffcfb971f04
+$ ./va
+code: 0x561b7fd64189   heap: 0x7f400b0a1010   stack: 0x7ffe8c533474
+$ ./va
+code: 0x55901a077189   heap: 0x7f8006aa1010   stack: 0x7ffede346384
+
+// Turn it off with setarch -R:
+$ setarch x86_64 -R ./va
+code: 0x555555555189   heap: 0x7ffff1ca1010   stack: 0x7fffffffac24
+$ setarch x86_64 -R ./va
+code: 0x555555555189   heap: 0x7ffff1ca1010   stack: 0x7fffffffac24
+// identical every time</pre>
+                <div class="highlight"><p>ASLR is one of the cheapest exploit defenses ever deployed. An attacker who wants to hijack a program needs to know where things are in memory. Reshuffling the layout on every run makes addresses learned from a previous run worthless. It raises the cost of exploitation but doesn't end it: leaking one pointer tells an attacker where an entire region landed.</p></div>
+                <p><strong>Practical consequence this week:</strong> gdb disables ASLR by default so breakpoints stay put. That's why addresses look stable in the debugger but change outside it. If a classmate's addresses don't match yours, nothing is broken.</p>
+            </div>
+        </div>
+
+        <div class="section" id="api">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>The Memory API — malloc, free, and the Rules</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Four calls make up most of the memory API:</p>
+                <table>
+                    <tr><th>Call</th><th>What It Does</th><th>Key Rule</th></tr>
+                    <tr><td>malloc(size)</td><td>Allocates size bytes on the heap, returns a void pointer</td><td>Always check the return value for NULL</td></tr>
+                    <tr><td>free(ptr)</td><td>Returns the block pointed to by ptr back to the allocator</td><td>Must pass the original pointer returned by malloc — never an offset</td></tr>
+                    <tr><td>calloc(n, size)</td><td>Allocates n*size bytes and zeroes them</td><td>Use when you need guaranteed zero initialization</td></tr>
+                    <tr><td>realloc(ptr, size)</td><td>Resizes an existing allocation, may move it</td><td>Always reassign the return value — old pointer may be invalid after call</td></tr>
+                </table>
+                <div class="highlight"><p>malloc is NOT a system call. It appears in no kernel syscall table — not Linux's 350+, not xv6's 22. It lives entirely in user space as a C library function. The library manages a pool of memory, carving out your requests without ever crossing into the kernel. Only when the pool runs dry does it call brk or mmap to get more territory from the OS.</p></div>
+                <pre>// malloc's relationship to the kernel:
+your program:    malloc(24)  free(p)
+                      ↕
+C library (libc): manages a pool in user space — fast, no trap
+                      ↕ only when pool is empty
+kernel:           brk/sbrk (extend heap)
+                  mmap (create new region for large requests)</pre>
+                <p>A trap into the kernel costs ~100 ns. Carving a block from an existing pool costs nanoseconds. The library buys territory in large pieces rarely, then retails it in small pieces often — most malloc calls in your program never reach the kernel.</p>
+                <p><strong>Never call brk yourself.</strong> It is the allocator's private lever. Moving it behind the allocator's back corrupts its bookkeeping entirely.</p>
+            </div>
+        </div>
+
+        <div class="section" id="bugs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Memory Bugs — The Classic Six</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>#</th><th>Bug</th><th>Code Pattern</th><th>Symptom</th></tr>
+                    <tr><td>1</td><td>Forget to allocate</td><td><code>char *s; strcpy(s, src);</code></td><td>Segfault or silent corruption — s is uninitialized</td></tr>
+                    <tr><td>2</td><td>Not enough space</td><td><code>malloc(strlen(src))</code> instead of <code>strlen(src)+1</code></td><td>Off-by-one overwrites the null terminator</td></tr>
+                    <tr><td>3</td><td>Uninitialized read</td><td><code>int *x = malloc(sizeof(int)); return *x;</code></td><td>Returns garbage; xv6 fills pages with 0x05 to make this obvious</td></tr>
+                    <tr><td>4</td><td>Buffer overflow</td><td><code>strcpy(buf, "way too long");</code></td><td>Overwrites adjacent memory; valgrind catches heap version, misses stack version</td></tr>
+                    <tr><td>5</td><td>Use after free</td><td><code>free(x); *x = 7;</code></td><td>Writes into memory now owned by someone else; one of the most exploited bug classes in browsers and kernels</td></tr>
+                    <tr><td>6</td><td>Double free</td><td><code>free(x); free(x);</code></td><td>Corrupts allocator's free list; undefined behavior</td></tr>
+                </table>
+                <div class="highlight"><p>Use-after-free is not a student mistake. It is one of the most exploited vulnerability classes in production software and a primary reason the industry is now seriously considering Rust for systems programming.</p></div>
+                <p><strong>Tools and their blind spots:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Valgrind</h3><p>Runs the finished binary without recompiling. 20–50x slowdown. Catches heap overflows and use-after-free precisely. Misses stack/global overflows entirely — it cannot know where one stack variable ends and the next begins.</p></div>
+                    <div class="card"><h3>AddressSanitizer (ASan)</h3><p>Built into the compiler (<code>-fsanitize=address</code>). 2–4x slowdown. Catches stack, heap, and global buffer overflows. Misses uninitialized reads (that's MemorySanitizer). Must rebuild — cannot use on a finished binary.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="malloc-internals">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>What malloc Actually Gives You — Demand Paging Preview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A program allocates 1 GB and we watch VmSize (promised) vs. VmRSS (actually delivered in RAM):</p>
+                <table>
+                    <tr><th>Moment</th><th>VmSize (promised)</th><th>VmRSS (in RAM)</th></tr>
+                    <tr><td>At startup</td><td>2,700 kB</td><td>1,432 kB</td></tr>
+                    <tr><td>After malloc(1 GB)</td><td>1,051,280 kB</td><td>1,760 kB</td></tr>
+                    <tr><td>After touching all of it</td><td>1,051,280 kB</td><td>1,050,336 kB</td></tr>
+                </table>
+                <div class="highlight"><p>The middle row is the entire point. The process was promised a gigabyte and given 328 kB. Memory arrives page by page only as the program touches it — this is demand paging (week 7). This is why a machine can run programs whose promises add up to far more RAM than it has, why "out of memory" arrives long after the allocation that caused it, and why the Linux OOM killer exists: the kernel wrote cheques on Tuesday that it cannot cash on Friday.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="kalloc">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>xv6 kalloc — The Kernel's Allocator in Four Lines</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>xv6's kernel allocator (kalloc.c) manages a free list of 4096-byte pages. The entire data structure is four lines:</p>
+                <pre>// kernel/kalloc.c lines 17-24
+struct run {
+    struct run *next;   // pointer to next free page
+};
+
+struct {
+    struct spinlock lock;   // ignore until week 8
+    struct run *freelist;   // head of the free list
+} kmem;</pre>
+                <p><strong>The trick:</strong> a free page IS the list node. The next pointer is written into the first 8 bytes of the page itself. Bookkeeping for every free page in the machine costs zero extra memory — it lives inside memory that nobody is using anyway.</p>
+                <pre>// kernel/kalloc.c lines 68-82 — handing out a page
+void *kalloc(void) {
+    struct run *r;
+    acquire(&kmem.lock);
+    r = kmem.freelist;         // take the head
+    if (r)
+        kmem.freelist = r->next;  // head moves on
+    release(&kmem.lock);
+
+    if (r)
+        memset((char *)r, 5, PGSIZE);  // fill with junk (byte 0x05)
+    return (void *)r;
+}</pre>
+                <p><strong>Three things happening:</strong></p>
+                <ul>
+                    <li><strong>Lines 74 and 76 are the entire allocation</strong> — no search, no size tracking, no fragmentation. Constant time regardless of how much memory is free.</li>
+                    <li><strong>memset fills the page with 0x05 on purpose</strong> — kfree() fills with 0x01. If your code reads uninitialized memory, you see obvious garbage instead of a plausible zero.</li>
+                    <li><strong>If you see 0x05050505 in a debugger</strong> — you are reading memory you were given but never initialized. The kernel put that there so the bug would be visible.</li>
+                </ul>
+                <div class="highlight"><p>Every page is exactly 4096 bytes — nothing to record, nothing to search, nothing to split or merge. This simplicity is why the kernel allocator is O(1). User-space allocators like glibc's malloc handle variable-size requests and must track sizes, merge freed blocks, and manage fragmentation — a much harder problem on top of the pages kalloc provides.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
