@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 5: Network Segmentation, Subnetting, and VLSM</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #0a2010, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #166534; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #166534; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #166534; color: white; border-color: #166534; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #166534; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        strong { color: #34d399; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0f2a18; border-left: 3px solid #166534; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #166534; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #0a1a0f; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #166534; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #166534; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 5</div>
+        <h1>Network Segmentation, Subnetting, and VLSM</h1>
+        <p class="subtitle">VLANs, binary math, subnet masks, bit borrowing, CIDR, block size shortcuts, and VLSM design</p>
+    </header>
+    <nav>
+        <a href="#segmentation">Segmentation</a>
+        <a href="#vlans">Physical vs. Logical</a>
+        <a href="#zones">Network Zones</a>
+        <a href="#binary">Binary Math</a>
+        <a href="#masks">Subnet Masks</a>
+        <a href="#borrowing">Bit Borrowing</a>
+        <a href="#blocksize">Block Size Shortcut</a>
+        <a href="#cidr">CIDR</a>
+        <a href="#vlsm">VLSM</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="segmentation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why Segment a Network?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Segmentation divides one network into logical or physical subnetworks (subnets). A flat network where every device shares the same broadcast domain creates serious problems at scale.</p>
+                <div class="grid">
+                    <div class="card"><h3>Flat Network Problems</h3><p>Every ARP and DHCP broadcast floods all devices. One compromised device can scan and attack everything. No logical boundaries mean no access control enforcement.</p></div>
+                    <div class="card"><h3>Performance</h3><p>Restricts broadcasts strictly to their VLAN — other segments never see the noise.</p></div>
+                    <div class="card"><h3>Security & Containment</h3><p>A compromised student laptop stays on the student VLAN and cannot reach corporate servers.</p></div>
+                    <div class="card"><h3>Granular Access Control</h3><p>ACLs and firewall rules define exactly which groups can reach specific systems and ports.</p></div>
+                    <div class="card"><h3>Scalability</h3><p>Organize address blocks hierarchically by department, function, building, or location.</p></div>
+                    <div class="card"><h3>Targeted Troubleshooting</h3><p>Isolates faults, broadcast storms, and duplicate IPs to a single subnet zone.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="vlans">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Physical vs. Logical Segmentation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Physical Segmentation</h3><p>Separate switches, firewalls, copper runs, and patch panels per segment. Air-gapped isolation — traffic physically cannot cross without a router. Extremely secure but expensive and inflexible. Adding one user may require new cabling.</p></div>
+                    <div class="card"><h3>Logical Segmentation (VLANs)</h3><p>Same physical switch and cables, but packets are tagged and isolated in logical lanes. Administrators reassign ports to different VLANs in seconds from a terminal. Security depends on ACL and firewall configuration at Layer 3.</p></div>
+                </div>
+                <div class="highlight"><p>VLANs deliver the isolation of physical segmentation without the cost. The tradeoff: security is now software-defined rather than physically enforced. A misconfigured ACL or trunk port can collapse the boundary entirely. Physical segmentation is still used for the most sensitive environments (payment systems, classified networks).</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="zones">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Enterprise Network Zones</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Zone</th><th>What Lives Here</th><th>Why Isolated</th></tr>
+                    <tr><td>DMZ (Demilitarized Zone)</td><td>Public web servers, email gateways, public DNS</td><td>Separates untrusted internet from internal LAN. A hacked DMZ server cannot reach internal subnets.</td></tr>
+                    <tr><td>Protected Server Zone</td><td>Active Directory, corporate databases, internal apps</td><td>Only specific ports permitted (e.g., TCP 443 allowed; TCP 1433 SQL blocked from user traffic).</td></tr>
+                    <tr><td>IoT / Facility Control Zone</td><td>IP cameras, smart thermostats, badge readers</td><td>IoT firmware rarely patched — isolating prevents lateral movement to user workstations.</td></tr>
+                    <tr><td>Guest / User Zone</td><td>Employee laptops, BYOD phones, visitor Wi-Fi</td><td>Internet access only; cannot reach corporate servers or IoT control systems.</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="binary">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Binary Math — The Foundation of All Subnetting</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>IPv4 addresses are 32-bit binary strings divided into four 8-bit octets. Every subnetting calculation happens in binary — decimal is just the human-readable representation.</p>
+                <p><strong>The 8-bit positional weight matrix — memorize this row:</strong></p>
+                <pre>Bit position: 7    6    5    4    3    2    1    0
+Weight:      128   64   32   16    8    4    2    1
+Max value:   128 + 64 + 32 + 16 + 8 + 4 + 2 + 1 = 255</pre>
+                <p><strong>Binary to decimal:</strong> identify which bit positions are 1, sum their weights.</p>
+                <pre>Convert 10110110 to decimal:
+Bits:    1    0    1    1    0    1    1    0
+Weights: 128  64   32   16   8    4    2    1
+Active:  128  —    32   16   —    4    2    —
+
+128 + 32 + 16 + 4 + 2 = 182</pre>
+                <p><strong>Decimal to binary:</strong> systematic subtraction — test each weight from 128 down to 1. If the weight fits in the remainder, write 1 and subtract; otherwise write 0.</p>
+                <pre>Convert 182 to binary:
+182 ≥ 128? YES → write 1, remainder = 54
+54  ≥ 64?  NO  → write 0
+54  ≥ 32?  YES → write 1, remainder = 22
+22  ≥ 16?  YES → write 1, remainder = 6
+6   ≥ 8?   NO  → write 0
+6   ≥ 4?   YES → write 1, remainder = 2
+2   ≥ 2?   YES → write 1, remainder = 0
+0   ≥ 1?   NO  → write 0
+
+Result: 10110110 ✓</pre>
+                <div class="highlight"><p>Fluency in the 8-bit weight row (128, 64, 32, 16, 8, 4, 2, 1) is the single most important prerequisite for subnetting. Everything else — CIDR conversion, block size calculation, bitwise AND — is just applying these weights in different ways.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="masks">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Subnet Masks & Bitwise AND</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A subnet mask filters a 32-bit IP address into its network and host portions. The 1 bits lock the network prefix; the 0 bits designate the host space.</p>
+                <pre>Standard /24 mask in binary:
+11111111.11111111.11111111.00000000  =  255.255.255.0
+|-------- 24 ones (network) ---------|--- 8 zeros (host) ---|</pre>
+                <p><strong>Bitwise AND determines which network a host belongs to:</strong></p>
+                <pre>IP:   192.168.10.25  =  11000000.10101000.00001010.00011001
+AND
+Mask: 255.255.255.0  =  11111111.11111111.11111111.00000000
+                        ─────────────────────────────────────
+Net:  192.168.10.0   =  11000000.10101000.00001010.00000000
+
+AND rule: 1 AND 1 = 1,  1 AND 0 = 0,  0 AND 0 = 0</pre>
+                <p><strong>/26 worked example — 192.168.10.75:</strong></p>
+                <pre>IP last octet  75:  01001011
+Mask last octet 192: 11000000
+AND:                 01000000  =  64
+
+Network ID: 192.168.10.64/26</pre>
+                <div class="highlight"><p>If two devices share the same AND result they are on the same local subnet and communicate directly. If their network IDs differ, the packet goes to the default gateway (router) for forwarding. This AND operation runs inside every router and Layer 3 switch on every packet.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="borrowing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Bit Borrowing — Creating Subnets</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Subnetting means moving the network/host boundary to the right — "borrowing" bits from the host portion and making them network bits. Two exponential formulas govern the math:</p>
+                <pre>Subnets created  = 2^n   (n = bits borrowed from host portion)
+Usable hosts     = 2^h - 2  (h = host bits remaining)
+                             (-2 for network ID and broadcast address)</pre>
+                <p><strong>Borrowing from a /24 block — the design curve:</strong></p>
+                <table>
+                    <tr><th>Prefix</th><th>Bits Borrowed</th><th>Subnets</th><th>Hosts per Subnet</th><th>Mask</th></tr>
+                    <tr><td>/24</td><td>0</td><td>1</td><td>254</td><td>255.255.255.0</td></tr>
+                    <tr><td>/25</td><td>1</td><td>2</td><td>126</td><td>255.255.255.128</td></tr>
+                    <tr><td>/26</td><td>2</td><td>4</td><td>62</td><td>255.255.255.192</td></tr>
+                    <tr><td>/27</td><td>3</td><td>8</td><td>30</td><td>255.255.255.224</td></tr>
+                    <tr><td>/28</td><td>4</td><td>16</td><td>14</td><td>255.255.255.240</td></tr>
+                    <tr><td>/29</td><td>5</td><td>32</td><td>6</td><td>255.255.255.248</td></tr>
+                    <tr><td>/30</td><td>6</td><td>64</td><td>2</td><td>255.255.255.252</td></tr>
+                </table>
+                <div class="highlight"><p>Every bit borrowed doubles the subnet count and cuts the hosts per subnet in half. /30 (2 usable hosts) is the standard for point-to-point router links — one address per router interface, nothing wasted.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="blocksize">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Block Size Shortcut — Fast Subnet Boundaries</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Binary AND every time is slow in production. The block size shortcut finds subnet boundaries in seconds:</p>
+                <pre>Step 1: Block size = 256 - last octet of subnet mask
+   /26 mask = 255.255.255.192
+   Block size = 256 - 192 = 64
+
+Step 2: Subnet IDs are multiples of block size starting at .0
+   Subnet 1: 192.168.10.0
+   Subnet 2: 192.168.10.64
+   Subnet 3: 192.168.10.128
+   Subnet 4: 192.168.10.192
+
+Step 3: For each subnet block:
+   Network ID:       first address (e.g., 192.168.10.64)
+   First usable:     Network ID + 1  (e.g., 192.168.10.65)
+   Broadcast:        Next network ID - 1  (e.g., 192.168.10.127)
+   Last usable:      Broadcast - 1  (e.g., 192.168.10.126)</pre>
+                <div class="highlight"><p>To find which subnet an IP belongs to: divide the host octet by the block size and round down to the nearest multiple. IP 192.168.10.75 on /26 → 75 ÷ 64 = 1 remainder → nearest multiple = 64 → subnet is 192.168.10.64/26. No binary needed.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="cidr">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>CIDR — Classless Inter-Domain Routing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Classful addressing (Class A /8, Class B /16, Class C /24) wasted massive blocks. A company needing 1,000 hosts had to take a Class B (65,534 hosts) — wasting 64,500+ addresses. CIDR replaced fixed class boundaries with flexible prefix lengths.</p>
+                <div class="grid">
+                    <div class="card"><h3>Flexible Boundaries</h3><p>Any prefix length at any bit position: /22, /26, /27, /28. Size the subnet to fit the actual device population.</p></div>
+                    <div class="card"><h3>Slash Notation</h3><p>192.168.10.0/26 means 26 consecutive 1-bits in the mask. Replaces writing out 255.255.255.192 every time.</p></div>
+                    <div class="card"><h3>Route Aggregation</h3><p>Four contiguous /24 networks (10.20.0.0 through 10.20.3.0) can be summarized as one 10.20.0.0/22 route — drastically reducing routing table size and CPU load.</p></div>
+                </div>
+                <div class="highlight"><p>Route aggregation (summarization) is CIDR's biggest operational benefit. Instead of advertising hundreds of specific routes, a router advertises one summary. Smaller routing tables mean faster lookups and less memory. Modern internet routing is completely dependent on this.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="vlsm">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>VLSM — Variable Length Subnet Masking</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Without VLSM, every subnet in a block must be the same size — a 2-host router link wastes the same space as a 60-host department subnet. VLSM allows different prefix lengths within the same address block.</p>
+                <div class="highlight"><p><strong>The Golden Rule of VLSM: always allocate largest subnets first, work down to smallest.</strong> Allocating out of order causes subnet ranges to overlap, breaking routing protocols and disabling connectivity.</p></div>
+                <p><strong>VLSM design order:</strong></p>
+                <ul>
+                    <li>Sort requirements largest to smallest</li>
+                    <li>Find the smallest prefix that fits (2^h - 2 ≥ hosts needed)</li>
+                    <li>Allocate that block starting at the next available address</li>
+                    <li>Record the exact range used, then move to the next requirement</li>
+                </ul>
+                <p><strong>Case study — subnetting 192.168.0.0/24 for four departments:</strong></p>
+                <table>
+                    <tr><th>Department</th><th>Hosts Needed</th><th>Prefix Used</th><th>Subnet Allocated</th><th>Usable Range</th></tr>
+                    <tr><td>Engineering (largest)</td><td>100</td><td>/25 (126 hosts)</td><td>192.168.0.0/25</td><td>.1 – .126</td></tr>
+                    <tr><td>Sales</td><td>50</td><td>/26 (62 hosts)</td><td>192.168.0.128/26</td><td>.129 – .190</td></tr>
+                    <tr><td>HR</td><td>20</td><td>/27 (30 hosts)</td><td>192.168.0.192/27</td><td>.193 – .222</td></tr>
+                    <tr><td>Router link (smallest)</td><td>2</td><td>/30 (2 hosts)</td><td>192.168.0.224/30</td><td>.225 – .226</td></tr>
+                </table>
+                <p style="margin-top:12px">Remaining space (192.168.0.228 – 192.168.0.255) is preserved for future growth — a key advantage of VLSM over equal-size subnetting.</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

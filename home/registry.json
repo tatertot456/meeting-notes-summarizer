@@ -1258,5 +1258,17 @@
     "code_bg": "#0a141a",
     "highlight_bg": "#0f1f2e",
     "bold": "#38bdf8"
+  },
+  {
+    "title": "COMP3630 Chapter 5 Network Segmentation Subnetting and VLSM",
+    "filename": "comp3630-chapter-5-network-segmentation-subnetting-and-vlsm.html",
+    "category": "Networks",
+    "date": "2026-09-24 12:04 PM",
+    "accent": "#15803d",
+    "glow": "#0a2010",
+    "badge": "#166534",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a18",
+    "bold": "#34d399"
   }
 ]
