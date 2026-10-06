@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 6: Routing Protocols, Management, and Security</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #1f1200, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #92400e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #92400e; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #92400e; color: white; border-color: #92400e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #92400e; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        strong { color: #fcd34d; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a1c00; border-left: 3px solid #92400e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #92400e; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #1a1200; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #92400e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #92400e; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 6</div>
+        <h1>Routing Protocols, Management, and Security</h1>
+        <p class="subtitle">Protocol numbers, TCP mechanics, routing protocols, BGP, SNMP, ARP, ICMP, and cryptographic security</p>
+    </header>
+    <nav>
+        <a href="#headers">L3/L4 Headers</a>
+        <a href="#tcp">TCP Mechanics</a>
+        <a href="#protocols">Open vs. Proprietary</a>
+        <a href="#directory">Directory Services</a>
+        <a href="#routing">IGP vs. EGP</a>
+        <a href="#rip">RIP</a>
+        <a href="#ospf">OSPF & EIGRP</a>
+        <a href="#bgp">BGP</a>
+        <a href="#snmp">SNMP & Discovery</a>
+        <a href="#arp">ARP & ICMP</a>
+        <a href="#filetransfer">File Transfer Security</a>
+        <a href="#crypto">TLS, SSH & IPsec</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="headers">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Layer 3 & 4 Header Identification</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Two distinct numbering systems direct payloads to the correct protocol and application — one at Layer 3, one at Layer 4.</p>
+                <div class="grid">
+                    <div class="card"><h3>IP Protocol Numbers (L3)</h3><p>A 1-byte field in the IPv4 header (called "Next Header" in IPv6) that tells the router which Layer 4 engine to hand the payload to. The IP header is a protocol router, not just an address carrier.</p></div>
+                    <div class="card"><h3>Port Numbers (L4)</h3><p>16-bit identifiers that associate incoming data with a specific running application. Pairing an IP address with a port creates a socket — a unique network endpoint (e.g., 10.0.0.5:443).</p></div>
+                </div>
+                <table style="margin-top:16px">
+                    <tr><th>Protocol Number</th><th>Protocol</th><th>Purpose</th></tr>
+                    <tr><td>1</td><td>ICMP</td><td>Diagnostics (ping, traceroute, error reporting)</td></tr>
+                    <tr><td>2</td><td>IGMP</td><td>Multicast group membership</td></tr>
+                    <tr><td>6</td><td>TCP</td><td>Reliable connection-oriented transport</td></tr>
+                    <tr><td>17</td><td>UDP</td><td>Lightweight connectionless transport</td></tr>
+                    <tr><td>50</td><td>ESP</td><td>IPsec encrypted payload</td></tr>
+                </table>
+                <div class="highlight"><p>The identification chain: IP Protocol 6 tells the router "hand this to TCP." TCP port 443 tells the OS "hand this to the HTTPS web server process." Two numbering systems, two different layers, working together to route every packet to the right application.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="tcp">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>TCP Mechanics — Handshake, Sequencing, and Flow Control</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Three-way handshake</strong> establishes the connection before any data flows:</p>
+                <pre>Client → Server:  SYN         (I want to connect)
+Server → Client:  SYN-ACK     (OK, I acknowledge your SYN)
+Client → Server:  ACK         (Connection established)</pre>
+                <p><strong>Sequence and acknowledgment numbers</strong> give TCP its reliability guarantee. Every byte is numbered. Receivers use the sequence numbers to reassemble out-of-order segments, discard duplicates, and request retransmission of anything lost.</p>
+                <div class="grid">
+                    <div class="card"><h3>Flow Control (Sliding Window)</h3><p>The receiver advertises its available buffer space in the Window Size field. The sender throttles its output to never overflow the receiver's memory. Protects the destination host.</p></div>
+                    <div class="card"><h3>Congestion Control</h3><p>Protects the network itself from overload. Managed by a private variable on the sender side that tracks network congestion signals and reduces transmission rate when the network shows stress.</p></div>
+                </div>
+                <div class="highlight"><p>Flow control and congestion control solve different problems. Flow control: "don't overwhelm ME (the receiver)." Congestion control: "don't overwhelm the NETWORK between us." Both are managed by TCP without any application awareness.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="protocols">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Open Standards vs. Proprietary Protocols</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Open Standards</h3><p>Developed by bodies like IETF, IEEE, or W3C. Freely implementable by any vendor. Examples: IP, TCP, UDP, HTTP, DNS, 802.3 Ethernet, LLDP. Enable multi-vendor interoperability and reduce lock-in risk.</p></div>
+                    <div class="card"><h3>Proprietary Protocols</h3><p>Owned by a single organization. Implementation restricted or licensed. Examples: Cisco CDP, legacy IGRP, AppleTalk. Often deliver advanced features faster than standards bodies can ratify, but lock you into one vendor ecosystem.</p></div>
+                </div>
+                <div class="highlight"><p>The practical tension: proprietary protocols often innovate faster and offer tighter integration, but they create dependency. A network built entirely on Cisco CDP cannot be monitored by an HP or Linux device. The modern enterprise trend is toward open standards (LLDP over CDP, OSPF over EIGRP) to preserve flexibility.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="directory">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Directory Services</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A directory service organizes, manages, and locates network resources — users, computers, printers, servers, and email addresses. It provides a security structure so users can access resources without knowing their physical location.</p>
+                <table>
+                    <tr><th>Service</th><th>Description</th></tr>
+                    <tr><td>NDS (Netware Directory Services)</td><td>The first enterprise directory service. Now obsolete — displaced by Active Directory.</td></tr>
+                    <tr><td>Active Directory (AD)</td><td>Microsoft's directory service. Widely adopted enterprise standard since Windows 2000 Server. Drove NDS out of corporate environments.</td></tr>
+                    <tr><td>LDAP</td><td>Lightweight Directory Access Protocol. An open standard for accessing and maintaining distributed directory information over IP. AD uses LDAP as a core protocol at every version.</td></tr>
+                </table>
+                <div class="highlight"><p>Active Directory achieves multi-vendor compatibility through open components: LDAP for directory access, Kerberos for authentication, and DNS for service discovery. The underlying protocols are open standards even though AD itself is Microsoft's product. LDAP is also used independently as a central store for usernames and passwords across Linux and mixed environments.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="routing">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Routing Boundaries — IGP vs. EGP</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An <strong>Autonomous System (AS)</strong> is a collection of networks, routers, and IP subnets under one administrative entity — a university, corporation, or ISP. Routing protocols split along this boundary.</p>
+                <div class="grid">
+                    <div class="card"><h3>Interior Gateway Protocols (IGP)</h3><p>Exchange routing information WITHIN an AS. Goal: find the mathematically fastest path. Examples: RIP, OSPF, EIGRP. Used inside your organization's own infrastructure.</p></div>
+                    <div class="card"><h3>Exterior Gateway Protocols (EGP)</h3><p>Exchange routing information BETWEEN separate Autonomous Systems. Goal: enforce policy and negotiate transit paths. Only example in production: BGP (Border Gateway Protocol).</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="rip">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>RIP — Routing Information Protocol</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Feature</th><th>RIPv1</th><th>RIPv2</th></tr>
+                    <tr><td>Routing Type</td><td>Distance Vector — counts hops</td><td>Distance Vector — counts hops</td></tr>
+                    <tr><td>Subnet Mask Support</td><td>No — classful only (/8, /16, /24)</td><td>Yes — CIDR and VLSM supported</td></tr>
+                    <tr><td>Update Method</td><td>Layer 2 broadcast (all devices process)</td><td>Multicast 224.0.0.9 (RIP routers only)</td></tr>
+                    <tr><td>Authentication</td><td>None</td><td>Cryptographic password validation</td></tr>
+                    <tr><td>Max Hops</td><td>15 (16 = unreachable)</td><td>15 (16 = unreachable)</td></tr>
+                    <tr><td>Status</td><td>Obsolete</td><td>Simple/small networks only</td></tr>
+                </table>
+                <div class="highlight"><p>The 15-hop limit is RIP's fatal flaw for large networks. It was designed when networks were small. A value of 16 means "unreachable" — so any path requiring more than 15 routers simply doesn't exist in RIP's view of the world. OSPF and EIGRP replaced RIP for any network of meaningful scale.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ospf">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>OSPF & EIGRP</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>OSPF (Open Shortest Path First)</h3><p>Open standard (IETF). Link-state protocol — each router builds a complete map of the network topology. Uses Dijkstra's algorithm to calculate the shortest path. Scales to large enterprise networks. No hop limit. Converges fast after topology changes.</p></div>
+                    <div class="card"><h3>EIGRP (Enhanced Interior Gateway Routing Protocol)</h3><p>Originally Cisco proprietary, later opened. Advanced Distance Vector using the DUAL algorithm. Considers bandwidth, delay, reliability, and load — not just hop count. Very fast convergence. Still common in Cisco-heavy environments.</p></div>
+                </div>
+                <table style="margin-top:16px">
+                    <tr><th>Feature</th><th>OSPF</th><th>EIGRP</th></tr>
+                    <tr><td>Type</td><td>Link-State</td><td>Advanced Distance Vector</td></tr>
+                    <tr><td>Metric</td><td>Cost (based on bandwidth)</td><td>Composite (bandwidth + delay + reliability)</td></tr>
+                    <tr><td>Standard</td><td>Open (IETF)</td><td>Originally proprietary, now open</td></tr>
+                    <tr><td>Hop Limit</td><td>None</td><td>None (default 100, configurable)</td></tr>
+                    <tr><td>Convergence</td><td>Fast</td><td>Very fast (DUAL algorithm)</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="bgp">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>BGP — The Internet's Routing Protocol</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Border Gateway Protocol (BGP) is the only EGP in production use. It routes traffic between the ~80,000 Autonomous Systems that make up the public internet. BGP does not optimize for speed — it enforces policy.</p>
+                <div class="grid">
+                    <div class="card"><h3>AS_PATH Routing</h3><p>BGP routes by policy, not raw speed. Each AS advertisement includes the list of AS numbers the route has passed through. Routers choose paths based on these policies — a shorter AS_PATH is preferred by default.</p></div>
+                    <div class="card"><h3>iBGP vs. eBGP</h3><p>eBGP runs between routers in different Autonomous Systems (external). iBGP runs between routers inside the same AS to distribute external routes internally. Both use the same protocol, different relationship types.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Major internet backbone operators (Tier 1 ASes):</strong></p>
+                <ul>
+                    <li>AT&T (AS7018), Verizon/Cogent (AS701/AS174), Lumen/CenturyLink (AS209)</li>
+                    <li>Deutsche Telekom (AS3320), NTT Communications (AS2914)</li>
+                    <li>Telecom Italia Sparkle/Seabone (AS6762)</li>
+                </ul>
+                <p><strong>Major physical interconnection hubs:</strong> Equinix (Ashburn VA, Chicago, Singapore, Frankfurt), One Wilshire (LA — US-Asia gateway), 60 Hudson Street (New York — transatlantic hub).</p>
+                <div class="highlight"><p>BGP is simultaneously the most critical and most fragile protocol on the internet. A misconfigured BGP announcement can accidentally route millions of users' traffic through the wrong country — this has happened multiple times in production. BGP hijacking (advertising someone else's IP block) is a real attack that requires out-of-band coordination to fix.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="snmp">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>SNMP, CDP & LLDP — Network Management</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>SNMP (Simple Network Management Protocol)</strong> has three components:</p>
+                <div class="grid">
+                    <div class="card"><h3>SNMP Manager</h3><p>The central monitoring dashboard. Periodically polls agents using GET requests for CPU, interface stats, and packet drop rates.</p></div>
+                    <div class="card"><h3>SNMP Agent</h3><p>Software running on network devices. Responds to polls and sends unsolicited Trap/Inform alerts immediately when events occur (interface down, temperature spike).</p></div>
+                    <div class="card"><h3>MIB (Management Information Base)</h3><p>A hierarchical database defining exactly which data points a device can report on or configure — the schema for everything SNMP can see.</p></div>
+                    <div class="card"><h3>SNMPv3</h3><p>SNMPv1/v2c used plaintext community strings (essentially passwords sent in the clear). SNMPv3 adds authentication, packet integrity, and payload encryption.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>CDP vs. LLDP — neighbor discovery:</strong></p>
+                <table>
+                    <tr><th>Feature</th><th>CDP</th><th>LLDP</th></tr>
+                    <tr><td>Standard</td><td>Cisco proprietary</td><td>Open IEEE 802.1AB</td></tr>
+                    <tr><td>Compatibility</td><td>Cisco devices only</td><td>Multi-vendor (Cisco, HP, Netgear, Linux)</td></tr>
+                    <tr><td>Information Shared</td><td>Platform, IP, software version, port mapping</td><td>Same as CDP</td></tr>
+                    <tr><td>Use Case</td><td>Pure Cisco environments</td><td>Mixed-vendor environments</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="arp">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>ARP & ICMP</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>The addressing gap:</strong> a host knows the target IP address but needs the MAC address to build an Ethernet frame. ARP bridges this gap for IPv4.</p>
+                <div class="grid">
+                    <div class="card"><h3>ARP (IPv4)</h3><p>Broadcasts "Who has 192.168.10.5?" to the entire LAN. The target replies with its MAC. Results cached in the ARP table. Vulnerability: no authentication — ARP Spoofing lets an attacker claim to be the gateway and intercept all traffic (Man-in-the-Middle).</p></div>
+                    <div class="card"><h3>IPv6 Neighbor Discovery (ND)</h3><p>Replaces ARP entirely. Uses ICMPv6 multicast solicitation and advertisement — no LAN-wide broadcast. Eliminates the ARP spoofing attack surface by design.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>ICMP — diagnostics and error reporting:</strong></p>
+                <ul>
+                    <li><strong>Error messages:</strong> Destination Unreachable, Time Exceeded (TTL expired), Port Unreachable</li>
+                    <li><strong>Ping:</strong> sends ICMP Echo Request, receives Echo Reply — verifies L1–L3 reachability and measures round-trip time</li>
+                    <li><strong>Traceroute:</strong> sends packets with TTL=1, then TTL=2, etc. Each hop drops TTL to zero and returns a Time Exceeded message, revealing the full path to the destination</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="filetransfer">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>File Transfer Security — FTP vs. FTPS vs. SFTP</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Protocol</th><th>Ports</th><th>Encryption</th><th>Firewall Behavior</th></tr>
+                    <tr><td>FTP</td><td>21 (control), 20 (data)</td><td>None — plaintext credentials and data</td><td>Problematic — separate channels confuse stateful firewalls</td></tr>
+                    <tr><td>FTPS</td><td>21 (control), passive range</td><td>TLS/SSL added on top of FTP</td><td>Still problematic — retains separate control/data channel design</td></tr>
+                    <tr><td>SFTP</td><td>22 only</td><td>Full SSH encryption</td><td>Simple — single TCP connection through one port</td></tr>
+                </table>
+                <div class="highlight"><p>SFTP is not "FTP with SSH bolted on" — it is a completely separate protocol that happens to run over SSH. The name is misleading. It has no relationship to FTP's architecture. Its single-port design makes it the correct choice for any modern file transfer requirement.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="crypto">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>TLS, SSH, IPsec & Cryptography</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Cryptographic systems comparison:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Symmetric Cryptography</h3><p>Same key encrypts and decrypts. Very fast for bulk data. Problem: how do two parties safely share the secret key before communication begins? (Key Distribution Problem). Example: AES.</p></div>
+                    <div class="card"><h3>Asymmetric Cryptography</h3><p>Public key (shared openly) encrypts; private key (kept secret) decrypts. Solves key distribution but is computationally slow. Examples: RSA, Diffie-Hellman, ECC.</p></div>
+                    <div class="card"><h3>Hybrid Approach (TLS/SSH)</h3><p>Use asymmetric cryptography to safely exchange a shared secret, then switch to symmetric encryption for bulk data transfer. Gets the security of asymmetric with the speed of symmetric.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Application security protocols:</strong></p>
+                <table>
+                    <tr><th>Protocol</th><th>Port</th><th>Purpose</th></tr>
+                    <tr><td>TLS (replaces SSL)</td><td>Varies</td><td>Encrypts application sessions using digital certificates from a CA</td></tr>
+                    <tr><td>HTTPS</td><td>443</td><td>HTTP over TLS — protects web traffic, passwords, transactions</td></tr>
+                    <tr><td>SSH</td><td>22</td><td>Secure remote CLI access to routers, switches, Linux servers. Replaces Telnet.</td></tr>
+                    <tr><td>SSH Key Auth</td><td>22</td><td>Public-key login — no reusable password sent over the wire</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>IPsec — network layer VPN security:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>AH (Authentication Header)</h3><p>Guarantees packet integrity and source authentication. Does NOT encrypt the payload — anyone can still read the data, but they cannot modify it without detection.</p></div>
+                    <div class="card"><h3>ESP (Encapsulating Security Payload)</h3><p>Provides full payload encryption plus integrity and authentication. The standard choice for real VPN security.</p></div>
+                    <div class="card"><h3>Transport Mode</h3><p>Encrypts the payload only. Original IP header stays intact. Used for host-to-host direct connections.</p></div>
+                    <div class="card"><h3>Tunnel Mode</h3><p>Wraps the entire original IP packet in a new IP header. Hides internal subnet structure. Industry standard for site-to-site corporate VPNs.</p></div>
+                </div>
+                <div class="highlight"><p>SSL is dead. Every reference to "SSL" in modern infrastructure actually means TLS. TLS 1.3 is the current standard — TLS 1.0 and 1.1 are deprecated and disabled by default in modern browsers and servers. If you configure a server to accept SSLv3, you have introduced a known exploitable vulnerability.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

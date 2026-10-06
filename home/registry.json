@@ -1270,5 +1270,17 @@
     "code_bg": "#0a1a0f",
     "highlight_bg": "#0f2a18",
     "bold": "#34d399"
+  },
+  {
+    "title": "COMP3630 Chapter 6 Routing Protocols Management and Security",
+    "filename": "comp3630-chapter-6-routing-protocols-management-and-security.html",
+    "category": "Networks",
+    "date": "2026-10-06 10:49 AM",
+    "accent": "#b45309",
+    "glow": "#1f1200",
+    "badge": "#92400e",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fcd34d"
   }
 ]
