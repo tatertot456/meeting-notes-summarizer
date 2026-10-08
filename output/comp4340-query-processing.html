@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP4340 — Query Processing</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #0a2a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #15803d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #16a34a; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #16a34a; color: white; border-color: #16a34a; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #16a34a; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #c8c8c8; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #c8c8c8; line-height: 1.8; margin-bottom: 4px; }
+        strong { color: #4ade80; }
+        .highlight { background: #0f2a1a; border-left: 3px solid #16a34a; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #16a34a; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; color: #c8c8c8; }
+        pre { background: #0a1a0f; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #15803d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #c8c8c8; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #16a34a; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Advanced Database · Query Processing</div>
+        <h1>Query Processing</h1>
+        <p class="subtitle">Parse, optimize, evaluate — cost models, selection algorithms, join strategies, and pipelining</p>
+    </header>
+    <nav>
+        <a href="#overview">Overview</a>
+        <a href="#cost">Cost Model</a>
+        <a href="#selection">Selection Operations</a>
+        <a href="#joins">Join Algorithms</a>
+        <a href="#evaluation">Evaluation Strategies</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="overview">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Three Stages of Query Processing</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every SQL query passes through three stages before returning results:</p>
+                <div class="grid">
+                    <div class="card"><h3>1. Parse & Translate</h3><p>SQL is parsed and translated into a relational algebra expression — a tree of operations (select, project, join). Multiple equivalent expressions may exist for the same query.</p></div>
+                    <div class="card"><h3>2. Optimize</h3><p>The optimizer enumerates execution plans, estimates the cost of each using statistics about the data, and picks the cheapest. The user never sees this step.</p></div>
+                    <div class="card"><h3>3. Evaluate</h3><p>The evaluation engine executes the chosen plan against the actual data and returns results.</p></div>
+                </div>
+                <pre>SQL query: SELECT salary FROM instructor WHERE salary < 75000;
+
+Two equivalent algebra expressions:
+  A: σ(salary < 75000) → Π(salary) → instructor   (filter first, then project)
+  B: Π(salary) → σ(salary < 75000) → instructor   (project first, then filter)
+
+Same answer. But A filters early → fewer tuples to project over → cheaper.</pre>
+                <div class="highlight"><p>The optimizer's job is to find the lowest-cost plan among all equivalent plans. It doesn't guarantee the globally optimal plan (the search space is too large) but produces a good plan using cost estimates. The user writes declarative SQL — the system decides how to run it.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="cost">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Measuring Query Cost</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>I/O cost dominates on magnetic disk. The cost formula counts block transfers and random seeks separately:</p>
+                <pre>Cost = b × tT  +  S × tS
+
+  b  = number of blocks transferred
+  S  = number of random seeks (random I/O accesses)
+  tT = time to transfer one block
+  tS = time for one random seek
+
+Typical values (magnetic disk):   tS = 4 ms,   tT = 0.1 ms
+Typical values (SATA SSD):        tS = 90 µs,  tT = 10 µs</pre>
+                <p><strong>Sequential vs. random access — 1,000 blocks:</strong></p>
+                <table>
+                    <tr><th>Pattern</th><th>Disk (ms)</th><th>SSD (ms)</th></tr>
+                    <tr><td>Sequential (S=1): 1000×0.1 + 1×4</td><td>104 ms</td><td>≈10 ms</td></tr>
+                    <tr><td>Random (S=1000): 1000×0.1 + 1000×4</td><td>4,100 ms</td><td>100 ms</td></tr>
+                </table>
+                <div class="highlight"><p>Random access is 39× more expensive than sequential on disk, and 10× on SSD. This single fact drives almost every query optimization decision. Any plan that converts random access into sequential access is likely better, even if it transfers more total data.</p></div>
+                <p>Cost models assume B+-tree internal nodes stay in the buffer pool (already in memory). The optimizer discounts the cost of index traversal accordingly — typically only the leaf-level I/O and the data block fetch are counted as "real" I/Os.</p>
+            </div>
+        </div>
+
+        <div class="section" id="selection">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Selection Algorithms</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Algorithm</th><th>When Used</th><th>Cost</th></tr>
+                    <tr><td>A1 — Linear Scan</td><td>No index, or condition not selective</td><td>tS + br × tT (equality on key: avg tS + br/2 × tT)</td></tr>
+                    <tr><td>A2 — Clustering index, equality on key</td><td>Index on key, clustering</td><td>(hi + 1) × (tT + tS) — tree traversal + 1 data read</td></tr>
+                    <tr><td>A3 — Clustering index, equality on non-key</td><td>Index on non-key, clustering</td><td>hi × (tT + tS) + tS + b × tT — one run of matching blocks</td></tr>
+                    <tr><td>A4 — Secondary index, equality on non-key</td><td>Index exists, file not sorted on attribute</td><td>(hi + n) × (tT + tS) — one seek per matching record</td></tr>
+                    <tr><td>A5 — Clustering index, range (≥ v)</td><td>Range query, clustering</td><td>Same as A3 — find v, scan forward</td></tr>
+                    <tr><td>A6 — Secondary index, range</td><td>Range query, non-clustering</td><td>Same as A4 — potentially one seek per record in range</td></tr>
+                </table>
+                <pre>Example: find all instructors with salary ≥ 50000
+  hi = 3 (B+-tree height), b = 4 (matching blocks), n = 4 (matching records)
+  tT = 0.1 ms, tS = 4 ms
+
+A5 (clustering): 3×(0.1+4) + 4 + 4×0.1 = 16.7 ms
+A6 (secondary):  (3+4)×(0.1+4)         = 28.7 ms
+
+A5 wins here. But if n is very large, A6 approaches a linear scan cost.</pre>
+                <p><strong>Bitmap index scan</strong> — for secondary indices on non-selective conditions: collect all block numbers from the index, build a bitmap (1 bit per block), then do one sequential pass reading only the marked blocks. Avoids repeatedly seeking to the same block.</p>
+                <p><strong>Conjunctive (AND) selections:</strong> use one index and test the other conditions in memory (A7), use a composite index (A8), or intersect pointer sets from two indexes (A9). <strong>Disjunctive (OR) selections:</strong> union pointer sets from all applicable indexes (A10), or fall back to linear scan if any condition lacks an index.</p>
+            </div>
+        </div>
+
+        <div class="section" id="joins">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Join Algorithms</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Nested-Loop Join (A1):</strong> for each tuple in r, scan all of s. Simple but expensive.</p>
+                <pre>for each tuple tr in r:
+    for each tuple ts in s:
+        if tr.attr = ts.attr: emit
+
+Worst case: nr × bs + br transfers,  nr + br seeks
+Best case (both fit in memory): br + bs transfers, 2 seeks
+
+student (5,000 rows, 100 blocks) JOIN takes (10,000 rows, 400 blocks):
+  student outer: 5,000 × 400 + 100 = 2,000,100 transfers → 220 seconds
+  takes outer:  10,000 × 100 + 400 = 1,000,400 transfers → 142 seconds
+  → smaller outer relation = fewer rescans of inner</pre>
+                <p><strong>Block Nested-Loop Join:</strong> pairs of blocks instead of pairs of tuples. s is read once per block of r, not once per tuple of r.</p>
+                <pre>Worst case: br × bs + br transfers,  2×br seeks
+student outer: 100 × 400 + 100 = 40,100 transfers (vs 2,000,100)</pre>
+                <p><strong>Indexed Nested-Loop Join:</strong> for each tuple in r, use an index on s to find matching tuples. Avoids scanning all of s.</p>
+                <pre>Cost: br(tT + tS) + nr × c    (c = cost of one index lookup on s)
+  = 100 + 5,000 × 5 = 25,100 accesses ≈ 103 seconds
+  vs. block nested-loop ≈ 4.8 seconds (here BNL wins)</pre>
+                <div class="highlight"><p>Indexed NLJ is better than BNL when the index is highly selective (few matches per probe). When the inner relation is small or the index is not selective, BNL wins. The optimizer estimates both and picks the cheaper plan based on actual statistics.</p></div>
+                <p><strong>Merge Join:</strong> both relations must be sorted on the join attribute. Then a single pass aligns them with two forward-moving pointers. If already sorted: br + bs transfers. If not sorted: cost includes sorting both inputs (dominant cost).</p>
+                <pre>student (100 blocks) + takes (400 blocks):
+  Already sorted: 100 + 400 = 500 transfers
+  Not sorted, M=3: 9,100 transfers + 8,932 seeks</pre>
+            </div>
+        </div>
+
+        <div class="section" id="evaluation">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Evaluation Strategies — Materialization vs. Pipelining</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Materialization</h3><p>Each operator writes its full output to a temporary relation before the next operator reads it. Safe and simple. High I/O cost — every intermediate result is written and read back from disk.</p></div>
+                    <div class="card"><h3>Pipelining</h3><p>Each operator passes tuples one at a time to the next operator without writing to disk. No temporary files. First results reach the user early. Cannot always be used (some operators must see all input before producing output).</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Two models for driving a pipeline:</strong></p>
+                <pre>Demand-driven (pull/lazy):
+  Parent calls next() on child. Child computes one tuple and returns it.
+  open() → next() → next() → ... → close()
+
+Producer-driven (push/eager):
+  Each operator runs in its own thread and pushes tuples into a buffer.
+  Consumer reads from the buffer. Natural parallelism.</pre>
+                <p><strong>Blocking operators</strong> cannot pipeline — they must see all input before producing any output:</p>
+                <ul>
+                    <li><strong>Sort:</strong> run generation phase blocks; merge phase can pipeline</li>
+                    <li><strong>Hash join:</strong> partition phase blocks; build-probe phase can pipeline</li>
+                    <li><strong>Indexed NLJ:</strong> waits on its index to be built</li>
+                </ul>
+                <p>Blocking edges split a query plan into <strong>pipeline stages</strong>. Each stage runs to completion before the next begins. Within a stage, operators pipeline freely.</p>
+                <div class="highlight"><p>The double-pipelined join streams both inputs simultaneously. As each tuple arrives from either r or s, it is matched against everything seen so far from the other relation. When memory fills, later tuples spill to disk and are joined in a final pass. This maximizes pipeline overlap when both inputs arrive concurrently.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP4340 — Blocks, Buffers, and Storage Structures</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #2a0a1a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #9d174d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #be185d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #be185d; color: white; border-color: #be185d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #be185d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #c8c8c8; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #c8c8c8; line-height: 1.8; margin-bottom: 4px; }
+        strong { color: #f472b6; }
+        .highlight { background: #2a0f1c; border-left: 3px solid #be185d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #be185d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; color: #c8c8c8; }
+        pre { background: #1a0a12; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #9d174d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #c8c8c8; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #be185d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Advanced Database · Storage</div>
+        <h1>Blocks, Buffers, and Storage Structures</h1>
+        <p class="subtitle">Buffer manager, pinning, LRU vs MRU, disk access, record layouts, slotted pages, and file organization</p>
+    </header>
+    <nav>
+        <a href="#buffer">Buffer Manager</a>
+        <a href="#pinning">Pinning & Locks</a>
+        <a href="#replacement">Replacement Strategies</a>
+        <a href="#disk">Disk Access</a>
+        <a href="#records">Record Layouts</a>
+        <a href="#slotted">Slotted Pages</a>
+        <a href="#lobs">Large Objects</a>
+        <a href="#fileorg">File Organization</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="buffer">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why a Buffer Manager?</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Disk access is far slower than memory. The buffer manager keeps recently used disk blocks in a portion of main memory so queries hit memory instead of disk whenever possible.</p>
+                <div class="grid">
+                    <div class="card"><h3>The Buffer</h3><p>A fixed-size pool of RAM frames. Each frame holds one disk block. The disk copy is the authoritative version until a modified frame is written back.</p></div>
+                    <div class="card"><h3>Buffer Manager Logic</h3><p>Program requests block N. Manager checks: in buffer? Yes — return memory address, no disk access. No — evict a victim frame (write back if modified), read block N in, return address.</p></div>
+                </div>
+                <div class="highlight"><p>Every buffer block also exists on disk. A modified (dirty) buffer frame holds newer data than the disk copy. The buffer manager must write dirty frames back before evicting them — otherwise that write is lost.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="pinning">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Pinning and Locks</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>pin</strong> prevents a buffer frame from being evicted while a process is actively reading or writing it. Multiple processes may pin the same block simultaneously.</p>
+                <pre>Protocol:
+  pin(block 7)        // declare I need this block
+  read or write data  // do the work
+  unpin(block 7)      // I'm done, you may evict it
+
+Pin count tracks concurrent pinners:
+  P1 pins  → count = 1
+  P2 pins  → count = 2
+  P1 unpins → count = 1
+  P2 unpins → count = 0  // now eligible for eviction</pre>
+                <p>A block with pin count > 0 cannot be evicted. If every buffer frame is pinned, the system stalls — no new block can be read in.</p>
+                <div class="grid">
+                    <div class="card"><h3>Shared Lock (Read)</h3><p>Any number of processes may hold a shared lock simultaneously. No process may write while a shared lock is held.</p></div>
+                    <div class="card"><h3>Exclusive Lock (Write)</h3><p>Only one process holds it. No shared locks may coexist. All other requests wait until the exclusive lock is released.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="replacement">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Buffer Replacement Strategies — LRU vs MRU</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>When no free frame exists, the buffer manager must evict a victim. The naive choice is <strong>LRU (Least Recently Used)</strong> — evict the block that was accessed longest ago. But LRU is wrong for some query patterns.</p>
+                <p><strong>Nested loop join example:</strong> outer relation <code>instructor</code>, inner <code>department</code>. For each instructor row, all of department must be re-read. LRU evicts the department block you're about to need next — every inner access is a miss.</p>
+                <pre>Buffer holds 2 department blocks. Department has 3.
+Request sequence: D1 D2 D3 D1 D2 D3
+
+LRU (evict oldest):  miss miss miss miss miss miss  → 6 reads
+MRU (evict newest):  miss miss miss HIT  miss HIT   → 4 reads</pre>
+                <div class="highlight"><p>The buffer manager can see the query plan and know what comes next. The optimal strategy isn't guessing from history — it's using plan knowledge. For nested loops: toss the outer (instructor) block the moment it's used; keep the inner (department) blocks as long as possible using MRU.</p></div>
+                <p><strong>Journaling</strong> writes changes to a sequential log before updating data blocks. On crash, replay the log. Sequential log writes avoid random seeks — the expensive part of disk I/O.</p>
+            </div>
+        </div>
+
+        <div class="section" id="disk">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Disk Access — Sequential vs. Random</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every optimization below converts random access into sequential access. A seek (arm movement to a track) costs far more than transferring a block once there.</p>
+                <div class="grid">
+                    <div class="card"><h3>Sequential Access</h3><p>1 seek, then N blocks transferred in a row. The arm moves once. Cost scales with transfer time, not seek time.</p></div>
+                    <div class="card"><h3>Random Access</h3><p>N seeks for N blocks on different tracks. Each block costs a full seek. Catastrophically expensive at scale.</p></div>
+                    <div class="card"><h3>Read-Ahead</h3><p>When block b1 is requested, the OS reads b2–b4 speculatively. The next sequential requests are cache hits with zero seeks. Pays only for sequential access patterns.</p></div>
+                    <div class="card"><h3>Elevator (SSTF) Scheduling</h3><p>Sort pending block requests by track position. Sweep inward, then reverse. Same 6 requests: 26 tracks in arrival order vs. 7 tracks in elevator order.</p></div>
+                    <div class="card"><h3>Extents</h3><p>Group related blocks into contiguous runs (extents). 7 scattered blocks = 7 seeks. 3 contiguous extents = 3 seeks. Fragmentation defeats this.</p></div>
+                    <div class="card"><h3>NVRAM Write Buffer</h3><p>Writes go to non-volatile RAM first — acknowledged immediately. Disk writes are deferred and reordered into elevator order. Safe through power failure.</p></div>
+                </div>
+                <div class="highlight"><p>Flash SSDs feel seek latency less than spinning disks (20–60 µs vs 4 ms), but the principle still holds. More importantly: flash cannot overwrite a 4 KB page without erasing a full 4 MB erase block. The SSD firmware remaps pages internally to hide this, but it means sequential writes are still far cheaper than random writes on flash.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="records">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Record Layouts — Fixed and Variable Length</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Fixed-length records:</strong> every attribute padded to its maximum width. Record i starts at byte <code>record_size × i</code> — any row is found by arithmetic, no scanning needed.</p>
+                <pre>instructor row: 5 + 20 + 20 + 8 = 53 bytes (fixed)
+4,096-byte block: ⌊4096 / 53⌋ = 77 records, 15 bytes wasted
+Record 3 starts at byte 53 × 3 = 159</pre>
+                <p>No record may cross a block boundary — a split record would cost two block accesses for every read and every write.</p>
+                <p><strong>Deletion</strong> has three options: shift all later records (expensive), move the last record into the hole (loses order), or chain deleted slots on a free list (no data movement). Free lists win because insertions outnumber deletions.</p>
+                <p><strong>Variable-length records:</strong> for VARCHAR columns, a fixed-size header stores (offset, length) pairs for each variable attribute. The actual values are stored consecutively after the header. A null bitmap marks absent attributes.</p>
+                <pre>Fixed header:  [(offset=21, len=5), (offset=26, len=10), salary=65000, bitmap=0000]
+Variable data: [10101][Srinivasan][Comp. Sci.]
+name starts at byte 26, runs 10 bytes — found directly from the header</pre>
+                <div class="highlight"><p>The fixed-size header is the key insight. Even though values vary in length, the header is the same size for every row. Code that reads the header always knows where to find each field's offset/length pair — no scanning within the record.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="slotted">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Slotted-Page Structure</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A block holding variable-length records needs a way to find each record and keep free space contiguous. The slotted-page structure solves both.</p>
+                <pre>Block layout (4,096 bytes):
+[block header | slot directory | ... free space ... | record 3 | record 2 | record 1]
+                                                      ← records fill from the END
+
+Slot directory (inside header):
+  n = 3          // number of records
+  slot 1: (4051, 45)   // offset 4051, length 45 bytes
+  slot 2: (4014, 37)
+  slot 3: (3974, 40)
+  slot 4: (-1)         // deleted — slot entry is -1</pre>
+                <p>External pointers reference a slot number, never a byte offset. This lets the block <strong>compact records</strong> (slide them together to merge free space) without invalidating any outside references — the slot entry is updated, the slot number stays the same.</p>
+                <div class="highlight"><p>Indirection through slot numbers is what makes compaction possible. If external pointers pointed directly to byte offsets, moving any record would break every pointer to it. Slot indirection adds one level of lookup but enables free space consolidation — worth the cost.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="lobs">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Storing Large Objects (BLOBs)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Attributes like photos (4 MB) or lecture videos (2.1 GB) far exceed a block's capacity. The row stores a small pointer; the object lives elsewhere.</p>
+                <div class="grid">
+                    <div class="card"><h3>Inside the Database</h3><p>Stored as a B+-tree file organization. Any byte range can be read or written directly. Constraints, authorization, and backup all apply. But database dumps grow enormously.</p></div>
+                    <div class="card"><h3>In the File System</h3><p>Row stores a path name. Backups stay small. But SQL authorization cannot reach the file — a deleted row leaves a dangling pointer to an orphaned file.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="fileorg">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>File Organization — Five Ways to Store a Relation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Organization</th><th>Where a Record Goes</th><th>Best For</th></tr>
+                    <tr><td>Heap</td><td>Anywhere there is free space — no order</td><td>Fast inserts; full scans</td></tr>
+                    <tr><td>Sequential</td><td>In search-key order, chained by pointers</td><td>Reading rows in sorted order</td></tr>
+                    <tr><td>Multitable Clustering</td><td>Beside related rows of another relation</td><td>Joins on the cluster key</td></tr>
+                    <tr><td>B+-tree (Ch. 14)</td><td>Kept in key order by the tree itself</td><td>Ordered access under heavy updates</td></tr>
+                    <tr><td>Hashing (Ch. 14)</td><td>In the block the hash function names</td><td>Single key equality lookups</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>Heap:</strong> uses a two-level free-space map. Each entry is a fraction-free score (0–7). A second level stores the max of every four entries so large blocks can be found without scanning the whole map.</p>
+                <p><strong>Sequential:</strong> new records whose block is full go to an overflow block, chained to maintain sorted order. Physical order drifts as inserts accumulate. Periodic reorganization is expensive — this is why B+-tree file organization replaced it.</p>
+                <p><strong>Multitable clustering:</strong> co-locates department and instructor rows so a natural join on dept_name needs one block read instead of two. Tradeoff: <code>SELECT * FROM department</code> now touches more blocks because instructor rows are interleaved.</p>
+                <p><strong>Table partitioning:</strong> splits one relation into smaller pieces by a partition key (e.g., year). A query with a matching WHERE clause touches only the relevant partition. Without the condition, every partition is scanned.</p>
+                <div class="highlight"><p>No single file organization wins everything. Heap is best for bulk inserts, sequential for range scans, clustering for joins, hashing for point lookups. Real systems let you choose per-table, and the query optimizer picks the access path at query time.</p></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

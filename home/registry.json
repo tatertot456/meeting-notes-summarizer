@@ -1282,5 +1282,41 @@
     "code_bg": "#1a1200",
     "highlight_bg": "#2a1c00",
     "bold": "#fcd34d"
+  },
+  {
+    "title": "COMP4340 Blocks Buffers and Storage Structures",
+    "filename": "comp4340-blocks-buffers-and-storage-structures.html",
+    "category": "Advanced Database",
+    "date": "2026-10-07 10:59 PM",
+    "accent": "#be185d",
+    "glow": "#2a0a1a",
+    "badge": "#9d174d",
+    "code_bg": "#1a0a12",
+    "highlight_bg": "#2a0f1c",
+    "bold": "#f472b6"
+  },
+  {
+    "title": "COMP4340 Indices",
+    "filename": "comp4340-indices.html",
+    "category": "Advanced Database",
+    "date": "2026-10-07 11:00 PM",
+    "accent": "#dc2626",
+    "glow": "#2a0a0a",
+    "badge": "#b91c1c",
+    "code_bg": "#1a0a0a",
+    "highlight_bg": "#2a0f0f",
+    "bold": "#f87171"
+  },
+  {
+    "title": "COMP4340 Query Processing",
+    "filename": "comp4340-query-processing.html",
+    "category": "Advanced Database",
+    "date": "2026-10-07 11:01 PM",
+    "accent": "#16a34a",
+    "glow": "#0a2a0a",
+    "badge": "#15803d",
+    "code_bg": "#0a1a0f",
+    "highlight_bg": "#0f2a1a",
+    "bold": "#4ade80"
   }
 ]

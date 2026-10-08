@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP4340 — Indices</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #2a0a0a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #b91c1c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #dc2626; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #dc2626; color: white; border-color: #dc2626; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #dc2626; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #c8c8c8; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        li { color: #c8c8c8; line-height: 1.8; margin-bottom: 4px; }
+        strong { color: #f87171; }
+        .highlight { background: #2a0f0f; border-left: 3px solid #dc2626; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #dc2626; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; color: #c8c8c8; }
+        pre { background: #1a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #b91c1c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #c8c8c8; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #dc2626; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Advanced Database · Indices</div>
+        <h1>Indices</h1>
+        <p class="subtitle">Basic concepts, ordered indices, B+-trees, hash indices, multiple-key access, covering indices, and index design</p>
+    </header>
+    <nav>
+        <a href="#why">Why Indices?</a>
+        <a href="#concepts">Basic Concepts</a>
+        <a href="#ordered">Ordered Indices</a>
+        <a href="#clustering">Clustering vs Non-Clustering</a>
+        <a href="#dense">Dense vs Sparse</a>
+        <a href="#btree">B+-Tree</a>
+        <a href="#hash">Hash Index</a>
+        <a href="#multikey">Multiple-Key Access</a>
+        <a href="#covering">Covering Index</a>
+        <a href="#design">Index Design</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="why">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why Indices Exist</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Without an index, finding a record requires reading every block in the file. For 30,000 students in ~1,000 blocks, finding one student = up to 1,000 block reads.</p>
+                <pre>WITHOUT INDEX: find student ID 22201
+Read block 1, check all records... not here
+Read block 2, check all records... not here
+...
+Read block 17, found it!   → up to 1,000 block reads
+
+WITH INDEX ON student ID:
+Index entry: 22201 → Block 17
+Read Block 17 directly      → 2 block reads (index + data)</pre>
+                <p>The index is much smaller than the data file (~8 blocks vs ~1,000). Adding a record does not move any existing records — the index is a separate structure that points into the data file.</p>
+                <div class="highlight"><p>An index is a textbook index for your database. The topic is the search key; the page number is the block pointer. The index is read first, then exactly the right block is fetched. 500x fewer reads for a single lookup.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="concepts">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Basic Concepts</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Search key:</strong> the attribute(s) an index is built on. Different from a primary key — a search key may have duplicate values and one relation can have several indexes with different search keys.</p>
+                <pre>instructor table with three indexes:
+  index on ID          ← search key = ID
+  index on dept_name   ← search key = dept_name
+  index on name        ← search key = name
+
+Composite search key example: (course_id, semester, year)</pre>
+                <p><strong>Two families of index structures:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Ordered Index</h3><p>Entries stored in sorted order of the search key. Answers both equality (ID = 22222) and range queries (ID between 20000 and 30000). B+-tree is the standard implementation.</p></div>
+                    <div class="card"><h3>Hash Index</h3><p>A hash function maps each key to a bucket. O(1) equality lookup. Cannot answer range queries at all — there is no order, only hash values.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Five questions to judge any index:</strong> lookup speed, range query support, insert cost, delete cost, and space overhead. No single method wins all five.</p>
+            </div>
+        </div>
+
+        <div class="section" id="ordered">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Ordered Indices</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An ordered index stores (search key, pointer) pairs in sorted order. To find a record: binary search the index, follow the pointer, read one block.</p>
+                <pre>SELECT * FROM instructor WHERE ID = 22222;
+
+1. Search index for 22222 → pointer to Block 4
+2. Read Block 4
+3. Return that one record
+
+Result: 1 of 12 records read (not all 12)</pre>
+            </div>
+        </div>
+
+        <div class="section" id="clustering">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Clustering vs. Non-Clustering</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Clustering Index</h3><p>The physical order of records in the file matches the order of the index. Finding 10 records with dept = 'Physics' fetches one contiguous run of blocks. Only one clustering index per table is possible.</p></div>
+                    <div class="card"><h3>Non-Clustering (Secondary) Index</h3><p>The file is sorted on a different attribute. The index pointers scatter across many different blocks. Finding 10 records may require up to 10 separate block reads — one seek per record.</p></div>
+                </div>
+                <div class="highlight"><p>Clustering is the most important index property for range queries. A clustering index on dept_name reads one run of blocks for all Physics instructors. A non-clustering index on dept_name may scatter those records across the entire file, requiring a random seek per record — potentially worse than a full scan.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="dense">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Dense vs. Sparse Indices</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Dense Index</h3><p>One entry per record in the data file. Can answer queries without accessing the data file at all (if the search key is the only attribute needed). Larger — every record has a pointer.</p></div>
+                    <div class="card"><h3>Sparse Index</h3><p>One entry per block (or per run of records with the same key value). Smaller and cheaper to maintain. Only works with clustering indices — records must be in order so you can scan forward from the nearest entry.</p></div>
+                </div>
+                <p style="margin-top:12px">A <strong>multilevel index</strong> builds a sparse outer index over a dense inner index, reducing search depth. B+-trees generalize this idea into a balanced tree structure.</p>
+            </div>
+        </div>
+
+        <div class="section" id="btree">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>B+-Tree Index</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>The B+-tree is the dominant index structure in production databases. It is self-balancing — all leaf nodes are at the same depth regardless of insertions or deletions.</p>
+                <div class="grid">
+                    <div class="card"><h3>Internal Nodes</h3><p>Store search keys and pointers to child nodes only. Guide the search down the tree. Typically kept in the buffer pool in memory — few I/Os needed to traverse them.</p></div>
+                    <div class="card"><h3>Leaf Nodes</h3><p>Store (search key, record pointer) pairs. Linked in a doubly-linked list for efficient range scans. All actual data pointers are in the leaves.</p></div>
+                </div>
+                <pre>B+-tree properties:
+  Height h — typically 2 to 4 for large tables
+  Fanout n — up to n-1 keys and n child pointers per node
+  All leaves at the same level (balanced)
+  Leaves linked: easy to scan from key K1 to K2
+
+Finding one record: h I/Os (tree traversal) + 1 I/O (data block)
+For h = 3: 4 total I/Os vs. 1,000 for a full scan</pre>
+                <p><strong>Insertion:</strong> find the correct leaf, insert the key. If the leaf is full, split it and push a key up to the parent. Splits propagate up but the tree remains balanced. <strong>Deletion:</strong> find and remove the entry. If a node is too sparse, merge with a sibling or redistribute keys.</p>
+                <div class="highlight"><p>The B+-tree trades a small constant overhead per operation (O(log n)) for eliminating full table scans (O(n)). At a million records, log base 100 of a million is 3 — three internal node reads to find any record. That is why almost every production database uses B+-trees as the primary index structure.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="hash">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Hash Index</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A hash index applies a hash function h(key) to map each search key to a bucket. Equality lookup is O(1) — compute the hash, read the bucket, done.</p>
+                <pre>h(key) = key mod 4
+
+h(12121) = 1  → Bucket 1
+h(10101) = 1  → Bucket 1 (same bucket, overflow chain)
+h(22222) = 2  → Bucket 2
+
+Equality lookup: compute h(22222) = 2, read Bucket 2 → found
+Range query: cannot use hash — there is no ordering between buckets</pre>
+                <div class="grid">
+                    <div class="card"><h3>Static Hashing</h3><p>Fixed number of buckets. Overflow chains grow as data increases. Performance degrades as chains lengthen. Periodic rebuilding required.</p></div>
+                    <div class="card"><h3>Dynamic Hashing (Extendible)</h3><p>Bucket count doubles when overflow occurs. A directory of pointers grows with the data. No full rebuild needed — only the overflowing bucket splits.</p></div>
+                </div>
+                <div class="highlight"><p>Hash indices are the right tool for exact-match lookups on a known equality predicate: WHERE ID = 22201. They are completely wrong for range queries (WHERE salary > 80000) or sorted output. Choose B+-tree when in doubt — it handles both equality and range queries well.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="multikey">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Multiple-Key Access</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A query with two conditions can use multiple single-column indices or one composite index. The right choice depends on selectivity.</p>
+                <pre>Query: WHERE dept_name = 'Finance' AND salary = 80000
+
+Option A: use dept_name index → fetch matching records, check salary
+Option B: use salary index → fetch matching records, check dept_name
+Option C: use both, intersect pointer sets → fetch only intersection
+Option D: composite index (dept_name, salary) → one index probe, no intersection</pre>
+                <p><strong>Composite index column order matters:</strong></p>
+                <pre>INDEX (dept_name, salary):
+  dept_name = 'Finance'           → one contiguous range (good)
+  dept_name = 'Finance' AND salary = 80000 → one exact entry (best)
+  dept_name = 'Finance' AND salary < 80000 → one range within Finance (good)
+  salary = 80000                  → scattered across all departments (bad)
+
+INDEX (salary, dept_name):
+  salary = 80000                  → one contiguous range (good)
+  dept_name = 'Finance'           → scattered (bad)
+
+The leading attribute is the one you want to range-scan or equality-match.</pre>
+                <div class="highlight"><p>Using two separate indexes with pointer intersection is only beneficial when both conditions are highly selective. If the dept index returns 2,000 pointers and the salary index returns 1,500, you do 3,500 pointer reads to find 2 answers — a full scan might be cheaper. The composite index avoids this entirely.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="covering">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Covering Index</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A covering index contains all the columns a query needs — the query never touches the data table at all.</p>
+                <pre>Query: SELECT salary FROM instructor WHERE ID = 22222;
+
+Ordinary index on ID:
+  3 index page reads → find pointer → 1 random data block read
+  Total: 4 I/Os
+
+Covering index on (ID) including salary:
+  3 index page reads → salary found in the leaf node itself
+  Total: 3 I/Os (data block never read)
+
+At scale, one saved random read per matching row adds up quickly.</pre>
+                <p><strong>Two ways to include a column:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Search Key = (ID, salary)</h3><p>Salary is part of the sort key. Both ID and salary can be searched. Wider key means fewer entries per node — potentially lower fanout, taller tree.</p></div>
+                    <div class="card"><h3>Search Key = ID, salary INCLUDED</h3><p>Salary is stored in the leaf but not part of the ordering key. Narrower key preserves higher fanout. Salary can be retrieved but not searched. Usually preferred.</p></div>
+                </div>
+                <div class="highlight"><p>A covering index is query-specific. It carries extra columns so that specific query never has to follow a pointer to the actual table. Adding too many included columns bloats the index and slows inserts. Only add what your most frequent, most performance-sensitive queries actually need.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="design">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Index Design Guidelines</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <pre>CREATE INDEX dept_index ON instructor (dept_name);
+DROP INDEX dept_index;   -- removes the index, never the data
+CREATE UNIQUE INDEX instructor_email_idx ON instructor (email);
+  -- unique index = candidate key constraint + access structure</pre>
+                <table>
+                    <tr><th>Query Pattern</th><th>Best Index Choice</th></tr>
+                    <tr><td>One selective equality condition</td><td>Single-key index on that attribute</td></tr>
+                    <tr><td>Several AND conditions</td><td>Compare: one index + filter vs. intersection vs. composite</td></tr>
+                    <tr><td>Equality on leading attributes, range on trailing</td><td>Ordered composite index</td></tr>
+                    <tr><td>Query needs only indexed values</td><td>Covering index</td></tr>
+                    <tr><td>Frequent joins on a foreign key</td><td>Index the referencing (child) side</td></tr>
+                    <tr><td>Heavy insert/update/delete traffic</td><td>Fewer indexes — each index costs a write on every DML</td></tr>
+                </table>
+                <div class="highlight"><p>Primary keys are indexed automatically by most systems. Foreign keys usually are not. An unindexed foreign key turns every "find the rows that belong to this parent" into a full table scan — and it also slows down DELETE on the parent because the database must verify no orphaned children exist. Index the foreign keys your queries actually use.</p></div>
+                <p>The optimizer decides whether to use an index at query time. An index that exists is not always used — if the condition is not selective enough, a full scan is cheaper. Measure before and after, and drop indexes that do not pay for themselves in improved query time.</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
