@@ -1318,5 +1318,17 @@
     "code_bg": "#0a1a0f",
     "highlight_bg": "#0f2a1a",
     "bold": "#4ade80"
+  },
+  {
+    "title": "COMP3630 Chapter 7 Advanced Network Services and Switching",
+    "filename": "comp3630-chapter-7-advanced-network-services-and-switching.html",
+    "category": "Networks",
+    "date": "2026-10-15 09:56 AM",
+    "accent": "#d97706",
+    "glow": "#1f1200",
+    "badge": "#b45309",
+    "code_bg": "#1a1200",
+    "highlight_bg": "#2a1c00",
+    "bold": "#fbbf24"
   }
 ]

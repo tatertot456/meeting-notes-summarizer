@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 7: Advanced Network Services & Switching</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #2a0a1a, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #9d174d; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #9d174d; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #9d174d; color: white; border-color: #9d174d; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #9d174d; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        strong { color: #f472b6; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a0f1c; border-left: 3px solid #9d174d; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #9d174d; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #1a0a12; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #9d174d; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #9d174d; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 7</div>
+        <h1>Advanced Network Services & Switching</h1>
+        <p class="subtitle">Delivery modes, QoS, STP, VLANs, port security, SPAN, NAT/PAT, VPNs, and ACLs</p>
+    </header>
+    <nav>
+        <a href="#delivery">Delivery Modes</a>
+        <a href="#media">Media Access</a>
+        <a href="#qos">QoS & Shaping</a>
+        <a href="#stp">Spanning Tree</a>
+        <a href="#ports">Port Types & VTP</a>
+        <a href="#design">VLAN Design</a>
+        <a href="#lag">LAG & PoE</a>
+        <a href="#hopping">VLAN Hopping</a>
+        <a href="#security">Port Security</a>
+        <a href="#span">SPAN</a>
+        <a href="#nat">Security Zones & NAT</a>
+        <a href="#vpn">VPN</a>
+        <a href="#acl">ACLs</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="delivery">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Delivery Modes, Broadcast & Collision Domains</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Three fundamental delivery modes define how a sender addresses its recipients on an IP network.</p>
+                <div class="grid">
+                    <div class="card"><h3>Unicast (1-to-1)</h3><p>One sender to one specific destination IP/MAC. Used for HTTP, SSH, and file transfers.</p></div>
+                    <div class="card"><h3>Multicast (1-to-Many)</h3><p>One sender to a subscribed group. Used for IPTV, video streams, and OSPF routing updates.</p></div>
+                    <div class="card"><h3>Broadcast (1-to-All)</h3><p>One sender to every device in the L2 domain. Used for ARP requests and IPv4 DHCP Discover.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Broadcast Domains:</strong></p>
+                <ul>
+                    <li><strong>L2 Domain Boundary:</strong> The collection of all devices that receive a L2 broadcast frame. Switches flood broadcasts to all active ports.</li>
+                    <li><strong>Router Separation:</strong> Routers and L3 interfaces strictly block L2 broadcasts from crossing into adjacent subnets.</li>
+                    <li><strong>VLAN Isolation:</strong> Separate VLANs create distinct logical broadcast domains on the same physical switch hardware.</li>
+                </ul>
+                <p style="margin-top:12px"><strong>Collision Domains:</strong></p>
+                <ul>
+                    <li><strong>Concept:</strong> A network segment where simultaneous transmissions can collide and corrupt signals.</li>
+                    <li><strong>Legacy Hubs:</strong> A hub creates ONE shared collision domain for all connected endpoints.</li>
+                    <li><strong>Switches & Full-Duplex:</strong> Every switch port is a separate collision domain. Full-duplex switched Ethernet eliminates collisions entirely.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="media">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Media Access & Payload Rules</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <ul>
+                    <li><strong>IP MTU vs Frame Size:</strong> Standard IP MTU = 1500B payload. Full Ethernet frame = 1518B (14B header + 4B FCS).</li>
+                    <li><strong>Jumbo Frames (9000B):</strong> Used in high-speed datacenters and SAN storage to reduce per-GB CPU overhead. TCP dynamically increases MSS during the handshake to fit the larger MTU.</li>
+                </ul>
+                <div class="grid" style="margin-top:12px">
+                    <div class="card"><h3>CSMA/CD (Wired Half-Duplex)</h3><p>Carrier Sense Multiple Access with Collision Detection. Listen before Tx; if a collision occurs, send a Jam signal and wait a random backoff time. Core of the original Ethernet protocol.</p></div>
+                    <div class="card"><h3>CSMA/CA (Wireless 802.11)</h3><p>Collision Avoidance used in Wi-Fi. Wireless nodes cannot detect collisions while transmitting, so they wait a random backoff slot and require explicit ACKs.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="qos">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Traffic Shaping, Prioritization & QoS Marking</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Traffic Shaping (Rate Control)</h3><p>Smooths out sudden traffic bursts by queuing packets and releasing them at a predictable, constant bit rate. Example: capping backup jobs to 30 Mbps on a 100 Mbps WAN link.</p></div>
+                    <div class="card"><h3>Traffic Prioritization</h3><p>Selects which queued packets transmit first during congestion. Example: forwarding real-time voice packets before web downloads.</p></div>
+                    <div class="card"><h3>Traffic Classification</h3><p>Identifies traffic by source/dest IP, VLAN, TCP/UDP port, DSCP tag, or application identity to apply QoS policies.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>QoS Marking at Multiple Layers:</strong></p>
+                <table>
+                    <tr><th>Layer</th><th>Mechanism</th><th>Detail</th></tr>
+                    <tr><td>Layer 2</td><td>PCP (802.1p)</td><td>3-bit Priority Code Point inside the 802.1Q VLAN tag. Values 0–7; Voice = 6 (High), Backups = 1 (Low).</td></tr>
+                    <tr><td>Layer 3</td><td>DSCP (IP Header)</td><td>6-bit Differentiated Services Code Point in the IP header. Routers map tags into high-priority queues for low-latency forwarding.</td></tr>
+                    <tr><td>Layer 4</td><td>Port Classification</td><td>Filter by TCP/UDP service port. Example: UDP Port 5060 = SIP VoIP signaling.</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="stp">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Spanning Tree Protocol (STP)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Because Ethernet frames lack a Layer 3 TTL field, physical loops cause endless <strong>broadcast storms</strong>, MAC table instability, and total network crashes. STP eliminates loops while keeping redundant links available as backups.</p>
+                <div class="grid">
+                    <div class="card"><h3>Classic STP (802.1D)</h3><p>Runs a single, global spanning tree for the entire physical network — ignores VLAN boundaries.</p></div>
+                    <div class="card"><h3>PVST / PVST+ / Rapid PVST+ (Cisco)</h3><p>Separate STP instance per VLAN. Enables different root bridges per VLAN, allowing L2 load balancing across redundant links. Default on Cisco switches.</p></div>
+                    <div class="card"><h3>MSTP (802.1s)</h3><p>Maps multiple VLANs into groups sharing one STP instance. Reduces CPU and control traffic overhead in large environments with hundreds of VLANs.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>STP Mechanics:</strong></p>
+                <ul>
+                    <li><strong>Root Bridge Election:</strong> Switches exchange BPDUs to elect the Root Bridge — the switch with the lowest Bridge ID / MAC address wins.</li>
+                    <li><strong>Loop-Free Topology:</strong> STP calculates the lowest-cost path to the Root Bridge. Redundant links are placed in a Logically Blocked state, remaining ready as backups.</li>
+                </ul>
+                <div class="highlight"><p>Physically redundant links provide instant hardware failover. STP keeps them logically blocked to prevent loops — if the active link fails, the blocked port transitions to forwarding automatically.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ports">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>VLAN Port Types & VTP</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Port Type</th><th>Connects To</th><th>Traffic</th></tr>
+                    <tr><td><strong>Access Port</strong></td><td>End-user devices (PCs, printers, IP phones)</td><td>Untagged; carries exactly ONE VLAN</td></tr>
+                    <tr><td><strong>Trunk Port</strong></td><td>Switch-to-switch, switch-to-router</td><td>Tagged (802.1Q); carries MULTIPLE VLANs on one cable</td></tr>
+                    <tr><td><strong>Routed Port (L3)</strong></td><td>Router-like connections</td><td>Configured with <code>no switchport</code>; assigned an IP address</td></tr>
+                    <tr><td><strong>Management Port</strong></td><td>Admin workstations</td><td>Out-of-band SSH/SNMP access, isolated from production traffic</td></tr>
+                </table>
+                <ul style="margin-top:16px">
+                    <li><strong>802.1Q Tagging:</strong> Inserts a 4-byte header into the Ethernet frame to identify VLAN membership across trunk links.</li>
+                    <li><strong>Native VLAN:</strong> VLAN whose traffic is sent untagged on a trunk — must match on both ends of the link for security.</li>
+                    <li><strong>SFP / SFP+:</strong> Modular transceiver slots for fiber or copper. SFP = 1 Gbps, SFP+ = 10 Gbps.</li>
+                </ul>
+                <div class="highlight"><p><strong>VTP (VLAN Trunking Protocol)</strong> is a Cisco proprietary L2 protocol that auto-synchronizes VLAN configurations across all switches in a shared domain. An admin configures VLANs on a VTP Server; all client switches sync automatically via trunk links. VTP uses revision numbers — a higher revision number overwrites lower ones on receiving switches, which can be dangerous if a misconfigured switch is introduced to the domain.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="design">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>VLAN Design, Deployment & Configuration</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <ul>
+                    <li><strong>Group by Role or Function:</strong> Faculty, Students, Guest — or Data, Voice, Video, Management.</li>
+                    <li><strong>1 VLAN = 1 Subnet:</strong> Align each VLAN to one IP subnet (e.g., 10.10.10.0/24) for clean L3 routing and ACL policy boundaries.</li>
+                    <li><strong>Deployment:</strong> Use 802.1Q trunks with explicit allowed VLAN lists (<code>switchport trunk allowed vlan 10,20</code>) to restrict unnecessary broadcast traffic.</li>
+                    <li><strong>Security:</strong> Disable DTP (<code>switchport mode access</code>) on user ports. Move native VLAN off VLAN 1 to a dedicated unused ID (e.g., VLAN 999). Shut down unused ports.</li>
+                </ul>
+                <p style="margin-top:16px"><strong>Router-on-a-Stick (ROAS) — Subinterface:</strong></p>
+                <pre>interface gi0/0.10
+ encapsulation dot1Q 10
+ ip address 10.10.10.1 255.255.255.0</pre>
+                <p><strong>Layer 3 Switch SVI:</strong></p>
+                <pre>ip routing
+interface vlan 10
+ ip address 10.10.10.1 255.255.255.0</pre>
+                <p><strong>L2 Switch — Access & Trunk Port Config:</strong></p>
+                <pre>! Access Port
+vlan 10
+ name Faculty
+interface gi0/1
+ switchport mode access
+ switchport access vlan 10
+
+! Trunk Port
+interface gi0/24
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30
+ switchport trunk native vlan 999
+ switchport nonegotiate</pre>
+            </div>
+        </div>
+
+        <div class="section" id="lag">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Link Aggregation, PoE & Duplex</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>EtherChannel / LAG</strong> combines up to 8 physical Ethernet links into ONE logical high-speed connection. Four 1-Gbps links = a 4-Gbps logical trunk. If one cable fails, traffic automatically redistributes across remaining links.</p>
+                <div class="highlight"><p><strong>LACP (802.1AX)</strong> — Link Aggregation Control Protocol dynamically negotiates and maintains LAG group trunks between switches. No manual per-port configuration required.</p></div>
+                <div class="grid">
+                    <div class="card"><h3>PoE (802.3af) — 15.4W</h3><p>Supplies power and data over a single Cat6 cable to IP phones, basic access points, and sensors.</p></div>
+                    <div class="card"><h3>PoE+ (802.3at) — 30W</h3><p>Double the power for PTZ security cameras, Wi-Fi 6 APs, and video conferencing units.</p></div>
+                </div>
+                <ul style="margin-top:16px">
+                    <li><strong>Auto-MDI/MDI-X:</strong> Interfaces automatically detect transmit/receive wire pairs, eliminating the need for crossover cables (copper only, not fiber).</li>
+                    <li><strong>Duplex Autonegotiation:</strong> Configures full-duplex speed automatically. A mismatch causes severe late collisions and packet loss.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="hopping">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>VLAN Hopping Attacks & Hardening</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Switch Spoofing</h3><p>An attacker configures their device to negotiate a trunk link using DTP (Dynamic Trunking Protocol), gaining unauthorized access to all VLANs on the switch.</p></div>
+                    <div class="card"><h3>Double-Tagging Attack</h3><p>Attacker sends a frame with TWO 802.1Q tags — [Native VLAN 1][Target VLAN 20]. The first switch strips tag 1; the inner tag 20 then reaches the target VLAN undetected.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Hardening Best Practices:</strong></p>
+                <ul>
+                    <li><strong>Explicit Access Mode:</strong> <code>switchport mode access</code> — disables DTP auto-trunking on all user-facing ports.</li>
+                    <li><strong>Shutdown Unused Ports:</strong> Issue <code>shutdown</code> on all unused ports and assign them to an isolated parking-lot VLAN.</li>
+                    <li><strong>Dedicated Native VLAN:</strong> Change the native VLAN from VLAN 1 to a dedicated unused VLAN (e.g., VLAN 999) on all trunks.</li>
+                    <li><strong>Restrict Trunk VLANs:</strong> Use <code>switchport trunk allowed vlan</code> to permit only required VLANs. Use <code>switchport nonegotiate</code> to disable DTP on trunk ports.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="security">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Port Security & Layer 2 Defense Suite</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Port Security (MAC Restrict)</h3><p>Restricts allowed MAC addresses on an access port. Sticky MAC learning dynamically binds the first connected device's MAC and locks it in.</p></div>
+                    <div class="card"><h3>Violation Actions</h3><p><strong>Protect</strong> — drops unauthorized frames silently. <strong>Restrict</strong> — drops and logs the event. <strong>Shutdown</strong> — places port in error-disabled state.</p></div>
+                    <div class="card"><h3>DHCP Snooping</h3><p>Blocks rogue DHCP servers by filtering untrusted ports. Only designated trusted ports can send DHCP offers to clients.</p></div>
+                    <div class="card"><h3>Dynamic ARP Inspection (DAI)</h3><p>Validates incoming ARP messages against the DHCP snooping binding table to prevent ARP poisoning and man-in-the-middle attacks.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="span">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>SPAN Port Mirroring & Switch Troubleshooting</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Port Mirroring (SPAN)</strong> copies ingress/egress frames from source switch ports or VLANs to a destination diagnostic port where a Wireshark analyzer captures traffic without interrupting live operations.</p>
+                <ul>
+                    <li><strong>Diagnostic Uses:</strong> Latency troubleshooting, protocol handshake inspection, DNS/DHCP failure analysis, intrusion detection.</li>
+                    <li><strong>Security Note:</strong> SPAN ports expose unencrypted payload data — destination ports must be strictly secured.</li>
+                </ul>
+                <p style="margin-top:12px"><strong>Cisco SPAN Configuration:</strong></p>
+                <pre>Switch# configure terminal
+Switch(config)# monitor session 1 source interface range GigabitEthernet0/1 - 3 both
+Switch(config)# monitor session 1 destination interface GigabitEthernet0/24
+Switch(config)# end
+Switch# show monitor session 1</pre>
+                <p><strong>5-Step Switch Troubleshooting Workflow:</strong></p>
+                <table>
+                    <tr><th>Step</th><th>Action</th></tr>
+                    <tr><td>1. Identify Port Role</td><td>Verify if interface is configured as Access, Trunk, Routed, or Management.</td></tr>
+                    <tr><td>2. Check Configuration</td><td>Verify assigned VLAN, allowed trunk list, speed/duplex, and operational status.</td></tr>
+                    <tr><td>3. Inspect Port Counters</td><td>Check for interface errors, late collisions, buffer drops, or flow control events.</td></tr>
+                    <tr><td>4. Mirror & Capture</td><td>Enable SPAN mirroring and inspect packet headers in Wireshark.</td></tr>
+                    <tr><td>5. Audit Security Violations</td><td>Check MAC table bindings and verify port security error-disabled states.</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="nat">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Security Zones, DMZ & NAT/PAT</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Trust Zone Classifications:</strong> Untrusted (Internet) → DMZ (Web/Mail/DNS) → Trusted (Internal/EHR/DB) → Restricted (Domain Controllers).</p>
+                <div class="grid">
+                    <div class="card"><h3>DMZ (Demilitarized Zone)</h3><p>Isolates public-facing servers. Firewall rules permit inbound HTTPS 443 to the DMZ but strictly block all DMZ-to-Internal connections.</p></div>
+                    <div class="card"><h3>Jump Servers (Bastion Hosts)</h3><p>Hardened intermediate hosts with MFA and central logging used for secure administrative access into restricted zones.</p></div>
+                    <div class="card"><h3>NAT</h3><p>Translates private RFC 1918 IPs (10.0.0.0/8, 192.168.0.0/16) to public routable IPs at the border router.</p></div>
+                    <div class="card"><h3>PAT / NAT Overload</h3><p>Maps hundreds of internal private sockets (192.168.1.10:51500) to ONE public IP using unique source port numbers (203.0.113.10:40001).</p></div>
+                </div>
+                <div class="highlight"><p><strong>Honeypots</strong> are isolated decoy systems deployed to detect, log, and analyze unauthorized scanning and attack techniques without exposing real infrastructure.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="vpn">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>VPN Architecture</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>VPN Type</th><th>How It Works</th><th>Trade-off</th></tr>
+                    <tr><td><strong>Full-Tunnel</strong></td><td>ALL traffic routes through the encrypted tunnel — corporate and public internet.</td><td>Maximizes centralized firewall control; increases gateway bandwidth load.</td></tr>
+                    <tr><td><strong>Split-Tunnel</strong></td><td>Corporate destinations (10.0.0.0/8) go through the tunnel; public web traffic exits the user's local ISP directly.</td><td>Balances security vs. latency; reduces gateway congestion.</td></tr>
+                    <tr><td><strong>Site-to-Site</strong></td><td>Connects entire office LANs using IPsec-capable routers or firewalls.</td><td>Always-on; no client software needed on endpoints.</td></tr>
+                    <tr><td><strong>Remote Access</strong></td><td>Connects individual laptops to the corporate network using TLS/IPsec clients.</td><td>Flexible for remote workers; requires client software.</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="acl">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Access Control Lists (ACLs)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>An ACL on a router is a sequential list of <strong>permit or deny rules</strong> that filter network traffic based on IP addresses, protocols, and port numbers.</p>
+                <div class="grid">
+                    <div class="card"><h3>Standard ACLs</h3><p>Filter based strictly on Source IP only. Place close to the destination to avoid blocking traffic prematurely.</p></div>
+                    <div class="card"><h3>Extended ACLs</h3><p>Filter on Source/Dest IP, Protocol, and TCP/UDP Ports. Place close to the source to stop unwanted traffic early.</p></div>
+                </div>
+                <ul style="margin-top:16px">
+                    <li><strong>Top-to-Bottom Processing:</strong> Rules are evaluated sequentially. Once a match is found, processing stops immediately — rule order is critical.</li>
+                    <li><strong>Implicit Deny Any:</strong> All ACLs end with an invisible <code>deny ip any any</code> rule — all traffic not explicitly permitted is silently dropped.</li>
+                </ul>
+                <div class="highlight"><p>A set of ACLs can provide rudimentary packet filtering, but they are no substitute for a stateful firewall. ACLs evaluate each packet independently with no awareness of connection state — a stateful firewall tracks whether a packet belongs to an established session.</p></div>
+            </div>
+        </div>
+
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
