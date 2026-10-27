@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 8: Enterprise Network Security & Zero Trust</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #0a0a2e, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #1d4ed8; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #1d4ed8; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #1d4ed8; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        strong { color: #60a5fa; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0f1a2e; border-left: 3px solid #1d4ed8; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #1d4ed8; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #0a0f1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #1d4ed8; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #1d4ed8; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        .pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .pillar { background: #111; border: 1px solid #1d4ed8; border-radius: 10px; padding: 16px; }
+        .pillar-num { font-size: 0.7rem; color: #1d4ed8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+        .pillar h3 { font-size: 0.95rem; color: #2563eb; margin-bottom: 8px; }
+        .pillar p { font-size: 0.88rem; margin: 0; }
+        @media (max-width: 600px) { .grid, .pillars { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 8</div>
+        <h1>Enterprise Network Security & Zero Trust</h1>
+        <p class="subtitle">CIA Triad, AAA/Kerberos, stateful firewalls, endpoint hardening, DoS defense, and Zero Trust Architecture</p>
+    </header>
+    <nav>
+        <a href="#cia">CIA Triad & IR</a>
+        <a href="#physical">Physical & Social Eng</a>
+        <a href="#firewall">Firewalls & NGFWs</a>
+        <a href="#ids">IDS/IPS</a>
+        <a href="#aaa">AAA & MFA</a>
+        <a href="#sso">SSO & Policies</a>
+        <a href="#kerberos">Kerberos</a>
+        <a href="#radius">RADIUS & TACACS+</a>
+        <a href="#dos">DoS & OT Security</a>
+        <a href="#hardening">Endpoint Hardening</a>
+        <a href="#content">Content Filtering</a>
+        <a href="#remote">SSH, RDP & Ports</a>
+        <a href="#ad">Active Directory & GPO</a>
+        <a href="#vpn">VPN</a>
+        <a href="#zerotrust">Zero Trust</a>
+        <a href="#pillars">Four Core Pillars</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="cia">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>CIA Triad & Incident Response</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Confidentiality</h3><p>Ensures only authorized parties can read data. Enforced via encryption, ACLs, and need-to-know access controls.</p></div>
+                    <div class="card"><h3>Integrity</h3><p>Guarantees data has not been tampered with. Enforced via hashing (SHA-256), digital signatures, and audit logs.</p></div>
+                    <div class="card"><h3>Availability</h3><p>Ensures systems remain accessible to authorized users. Achieved through redundancy, failover, and DDoS mitigation.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>Incident Response Loop:</strong></p>
+                <ul>
+                    <li><strong>Prevent:</strong> Patch management, firewall rules, user training.</li>
+                    <li><strong>Detect:</strong> SIEM alerting, IDS signatures, anomaly detection.</li>
+                    <li><strong>Respond:</strong> Isolate endpoints, block IPs, escalate to IR team.</li>
+                    <li><strong>Recover:</strong> Restore from clean backups, conduct post-mortem, update controls.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="physical">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Physical Security & Social Engineering</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Physical Controls</h3><p>Badge readers, mantraps, security cameras, locked server rooms, and cable locks enforce physical asset protection.</p></div>
+                    <div class="card"><h3>Social Engineering</h3><p>Attacks that manipulate people rather than systems. Examples: phishing emails, pretexting calls, tailgating into secured areas.</p></div>
+                    <div class="card"><h3>Phishing Variants</h3><p><strong>Spear Phishing</strong> targets specific individuals. <strong>Whaling</strong> targets executives. <strong>Vishing</strong> uses voice calls.</p></div>
+                    <div class="card"><h3>Defense</h3><p>Security awareness training, simulated phishing campaigns, and strict visitor escort policies are the primary countermeasures.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="firewall">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Stateful Firewalls & Next-Gen Firewalls (NGFWs)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Type</th><th>Inspects</th><th>Key Capability</th></tr>
+                    <tr><td><strong>Packet Filter</strong></td><td>IP header only</td><td>Simple ACL rules; stateless — no session awareness.</td></tr>
+                    <tr><td><strong>Stateful Firewall</strong></td><td>IP + TCP connection state</td><td>Tracks sessions in a state table; allows return traffic automatically.</td></tr>
+                    <tr><td><strong>NGFW</strong></td><td>L3–L7 (application layer)</td><td>Deep Packet Inspection, app-ID, SSL decryption, IPS integration, and user-identity policies.</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Implicit Deny:</strong> All firewalls end with an invisible deny-all rule. Any traffic not explicitly permitted by a rule is silently dropped — the same principle as router ACLs.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ids">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>IDS & IPS — Detection vs. Prevention</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>NIPS (Inline — Active)</h3><p>Sits directly in the traffic path. Drops malicious packets in real time before they reach the target host.</p></div>
+                    <div class="card"><h3>NIDS (Out-of-Band — Passive)</h3><p>Receives a copy of traffic via a SPAN/mirror port. Generates alerts but does NOT block traffic — zero impact on latency.</p></div>
+                    <div class="card"><h3>HIDS (Host-Based)</h3><p>Runs as an agent directly on endpoint servers. Monitors local system files, registry changes, and process logs for tampering.</p></div>
+                    <div class="card"><h3>Detection Methods</h3><p><strong>Signature-Based:</strong> Matches known attack patterns. <strong>Behavioral/Anomaly:</strong> Flags deviations from a learned traffic baseline.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="aaa">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>AAA Framework & Multi-Factor Authentication</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>AAA Pillar</th><th>Answers</th><th>Example</th></tr>
+                    <tr><td><strong>Authentication</strong></td><td>WHO are you?</td><td>Username + password + OTP token</td></tr>
+                    <tr><td><strong>Authorization</strong></td><td>WHAT can you access?</td><td>RBAC role grants access to Finance OU only</td></tr>
+                    <tr><td><strong>Accounting</strong></td><td>WHAT did you do?</td><td>SIEM log: user X downloaded file Y at 14:32</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>MFA Factor Categories:</strong></p>
+                <ul>
+                    <li><strong>Something You Know:</strong> Password, PIN, security question.</li>
+                    <li><strong>Something You Have:</strong> Hardware token, authenticator app, smart card.</li>
+                    <li><strong>Something You Are:</strong> Fingerprint, facial recognition, retina scan.</li>
+                </ul>
+                <div class="highlight"><p><strong>Key Rule:</strong> Two passwords is NOT MFA. MFA requires 2+ factors from DISTINCT categories. A password plus a one-time SMS code qualifies; two passwords do not.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="sso">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Single Sign-On & Security Policies</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>SSO</strong> allows a user to authenticate once and gain access to multiple systems without re-entering credentials. Kerberos tickets and SAML assertions are common SSO mechanisms.</p>
+                <p style="margin-top:12px"><strong>Security Policy Framework:</strong></p>
+                <ul>
+                    <li><strong>Governance:</strong> Leadership approval and executive oversight of security policy.</li>
+                    <li><strong>Enforcement:</strong> Access controls, monitoring, and automated policy application.</li>
+                    <li><strong>Employee Compliance:</strong> Daily adherence to acceptable use and data handling policies.</li>
+                    <li><strong>Security Awareness:</strong> Ongoing training programs and phishing simulation campaigns.</li>
+                    <li><strong>Ongoing Review:</strong> Periodic audits and policy updates to address emerging threats.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="kerberos">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Kerberos Ticket-Based Authentication</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Kerberos is the default authentication protocol for Active Directory. It uses encrypted time-stamped tickets so plaintext passwords never traverse the network.</p>
+                <ul>
+                    <li><strong>KDC (Key Distribution Center):</strong> The trusted third-party server that issues all tickets. Contains the Authentication Server (AS) and Ticket Granting Server (TGS).</li>
+                    <li><strong>TGT (Ticket Granting Ticket):</strong> Issued at login. Proves identity to the KDC — presented to request service tickets without re-entering credentials.</li>
+                    <li><strong>Service Ticket:</strong> Issued per resource. Presented directly to the target server (file share, SQL server) to gain access.</li>
+                </ul>
+                <div class="highlight"><p>Kerberos eliminates the need to send passwords across the wire. Every ticket is time-stamped and encrypted — replay attacks are blocked because expired tickets are rejected.</p></div>
+                <pre>Client → AS: "I'm user X, here's my hashed password"
+AS → Client: TGT (encrypted with KDC secret key)
+Client → TGS: "I need access to File Server, here's my TGT"
+TGS → Client: Service Ticket for File Server
+Client → File Server: Service Ticket → Access Granted</pre>
+            </div>
+        </div>
+
+        <div class="section" id="radius">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>RADIUS & TACACS+</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Feature</th><th>RADIUS</th><th>TACACS+</th></tr>
+                    <tr><td>Transport</td><td>UDP 1812/1813</td><td>TCP 49</td></tr>
+                    <tr><td>Encryption</td><td>Password only</td><td>Full packet body encrypted</td></tr>
+                    <tr><td>AAA Separation</td><td>Combined Auth + Authz</td><td>Separate Authentication, Authorization, Accounting</td></tr>
+                    <tr><td>Vendor</td><td>Open standard (FreeRADIUS)</td><td>Cisco proprietary</td></tr>
+                    <tr><td>Best Use</td><td>Wi-Fi / VPN user auth (802.1X)</td><td>Network device admin (router/switch CLI)</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Access-Challenge:</strong> RADIUS may issue a challenge between steps 2 and 3 requiring a PIN or second password. This is NOT true MFA — it uses the same category (something you know) rather than a distinct factor type.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="dos">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>DoS/DDoS Attacks & OT Security</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Volumetric Attacks</h3><p>Botnet traffic floods ISP uplinks to saturate bandwidth (Gbps–Tbps scale). Example: UDP flood, DNS amplification.</p></div>
+                    <div class="card"><h3>Protocol Attacks</h3><p>Exhausts firewall state tables or router memory. Example: TCP SYN flood leaves half-open connections that consume state table entries.</p></div>
+                    <div class="card"><h3>Application Attacks</h3><p>Floods web/database server CPU with heavy HTTP requests. Example: HTTP GET flood, Slowloris (holds connections open indefinitely).</p></div>
+                    <div class="card"><h3>DDoS Mitigation</h3><p>Anycast BGP scrubbing centers absorb and filter attack traffic before it reaches origin infrastructure. Cloud rate-limiting filters drop volumetric bursts.</p></div>
+                </div>
+                <p style="margin-top:16px"><strong>OT / ICS / SCADA Security:</strong></p>
+                <ul>
+                    <li><strong>Physical Safety Priority:</strong> Continuous availability and physical safety trump confidentiality — a shutdown can cause physical harm.</li>
+                    <li><strong>Air-Gapped Isolation:</strong> Physical or logical separation from public Internet. No direct inbound or outbound connectivity.</li>
+                    <li><strong>Legacy Equipment:</strong> Industrial PLCs often lack modern encryption. Strict VLAN boundaries and unidirectional gateways compensate.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="hardening">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Endpoint Hardening & EDR</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Behavioral Heuristics (EDR)</h3><p>Identifies zero-day malware by monitoring process behavior — memory injection, unusual child processes — rather than static signature matching.</p></div>
+                    <div class="card"><h3>Automated Isolation</h3><p>EDR agents instantly sever compromised endpoints from network switches upon threat detection, containing lateral spread before manual response.</p></div>
+                    <div class="card"><h3>Patch Management Rings</h3><p>Staged OS/software update rollout: Dev → Pilot → Enterprise. Catches breaking changes before they hit production endpoints.</p></div>
+                    <div class="card"><h3>TPM 2.0 & BitLocker</h3><p>TPM chip stores encryption keys in hardware. BitLocker uses TPM to encrypt the full OS volume — stolen drives are unreadable without the chip.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="content">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Content Filtering</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Web/URL Filtering</h3><p>Compares requested URLs against threat intelligence databases. Blocks access to known malicious, phishing, or policy-violating sites.</p></div>
+                    <div class="card"><h3>DNS Filtering</h3><p>Intercepts DNS resolution requests. Prevents malicious domains from resolving to IP addresses — stops the connection before a TCP session is established.</p></div>
+                    <div class="card"><h3>Email/Spam Filtering</h3><p>Inspects message headers, attachments, and embedded links. Sandboxes suspicious attachments before delivery to user inboxes.</p></div>
+                </div>
+                <div class="highlight"><p><strong>Threat Vectors:</strong> Malicious websites deliver infected executables (rootkits, ransomware) through phony download links, drive-by exploits, and malicious ad networks. DNS filtering is the earliest and cheapest blocking layer.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="remote">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>SSH, RDP & Port Security</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Protocol</th><th>Port</th><th>Use Case</th><th>Security Notes</th></tr>
+                    <tr><td><strong>SSH</strong></td><td>TCP 22</td><td>Encrypted CLI access to routers, switches, Linux servers</td><td>Asymmetric key exchange; supports SFTP and public key auth. Disable Telnet (plaintext).</td></tr>
+                    <tr><td><strong>RDP</strong></td><td>TCP 3389</td><td>Encrypted graphical desktop access to Windows servers</td><td>Always route through Bastion/Jump Servers. Require Network Level Authentication (NLA).</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Port Hardening:</strong> Use NMAP to audit all open TCP/UDP ports. Apply firewall rules and router ACLs to close any port not explicitly required by a documented business need.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ad">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Active Directory OUs & Group Policy Objects</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Active Directory Organizational Units (OUs)</strong> organize users, computers, and servers into a logical hierarchy that maps to business departments.</p>
+                <ul>
+                    <li><strong>Hierarchical Structure:</strong> Domain → OUs (Finance, IT, HR) → Sub-OUs → User/Computer objects.</li>
+                    <li><strong>RBAC:</strong> Assigns permissions based on OU membership — Finance OU users access financial shares; IT OU admins get elevated rights.</li>
+                    <li><strong>Inheritance:</strong> Child OUs automatically inherit GPOs applied to parent containers, reducing redundant configuration.</li>
+                </ul>
+                <p style="margin-top:16px"><strong>Group Policy Object (GPO) Enforcement:</strong></p>
+                <div class="grid">
+                    <div class="card"><h3>Centralized Baselines</h3><p>Automatically pushes password complexity requirements, screen lock timers, and firewall rules to all domain-joined PCs at login.</p></div>
+                    <div class="card"><h3>USB & Device Blocking</h3><p>Disables removable storage devices enterprise-wide to prevent malware ingestion and unauthorized data exfiltration.</p></div>
+                    <div class="card"><h3>Automated Software Push</h3><p>Silently deploys EDR agents, security patches, and approved software across thousands of endpoints without user interaction.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="vpn">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>VPN Architecture & Protocols</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>VPN Type</th><th>How It Works</th><th>Best For</th></tr>
+                    <tr><td><strong>Full-Tunnel</strong></td><td>ALL traffic — corporate and internet — routes through the encrypted tunnel.</td><td>High-security environments; centralized inspection of all user traffic.</td></tr>
+                    <tr><td><strong>Split-Tunnel</strong></td><td>Corporate destinations tunnel; public internet exits locally at the ISP.</td><td>Balancing security vs. WAN gateway load and user latency.</td></tr>
+                    <tr><td><strong>Site-to-Site</strong></td><td>Connects entire office LANs via IPsec routers or firewalls.</td><td>Branch office connectivity; always-on, no client software needed.</td></tr>
+                    <tr><td><strong>Remote Access</strong></td><td>Individual device connects via TLS/IPsec client software.</td><td>Remote workers and contractors needing flexible access.</td></tr>
+                </table>
+                <div class="grid" style="margin-top:16px">
+                    <div class="card"><h3>IPsec (L3)</h3><p>IKEv2 negotiates encryption keys. ESP encrypts payload; AH provides integrity. Used for Site-to-Site tunnels.</p></div>
+                    <div class="card"><h3>TLS/SSL VPN (L7)</h3><p>Runs over HTTPS port 443 — traverses most firewalls without special rules. Common for remote access clients (OpenVPN, Cisco AnyConnect).</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="zerotrust">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Zero Trust Architecture</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="highlight"><p><strong>Core Principle — Never Trust, Always Verify:</strong> Zero Trust abandons the implicit trust granted to users inside the network perimeter. Every access request is evaluated continuously, regardless of source location.</p></div>
+                <div class="grid">
+                    <div class="card"><h3>Policy Decision Engine (PDP)</h3><p>Continuously evaluates user identity, device health posture, RBAC role, and request context before granting access. Access is session-level, not network-level.</p></div>
+                    <div class="card"><h3>Microsegmentation</h3><p>Divides the network into granular security zones. A compromised host in one zone cannot move laterally to adjacent workloads without re-authenticating.</p></div>
+                    <div class="card"><h3>Continuous Risk Scoring</h3><p>Device health, geo-location anomalies, and behavior analytics feed the PDP in real time. A suddenly anomalous device triggers step-up authentication.</p></div>
+                    <div class="card"><h3>Identity as the Perimeter</h3><p>The verified identity of a user + device + context replaces network location as the trust boundary. VPN alone is not sufficient.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="pillars">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Four Core Pillars of Modern Enterprise Security</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="pillars">
+                    <div class="pillar">
+                        <div class="pillar-num">01 / Layered CIA Defense</div>
+                        <h3>CIA Triad & Incident Response</h3>
+                        <p>Enforce Confidentiality, Integrity, and Availability across every layer. Utilize Incident Response loops (Prevent → Detect → Respond → Recover) to minimize breach impact.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-num">02 / Ticketed Identity & AAA</div>
+                        <h3>AAA, MFA & Kerberos SSO</h3>
+                        <p>Centralize identity with AAA frameworks, 2+ factor MFA, and ticket-based Kerberos SSO to eliminate plaintext password transmissions across enterprise subnets.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-num">03 / Proactive Perimeter & Endpoint</div>
+                        <h3>Firewalls, NIPS & EDR</h3>
+                        <p>Deploy stateful firewalls and inline NIPS at boundaries. Combine EDR behavioral heuristics, TPM 2.0 BitLocker encryption, and Active Directory GPOs on endpoints.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-num">04 / Zero Trust Architecture</div>
+                        <h3>Never Trust, Always Verify</h3>
+                        <p>Abandon implicit trust. Enforce continuous PDP policy evaluations and microsegmented network zones across all access points and user identities.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

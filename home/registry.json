@@ -1330,5 +1330,17 @@
     "code_bg": "#1a1200",
     "highlight_bg": "#2a1c00",
     "bold": "#fbbf24"
+  },
+  {
+    "title": "COMP3630 Chapter 8 Enterprise Network Security and Zero Trust",
+    "filename": "comp3630-chapter-8-enterprise-network-security-and-zero-trust.html",
+    "category": "Networks",
+    "date": "2026-10-27 09:43 AM",
+    "accent": "#2563eb",
+    "glow": "#0a0a2e",
+    "badge": "#1d4ed8",
+    "code_bg": "#0a0f1a",
+    "highlight_bg": "#0f1a2e",
+    "bold": "#60a5fa"
   }
 ]
