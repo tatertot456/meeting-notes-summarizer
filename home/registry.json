@@ -1342,5 +1342,17 @@
     "code_bg": "#0a0f1a",
     "highlight_bg": "#0f1a2e",
     "bold": "#60a5fa"
+  },
+  {
+    "title": "COMP3630 Chapter 9 Wireless Networking Architecture and WLAN Security",
+    "filename": "comp3630-chapter-9-wireless-networking-architecture-and-wlan-security.html",
+    "category": "Networks",
+    "date": "2026-11-03 11:32 AM",
+    "accent": "#7c3aed",
+    "glow": "#1e0a3c",
+    "badge": "#6d28d9",
+    "code_bg": "#130a1a",
+    "highlight_bg": "#1e0f2e",
+    "bold": "#a78bfa"
   }
 ]

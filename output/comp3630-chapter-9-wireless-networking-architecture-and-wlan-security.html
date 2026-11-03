@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 9: Wireless Networking, Architecture & WLAN Security</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #1e0a3c, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #6d28d9; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #7c3aed; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #7c3aed; color: white; border-color: #7c3aed; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #7c3aed; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        strong { color: #a78bfa; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #1e0f2e; border-left: 3px solid #7c3aed; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #7c3aed; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #130a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #6d28d9; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #7c3aed; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        .pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .pillar { background: #111; border: 1px solid #6d28d9; border-radius: 10px; padding: 16px; }
+        .pillar-num { font-size: 0.7rem; color: #7c3aed; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+        .pillar h3 { font-size: 0.95rem; color: #7c3aed; margin-bottom: 8px; }
+        .pillar p { font-size: 0.88rem; margin: 0; }
+        @media (max-width: 600px) { .grid, .pillars { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } nav { padding: 16px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 9</div>
+        <h1>Wireless Networking, Architecture & WLAN Security</h1>
+        <p class="subtitle">RF propagation, 802.11 standards, OFDMA, MIMO, site surveys, WPA3 Enterprise, and Zero Trust wireless</p>
+    </header>
+    <nav>
+        <a href="#rf">RF & Antennas</a>
+        <a href="#spectrum">Spectrum & Channels</a>
+        <a href="#standards">802.11 Standards</a>
+        <a href="#phy">OFDMA & Modulation</a>
+        <a href="#mimo">MIMO & Beamforming</a>
+        <a href="#survey">Site Surveys</a>
+        <a href="#roaming">Client Mobility</a>
+        <a href="#topology">WLAN Topologies</a>
+        <a href="#5g">Private 5G vs Wi-Fi</a>
+        <a href="#threats">Wireless Threats</a>
+        <a href="#wips">WIPS & PMF</a>
+        <a href="#auth">WPA2/WPA3</a>
+        <a href="#multissid">Multi-SSID & VLANs</a>
+        <a href="#pillars">Four Pillars</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="rf">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>RF Propagation & Antenna Fundamentals</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Wi-Fi transmits data using <strong>radio frequency (RF)</strong> electromagnetic waves. Understanding how RF energy moves through space and physical obstacles is essential for designing reliable WLANs.</p>
+                <div class="grid">
+                    <div class="card"><h3>Frequency</h3><p>Higher frequencies (5 GHz, 6 GHz) carry more data but attenuate faster. Lower frequencies (2.4 GHz) travel farther but have less bandwidth capacity.</p></div>
+                    <div class="card"><h3>Attenuation</h3><p>Signal strength decreases with distance and obstruction. Concrete and metal cause heavy attenuation; drywall and glass cause moderate loss.</p></div>
+                    <div class="card"><h3>Omnidirectional Antennas</h3><p>Radiate RF energy equally in all horizontal directions. Used in most enterprise access points for general-area coverage.</p></div>
+                    <div class="card"><h3>Directional Antennas</h3><p>Focus RF energy in a narrow beam for point-to-point links (building-to-building) or focused corridor coverage. Higher gain = narrower beam.</p></div>
+                </div>
+                <ul style="margin-top:16px">
+                    <li><strong>dBi (Gain):</strong> Antenna gain measured in decibels relative to an isotropic radiator. Higher dBi concentrates signal in a specific direction.</li>
+                    <li><strong>EIRP (Effective Isotropic Radiated Power):</strong> Transmit power + antenna gain. Regulated by the FCC to limit interference.</li>
+                    <li><strong>Multipath:</strong> RF signals reflect off surfaces and arrive at the receiver via multiple paths at different phases. Can cause signal cancellation or reinforcement.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="spectrum">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Wi-Fi Spectrum & Channel Planning</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Band</th><th>Channels</th><th>Channel Width</th><th>Notes</th></tr>
+                    <tr><td><strong>2.4 GHz</strong></td><td>11 (US); only 3 non-overlapping (1, 6, 11)</td><td>20 MHz</td><td>Long range, high congestion, legacy support. Heavily used by Bluetooth and microwaves.</td></tr>
+                    <tr><td><strong>5 GHz</strong></td><td>25+ non-overlapping (US)</td><td>20/40/80/160 MHz</td><td>Shorter range, much higher throughput, far less congestion. Enterprise primary band.</td></tr>
+                    <tr><td><strong>6 GHz (Wi-Fi 6E/7)</strong></td><td>59 non-overlapping 20 MHz channels</td><td>20/40/80/160/320 MHz</td><td>Cleanest spectrum; no legacy devices. Required for Wi-Fi 7 multi-link operation.</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Channel Reuse Planning:</strong> In a high-density deployment, adjacent APs must use non-overlapping channels to prevent co-channel interference. 5 GHz and 6 GHz provide enough channels to plan cells without overlap in most enterprise floor plans.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="standards">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>IEEE 802.11 Standards Evolution (Wi-Fi 1–7)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Generation</th><th>Standard</th><th>Band</th><th>Max Throughput</th><th>Key Innovation</th></tr>
+                    <tr><td>Wi-Fi 1</td><td>802.11b (1999)</td><td>2.4 GHz</td><td>11 Mbps</td><td>First mainstream Wi-Fi standard.</td></tr>
+                    <tr><td>Wi-Fi 2</td><td>802.11a (1999)</td><td>5 GHz</td><td>54 Mbps</td><td>OFDM; less congestion than 2.4 GHz.</td></tr>
+                    <tr><td>Wi-Fi 3</td><td>802.11g (2003)</td><td>2.4 GHz</td><td>54 Mbps</td><td>OFDM on 2.4 GHz; backward compatible with 802.11b.</td></tr>
+                    <tr><td>Wi-Fi 4</td><td>802.11n (2009)</td><td>2.4 / 5 GHz</td><td>600 Mbps</td><td>MIMO introduced; channel bonding (40 MHz).</td></tr>
+                    <tr><td>Wi-Fi 5</td><td>802.11ac (2013)</td><td>5 GHz only</td><td>6.9 Gbps</td><td>MU-MIMO (downlink); 80/160 MHz channels; beamforming.</td></tr>
+                    <tr><td>Wi-Fi 6/6E</td><td>802.11ax (2019/21)</td><td>2.4 / 5 / 6 GHz</td><td>9.6 Gbps</td><td>OFDMA; uplink MU-MIMO; BSS Coloring; TWT power savings.</td></tr>
+                    <tr><td>Wi-Fi 7</td><td>802.11be (2024)</td><td>2.4 / 5 / 6 GHz</td><td>46 Gbps</td><td>Multi-Link Operation (MLO); 320 MHz channels; 4K-QAM.</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="phy">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Physical Layer: OFDMA, Channel Bonding & Modulation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>OFDM (Wi-Fi 4/5)</h3><p>Orthogonal Frequency Division Multiplexing splits a channel into parallel subcarriers. One client uses the entire channel per transmission slot.</p></div>
+                    <div class="card"><h3>OFDMA (Wi-Fi 6+)</h3><p>Orthogonal Frequency Division Multiple Access divides subcarriers into Resource Units (RUs) so multiple clients share one channel simultaneously. Dramatically reduces latency in high-density environments.</p></div>
+                    <div class="card"><h3>Channel Bonding</h3><p>Combines adjacent 20 MHz channels into 40/80/160/320 MHz wide channels. Doubles bandwidth per bond; requires clean spectrum without interference.</p></div>
+                    <div class="card"><h3>QAM Modulation</h3><p>Higher-order QAM encodes more bits per symbol. <strong>256-QAM</strong> (Wi-Fi 5) = 8 bits/symbol. <strong>1024-QAM</strong> (Wi-Fi 6) = 10 bits/symbol. <strong>4096-QAM</strong> (Wi-Fi 7) = 12 bits/symbol. Requires strong signal (high SNR).</p></div>
+                </div>
+                <div class="highlight"><p><strong>Target Wake Time (TWT):</strong> Wi-Fi 6 feature that schedules when IoT devices wake up to transmit, dramatically reducing power consumption and airtime contention in dense sensor deployments.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="mimo">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>MIMO, MU-MIMO & Beamforming</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>MIMO (Multiple Input / Multiple Output)</h3><p>Uses multiple antennas to send and receive several spatial data streams simultaneously over the same channel, multiplying throughput without extra spectrum.</p></div>
+                    <div class="card"><h3>MU-MIMO (Multi-User MIMO)</h3><p>Wi-Fi 5 added downlink MU-MIMO (AP transmits to multiple clients at once). Wi-Fi 6 added uplink MU-MIMO (multiple clients transmit to AP simultaneously).</p></div>
+                    <div class="card"><h3>Beamforming</h3><p>AP adjusts phase and amplitude across its antenna array to concentrate RF energy toward a specific client, improving signal strength and reducing interference for that device.</p></div>
+                    <div class="card"><h3>Spatial Streams</h3><p>Notation: 4x4:4 = 4 transmit antennas, 4 receive antennas, 4 spatial streams. More streams = higher peak throughput but requires the client to support the same count.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="survey">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>WLAN Site Survey Methodology & RSSI Design</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A site survey ensures APs are placed for correct coverage, capacity, and roaming before physical installation.</p>
+                <ul>
+                    <li><strong>Passive Survey:</strong> Walk the floor with a laptop running Wi-Fi scanning software. Records RSSI, channel, and SNR of existing signals without transmitting.</li>
+                    <li><strong>Active Survey:</strong> Temporarily place APs at candidate locations and test real throughput and roaming behavior.</li>
+                    <li><strong>Predictive Survey:</strong> Import floor plan into RF modeling software to simulate AP placement before physical deployment.</li>
+                </ul>
+                <table style="margin-top:16px">
+                    <tr><th>RSSI Threshold</th><th>Signal Quality</th><th>Use Case</th></tr>
+                    <tr><td>-50 dBm or better</td><td>Excellent</td><td>High-density video conferencing, VoWi-Fi</td></tr>
+                    <tr><td>-65 dBm</td><td>Good</td><td>Standard enterprise data and web browsing</td></tr>
+                    <tr><td>-70 dBm</td><td>Marginal</td><td>Basic connectivity; roaming may be unreliable</td></tr>
+                    <tr><td>-80 dBm or worse</td><td>Poor</td><td>Frequent disconnections; unusable for real-time apps</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Cell Overlap:</strong> Adjacent APs should have 15–20% coverage overlap on non-overlapping channels to ensure seamless roaming without gaps or dead zones.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="roaming">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Wireless Client Mobility & 802.11k/v/r Fast Roaming</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>802.11k — Neighbor Reports</h3><p>AP tells the client which nearby APs exist and their signal quality. Client builds a candidate roam list without having to scan all channels, speeding up handoff decisions.</p></div>
+                    <div class="card"><h3>802.11v — BSS Transition Management</h3><p>AP can suggest or push a client to roam to a better AP. Helps offload congested APs and balance load in high-density environments.</p></div>
+                    <div class="card"><h3>802.11r — Fast BSS Transition (FT)</h3><p>Pre-authenticates the client to the target AP before it roams. Reduces roaming handoff latency from ~200ms to under 50ms — critical for VoWi-Fi and real-time apps.</p></div>
+                    <div class="card"><h3>Controller-Based Roaming</h3><p>A WLAN Controller (WLC) maintains client session state. When a client roams between APs, the controller transfers context invisibly — no re-authentication required.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="topology">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>WLAN Topologies: IBSS, BSS, ESS & Mesh</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Topology</th><th>Description</th><th>Use Case</th></tr>
+                    <tr><td><strong>IBSS (Ad Hoc)</strong></td><td>Devices communicate directly peer-to-peer with no AP. Each device is both client and access point.</td><td>Temporary device-to-device transfers; rarely used in enterprise.</td></tr>
+                    <tr><td><strong>BSS (Infrastructure)</strong></td><td>One AP creates one wireless cell (BSSID = AP's MAC). All client traffic routes through the AP.</td><td>Single-AP deployments; small offices.</td></tr>
+                    <tr><td><strong>ESS (Extended Service Set)</strong></td><td>Multiple APs share the same SSID and are connected via a wired distribution system. Clients roam transparently between APs.</td><td>Enterprise campus WLANs; multi-floor buildings.</td></tr>
+                    <tr><td><strong>Mesh</strong></td><td>APs backhaul wirelessly to each other rather than requiring a wired uplink at every AP. One or more mesh gates connect to the wired network.</td><td>Outdoor campuses, warehouses, or buildings where running cable is impractical.</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="5g">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Private 5G / LTE vs. Enterprise Wi-Fi</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Dimension</th><th>Enterprise Wi-Fi (802.11ax)</th><th>Private 5G / LTE (CBRS)</th></tr>
+                    <tr><td>Licensed Spectrum</td><td>Unlicensed (shared, subject to interference)</td><td>Licensed or lightly licensed (CBRS 3.5 GHz) — interference protected</td></tr>
+                    <tr><td>Coverage Area</td><td>Indoor; 30–100 m per AP</td><td>Indoor + outdoor; 100–500 m per small cell</td></tr>
+                    <tr><td>Roaming</td><td>SSID-based; 802.11r helps but has limits</td><td>SIM-based handoff; carrier-grade seamless mobility</td></tr>
+                    <tr><td>Latency</td><td>~5–10 ms</td><td>~1–5 ms (Ultra-Reliable Low Latency with 5G NR)</td></tr>
+                    <tr><td>Best For</td><td>Dense indoor user connectivity, BYOD, laptops</td><td>Factory automation, IoT, outdoor campuses, mission-critical OT</td></tr>
+                </table>
+                <div class="highlight"><p>Many enterprises deploy a <strong>heterogeneous network</strong> combining Wi-Fi indoors for laptop/BYOD and private 5G outdoors or in industrial zones where licensed spectrum and low latency are required.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="threats">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Wireless Threat Vectors: Rogue APs, Evil Twins & DoS</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Rogue Access Point</h3><p>An unauthorized AP plugged into the corporate wired network by an employee or attacker. Creates an unmanaged entry point into the internal network, bypassing perimeter security.</p></div>
+                    <div class="card"><h3>Evil Twin AP</h3><p>An attacker broadcasts the same SSID as a legitimate corporate AP. Clients that connect are subjected to credential harvesting and man-in-the-middle decryption.</p></div>
+                    <div class="card"><h3>Deauthentication Flood (DoS)</h3><p>802.11 management frames are unencrypted by default. An attacker spoofs deauth frames to force clients to disconnect repeatedly, causing a wireless denial of service.</p></div>
+                    <div class="card"><h3>RF Jamming</h3><p>High-power noise on the Wi-Fi channel drowns out legitimate signals. All clients on the affected channel lose connectivity simultaneously.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="wips">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>WIPS & Protected Management Frames</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>WIPS (Wireless Intrusion Prevention System)</strong> uses APs or dedicated sensors to continuously scan the RF environment for threats.</p>
+                <ul>
+                    <li><strong>Rogue AP Detection:</strong> Compares scanned SSIDs and BSSIDs against an approved AP inventory. Flags unauthorized APs and can locate them via RF triangulation.</li>
+                    <li><strong>Evil Twin Detection:</strong> Identifies APs broadcasting a known corporate SSID with an unregistered BSSID or on an unexpected channel.</li>
+                    <li><strong>Containment:</strong> WIPS can transmit targeted deauthentication frames to disconnect clients from rogue APs — though this is itself an 802.11 management frame attack used defensively.</li>
+                </ul>
+                <div class="highlight"><p><strong>PMF (Protected Management Frames — 802.11w):</strong> Encrypts and authenticates management frames (deauth, disassoc) so attackers cannot spoof them. Required for WPA3 certification. Completely blocks deauthentication flood attacks when both AP and client support 802.11w.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="auth">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>WPA2 vs. WPA3 — Personal & Enterprise</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Mode</th><th>WPA2</th><th>WPA3</th></tr>
+                    <tr><td><strong>Personal (PSK)</strong></td><td>Pre-Shared Key + PBKDF2. Vulnerable to offline dictionary attacks if a handshake is captured.</td><td>SAE (Simultaneous Authentication of Equals) — Dragonfly handshake. Provides forward secrecy; immune to offline brute-force.</td></tr>
+                    <tr><td><strong>Enterprise (802.1X)</strong></td><td>EAP + RADIUS. Individual credentials per user. CCMP-128 (AES) encryption.</td><td>192-bit Suite B cryptography (GCMP-256). Mandatory PMF. Same 802.1X/EAP/RADIUS back-end.</td></tr>
+                    <tr><td><strong>Key Exchange</strong></td><td>4-Way Handshake (capturable for offline attack)</td><td>SAE/Dragonfly (handshake not replayable offline)</td></tr>
+                </table>
+                <p style="margin-top:16px"><strong>802.1X Enterprise Flow:</strong></p>
+                <pre>Client (Supplicant) → AP (Authenticator) → RADIUS Server
+1. Client associates to SSID
+2. AP blocks all traffic except EAP
+3. EAP exchange passes through AP to RADIUS (PEAP/EAP-TLS)
+4. RADIUS issues Access-Accept + PMK
+5. AP and client run 4-Way Handshake to derive session keys
+6. AP opens full data port for the authenticated client</pre>
+            </div>
+        </div>
+
+        <div class="section" id="multissid">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Multi-SSID Architecture, VLAN Segmentation & Guest Isolation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Enterprise APs broadcast multiple SSIDs simultaneously, each mapped to a separate VLAN. This creates logical network separation on shared physical radio hardware.</p>
+                <table>
+                    <tr><th>SSID</th><th>VLAN</th><th>Security</th><th>Access</th></tr>
+                    <tr><td>Corp-Secure</td><td>VLAN 10</td><td>WPA3 Enterprise (802.1X)</td><td>Full internal network access via RBAC</td></tr>
+                    <tr><td>Corp-BYOD</td><td>VLAN 20</td><td>WPA2/3 Enterprise (802.1X)</td><td>Internet + limited internal resources</td></tr>
+                    <tr><td>Guest-WiFi</td><td>VLAN 99</td><td>WPA3 Personal (SAE) or Open + Captive Portal</td><td>Internet-only; firewall blocks all internal subnets</td></tr>
+                    <tr><td>IoT-Devices</td><td>VLAN 30</td><td>WPA2 Personal (PSK)</td><td>Isolated; no lateral access to other VLANs</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Client Isolation:</strong> On guest SSIDs, enable AP-level client isolation so wireless devices on the same SSID cannot communicate directly with each other. All traffic is forced through the firewall for inspection.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="pillars">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Four Pillars of Enterprise WLANs</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="pillars">
+                    <div class="pillar">
+                        <div class="pillar-num">01 / RF Foundation</div>
+                        <h3>Signal & Spectrum Design</h3>
+                        <p>Plan non-overlapping channels, target RSSI thresholds, and use beamforming to maximize signal quality. A failed RF design cannot be fixed in software.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-num">02 / High-Density Performance</div>
+                        <h3>OFDMA, MU-MIMO & Wi-Fi 6</h3>
+                        <p>Use OFDMA and uplink MU-MIMO to serve hundreds of concurrent clients. Wi-Fi 6E and 7 move high-bandwidth clients to clean 6 GHz spectrum.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-num">03 / Seamless Mobility</div>
+                        <h3>802.11k/v/r & Controller Roaming</h3>
+                        <p>Enable fast BSS transition protocols so VoWi-Fi and real-time apps survive AP handoffs without perceptible interruption.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-num">04 / Zero Trust Wireless Security</div>
+                        <h3>WPA3 + 802.1X + WIPS + PMF</h3>
+                        <p>Authenticate every device individually with 802.1X, protect management frames with PMF, detect rogues with WIPS, and segment traffic via VLAN-mapped SSIDs.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
