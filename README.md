@@ -1,12 +1,12 @@
 # Meeting Notes Summarizer
 
-A local tool that reads meeting notes and lecture slides in multiple formats, sends the content to Claude AI for summarization, and generates interactive HTML pages organized in a central home page directory.
+A local tool that reads meeting notes and lecture slides in multiple formats, extracts the text, and writes a ready-to-attach prompt file. You attach that file to Claude AI, which generates an interactive HTML summary page organized in a central home page directory.
 
 ## How It Works
 
 1. Drop a notes file into the `input/` folder
-2. Run `watcher.py` — it detects the file, extracts the text, and copies a ready-to-paste prompt to your clipboard
-3. Paste into Claude and specify a category (e.g. Machine Learning, Work, Personal)
+2. Run `watcher.py` — it detects the file, extracts the text, and writes `input/latest_notes.txt`
+3. Attach `latest_notes.txt` to Claude and specify a category (e.g. Networks, Machine Learning, Personal)
 4. Claude generates an interactive HTML summary page
 5. Run `builder.py`, choose option 1, paste the HTML, type `END`
 6. Open `home/index.html` in your browser — your new page appears automatically
@@ -22,15 +22,16 @@ A local tool that reads meeting notes and lecture slides in multiple formats, se
 ## Project Structure
 
 meeting-notes-summarizer/
-├── input/          # Drop your notes files here (gitignored)
-├── output/         # Generated HTML summary pages
-├── home/           # index.html home page directory
+├── input/ # Drop your notes files here (gitignored)
+├── output/ # Generated HTML summary pages
+├── home/ # index.html home page directory
 ├── scripts/
-│   ├── reader.py   # Extracts text from all supported file types
-│   ├── watcher.py  # Monitors input/ and copies text to clipboard
-│   └── builder.py  # Saves HTML pages and updates home page
+│ ├── reader.py # Extracts text from all supported file types
+│ ├── watcher.py # Monitors input/ and writes latest_notes.txt
+│ └── builder.py # Saves HTML pages and updates home page
 ├── requirements.txt
 └── README.md
+
 
 ## Setup
 
@@ -58,7 +59,7 @@ python builder.py
 
 ## Home Page Features
 
-- **Categorized sections** — pages grouped by category (Machine Learning, Work, Personal, etc.)
+- **Categorized sections** — pages grouped by category (Networks, Machine Learning, Personal, etc.)
 - **Search bar** — filters cards by title in real time
 - **Hover effects** — each category has a unique accent color and glow
 - **Auto-updating** — adding or deleting a page instantly updates the home page
@@ -72,5 +73,5 @@ python builder.py
 ## Notes
 
 - The `input/` folder is gitignored — your raw notes never get pushed to GitHub
-- After the watcher processes a file, delete it from `input/` before dropping the next one
+- After the watcher writes `latest_notes.txt`, delete the original file from `input/` before dropping the next one
 - Claude.ai Pro plan covers all AI summarization — no Anthropic API costs
