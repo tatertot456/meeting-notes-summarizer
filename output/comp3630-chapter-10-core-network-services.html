@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 10: Core Network Services</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #0a2a28, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #0f766e; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #0f766e; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #0f766e; color: white; border-color: #0f766e; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #0f766e; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        strong { color: #2dd4bf; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #0f2a28; border-left: 3px solid #0f766e; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #0f766e; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #0a1a18; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #0f766e; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #0f766e; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } nav { padding: 16px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 10</div>
+        <h1>Core Network Services</h1>
+        <p class="subtitle">DNS resolution, DHCP addressing, NTP synchronization, IPAM, LDAP, and service hardening</p>
+    </header>
+    <nav>
+        <a href="#overview">Service Overview</a>
+        <a href="#dns-hierarchy">DNS Hierarchy</a>
+        <a href="#dns-zones">DNS Zones</a>
+        <a href="#dns-records">Resource Records</a>
+        <a href="#dns-zone-file">Zone File Example</a>
+        <a href="#dns-encryption">DNS Encryption</a>
+        <a href="#dhcp-dora">DHCP DORA</a>
+        <a href="#dhcp-scopes">DHCP Scopes</a>
+        <a href="#dhcp-relay">DHCP Relay</a>
+        <a href="#ntp">NTP & Stratum</a>
+        <a href="#ipam">IPAM, LDAP & AD</a>
+        <a href="#hardening">Service Hardening</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="overview">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Core Network Services Overview</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>When a new device joins the network, a chain of core services fires automatically in sequence to bring it fully online. Each service depends on the previous one succeeding.</p>
+                <div class="grid">
+                    <div class="card"><h3>1. DHCP</h3><p>Assigns IP address, subnet mask, default gateway, and DNS server address automatically via the DORA handshake.</p></div>
+                    <div class="card"><h3>2. DNS</h3><p>Translates human-readable hostnames (google.com) into routable IP addresses so the device can reach resources by name.</p></div>
+                    <div class="card"><h3>3. NTP</h3><p>Synchronizes the device clock to a trusted time source. Accurate time is required for Kerberos tickets, TLS certificates, and log correlation.</p></div>
+                    <div class="card"><h3>4. Directory Services</h3><p>LDAP/Active Directory authenticates the user, applies GPOs, and grants RBAC-based access to network resources.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="dns-hierarchy">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>DNS Hierarchy & Name Resolution</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>DNS is a globally distributed, hierarchical database that maps domain names to IP addresses. No single server holds all records -- resolution is delegated down the tree.</p>
+                <ul>
+                    <li><strong>Root Zone (.):</strong> The top of the DNS tree. 13 sets of root server clusters worldwide (operated by ICANN and partners). Returns the authoritative nameserver for the requested TLD.</li>
+                    <li><strong>TLD Servers (.com, .org, .edu):</strong> Operated by registries. Return the authoritative nameserver for the specific domain (e.g., google.com).</li>
+                    <li><strong>Authoritative Nameserver:</strong> Holds the actual DNS zone file for the domain. Returns the final answer (IP address) for the queried hostname.</li>
+                    <li><strong>Recursive Resolver:</strong> Your ISP or corporate DNS server. Walks the hierarchy on your behalf, caches results for the TTL period, and returns the answer to the client.</li>
+                </ul>
+                <div class="highlight"><p><strong>Resolution walk for www.example.com:</strong> Client asks Recursive Resolver → Resolver asks Root (.) → Root refers to .com TLD → .com refers to example.com nameserver → example.com nameserver returns the A record IP → Resolver caches and returns to client.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="dns-zones">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>DNS Zone Database Architecture</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>Forward Lookup Zone</h3><p>Maps hostnames to IP addresses. The standard zone type -- queried for every normal DNS resolution (A and AAAA records).</p></div>
+                    <div class="card"><h3>Reverse Lookup Zone</h3><p>Maps IP addresses back to hostnames (PTR records). Used by security tools, mail servers, and logging systems to identify devices by IP.</p></div>
+                    <div class="card"><h3>Primary Zone</h3><p>The authoritative read/write copy of the zone. All record changes are made here and replicated to secondary zones.</p></div>
+                    <div class="card"><h3>Secondary Zone</h3><p>Read-only replica of the primary zone. Provides redundancy and load distribution for DNS queries. Updated via zone transfer (AXFR/IXFR).</p></div>
+                </div>
+                <ul style="margin-top:16px">
+                    <li><strong>Zone Transfer (AXFR):</strong> Full transfer of all zone records from primary to secondary. Should be restricted to authorized secondary servers only -- unrestricted AXFR exposes your entire internal DNS to attackers.</li>
+                    <li><strong>TTL (Time to Live):</strong> How long resolvers cache a DNS record before re-querying. Short TTL = faster propagation of changes; long TTL = less DNS traffic but slower updates.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="dns-records">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>DNS Resource Records</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Record Type</th><th>Purpose</th><th>Example</th></tr>
+                    <tr><td><strong>A</strong></td><td>Maps hostname to IPv4 address</td><td>www.example.com → 93.184.216.34</td></tr>
+                    <tr><td><strong>AAAA</strong></td><td>Maps hostname to IPv6 address</td><td>www.example.com → 2606:2800::1</td></tr>
+                    <tr><td><strong>CNAME</strong></td><td>Canonical name alias -- points one hostname to another</td><td>mail.example.com → mailserver.example.com</td></tr>
+                    <tr><td><strong>MX</strong></td><td>Mail exchanger -- identifies email servers for the domain</td><td>example.com MX 10 mail.example.com</td></tr>
+                    <tr><td><strong>NS</strong></td><td>Nameserver -- delegates authority for a zone</td><td>example.com NS ns1.example.com</td></tr>
+                    <tr><td><strong>PTR</strong></td><td>Reverse lookup -- maps IP to hostname</td><td>34.216.184.93.in-addr.arpa → www.example.com</td></tr>
+                    <tr><td><strong>SOA</strong></td><td>Start of Authority -- zone metadata (serial, refresh, TTL defaults)</td><td>Zone serial, primary NS, admin email</td></tr>
+                    <tr><td><strong>TXT</strong></td><td>Free-text record -- used for SPF, DKIM, DMARC email authentication</td><td>v=spf1 include:_spf.google.com ~all</td></tr>
+                    <tr><td><strong>SRV</strong></td><td>Service locator -- identifies host and port for a specific service</td><td>_sip._tcp.example.com SRV 10 5060 sip.example.com</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="dns-zone-file">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>DNS Zone File Example</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A zone file is the flat-text database that an authoritative nameserver reads. Each line is one resource record.</p>
+                <pre>$ORIGIN example.com.
+$TTL 3600
+
+; SOA — zone authority record
+@   IN  SOA  ns1.example.com. admin.example.com. (
+                2024110101  ; Serial (YYYYMMDDnn)
+                3600        ; Refresh
+                900         ; Retry
+                604800      ; Expire
+                300 )       ; Minimum TTL
+
+; Nameservers
+@       IN  NS    ns1.example.com.
+@       IN  NS    ns2.example.com.
+
+; A records
+@       IN  A     93.184.216.34
+www     IN  A     93.184.216.34
+mail    IN  A     93.184.216.50
+ns1     IN  A     93.184.216.10
+ns2     IN  A     93.184.216.11
+
+; Mail exchanger
+@       IN  MX  10  mail.example.com.
+
+; Alias
+ftp     IN  CNAME  www.example.com.
+
+; SPF record
+@       IN  TXT   "v=spf1 mx ~all"</pre>
+            </div>
+        </div>
+
+        <div class="section" id="dns-encryption">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>DNS Encryption</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Traditional DNS sends queries in plaintext over UDP port 53 -- anyone on the network can read exactly what hostnames you are resolving. Three standards address this.</p>
+                <div class="grid">
+                    <div class="card"><h3>DoT — DNS over TLS (Port 853)</h3><p>Wraps DNS queries inside a TLS tunnel. The DNS payload is encrypted but the destination IP (port 853) reveals that DNS is happening -- firewalls can inspect and filter it.</p></div>
+                    <div class="card"><h3>DoH — DNS over HTTPS (Port 443)</h3><p>Sends DNS queries inside standard HTTPS traffic. Completely hides DNS from network inspection tools -- indistinguishable from normal web browsing. Preferred by browsers (Firefox, Chrome).</p></div>
+                    <div class="card"><h3>DNSSEC — DNS Security Extensions</h3><p>Cryptographically signs DNS records so resolvers can verify responses have not been tampered with. Prevents DNS cache poisoning attacks. Does NOT encrypt queries -- it only provides integrity, not confidentiality.</p></div>
+                </div>
+                <div class="highlight"><p><strong>DNS Cache Poisoning:</strong> An attacker injects a forged DNS response into a resolver's cache, redirecting users from a legitimate site to a malicious one. DNSSEC defeats this by requiring valid cryptographic signatures on all records.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="dhcp-dora">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>DHCP DORA — Automated IPv4 Address Allocation</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>DHCP eliminates manual IP configuration. When a device connects to the network, it completes a 4-step broadcast handshake to obtain addressing information.</p>
+                <table>
+                    <tr><th>Step</th><th>Message</th><th>Direction</th><th>What Happens</th></tr>
+                    <tr><td>1</td><td><strong>Discover</strong></td><td>Client → Broadcast</td><td>Client broadcasts "I need an IP address" to 255.255.255.255. No IP yet -- source is 0.0.0.0.</td></tr>
+                    <tr><td>2</td><td><strong>Offer</strong></td><td>Server → Broadcast</td><td>DHCP server responds with an offered IP, subnet mask, gateway, DNS server, and lease duration.</td></tr>
+                    <tr><td>3</td><td><strong>Request</strong></td><td>Client → Broadcast</td><td>Client broadcasts acceptance of the offered IP (still broadcast -- other DHCP servers retract their offers).</td></tr>
+                    <tr><td>4</td><td><strong>Acknowledge</strong></td><td>Server → Client</td><td>Server confirms the lease. Client configures its interface and is fully online.</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Lease Renewal:</strong> At 50% of lease time the client sends a unicast Request to renew with the same server. At 87.5% it broadcasts to any available server. If no renewal occurs before expiry, the IP returns to the pool.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="dhcp-scopes">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>DHCP Scopes, Pools, Exclusions & Reservations</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <ul>
+                    <li><strong>Scope:</strong> The full IP range configured for a subnet (e.g., 10.10.10.1 – 10.10.10.254 for VLAN 10).</li>
+                    <li><strong>Pool:</strong> The dynamically assignable subset of the scope after exclusions are removed.</li>
+                    <li><strong>Exclusions:</strong> Addresses within the scope range that DHCP will never hand out -- reserved for statically configured devices (routers, servers, printers).</li>
+                    <li><strong>Reservation:</strong> Binds a specific MAC address to a specific IP. The device always gets the same IP via DHCP without manual static configuration on the endpoint.</li>
+                </ul>
+                <pre>; Example scope layout for 10.10.10.0/24
+Scope:       10.10.10.1  –  10.10.10.254
+Exclusions:  10.10.10.1  –  10.10.10.20   (routers, switches, servers)
+Dynamic Pool: 10.10.10.21 – 10.10.10.200
+Reservation:  10.10.10.50  ↔  MAC AA:BB:CC:DD:EE:FF (network printer)</pre>
+                <p><strong>DHCP Options</strong> delivered with every lease:</p>
+                <ul>
+                    <li><strong>Option 3:</strong> Default Gateway</li>
+                    <li><strong>Option 6:</strong> DNS Server(s)</li>
+                    <li><strong>Option 15:</strong> Domain Name</li>
+                    <li><strong>Option 51:</strong> Lease Duration</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="dhcp-relay">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>DHCP Relay Agents</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>DHCP Discover messages are Layer 2 broadcasts -- they cannot cross router boundaries. In a multi-VLAN enterprise with one central DHCP server, a <strong>DHCP Relay Agent</strong> (IP Helper) solves this problem.</p>
+                <ul>
+                    <li><strong>How It Works:</strong> The router's L3 interface on each VLAN intercepts the broadcast Discover, re-encapsulates it as a unicast packet, and forwards it to the central DHCP server's IP address.</li>
+                    <li><strong>Configuration:</strong> <code>ip helper-address 10.0.0.5</code> applied to each VLAN SVI on the router/L3 switch.</li>
+                    <li><strong>Subnet Identification:</strong> The relay agent inserts the client's subnet into the DHCP packet (giaddr field) so the server knows which scope to assign from.</li>
+                </ul>
+                <pre>! Cisco IOS — DHCP Relay on VLAN 10 SVI
+interface vlan 10
+ ip address 10.10.10.1 255.255.255.0
+ ip helper-address 10.0.0.5</pre>
+                <div class="highlight"><p>Without a relay agent you would need a separate DHCP server on every VLAN -- relay agents allow a single highly available DHCP server pair to serve the entire enterprise.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ntp">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>NTP & Stratum Hierarchy</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>NTP (Network Time Protocol) synchronizes system clocks across all network devices. Accurate time is non-negotiable for Kerberos (5-minute skew tolerance), TLS certificate validation, and SIEM log correlation.</p>
+                <table>
+                    <tr><th>Stratum Level</th><th>Source</th><th>Notes</th></tr>
+                    <tr><td><strong>Stratum 0</strong></td><td>Atomic clocks, GPS receivers, radio clocks</td><td>Not on the network -- connected directly to a Stratum 1 server.</td></tr>
+                    <tr><td><strong>Stratum 1</strong></td><td>NTP servers connected to Stratum 0</td><td>Primary time servers (NIST, pool.ntp.org). Microsecond accuracy.</td></tr>
+                    <tr><td><strong>Stratum 2</strong></td><td>Servers synced from Stratum 1</td><td>Enterprise internal NTP servers. Millisecond accuracy.</td></tr>
+                    <tr><td><strong>Stratum 3–15</strong></td><td>Downstream clients syncing from higher strata</td><td>Workstations, switches, routers. Each hop adds minor drift.</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Kerberos & Time:</strong> Active Directory Kerberos authentication rejects tickets if the client clock differs from the domain controller by more than 5 minutes. NTP failure = authentication failure across the entire domain.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="ipam">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>IPAM, LDAP & Active Directory</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>IPAM (IP Address Management)</h3><p>Centralized platform that tracks all IP address allocations, DHCP scopes, and DNS records across the enterprise. Prevents IP conflicts and provides audit trails for every assignment.</p></div>
+                    <div class="card"><h3>LDAP (Lightweight Directory Access Protocol)</h3><p>Application-layer protocol (TCP 389 / 636 for LDAPS) for querying and modifying directory services. The standard protocol used to query Active Directory user and group objects.</p></div>
+                    <div class="card"><h3>Active Directory (AD)</h3><p>Microsoft's enterprise directory service. Stores user accounts, computer objects, groups, and GPOs. Uses Kerberos for authentication and LDAP for directory queries.</p></div>
+                    <div class="card"><h3>AD-Integrated DNS</h3><p>DNS zones stored directly in Active Directory. Zone data replicates automatically via AD replication -- no manual zone transfers needed. All domain controllers are authoritative for the internal DNS zone.</p></div>
+                </div>
+                <ul style="margin-top:16px">
+                    <li><strong>DDI:</strong> DNS + DHCP + IPAM managed as a unified platform. Enterprise DDI solutions (Infoblox, BlueCat) provide a single pane of glass for all three services with audit logging and automated conflict detection.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="hardening">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Core Services Hardening: DNSSEC, DHCP Snooping & DAI</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>DNSSEC</h3><p>Signs DNS zone records with public-key cryptography. Resolvers verify signatures to confirm records are authentic and unmodified. Defeats cache poisoning and man-in-the-middle DNS attacks.</p></div>
+                    <div class="card"><h3>DHCP Snooping</h3><p>Switch-level control that only permits DHCP server responses on designated trusted ports. Blocks rogue DHCP servers on untrusted access ports from handing out fake gateway addresses.</p></div>
+                    <div class="card"><h3>DAI — Dynamic ARP Inspection</h3><p>Validates ARP packets against the DHCP snooping binding table. Drops ARP replies that don't match the legitimate IP-to-MAC binding, defeating ARP poisoning and MitM attacks.</p></div>
+                    <div class="card"><h3>DNS RPZ (Response Policy Zones)</h3><p>Allows the recursive resolver to override DNS responses for known malicious domains, redirecting users to a block page instead of the attacker's server. Enterprise-grade DNS content filtering.</p></div>
+                </div>
+                <div class="highlight"><p><strong>Defense Chain:</strong> DHCP Snooping builds the trusted IP-MAC binding table → DAI uses that table to validate ARP → DNSSEC ensures DNS responses aren't forged → DoT/DoH encrypts queries in transit. These four controls together eliminate the most common L2/L3 spoofing attack chains.</p></div>
+            </div>
+        </div>
+
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

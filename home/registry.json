@@ -1354,5 +1354,17 @@
     "code_bg": "#130a1a",
     "highlight_bg": "#1e0f2e",
     "bold": "#a78bfa"
+  },
+  {
+    "title": "COMP3630 Chapter 10 Core Network Services",
+    "filename": "comp3630-chapter-10-core-network-services.html",
+    "category": "Networks",
+    "date": "2026-11-12 10:22 AM",
+    "accent": "#0d9488",
+    "glow": "#0a2a28",
+    "badge": "#0f766e",
+    "code_bg": "#0a1a18",
+    "highlight_bg": "#0f2a28",
+    "bold": "#2dd4bf"
   }
 ]

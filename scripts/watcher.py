@@ -1,6 +1,5 @@
 import time
 from pathlib import Path
-import pyperclip
 from reader import read_file
 
 WATCHED_FOLDER = Path(__file__).parent.parent / "input"
@@ -27,8 +26,11 @@ def watch():
                     print("=" * 60)
 
                     clip_text = f"Here are my notes, please summarize them into an HTML page:\n\n{text}"
-                    pyperclip.copy(clip_text)
-                    print("Copied to clipboard! Go paste it into Claude.")
+
+                    output_path = WATCHED_FOLDER / "latest_notes.txt"
+                    with open(output_path, "w", encoding="utf-8") as f:
+                        f.write(clip_text)
+                    print(f"Notes written to {output_path}")
 
                 except Exception as e:
                     print(f"Error reading file: {e}")
