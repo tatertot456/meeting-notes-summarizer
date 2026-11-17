@@ -1366,5 +1366,17 @@
     "code_bg": "#0a1a18",
     "highlight_bg": "#0f2a28",
     "bold": "#2dd4bf"
+  },
+  {
+    "title": "COMP3630 Chapter 11 Network Architecture Data Centers Virtualization and Cloud",
+    "filename": "comp3630-chapter-11-network-architecture-data-centers-virtualization-and-cloud.html",
+    "category": "Networks",
+    "date": "2026-11-17 10:52 AM",
+    "accent": "#ea580c",
+    "glow": "#1f0a00",
+    "badge": "#c2410c",
+    "code_bg": "#1a0f0a",
+    "highlight_bg": "#2a180a",
+    "bold": "#fb923c"
   }
 ]

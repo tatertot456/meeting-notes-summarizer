@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP3630 — Chapter 11: Network Architecture, Data Centers & Cloud</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #c8c8c8; }
+        header { background: linear-gradient(135deg, #1f0a00, #1a1a2e); padding: 60px 40px 40px; border-bottom: 1px solid #2a2a2a; }
+        .tag { display: inline-block; background: #c2410c; color: white; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+        h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 1rem; }
+        nav { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 40px; background: #111; border-bottom: 1px solid #1e1e1e; position: sticky; top: 0; z-index: 100; }
+        nav a { color: #c2410c; font-size: 0.85rem; text-decoration: none; padding: 6px 14px; border-radius: 20px; border: 1px solid #2a2a2a; transition: all 0.2s; }
+        nav a:hover { background: #c2410c; color: white; border-color: #c2410c; }
+        main { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .section { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+        .section-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .section-header:hover { background: #222; }
+        .section-header h2 { font-size: 1.15rem; color: #c2410c; }
+        .arrow { color: #666; font-size: 1.2rem; transition: transform 0.3s; }
+        .arrow.open { transform: rotate(90deg); }
+        .section-body { padding: 0 24px 24px; display: none; }
+        .section-body.open { display: block; }
+        p { line-height: 1.8; color: #ccc; margin-bottom: 12px; }
+        ul { padding-left: 20px; margin-bottom: 12px; }
+        strong { color: #fb923c; }
+        li { color: #ccc; line-height: 1.8; margin-bottom: 4px; }
+        .highlight { background: #2a180a; border-left: 3px solid #c2410c; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+        .highlight p { margin: 0; color: #c8c8c8; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .card { background: #111; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+        .card h3 { font-size: 0.9rem; color: #c2410c; margin-bottom: 8px; }
+        .card p { font-size: 0.9rem; margin: 0; }
+        pre { background: #1a0f0a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.85rem; color: #c8c8c8; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #c2410c; color: white; padding: 10px 14px; text-align: left; font-size: 0.85rem; }
+        td { padding: 10px 14px; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; color: #ccc; }
+        tr:hover td { background: #1e1e1e; }
+        .back { display: inline-block; margin-bottom: 32px; color: #c2410c; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { color: white; }
+        .pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .pillar { background: #111; border: 1px solid #c2410c; border-radius: 10px; padding: 16px; }
+        .pillar-num { font-size: 0.7rem; color: #c2410c; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+        .pillar h3 { font-size: 0.95rem; color: #c2410c; margin-bottom: 8px; }
+        .pillar p { font-size: 0.88rem; margin: 0; }
+        @media (max-width: 600px) { .grid, .pillars { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } nav { padding: 16px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="tag">Networks · Chapter 11</div>
+        <h1>Network Architecture, Data Centers & Cloud</h1>
+        <p class="subtitle">Data center infrastructure, server virtualization, cloud models, SDN, SD-WAN, and enterprise storage fabrics</p>
+    </header>
+    <nav>
+        <a href="#why">Why It Matters</a>
+        <a href="#deployment">Deployment Models</a>
+        <a href="#tiered">Tiered Architecture</a>
+        <a href="#dcim">DCIM</a>
+        <a href="#hypervisors">Hypervisors</a>
+        <a href="#vswitches">Virtual Switches</a>
+        <a href="#cloud">Cloud Fundamentals</a>
+        <a href="#shared">Shared Responsibility</a>
+        <a href="#sdn">SDN</a>
+        <a href="#sdwan">SD-WAN</a>
+        <a href="#storage">Storage Architectures</a>
+        <a href="#nas-san">NAS & SAN</a>
+        <a href="#synthesis">Integrated Architecture</a>
+    </nav>
+    <main>
+        <a href="../home/index.html" class="back">← Back to Home</a>
+
+        <div class="section" id="why">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Why Data Center & Cloud Architecture Matters</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Every application, website, and enterprise service you use runs on physical infrastructure somewhere. Understanding how that infrastructure is designed determines whether services stay online, scale under load, and recover from failures.</p>
+                <div class="grid">
+                    <div class="card"><h3>Business Continuity</h3><p>Properly tiered data centers provide redundant power, cooling, and network paths. A single component failure should never bring down the whole facility.</p></div>
+                    <div class="card"><h3>Elasticity & Scale</h3><p>Virtualization and cloud computing allow capacity to grow or shrink with demand -- no need to provision hardware months in advance for peak loads.</p></div>
+                    <div class="card"><h3>Cost Efficiency</h3><p>Server virtualization consolidates dozens of physical servers onto one host, drastically reducing hardware, power, and rack space costs.</p></div>
+                    <div class="card"><h3>Security Boundaries</h3><p>Network segmentation at the data center layer isolates workloads, enforces compliance zones, and limits blast radius when a breach occurs.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="deployment">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Center Deployment Models</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Model</th><th>Who Owns Infrastructure</th><th>Best For</th></tr>
+                    <tr><td><strong>On-Premises</strong></td><td>Organization owns and operates everything in its own facility</td><td>Regulated industries (healthcare, finance) with strict data sovereignty requirements</td></tr>
+                    <tr><td><strong>Colocation (Colo)</strong></td><td>Organization owns servers; leases rack space and power in a shared facility</td><td>Enterprises wanting managed physical security and power without building a facility</td></tr>
+                    <tr><td><strong>Private Cloud</strong></td><td>Organization owns infrastructure; runs cloud-style self-service on top of it</td><td>Large enterprises needing cloud agility with on-prem control (VMware vSphere, OpenStack)</td></tr>
+                    <tr><td><strong>Public Cloud</strong></td><td>Cloud provider owns all infrastructure; tenant pays per use</td><td>Startups, dev/test workloads, variable-demand applications (AWS, Azure, GCP)</td></tr>
+                    <tr><td><strong>Hybrid Cloud</strong></td><td>Mix of on-prem and public cloud connected by private links or VPN</td><td>Burst-to-cloud scenarios; keeping sensitive data on-prem while offloading compute peaks</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="tiered">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Tiered Network Architecture (Three-Tier & Spine-Leaf)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>Traditional Three-Tier Architecture:</strong></p>
+                <ul>
+                    <li><strong>Core Layer:</strong> High-speed backbone switches connecting the data center to the WAN and internet. Optimized for fast packet forwarding -- no filtering, no policy enforcement here.</li>
+                    <li><strong>Distribution Layer:</strong> Aggregates access layer switches. Enforces routing, ACLs, QoS policies, and VLAN boundaries between network segments.</li>
+                    <li><strong>Access Layer:</strong> Directly connects end devices (servers, storage). Enforces port security, DHCP snooping, and VLAN assignments.</li>
+                </ul>
+                <div class="highlight"><p><strong>Spine-Leaf (Modern Data Centers):</strong> Every Leaf switch connects to every Spine switch -- no Leaf-to-Leaf or Spine-to-Spine links. This creates a consistent two-hop path between any two servers, eliminating bottlenecks and enabling equal-cost multipath (ECMP) load balancing. Preferred for east-west traffic in hyperscale and cloud environments.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="dcim">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Data Center Infrastructure Management (DCIM)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>DCIM software provides a unified platform to monitor, manage, and optimize all physical data center assets -- power, cooling, space, and network connectivity.</p>
+                <div class="grid">
+                    <div class="card"><h3>Power Management</h3><p>Tracks per-rack power draw (kW), UPS capacity, and PDU (Power Distribution Unit) load. Prevents circuit overloads and predicts when additional power feeds are needed.</p></div>
+                    <div class="card"><h3>Cooling Optimization</h3><p>Monitors hot aisle / cold aisle temperatures and CRAC (Computer Room Air Conditioning) efficiency. Optimizes airflow to reduce PUE (Power Usage Effectiveness).</p></div>
+                    <div class="card"><h3>Asset Tracking</h3><p>Maintains a real-time inventory of every server, switch, and cable. Maps physical port-to-port connections for change management and troubleshooting.</p></div>
+                    <div class="card"><h3>Capacity Planning</h3><p>Forecasts when racks, power circuits, or cooling zones will reach capacity, enabling proactive expansion before headroom runs out.</p></div>
+                </div>
+                <div class="highlight"><p><strong>PUE (Power Usage Effectiveness):</strong> Total facility power / IT equipment power. A PUE of 1.0 is perfect (all power goes to servers). Hyperscalers (Google, Meta) achieve ~1.1; average enterprise data centers run ~1.5–2.0.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="hypervisors">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Server Virtualization & Hypervisors</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>hypervisor</strong> is software that abstracts physical server hardware and divides it into multiple isolated <strong>Virtual Machines (VMs)</strong>, each running its own OS and applications.</p>
+                <table>
+                    <tr><th>Type</th><th>Runs On</th><th>Examples</th><th>Use Case</th></tr>
+                    <tr><td><strong>Type 1 (Bare Metal)</strong></td><td>Directly on hardware -- no host OS</td><td>VMware ESXi, Microsoft Hyper-V, KVM</td><td>Enterprise production workloads -- highest performance and isolation</td></tr>
+                    <tr><td><strong>Type 2 (Hosted)</strong></td><td>On top of a host OS</td><td>VMware Workstation, VirtualBox, Parallels</td><td>Developer workstations, testing, lab environments</td></tr>
+                </table>
+                <ul style="margin-top:16px">
+                    <li><strong>vMotion / Live Migration:</strong> Moves a running VM from one physical host to another with zero downtime. Enables host maintenance without service interruptions.</li>
+                    <li><strong>VM Snapshots:</strong> Captures VM disk and memory state at a point in time. Allows instant rollback if a software update or config change breaks the system.</li>
+                    <li><strong>Resource Pools:</strong> Allocates guaranteed CPU and RAM minimums to VMs while allowing burst access to unused capacity on the host.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="vswitches">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Virtual Switches (vSwitches) & Virtual Networking</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A <strong>vSwitch</strong> is a software-defined Layer 2 switch running inside the hypervisor. It connects Virtual NICs (vNICs) of VMs to each other and to the physical network via uplink ports.</p>
+                <div class="grid">
+                    <div class="card"><h3>Standard vSwitch</h3><p>Configured per-host. Simple and lightweight -- each ESXi host has its own independent vSwitch configuration. No centralized management.</p></div>
+                    <div class="card"><h3>Distributed vSwitch (dvSwitch)</h3><p>Centrally managed across all hosts in a cluster from vCenter. VMs maintain consistent port group settings and policies as they migrate between hosts.</p></div>
+                    <div class="card"><h3>Port Groups</h3><p>Logical groupings of vSwitch ports with shared configuration -- VLAN tagging, security policies, and load balancing. Maps VM traffic to physical VLANs on the upstream physical switch.</p></div>
+                    <div class="card"><h3>VMkernel Ports</h3><p>Special vSwitch ports used for hypervisor traffic -- vMotion, management, storage (iSCSI/NFS), and fault tolerance heartbeat traffic. Isolated from VM data traffic.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="cloud">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Cloud Computing Fundamentals</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>Cloud computing delivers on-demand IT resources over the internet with pay-per-use billing. The NIST definition identifies five essential characteristics.</p>
+                <ul>
+                    <li><strong>On-Demand Self-Service:</strong> Provision compute, storage, or network resources instantly through a portal or API without human involvement from the provider.</li>
+                    <li><strong>Broad Network Access:</strong> Resources are accessible from any device over standard internet protocols.</li>
+                    <li><strong>Resource Pooling:</strong> Provider's infrastructure is shared across multiple tenants with dynamic resource assignment. Tenants are isolated but share physical hardware.</li>
+                    <li><strong>Rapid Elasticity:</strong> Resources scale up or down automatically in response to demand -- appear unlimited to the consumer.</li>
+                    <li><strong>Measured Service:</strong> Usage is metered and billed per unit consumed (per GB, per vCPU-hour, per API call).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="shared">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Cloud Service Models & Shared Responsibility</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Layer</th><th>IaaS</th><th>PaaS</th><th>SaaS</th></tr>
+                    <tr><td>Applications</td><td>Customer</td><td>Customer</td><td>Provider</td></tr>
+                    <tr><td>Runtime / Middleware</td><td>Customer</td><td>Provider</td><td>Provider</td></tr>
+                    <tr><td>OS</td><td>Customer</td><td>Provider</td><td>Provider</td></tr>
+                    <tr><td>Virtualization</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+                    <tr><td>Physical Hardware</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+                </table>
+                <div class="grid" style="margin-top:16px">
+                    <div class="card"><h3>IaaS (Infrastructure as a Service)</h3><p>Raw compute, storage, and networking. Customer manages OS upward. Examples: AWS EC2, Azure VMs, GCP Compute Engine.</p></div>
+                    <div class="card"><h3>PaaS (Platform as a Service)</h3><p>Managed runtime environment. Customer deploys applications only. Examples: AWS Elastic Beanstalk, Azure App Service, Google App Engine.</p></div>
+                    <div class="card"><h3>SaaS (Software as a Service)</h3><p>Fully managed application. Customer just uses it. Examples: Microsoft 365, Salesforce, Google Workspace.</p></div>
+                </div>
+                <div class="highlight"><p><strong>Key Rule:</strong> The shared responsibility model means security obligations don't disappear in the cloud -- they shift. Misconfigured S3 buckets, weak IAM policies, and unpatched guest OSes remain the customer's responsibility in IaaS and PaaS.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="sdn">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Software-Defined Networking (SDN)</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>SDN separates the <strong>control plane</strong> (decisions about where traffic goes) from the <strong>data plane</strong> (actual packet forwarding). A centralized SDN Controller programs all network devices via APIs.</p>
+                <div class="grid">
+                    <div class="card"><h3>Control Plane (SDN Controller)</h3><p>Centralized intelligence. Computes routing topology, enforces policy, and pushes forwarding rules to all switches and routers via OpenFlow or vendor APIs (APIC, NSX Manager).</p></div>
+                    <div class="card"><h3>Data Plane (Forwarding)</h3><p>Dumb hardware that simply executes the flow tables pushed down by the controller. No local routing decisions -- fast and simple packet forwarding only.</p></div>
+                    <div class="card"><h3>Northbound API</h3><p>Interface between the SDN Controller and management applications (orchestration, monitoring, policy engines). Allows automation tools to program the network via REST APIs.</p></div>
+                    <div class="card"><h3>Southbound API (OpenFlow)</h3><p>Interface between the controller and network devices. OpenFlow is the most common standard; Cisco uses NETCONF/YANG and proprietary APIs.</p></div>
+                </div>
+                <div class="highlight"><p><strong>Traditional vs. SDN:</strong> In traditional networking, every switch runs its own control plane (OSPF, STP decisions happen locally). In SDN, all those decisions move to one controller -- the network becomes programmable, automatable, and policy-driven from a single point.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="sdwan">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>SD-WAN — Application-Aware WAN</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p><strong>SD-WAN</strong> applies SDN principles to wide-area networks. It dynamically steers application traffic across multiple transport links based on real-time performance metrics.</p>
+                <ul>
+                    <li><strong>Transport Agnostic:</strong> Bonds MPLS, broadband internet, 4G/5G LTE, and satellite links into a single logical WAN fabric.</li>
+                    <li><strong>Application-Aware Routing:</strong> Identifies application type (Zoom, Salesforce, SAP) and routes it over the best-performing available link. VoIP gets the low-latency MPLS; bulk backups get cheap broadband.</li>
+                    <li><strong>Automatic Failover:</strong> Detects link degradation (packet loss, jitter, latency) in real time and reroutes traffic to a healthy link in milliseconds -- no BGP reconvergence delay.</li>
+                    <li><strong>Zero-Touch Provisioning:</strong> New branch office CPE devices call home, download their config, and come online without an on-site engineer.</li>
+                </ul>
+                <div class="highlight"><p><strong>SD-WAN vs. MPLS:</strong> Traditional MPLS is expensive, inflexible, and takes weeks to provision. SD-WAN delivers similar or better performance using cheap broadband links while cutting WAN costs by 50–80%.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="storage">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Storage Architectures: DAS, NAS & SAN</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <table>
+                    <tr><th>Type</th><th>Protocol</th><th>Access Level</th><th>Best For</th></tr>
+                    <tr><td><strong>DAS (Direct-Attached Storage)</strong></td><td>SATA, SAS, NVMe</td><td>Block (local only)</td><td>Single server workloads; highest throughput with no network overhead</td></tr>
+                    <tr><td><strong>NAS (Network-Attached Storage)</strong></td><td>NFS (Linux), SMB/CIFS (Windows)</td><td>File-level (shared)</td><td>File sharing, home directories, media storage across multiple clients</td></tr>
+                    <tr><td><strong>SAN (Storage Area Network)</strong></td><td>Fibre Channel, iSCSI, FCoE</td><td>Block-level (shared)</td><td>Databases, VM datastores, high-performance enterprise workloads</td></tr>
+                </table>
+                <div class="highlight"><p><strong>Block vs. File access:</strong> DAS and SAN present raw storage blocks -- the OS formats them with any filesystem it chooses. NAS presents pre-formatted file systems over the network -- the client just reads and writes files via NFS or SMB without managing the underlying storage.</p></div>
+            </div>
+        </div>
+
+        <div class="section" id="nas-san">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>NAS & SAN Deep Dive</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="card"><h3>NAS</h3><p>A dedicated file server appliance attached to the LAN. Multiple clients mount shared folders over NFS or SMB. Simple to manage; scales well for unstructured data (documents, media, backups).</p></div>
+                    <div class="card"><h3>SAN — Fibre Channel (FC)</h3><p>Dedicated high-speed storage network using FC HBAs and FC switches (fabric). Latency under 1 ms. Gold standard for mission-critical databases and VM datastores in large enterprises.</p></div>
+                    <div class="card"><h3>iSCSI SAN</h3><p>Runs SCSI block commands over standard TCP/IP Ethernet. Cheaper than FC -- no special HBAs or switches required. Used in mid-market environments where FC cost is prohibitive.</p></div>
+                    <div class="card"><h3>RAID Levels</h3><p><strong>RAID 1:</strong> Mirroring (100% redundancy, 50% capacity). <strong>RAID 5:</strong> Striping + single parity (survives 1 drive failure). <strong>RAID 6:</strong> Dual parity (survives 2 drive failures). <strong>RAID 10:</strong> Mirror + stripe (high performance + redundancy).</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="synthesis">
+            <div class="section-header" onclick="toggle(this)">
+                <h2>Integrated Enterprise Architecture</h2>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="section-body">
+                <p>A modern enterprise data center weaves all these layers together into a single cohesive architecture.</p>
+                <div class="pillars">
+                    <div class="pillar">
+                        <div class="pillar-num">01 / Physical Foundation</div>
+                        <h3>Facilities & DCIM</h3>
+                        <p>Tiered power, redundant cooling, and DCIM monitoring ensure the physical layer never becomes the single point of failure.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-num">02 / Compute & Storage</div>
+                        <h3>Hypervisors & SANs</h3>
+                        <p>Type 1 hypervisors consolidate workloads. SAN block storage provides shared, high-performance VM datastores with snapshot and replication capabilities.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-num">03 / Network Intelligence</div>
+                        <h3>SDN & Spine-Leaf</h3>
+                        <p>SDN controllers program spine-leaf fabrics for consistent east-west throughput. vSwitches extend policy enforcement into the hypervisor layer.</p>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-num">04 / Hybrid Cloud & WAN</div>
+                        <h3>Cloud + SD-WAN</h3>
+                        <p>SD-WAN connects branch offices to cloud workloads intelligently. The shared responsibility model defines where the enterprise's security obligations begin and the provider's end.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    <script>
+        function toggle(header) {
+            const body = header.nextElementSibling;
+            const arrow = header.querySelector('.arrow');
+            body.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
